@@ -74,3 +74,64 @@ jobs:
           tags: ghcr.io/${{ env.REPO_LC }}:${{ github.ref_name }}
           cache-from: type=gha,scope=portal
 
+  # ─────────────────────────────────────────────────────────────────────────────
+  # DEPLOY
+  # Authenticates to GCP via Workload Identity Federation, then SSHes into the
+  # VM through the IAP tunnel (no open port 22 needed). Pulls the tested image
+  # from ghcr.io, restarts the stack, and runs any pending DB migrations.
+  # Only runs on push to production — not on PRs, tag pushes, or develop.
+  #
+  # Required secrets:
+  #   GCP_WORKLOAD_IDENTITY_PROVIDER — WIF provider resource name
+  #   GCP_SERVICE_ACCOUNT            — service account email
+  #   GCP_PROJECT_ID                 — GCP project ID
+  #   GCP_ZONE                       — VM zone (e.g. us-central1-a)
+  #   DEPLOY_HOST                    — VM instance name (not IP)
+  #   DEPLOY_USER                    — Linux user on the VM
+  #
+  # Required IAM roles on the service account:
+  #   roles/iap.tunnelResourceAccessor
+  #   roles/compute.osLogin
+  # ─────────────────────────────────────────────────────────────────────────────
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/production'
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Lowercase repository name
+        run: echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          token_format: 'access_token'
+
+      - name: Setup gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy to portal VM via IAP
+        env:
+          REPO_LC: ${{ env.REPO_LC }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          gcloud compute ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
+            --tunnel-through-iap \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --zone=${{ secrets.GCP_ZONE }} \
+            --command="
+              set -e
+              cd /home/$DEPLOY_USER/wba-openroaming-portal
+              PORTAL_IMAGE=ghcr.io/$REPO_LC:production \
+              docker compose pull
+              PORTAL_IMAGE=ghcr.io/$REPO_LC:production \
+              docker compose up -d
+              docker compose exec -T web php bin/console doctrine:migrations:migrate --no-interaction
+              docker image prune -f
+            "
+
