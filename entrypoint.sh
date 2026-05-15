@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+mkdir -p \
+    /var/www/openroaming/signing-keys/ \
+    /var/www/openroaming/config/jwt/
+
 chown -R www-data:www-data \
     /var/www/openroaming/signing-keys/ \
     /var/www/openroaming/config/jwt/
