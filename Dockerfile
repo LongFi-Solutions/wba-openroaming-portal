@@ -83,5 +83,9 @@ COPY service-config/nginx/sites /etc/nginx/conf.d/
 RUN mkdir -p /run/nginx /run/php /var/log/supervisor /var/www/openroaming/var \
  && chown -R www-data:www-data /var/www/openroaming
 
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 80
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

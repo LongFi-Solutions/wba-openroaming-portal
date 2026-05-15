@@ -1,1 +1,4 @@
 .git/
+signing-keys/*.pem
+signing-keys/*.pfx
+config/jwt/*.pem
