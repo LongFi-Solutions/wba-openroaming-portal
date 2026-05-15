@@ -127,6 +127,7 @@ jobs:
             --command="
               set -e
               cd /home/$DEPLOY_USER/wba-openroaming-portal
+              git pull
               PORTAL_IMAGE=ghcr.io/$REPO_LC:production \
               docker compose -f docker-compose.ssl.yml pull
               PORTAL_IMAGE=ghcr.io/$REPO_LC:production \
