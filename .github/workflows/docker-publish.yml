@@ -136,4 +136,3 @@ jobs:
               docker compose -f docker-compose.ssl.yml exec -T web php bin/console doctrine:migrations:migrate --no-interaction
               docker image prune -f
             "
-
