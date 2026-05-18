@@ -20,6 +20,7 @@ use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\EmailGenerator;
 use App\Service\SendSMS;
+use App\Service\UserStatusChecker;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
@@ -58,6 +59,7 @@ class RegistrationController extends AbstractController
         private readonly EmailGenerator $emailGenerator,
         private readonly ValidatorInterface $validator,
         private readonly PhoneNumberUtil $phoneNumberUtil,
+        private readonly UserStatusChecker $userStatusChecker,
     ) {
     }
 
@@ -136,6 +138,24 @@ class RegistrationController extends AbstractController
             )->toResponse(); // False success for RGPD policies
         }
 
+        // Check if the email is valid
+        if (!$this->userStatusChecker->isValidEmail($data['email'])) {
+            return new BaseResponse(
+                403,
+                null,
+                'Your email domain is not allowed to use this platform.'
+            )->toResponse();
+        }
+
+        $blockAliases = $this->getParameter('app.block_email_aliases');
+        if ($blockAliases && str_contains(explode('@', (string) $data['email'])[0], '+')) {
+            return new BaseResponse(
+                400,
+                null,
+                'Email aliases are not allowed for registration.'
+            )->toResponse();
+        }
+
         $user = new User();
         $user->setUuid($data['email']);
         $user->setEmail($data['email']);
@@ -158,7 +178,7 @@ class RegistrationController extends AbstractController
         $this->entityManager->persist($userExternalAuth);
         $this->entityManager->flush();
 
-        $this->emailGenerator->sendRegistrationEmail($user, $data['password']);
+        $this->emailGenerator->sendRegistrationEmail($user, $data['password'], true);
 
         $eventMetaData = [
             'ip' => $request->getClientIp(),

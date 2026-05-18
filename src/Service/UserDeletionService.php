@@ -8,8 +8,10 @@ use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserVerificationStatus;
+use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use libphonenumber\PhoneNumber;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -29,11 +31,12 @@ readonly class UserDeletionService
      * @param UserExternalAuth[] $userExternalAuths Array of external auth objects
      * @return array<string, mixed>
      * @throws \JsonException
+     * @throws ORMException
      */
-    public function deleteUser(User $user, array $userExternalAuths, Request $request, User $currentUser): array
+    public function deleteUser(User $user, array $userExternalAuths, Request $request, User $admin): array
     {
         $deletedUserUuid = $user->getUuid();
-        $deletedUserByUuid = $currentUser->getUuid();
+        $deletedUserByUuid = $admin->getUuid();
 
         $phoneNumber = null;
         if ($user->getPhoneNumber() instanceof PhoneNumber) {
@@ -97,10 +100,10 @@ readonly class UserDeletionService
         $deletedUserDataEntity->setPgpEncryptedJsonFile($pgpEncryptedData);
         $deletedUserDataEntity->setUser($user);
 
-        $user->setUuid((string) $user->getId());
+        $user->setUuid((string)$user->getId());
         $user->setEmail(null);
         $user->setPhoneNumber(null);
-        $user->setPassword((string) $user->getId());
+        $user->setPassword((string)$user->getId());
         $user->setFirstName(null);
         $user->setLastName(null);
         $user->setDeletedAt(new DateTime());
@@ -124,8 +127,10 @@ readonly class UserDeletionService
             'deletedBy' => $deletedUserByUuid,
             'ip' => $request->getClientIp(),
         ];
+
+
         $this->eventActions->saveEvent(
-            $currentUser,
+            $admin,
             AnalyticalEventType::DELETED_USER_BY->value,
             new DateTime(),
             $eventMetadata
