@@ -129,7 +129,7 @@ jobs:
               cd /home/$DEPLOY_USER/wba-openroaming-portal
               git config --global --add safe.directory /home/$DEPLOY_USER/wba-openroaming-portal
               git reset --hard HEAD
-              git clean -fd
+              git clean -fd || true
               git pull
               PORTAL_IMAGE=ghcr.io/$REPO_LC:production \
               docker compose -f docker-compose-ssl.yml pull
