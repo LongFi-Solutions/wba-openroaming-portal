@@ -132,9 +132,9 @@ jobs:
               git clean -fd
               git pull
               PORTAL_IMAGE=ghcr.io/$REPO_LC:production \
-              docker compose -f docker-compose.ssl.yml pull
+              docker compose -f docker-compose-ssl.yml pull
               PORTAL_IMAGE=ghcr.io/$REPO_LC:production \
-              docker compose -f docker-compose.ssl.yml up -d
-              docker compose -f docker-compose.ssl.yml exec -T web php bin/console doctrine:migrations:migrate --no-interaction
+              docker compose -f docker-compose-ssl.yml up -d
+              docker compose -f docker-compose-ssl.yml exec -T web php bin/console doctrine:migrations:migrate --no-interaction
               docker image prune -f
             "
