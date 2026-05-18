@@ -1,7 +1,7 @@
 ---
 services:
   web:
-    image: ${PORTAL_IMAGE:-ghcr.io/wireless-broadband-alliance/wba-openroaming-portal:latest}
+    image: ${PORTAL_IMAGE:-ghcr.io/longfi-solutions/wba-openroaming-portal:production}
     env_file:
       - .env
     volumes:

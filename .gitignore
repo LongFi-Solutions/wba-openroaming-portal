@@ -83,3 +83,6 @@ DockerfileCleanedDev
 config/reference.php
 supervisord.pid
 ###< config/reference ###
+
+self-signed-ssl/ssl.crt
+self-signed-ssl/ssl.key
