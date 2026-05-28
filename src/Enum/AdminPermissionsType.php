@@ -52,4 +52,7 @@ enum AdminPermissionsType: string
     case PORTAL_STATISTICS_READ = 'PORTAL_STATISTICS_READ';
     // Connectivity Statistics page
     case CONNECTIVITY_STATISTICS_READ = 'CONNECTIVITY_STATISTICS_READ';
+    // Activity Logs page
+    case ACTIVITY_LOGS_READ = 'ACTIVITY_LOGS_READ';
+    case ACTIVITY_LOGS_WRITE = 'ACTIVITY_LOGS_WRITE';
 }
