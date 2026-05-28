@@ -1,10 +1,9 @@
 {# Table Content - Clickable Row #}
 <tr class="border-b hover:bg-veryLightGreen transition-all duration-100 cursor-pointer"
-        {{ stimulus_controller('modal') }}
-        {{ stimulus_action('modal', 'open') }}>
+        {{ stimulus_controller('modal') }}>
 
     {# User Email #}
-    <td class="p-4 pl-8 font-medium">
+    <td class="p-4 pl-8 font-medium" {{ stimulus_action('modal', 'open') }}>
         {% if log.user is not null %}
             {{ log.user.email }}
         {% else %}
@@ -13,26 +12,25 @@
     </td>
 
     {# Event Name #}
-    <td class="p-4 font-medium">
+    <td class="p-4 font-medium" {{ stimulus_action('modal', 'open') }}>
         <span class="pill-info">{{ log.eventName }}</span>
     </td>
 
     {# IP Address #}
-    <td class="p-4 text-gray-500">
+    <td class="p-4 text-gray-500" {{ stimulus_action('modal', 'open') }}>
         {{ log.eventMetadata.ip ?? '-' }}
     </td>
 
     {# Created At #}
-    <td class="px-6 py-4 font-medium">
+    <td class="px-6 py-4 font-medium" {{ stimulus_action('modal', 'open') }}>
         {{ log.eventDatetime|date('d/m/Y H:i') }}
     </td>
 
-    {# Modal — inside the tr so it's in the same controller scope #}
-    <td class="hidden">
+    {# Modal container — hidden td so it stays in controller scope #}
+    <td class="hidden p-0 border-0">
         <div {{ stimulus_target('modal', 'container') }}
                 {{ stimulus_action('modal', 'backdropClose') }}
                 class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-
             <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 overflow-hidden">
 
                 {# Modal Header #}
