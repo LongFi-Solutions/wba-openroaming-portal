@@ -4,13 +4,15 @@
         class="overflow-hidden transition-all duration-300 ease-in-out"
         style="max-height: 0; opacity: 0;"
 >
-    <div class="{{ toast_type }}">
-        <twig:ux:icon name="wba:info" class="w-5 h-5 inline mr-3 fill-current shrink-0"/>
+    <div class="{{ toast_type }} flex-col sm:flex-row sm:items-center gap-2">
+        {# Top row: icon + message #}
+        <div class="flex items-start gap-3 flex-1">
+            <twig:ux:icon name="wba:info" class="w-5 h-5 fill-current shrink-0 mt-0.5" />
+            <span class="font-medium flex-1">{{ message }}</span>
+        </div>
 
-        <span class="font-medium flex-1">{{ message }}</span>
-
-        <div class="flex items-center gap-2 ml-3">
-            {# Action button — takes user to the validation page #}
+        {# Bottom row on mobile, right side on desktop: actions #}
+        <div class="flex items-center gap-2 self-end sm:self-auto">
             <a href="{{ path('admin_dashboard_settings_certs_management') }}"
                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg
                       text-xs font-semibold
@@ -20,8 +22,8 @@
                 <span>{{ 'evWarningValidateNow'|trans({}, 'dashboard') }}</span>
             </a>
 
-            {# Close button #}
-            <button {{ stimulus_action('toast', 'close') }} class="flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity ml-auto">
+            <button {{ stimulus_action('toast', 'close') }}
+                    class="flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity">
                 <twig:ux:icon name="wba:cross-circle-rounded" class="w-4 h-4 fill-current"/>
             </button>
         </div>
