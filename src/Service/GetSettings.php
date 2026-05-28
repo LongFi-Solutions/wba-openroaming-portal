@@ -236,6 +236,9 @@ readonly class GetSettings
                 SettingName::RETURN_APPS_ENABLED->value => 'Enables or disables the Return to Apps',
                 SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value => 'Name of the package or application associated for android devices',
                 SettingName::RETURN_APPS_ID_IOS->value => 'Name of the package or application associated for iOS devices',
+                SettingName::TIME_INTERVAL_TO_RESET_ATTEMPTS->value => 'Time window (in minutes) after which the request attempts counter is reset',
+                SettingName::TIME_INTERVAL_BETWEEN_REQUESTS->value => 'Minimum cooldown (in seconds) between consecutive requests',
+                SettingName::ATTEMPTS_NUMBER->value => 'Maximum number of allowed requests within the defined time window',
             ],
             LanguageType::PT->value => [
                 SettingName::RADIUS_REALM_NAME->value => 'O nome do realm para o seu servidor RADIUS',
@@ -327,6 +330,9 @@ readonly class GetSettings
                 SettingName::CLOUDFLARE_TOKEN->value => 'Token para renovação automática do certificado Cloudflare.',
                 SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value => 'Nome do pacote ou da aplicação associado a dispositivos Android',
                 SettingName::RETURN_APPS_ID_IOS->value => 'Nome do pacote ou da aplicação associado a dispositivos iOS',
+                SettingName::TIME_INTERVAL_TO_RESET_ATTEMPTS->value => 'Janela de tempo (em minutos) após a qual o contador de tentativas é reiniciado',
+                SettingName::TIME_INTERVAL_BETWEEN_REQUESTS->value => 'Tempo mínimo de espera (em segundos) entre pedidos consecutivos',
+                SettingName::ATTEMPTS_NUMBER->value => 'Número máximo de pedidos permitidos dentro da janela de tempo definida',
             ]
         ];
         // phpcs:enable
