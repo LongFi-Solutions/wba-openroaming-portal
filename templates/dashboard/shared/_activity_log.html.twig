@@ -12,7 +12,12 @@
     </td>
 
     <td class="p-4 font-medium">
-        <span class="pill-info">{{ log.eventName }}</span>
+        {% set eventType = constant('App\\Enum\\AnalyticalEventType::' ~ log.eventName) is defined
+            ? constant('App\\Enum\\AnalyticalEventType::' ~ log.eventName)
+            : null %}
+        <span class="pill-info">
+            {{ eventType ? eventType.label : log.eventName }}
+        </span>
     </td>
 
     <td class="p-4 text-gray-500">

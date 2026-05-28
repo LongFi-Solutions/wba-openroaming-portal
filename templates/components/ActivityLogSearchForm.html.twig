@@ -31,11 +31,14 @@
                         {% for suggestion in suggestions %}
                             <li>
                                 <button type="button"
-                                        class="w-full text-left px-4 py-2 text-sm hover:bg-veryLightGreen transition-colors duration-100 font-mono"
+                                        class="w-full text-left px-4 py-2 text-sm hover:bg-veryLightGreen transition-colors duration-100"
                                         data-action="click->live#update"
                                         data-model="query"
-                                        data-value="{{ suggestion }}">
-                                    {{ suggestion }}
+                                        data-value="{{ suggestion.value }}">
+                                    {# Show human label #}
+                                    <span class="font-medium">{{ suggestion.label }}</span>
+                                    {# Show raw value as hint #}
+                                    <span class="text-xs text-gray-400 ml-2 font-mono">{{ suggestion.value }}</span>
                                 </button>
                             </li>
                         {% endfor %}

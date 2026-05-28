@@ -14,14 +14,14 @@
             {# Modal Header #}
             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between gap-4">
                 <div class="flex items-center gap-2 min-w-0">
-                    <twig:ux:icon name="ph:clock-counter-clockwise" class="w-5 h-5 text-primary shrink-0" />
+                    <twig:ux:icon name="ph:clock-counter-clockwise" class="w-5 h-5 text-primary shrink-0"/>
                     <h5 class="text-lg font-semibold text-gray-800 truncate">{{ log.eventName }}</h5>
                 </div>
                 <div class="flex items-center gap-3 shrink-0">
                     <p class="text-sm text-gray-400 whitespace-nowrap">{{ log.eventDatetime|date('d/m/Y H:i:s') }}</p>
                     <button {{ stimulus_action('modal', 'close') }}
                             class="text-gray-400 hover:text-gray-600 transition">
-                        <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 fill-current" />
+                        <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 fill-current"/>
                     </button>
                 </div>
             </div>

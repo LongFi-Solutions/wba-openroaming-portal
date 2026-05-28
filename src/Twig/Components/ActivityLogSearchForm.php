@@ -43,12 +43,39 @@ class ActivityLogSearchForm extends AbstractController
             return [];
         }
 
-        return array_values(
-            array_filter(
-                array_map(static fn($case) => $case->value, AnalyticalEventType::cases()),
-                fn($value) => str_contains(strtolower($value), strtolower($this->query))
-            )
-        );
+        $suggestions = [];
+        foreach (AnalyticalEventType::cases() as $case) {
+            $label = $case->getLabel();
+            // Match against both the label and the raw value
+            if (
+                str_contains(strtolower($label), strtolower($this->query)) ||
+                str_contains(strtolower($case->value), strtolower($this->query))
+            ) {
+                $suggestions[] = [
+                    'value' => $case->value,
+                    'label' => $label,
+                ];
+            }
+        }
+
+        return $suggestions;
+    }
+
+    private function resolvedQuery(): ?string
+    {
+        if (!$this->query) {
+            return null;
+        }
+
+        // Check if the query matches an enum label and resolve to raw value
+        foreach (AnalyticalEventType::cases() as $case) {
+            if (strtolower($case->getLabel()) === strtolower($this->query)) {
+                return $case->value;
+            }
+        }
+
+        // Otherwise pass through as-is (raw value search)
+        return $this->query;
     }
 
     public function getLogs(): array
@@ -57,7 +84,7 @@ class ActivityLogSearchForm extends AbstractController
             $this->filter,
             $this->sort,
             $this->order,
-            $this->query ?: null
+            $this->resolvedQuery()
         );
 
         $offset = ($this->page - 1) * $this->count;
@@ -71,7 +98,7 @@ class ActivityLogSearchForm extends AbstractController
                 $this->filter,
                 $this->sort,
                 $this->order,
-                $this->query ?: null
+                $this->resolvedQuery()
             )
         );
     }
