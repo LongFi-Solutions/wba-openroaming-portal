@@ -1,7 +1,5 @@
 {% extends '/dashboard/base.html.twig' %}
 
-{% block title %}{{ 'activityLogs'|trans({}, '_header_admin') }}{% endblock %}
-
 {% import 'dashboard/shared/_sort_arrow.html.twig' as sharedSort %}
 
 {% block container %}
@@ -11,7 +9,7 @@
     <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
         <div class="w-full">
             <div class="sm:w-auto px-5 py-4">
-                <div class="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0 sm:space-x-4">
+                <div class="flex flex-col lg:flex-row justify-center items-center space-y-6 lg:space-y-0 sm:space-x-4">
 
                     {# Search Bar #}
                     <div class="w-full md:w-3/6">
@@ -44,7 +42,7 @@
                         <thead class="text-sm text-gray-700 bg-veryLightGreen">
                         <tr>
                             <th scope="col" class="flex items-center p-4 pl-8">
-                                <h1 class="mr-2">{{ 'user'|trans({}, 'dashboard') }}</h1>
+                                <h1 class="mr-2">UUID</h1>
                             </th>
 
                             <th scope="col" class="px-6 py-3">
@@ -86,6 +84,11 @@
                     </table>
                 </div>
             </div>
+
+            {# Modals rendered OUTSIDE the table #}
+            {% for log in logs %}
+                {{ include('dashboard/shared/_activity_log_modal.html.twig', {log: log}) }}
+            {% endfor %}
 
             {# Pagination #}
             <div class="m-8">

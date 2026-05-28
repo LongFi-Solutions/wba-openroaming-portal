@@ -1,92 +1,25 @@
-{# Table Content - Clickable Row #}
+{# Clickable Row — triggers modal by ID #}
 <tr class="border-b hover:bg-veryLightGreen transition-all duration-100 cursor-pointer"
-        {{ stimulus_controller('modal') }}>
+        {{ stimulus_controller('modal-trigger', { modalId: 'log-modal-' ~ log.id }) }}
+    data-action="click->modal-trigger#open">
 
-    {# User Email #}
-    <td class="p-4 pl-8 font-medium" {{ stimulus_action('modal', 'open') }}>
+    <td class="p-4 pl-8 font-medium">
         {% if log.user is not null %}
-            {{ log.user.email }}
+            {{ log.user.uuid }}
         {% else %}
             <span class="font-semibold p-1 pill-error">{{ 'noInformation'|trans({}, '_user') }}</span>
         {% endif %}
     </td>
 
-    {# Event Name #}
-    <td class="p-4 font-medium" {{ stimulus_action('modal', 'open') }}>
+    <td class="p-4 font-medium">
         <span class="pill-info">{{ log.eventName }}</span>
     </td>
 
-    {# IP Address #}
-    <td class="p-4 text-gray-500" {{ stimulus_action('modal', 'open') }}>
+    <td class="p-4 text-gray-500">
         {{ log.eventMetadata.ip ?? '-' }}
     </td>
 
-    {# Created At #}
-    <td class="px-6 py-4 font-medium" {{ stimulus_action('modal', 'open') }}>
+    <td class="px-6 py-4 font-medium">
         {{ log.eventDatetime|date('d/m/Y H:i') }}
-    </td>
-
-    {# Modal container — hidden td so it stays in controller scope #}
-    <td class="hidden p-0 border-0">
-        <div {{ stimulus_target('modal', 'container') }}
-                {{ stimulus_action('modal', 'backdropClose') }}
-                class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 overflow-hidden">
-
-                {# Modal Header #}
-                <div class="flex items-center justify-between px-6 py-4 border-b">
-                    <div class="flex items-center gap-3">
-                        <twig:ux:icon name="ph:clock-counter-clockwise" class="w-5 h-5 fill-current text-gray-600" />
-                        <div>
-                            <h2 class="font-semibold text-gray-800">{{ log.eventName }}</h2>
-                            <p class="text-sm text-gray-400">{{ log.eventDatetime|date('d/m/Y H:i:s') }}</p>
-                        </div>
-                    </div>
-                    <button {{ stimulus_action('modal', 'close') }}
-                            class="text-gray-400 hover:text-gray-600 transition">
-                        <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 fill-current" />
-                    </button>
-                </div>
-
-                {# Modal Body #}
-                <div class="px-6 py-4 space-y-4">
-                    <div class="flex flex-wrap gap-2 text-sm">
-                        {% if log.eventMetadata.by is defined %}
-                            <span class="px-3 py-1 bg-veryLightGreen rounded-full text-gray-700">
-                                <strong>By:</strong> {{ log.eventMetadata.by }}
-                            </span>
-                        {% endif %}
-                        {% if log.eventMetadata.ip is defined %}
-                            <span class="px-3 py-1 bg-veryLightGreen rounded-full text-gray-700">
-                                <strong>IP:</strong> {{ log.eventMetadata.ip }}
-                            </span>
-                        {% endif %}
-                        {% if log.eventMetadata.success is defined %}
-                            {% if log.eventMetadata.success %}
-                                <span class="pill-success">Success</span>
-                            {% else %}
-                                <span class="pill-error">Failed</span>
-                            {% endif %}
-                        {% endif %}
-                    </div>
-
-                    {% if log.eventMetadata.errors is defined and log.eventMetadata.errors is not empty %}
-                        <div class="rounded-lg bg-red-50 border border-red-200 px-4 py-3">
-                            <p class="text-sm font-semibold text-red-600 mb-1">Errors</p>
-                            <ul class="list-disc list-inside text-sm text-red-500 space-y-1">
-                                {% for error in log.eventMetadata.errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    {% endif %}
-
-                    <div>
-                        <p class="text-sm font-semibold text-gray-600 mb-2">{{ 'eventMetadata'|trans({}, 'dashboard') }}</p>
-                        <pre class="bg-gray-900 text-green-400 text-xs rounded-lg p-4 overflow-x-auto whitespace-pre-wrap break-words">{{ log.eventMetadata|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
-                    </div>
-                </div>
-            </div>
-        </div>
     </td>
 </tr>
