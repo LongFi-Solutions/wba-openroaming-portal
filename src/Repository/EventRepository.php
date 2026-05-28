@@ -7,7 +7,6 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\DBAL\Exception;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -43,6 +42,98 @@ class EventRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    /**
+     * @return Event[] Returns an array of Event objects
+     */
+    public function searchWithFilter(
+        string $filter = 'all',
+        string $sort = 'createdAt',
+        string $order = 'desc',
+        ?string $searchTerm = null
+    ): array {
+        $qb = $this->createQueryBuilder('e')
+            ->join('e.user', 'u');
+
+        // --- Search by user email/uuid ---
+        if ($searchTerm) {
+            $qb->andWhere('u.email LIKE :search OR u.uuid LIKE :search')
+                ->setParameter('search', '%' . $searchTerm . '%');
+        }
+
+        // --- Filter by event type group ---
+        match ($filter) {
+            'user_actions' => $qb->andWhere('e.event_name IN (:events)')
+                ->setParameter('events', [
+                    AnalyticalEventType::USER_CREATION->value,
+                    AnalyticalEventType::USER_VERIFICATION->value,
+                    AnalyticalEventType::USER_ACCOUNT_DELETION->value,
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE->value,
+                ]),
+            'admin_actions' => $qb->andWhere('e.event_name IN (:events)')
+                ->setParameter('events', [
+                    AnalyticalEventType::ADMIN_CREATION->value,
+                    AnalyticalEventType::ADMIN_ADDED_PERMISSIONS->value,
+                    AnalyticalEventType::ADMIN_REMOVED_PERMISSIONS->value,
+                    AnalyticalEventType::ADMIN_ADDED_NEW_USER->value,
+                ]),
+            'auth_events' => $qb->andWhere('e.event_name IN (:events)')
+                ->setParameter('events', [
+                    AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value,
+                    AnalyticalEventType::GOOGLE_LOGIN_REQUEST->value,
+                    AnalyticalEventType::MICROSOFT_LOGIN_REQUEST->value,
+                    AnalyticalEventType::LOGOUT_REQUEST->value,
+                ]),
+            'settings_changes' => $qb->andWhere('e.event_name LIKE :prefix')
+                ->setParameter('prefix', 'SETTING_%'),
+            'certificate_events' => $qb->andWhere('e.event_name LIKE :prefix')
+                ->setParameter('prefix', 'CERTIFICATE_%'),
+            default => null, // 'all' — no filter applied
+        };
+
+        // --- Sorting ---
+        $allowedSorts = ['event_datetime', 'event_name'];
+        $allowedOrders = ['asc', 'desc'];
+
+        $sort = in_array($sort, $allowedSorts, true) ? $sort : 'event_datetime';
+        $order = in_array(strtolower($order), $allowedOrders, true) ? $order : 'desc';
+
+        $qb->orderBy('e.' . $sort, $order);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * @return Event[] Returns an array of Event objects by Group
+     */
+    public function countByEventGroup(): array
+    {
+        return [
+            'all' => $this->count([]),
+            'user_actions' => $this->countByPrefix('USER_'),
+            'admin_actions' => $this->countByPrefix('ADMIN_'),
+            'auth_events' => $this->countByPrefix('LOGIN_', 'LOGOUT_'),
+            'settings_changes' => $this->countByPrefix('SETTING_'),
+            'certificate_events' => $this->countByPrefix('CERTIFICATE_'),
+        ];
+    }
+
+    /**
+     * Helper to count by prefix
+     */
+    private function countByPrefix(string ...$prefixes): int
+    {
+        $qb = $this->createQueryBuilder('e')
+            ->select('COUNT(e.id)');
+
+        $orX = $qb->expr()->orX();
+        foreach ($prefixes as $i => $prefix) {
+            $orX->add("e.event_name LIKE :prefix$i");
+            $qb->setParameter("prefix$i", $prefix . '%');
+        }
+
+        return (int)$qb->andWhere($orX)->getQuery()->getSingleScalarResult();
     }
 
     /**
