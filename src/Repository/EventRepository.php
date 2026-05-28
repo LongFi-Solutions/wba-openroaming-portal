@@ -56,9 +56,11 @@ class EventRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('e')
             ->join('e.user', 'u');
 
-        // --- Search by user email/uuid ---
+        // --- Search by user email/uuid/EventName ---
         if ($searchTerm) {
-            $qb->andWhere('u.email LIKE :search OR u.uuid LIKE :search')
+            $qb->andWhere(
+                'u.email LIKE :search OR u.uuid LIKE :search OR e.event_name LIKE :search'
+            )
                 ->setParameter('search', '%' . $searchTerm . '%');
         }
 
