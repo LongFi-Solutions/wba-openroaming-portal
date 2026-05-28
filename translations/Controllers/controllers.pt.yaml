@@ -201,3 +201,5 @@ tooManyAttempts: "Demasiadas tentativas. Tente novamente em %seconds% segundos."
 redirectingToApp: 'Redirecionado para a aplicação.'
 certificateProcessBlocked: "Ocorreu um erro de configuração. Por favor contacte a nossa equipa de suporte."
 emailAliasesNotAllowed: 'Não é permitido o uso de aliases de email para o registo.'
+tooManyAttemptsMinutes: "Demasiadas tentativas. Tente novamente em %minutes% minutos."
+timeBetweenRequests: "Deve esperar %seconds% segundos antes de solicitar um novo email. Por favor, tente novamente mais tarde."

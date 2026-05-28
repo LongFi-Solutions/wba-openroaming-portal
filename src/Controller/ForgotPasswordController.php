@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
+use App\Enum\ForgotPasswordEnum;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
@@ -18,6 +19,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
+use App\Service\ForgotPasswordService;
 use App\Service\GetSettings;
 use App\Service\MagicLinkService;
 use App\Service\PasswordResetRequestHandler;
@@ -66,6 +68,7 @@ class ForgotPasswordController extends AbstractController
         private readonly MagicLinkService $magicLinkService,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly RateLimiterFactory $verifyAccountLimiter,
+        private readonly ForgotPasswordService $forgotPasswordService,
     ) {
     }
 
@@ -126,22 +129,9 @@ class ForgotPasswordController extends AbstractController
                     }
                 }
                 if ($hasValidPortalAccount) {
-                    $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
-                        $user,
-                        AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
-                    );
-                    $resetPasswordTimer = $data[SettingName::EMAIL_TIMER_RESEND->value]['value'];
-                    $minInterval = new DateInterval('PT' . $resetPasswordTimer . 'M');
-                    $currentTime = new DateTime();
-                    // Check if enough time has passed since the last attempt
-                    $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
-                    $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
-                        ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
-                        : null;
-
+                    $attemptsVerification = $this->forgotPasswordService->userCanResetPassword($user);
                     if (
-                        !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
-                            $lastVerificationCodeTime->add($minInterval) < $currentTime)
+                        $attemptsVerification[ForgotPasswordEnum::SUCCESS->value]
                     ) {
                         $latestEvent = new Event();
                         $latestEvent->setUser($user);
@@ -152,7 +142,7 @@ class ForgotPasswordController extends AbstractController
                             'ip' => $request->getClientIp(),
                             'uuid' => $user->getUuid(),
                         ];
-
+                        $currentTime = new DateTime();
                         $latestEventMetadata['lastVerificationCodeTime'] =
                             $currentTime->format(DateTimeInterface::ATOM);
                         $latestEvent->setEventMetadata($latestEventMetadata);
@@ -175,15 +165,44 @@ class ForgotPasswordController extends AbstractController
                         $this->addFlash('success', $message);
                     } else {
                         // Inform the user to wait before trying again
-                        $emailTimeIntervalSetting = $data[SettingName::EMAIL_TIMER_RESEND->value]['value'];
-                        $this->addFlash(
-                            'error',
-                            $this->translator->trans(
-                                'waitBeforeTryingAgain',
-                                ['%minutes%' => $emailTimeIntervalSetting],
-                                'controllers'
-                            )
-                        );
+                        $timeLeft = $attemptsVerification[ForgotPasswordEnum::TIME_LEFT->value];
+                        if ($attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] === ForgotPasswordEnum::ATTEMPTS_EXCEEDED->value) {
+                            $minutes = ($timeLeft->days * 24 * 60)
+                                + ($timeLeft->h * 60)
+                                + $timeLeft->i;
+                            $this->addFlash(
+                                'error',
+                                $this->translator->trans(
+                                    'tooManyAttemptsMinutes',
+                                    ['%minutes%' => $minutes],
+                                    'controllers'
+                                )
+                            );
+                        } elseif ($attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] === ForgotPasswordEnum::TIME_BETWEEN_REQUESTS->value) {
+                            $seconds = ($timeLeft->days * 24 * 3600)
+                                + ($timeLeft->h * 3600)
+                                + ($timeLeft->i * 60)
+                                + $timeLeft->s;
+                            $this->addFlash(
+                                'error',
+                                $this->translator->trans(
+                                    'timeBetweenRequests',
+                                    ['%seconds%' => $seconds],
+                                    'controllers'
+                                )
+                            );
+                        } else {
+                            $timeToResetAttempts = $data[SettingName::TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'];
+                            $this->addFlash(
+                                'error',
+                                $this->translator->trans(
+                                    'waitBeforeTryingAgain',
+                                    ['%minutes%' => $timeToResetAttempts],
+                                    'controllers'
+                                )
+                            );
+                        }
+
                     }
                 } else {
                     $this->addFlash(
