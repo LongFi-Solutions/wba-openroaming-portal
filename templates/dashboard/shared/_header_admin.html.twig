@@ -1,6 +1,3 @@
-{# Dashboard Header #}
-{# templates/dashboard/shared/_header.html.twig #}
-
 {# Define route-to-header mapping #}
 {% set routeHeaders = {
     admin_page: {icon: 'wba:user', title: 'usersManagement'},
@@ -23,13 +20,14 @@
     admin_dashboard_settings_certs_management: {icon: 'wba:certificate', title: 'certsManagement'},
     admin_dashboard_return_apps: {icon: 'wba:mobile-arrows', title: 'returnAppsManagement'},
     dashboard_add_admin: {icon: 'wba:add-user', title: 'addAdmin'},
+    admin_dashboard_activity_logs: {icon: 'wba:clock-counter-clockwise', title: 'activityLogs', class: 'fill-current stroke-none '},
 } %}
 
 {% set currentRoute = app.request.attributes.get('_route') %}
 {% set header = routeHeaders[currentRoute] ?? {icon: 'wba:wifi', title: 'Dashboard'} %}
 
 <div class="flex flex-row items-center pl-4">
-    <twig:ux:icon name="{{ header.icon }}" class="w-10 mt-0.5 fill-none stroke-current" />
+    <twig:ux:icon name="{{ header.icon }}" class="w-10 mt-0.5 {{ header.class ?? 'fill-none stroke-current' }}" />
     <h1 class="text-2xl font-semibold p-5">{{ header.title|trans({}, '_header_admin') }}</h1>
 </div>
 
