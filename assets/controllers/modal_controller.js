@@ -24,4 +24,8 @@ export default class extends Controller {
             document.body.classList.remove('overflow-hidden');
         }, 200);
     }
+
+    stopPropagation(event) {
+        event.stopPropagation();
+    }
 }
