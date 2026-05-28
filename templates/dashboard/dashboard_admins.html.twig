@@ -5,40 +5,9 @@
 {% import 'dashboard/shared/_sort_arrow.html.twig' as sharedSort %}
 
 {% block container %}
-    {% set eeaStatus = isEEAUser() %}
-    {% set message = '' %}
-    {% if eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::LOCATION_ERROR').value %}
-        {% set message = 'locationError'|trans({}, 'dashboard') %}
-    {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::MISSING_FILE').value %}
-        {% set message = 'missingFile'|trans({}, 'dashboard') %}
-    {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::INVALID_DB').value %}
-        {% set message = 'invalidDb'|trans({}, 'dashboard') %}
-    {% endif %}
+    {# Render generic warning toast of the platform #}
+    {{ include('/dashboard/shared/_dashboard_toasts.html.twig')}}
 
-    {# Certificate Process Status - Checks if the certificates are applied correctly #}
-    {% if isCertificateAborted() %}
-        {% set isDashboard = app.request.pathinfo starts with '/dashboard' %}
-        {% set toastType = isDashboard ? 'toast-error-dashboard' : 'toast-error' %}
-
-        {{ include('shared/_toast.html.twig', {
-            message: 'abortedCertificatesWarning'|trans({}, 'dashboard'),
-            toast_type: toastType,
-        }) }}
-    {% endif %}
-
-    {% if message != '' %}
-        {{ include('shared/_toast.html.twig', {
-            message: message,
-            toast_type: 'toast-warning-dashboard',
-        }) }}
-    {% endif %}
-
-    {% if not isFreeradiusCertEV() %}
-        {{ include('shared/_toast.html.twig', {
-            message: 'freeradius_is_not_ev_cert_warning'|trans({}, 'dashboard'),
-            toast_type: 'toast-warning-dashboard',
-        }) }}
-    {% endif %}
     <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
         <div class="w-full">
             <div class="sm:w-auto px-5 py-4">

@@ -1,0 +1,43 @@
+{% set eeaStatus = isEEAUser() %}
+{% set message = '' %}
+{% if eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::LOCATION_ERROR').value %}
+    {% set message = 'locationError'|trans({}, 'dashboard') %}
+{% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::MISSING_FILE').value %}
+    {% set message = 'missingFile'|trans({}, 'dashboard') %}
+{% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::INVALID_DB').value %}
+    {% set message = 'invalidDb'|trans({}, 'dashboard') %}
+{% endif %}
+
+{% if isCertificateAborted() %}
+    {% set isDashboard = app.request.pathinfo starts with '/dashboard' %}
+    {% set toastType = isDashboard ? 'toast-error-dashboard' : 'toast-error' %}
+    {{ include('shared/_toast.html.twig', {
+        message: 'abortedCertificatesWarning'|trans({}, 'dashboard'),
+        toast_type: toastType,
+    }) }}
+{% endif %}
+
+{% if message != '' %}
+    {{ include('shared/_toast.html.twig', {
+        message: message,
+        toast_type: 'toast-warning-dashboard',
+    }) }}
+{% endif %}
+
+{% if isCertificateProcessInvalid() %}
+    {{ include('shared/_toast_with_link.html.twig', {
+        message: 'certProcessInvalid'|trans({}, 'dashboard'),
+        toast_type: 'toast-error-dashboard',
+        action_route: 'admin_dashboard_settings_certs_management',
+        action_icon: 'wba:warning',
+        action_label: 'evWarningValidateNow'|trans({}, 'dashboard'),
+    }) }}
+{% elseif not isFreeradiusCertEV() %}
+    {{ include('shared/_toast_with_link.html.twig', {
+        message: 'freeradius_is_not_ev_cert_warning'|trans({}, 'dashboard'),
+        toast_type: 'toast-warning-dashboard',
+        action_route: 'admin_dashboard_settings_certs_management',
+        action_icon: 'wba:shield-check',
+        action_label: 'evWarningValidateNow'|trans({}, 'dashboard'),
+    }) }}
+{% endif %}
