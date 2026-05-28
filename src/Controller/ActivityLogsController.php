@@ -65,6 +65,7 @@ class ActivityLogsController extends AbstractController
             'eventCounts' => $eventCounts,
             'currentPage' => $page,
             'totalPages' => $totalPages,
+            'totalLogs' => $totalLogs,
             'searchTerm' => $searchTerm,
             'activeFilter' => $filter,
             'activeSort' => $sort,

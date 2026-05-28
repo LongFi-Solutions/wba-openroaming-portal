@@ -139,4 +139,6 @@ enum AnalyticalEventType: string
     case RADIUS_TLS_UPDATED = 'RADIUS_TLS_UPDATED';
     case RETURN_APPS_UPDATED = 'RETURN_APPS_UPDATED';
     case RETURN_APPS_RESET_REQUEST = 'RETURN_APPS_RESET_REQUEST';
+
+    // TODO MAKE getLabel for all the events
 }
