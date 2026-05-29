@@ -86,7 +86,17 @@ class UsersManagementController extends AbstractController
     public function showUser(
         User $user
     ): Response {
-        return $this->render('dashboard/actions/show.html.twig', $this->userDataService->getData($user));
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings();
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        return $this->render('dashboard/actions/user/show.html.twig', [
+            'data' => $data,
+            'currentUser' => $currentUser,
+            'userData' => $this->userDataService->getData($user)
+        ]);
     }
 
     #[Route('/dashboard/user/revoke/{id:user<\d+>}', name: 'admin_dashboard_user_revoke_profiles', methods: ['POST'])]

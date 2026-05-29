@@ -45,26 +45,7 @@
 
     {# 2FA status #}
     <td class="px-6 py-4 font-medium">
-        {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
-            <span class="pill-error">
-                {{ 'disabled'|trans({}, '_user') }}
-            </span>
-        {% endif %}
-        {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value %}
-            <span class="pill-success">
-                Email
-            </span>
-        {% endif %}
-        {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value %}
-            <span class="pill-success">
-                SMS
-            </span>
-        {% endif %}
-        {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value %}
-            <span class="pill-success">
-                TOTP
-            </span>
-        {% endif %}
+        {{ include('dashboard/shared/_2fa_badge.html.twig', { twoFAtype: user.twoFAtype }) }}
     </td>
 
     {# Banned At #}
