@@ -3,13 +3,15 @@
         {{ stimulus_controller('modal-trigger', { modalId: 'log-modal-' ~ log.id }) }}
     data-action="click->modal-trigger#open">
 
-    <td class="p-4 pl-8 font-medium">
-        {% if log.user is not null %}
-            {{ log.user.uuid }}
-        {% else %}
-            <span class="font-semibold p-1 pill-error">{{ 'noInformation'|trans({}, '_user') }}</span>
-        {% endif %}
-    </td>
+    {% if showUser is not defined or showUser %}
+        <td class="px-6 py-4 font-medium">
+            {% if log.user is not null %}
+                {{ log.user.uuid }}
+            {% else %}
+                <span class="pill-error">{{ 'noInformation'|trans({}, '_user') }}</span>
+            {% endif %}
+        </td>
+    {% endif %}
 
     <td class="p-4 font-medium">
         {% set eventType = constant('App\\Enum\\AnalyticalEventType::' ~ log.eventName) is defined

@@ -31,6 +31,13 @@
 
                 {# Pills row #}
                 <div class="flex flex-wrap gap-2 text-sm">
+                    {% if showUser is not defined or showUser %}
+                        {% if log.user is not null %}
+                            <span class="px-3 py-1 bg-gray-50 border border-gray-200 rounded-full text-gray-700">
+                                <strong>UUID:</strong> {{ log.user.uuid }}
+                            </span>
+                        {% endif %}
+                    {% endif %}
                     {% if log.eventMetadata.by is defined %}
                         <span class="px-3 py-1 bg-gray-50 border border-gray-200 rounded-full text-gray-700">
                             <strong>By:</strong> {{ log.eventMetadata.by }}

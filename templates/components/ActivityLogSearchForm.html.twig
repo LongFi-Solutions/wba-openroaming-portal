@@ -96,16 +96,16 @@
         <table class="w-full items-start">
             <thead class="text-sm text-gray-700 bg-veryLightGreen">
             <tr>
-                <th scope="col" class="flex items-center p-4 pl-8">
-                    <h1 class="mr-2">UUID</h1>
-                </th>
-                <th scope="col" class="px-6 py-3">
+                {% if not this.userScoped %}
+                    <th scope="col" class="px-6 py-3 text-left">UUID</th>
+                {% endif %}
+                <th scope="col" class="px-6 py-3 text-left">
                     {{ 'action'|trans({}, 'dashboard') }}
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-left">
                     {{ 'ipAddress'|trans({}, 'dashboard') }}
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-left">
                     {{ 'createdAt'|trans({}, 'dashboard') }}
                 </th>
             </tr>
@@ -113,7 +113,10 @@
             <tbody>
             {% set logs = this.logs %}
             {% for log in logs %}
-                {{ include('dashboard/shared/_activity_log.html.twig', {log: log}) }}
+                {{ include('dashboard/shared/_activity_log.html.twig', {
+                    log: log,
+                    showUser: not this.userScoped
+                }) }}
             {% else %}
                 <tr>
                     <td colspan="4">
@@ -136,7 +139,10 @@
     {# Modals outside table #}
     {% set logs = this.logs %}
     {% for log in logs %}
-        {{ include('dashboard/shared/_activity_log_modal.html.twig', {log: log}) }}
+        {{ include('dashboard/shared/_activity_log_modal.html.twig', {
+            log: log,
+            showUser: not this.userScoped
+        }) }}
     {% endfor %}
 
     {# Pagination #}

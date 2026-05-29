@@ -2,6 +2,7 @@
 
 namespace App\Twig\Components;
 
+use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Repository\EventRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,6 +14,9 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 class ActivityLogSearchForm extends AbstractController
 {
     use DefaultActionTrait;
+
+    #[LiveProp]
+    public ?User $user = null;
 
     #[LiveProp(writable: true)]
     public string $query = '';
@@ -96,6 +100,7 @@ class ActivityLogSearchForm extends AbstractController
             $this->resolvedQuery(),
             $this->startDate ?: null,
             $this->endDate ?: null,
+            $this->user
         );
 
         $offset = ($this->page - 1) * $this->count;
@@ -115,6 +120,7 @@ class ActivityLogSearchForm extends AbstractController
                 $this->resolvedQuery(),
                 $this->startDate ?: null,
                 $this->endDate ?: null,
+                $this->user
             )
         );
     }
@@ -126,6 +132,15 @@ class ActivityLogSearchForm extends AbstractController
 
     public function getEventCounts(): array
     {
+        // When scoped to a user, count only their events
+        if ($this->user !== null) {
+            return $this->eventRepository->countByEventGroup($this->user);
+        }
         return $this->eventRepository->countByEventGroup();
+    }
+
+    public function isUserScoped(): bool
+    {
+        return $this->user !== null;
     }
 }
