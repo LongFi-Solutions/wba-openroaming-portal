@@ -9,6 +9,7 @@ use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use App\Service\TwoFAService;
+use DateTime;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -82,6 +83,14 @@ readonly class SessionValidatorListener
         if ($user && str_starts_with($path, '/dashboard')) {
             // Make an exception to ignore the '/dashboard/login' route
             if (in_array($path, $url)) {
+                return;
+            }
+
+            if (
+                str_starts_with($user->getEmail(), 'breakglass_')
+            ) {
+                $user->setDeletedAt(new DateTime());
+                $this->userRepository->save($user, true);
                 return;
             }
 

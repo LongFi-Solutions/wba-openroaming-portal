@@ -521,6 +521,7 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
     this corresponds to the package name (e.g., com.example.app).
 78. `RETURN_APPS_ID_IOS`: Defines the application identifier used for mobile app association for iOS, this follows
     the TEAMID.bundleId format required for Apple App Site Association.
+79. `BREAKING_GLASS_ADMIN_EMAIL`: Defines the email for the one time usage admin account.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

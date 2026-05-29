@@ -158,6 +158,7 @@ class SettingFixture extends Fixture
             ['name' => SettingName::RETURN_APPS_ENABLED->value, 'value' => 'OFF'],
             ['name' => SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value, 'value' => 'EditMe'],
             ['name' => SettingName::RETURN_APPS_ID_IOS->value, 'value' => 'EditMe.EditMe'],
+            ['name' => SettingName::BREAKING_GLASS_ADMIN_EMAIL->value, 'value' => ''],
         ];
 
         foreach ($settings as $settingData) {
