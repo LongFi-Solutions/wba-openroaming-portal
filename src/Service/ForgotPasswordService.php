@@ -31,14 +31,14 @@ readonly class ForgotPasswordService
         $event = $this->eventRepository->findLatestRequestAttemptEvent($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
         if ($event instanceof Event) {
             $limitTimeToReset = new DateTime();
-            $timeToResetAttempts = $data[SettingName::TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'];
+            $timeToResetAttempts = $data[SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'];
             $limitTimeToReset->modify('-' . $timeToResetAttempts . ' minutes');
             $events = $this->eventRepository->findLastEvents($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value, $limitTimeToReset);
-            $attemptsNumber = (int)$data[SettingName::ATTEMPTS_NUMBER->value]['value'];
+            $attemptsNumber = (int)$data[SettingName::EMAIL_ATTEMPTS_NUMBER->value]['value'];
             if (count($events) < $attemptsNumber) {
                 $lastEventTime = $event->getEventDatetime();
                 $limitTime = new DateTime();
-                $timeBetweenRequests = $data[SettingName::TIME_INTERVAL_BETWEEN_REQUESTS->value]['value'];
+                $timeBetweenRequests = $data[SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value]['value'];
                 $limitTime->modify('-'.$timeBetweenRequests.' seconds');
                 if ($limitTime > $lastEventTime) {
                     return [

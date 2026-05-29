@@ -192,7 +192,7 @@ class ForgotPasswordController extends AbstractController
                                 )
                             );
                         } else {
-                            $timeToResetAttempts = $data[SettingName::TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'];
+                            $timeToResetAttempts = $data[SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'];
                             $this->addFlash(
                                 'error',
                                 $this->translator->trans(
