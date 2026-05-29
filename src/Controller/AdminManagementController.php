@@ -41,7 +41,7 @@ class AdminManagementController extends AbstractController
      * @throws \DateMalformedStringException
      */
     #[Route('/dashboard/admin/{id:user<\d+>}', name: 'admin_dashboard_admin_show')]
-    #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ)]
+    #[IsGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_READ)]
     public function showUser(
         User $user
     ): Response {

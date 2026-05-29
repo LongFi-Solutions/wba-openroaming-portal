@@ -694,8 +694,8 @@ class UsersManagementController extends AbstractController
         // Return to the respective route from which URL was hit
         $returnRoute = in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true) ||
         in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true)
-            ? 'admin_user_edit'
-            : 'admin_user_show';
+            ? 'admin_dashboard_admin_show'
+            : 'admin_dashboard_user_show';
 
         return $this->redirectToRoute($returnRoute, ['id' => $user->getId()]);
     }
