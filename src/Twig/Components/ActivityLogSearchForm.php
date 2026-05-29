@@ -32,6 +32,12 @@ class ActivityLogSearchForm extends AbstractController
     #[LiveProp(writable: true)]
     public string $order = 'desc';
 
+    #[LiveProp(writable: true)]
+    public string $startDate = '';
+
+    #[LiveProp(writable: true)]
+    public string $endDate = '';
+
     public function __construct(
         private readonly EventRepository $eventRepository,
     ) {
@@ -78,19 +84,27 @@ class ActivityLogSearchForm extends AbstractController
         return $this->query;
     }
 
+    /**
+     * @throws \DateMalformedStringException
+     */
     public function getLogs(): array
     {
         $all = $this->eventRepository->searchWithFilter(
             $this->filter,
             $this->sort,
             $this->order,
-            $this->resolvedQuery()
+            $this->resolvedQuery(),
+            $this->startDate ?: null,
+            $this->endDate ?: null,
         );
 
         $offset = ($this->page - 1) * $this->count;
         return array_slice($all, $offset, $this->count);
     }
 
+    /**
+     * @throws \DateMalformedStringException
+     */
     public function getTotalLogs(): int
     {
         return count(
@@ -98,7 +112,9 @@ class ActivityLogSearchForm extends AbstractController
                 $this->filter,
                 $this->sort,
                 $this->order,
-                $this->resolvedQuery()
+                $this->resolvedQuery(),
+                $this->startDate ?: null,
+                $this->endDate ?: null,
             )
         );
     }

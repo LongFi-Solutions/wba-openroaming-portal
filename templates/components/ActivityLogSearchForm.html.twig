@@ -1,4 +1,7 @@
 <div {{ attributes }}>
+    {# Hidden inputs for date range — bound to Live Component props #}
+    <input type="hidden" data-model="startDate" value="{{ startDate }}">
+    <input type="hidden" data-model="endDate" value="{{ endDate }}">
 
     {# Search Bar + Filter Tabs — matches dashboard.html.twig style #}
     <div class="sm:w-auto px-5 py-4 space-y-4">
@@ -6,7 +9,7 @@
         {# Bottom Row: Filter Tabs — full width, wraps naturally #}
         <div class="flex flex-row flex-wrap items-center justify-center gap-4">
             {% set filters = {
-                'all': { label: 'all', count: this.eventCounts.all, activeClass: 'border-b-2 border-y-veryDarkButton', hoverClass: 'hover:border-b-2 hover:border-y-veryDarkButton', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
+                'all': { label: 'all', count: this.eventCounts.all, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
                 'user_actions': { label: 'userActions', count: this.eventCounts.user_actions, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
                 'admin_actions': { label: 'adminActions', count: this.eventCounts.admin_actions, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
                 'auth_events': { label: 'authEvents', count: this.eventCounts.auth_events, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
@@ -21,18 +24,19 @@
                         data-value="{{ value }}"
                         class="flex flex-row group transition-all duration-100 {{ tab.hoverClass }} {{ filter == value ? tab.activeClass : '' }}">
                     <h1 class="px-2">{{ tab.label|trans({}, 'dashboard') }}</h1>
-                    <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen rounded-md text-center transition-all duration-100 {{ filter == value ? tab.badgeActive : tab.badgeHover }}">
+                    <div class="w-auto h-6 mb-1 px-2 rounded-md text-center transition-all duration-100 {{ filter == value ? tab.badgeActive : tab.badgeHover }}">
                         {{ tab.count }}
                     </div>
                 </button>
             {% endfor %}
         </div>
 
-        {# Top Row: Search Bar only #}
-        <div class="flex flex-col lg:flex-row justify-center items-center space-y-6 lg:space-y-0 sm:space-x-4 mb-4">
+        {# Top Row: Search Bar + Date Filter #}
+        <div class="flex flex-col lg:flex-row justify-center items-center gap-4 mb-4">
+
+            {# Search Input #}
             <div class="relative w-full md:w-3/6"
                     {{ stimulus_controller('autocomplete') }}>
-
                 <div class="flex flex-row items-center border rounded-md">
                     <button type="button">
                         <svg class="w-5 mx-3 text-gray-400" fill="none" stroke="currentColor"
@@ -75,6 +79,15 @@
                     </ul>
                 {% endif %}
             </div>
+
+            {# Date Filter #}
+            {{ include('dashboard/shared/_date_filter_form.html.twig', {
+                activePreset: '',
+                selectedStartDate: startDate,
+                selectedEndDate: endDate,
+                showTime: true
+            }) }}
+
         </div>
     </div>
 

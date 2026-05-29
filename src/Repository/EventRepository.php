@@ -9,6 +9,7 @@ use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 
 /**
  * @extends ServiceEntityRepository<Event>
@@ -46,12 +47,15 @@ class EventRepository extends ServiceEntityRepository
 
     /**
      * @return Event[] Returns an array of Event objects
+     * @throws \DateMalformedStringException
      */
     public function searchWithFilter(
         string $filter = 'all',
-        string $sort = 'createdAt',
+        string $sort = 'event_datetime',
         string $order = 'desc',
-        ?string $searchTerm = null
+        ?string $searchTerm = null,
+        ?string $startDate = null,
+        ?string $endDate = null,
     ): array {
         $qb = $this->createQueryBuilder('e')
             ->join('e.user', 'u');
@@ -62,6 +66,26 @@ class EventRepository extends ServiceEntityRepository
                 'u.email LIKE :search OR u.uuid LIKE :search OR e.event_name LIKE :search'
             )
                 ->setParameter('search', '%' . $searchTerm . '%');
+        }
+
+        // Date range filter
+        if ($startDate) {
+            try {
+                $start = new DateTime($startDate);
+                $qb->andWhere('e.event_datetime >= :startDate')
+                    ->setParameter('startDate', $start);
+            } catch (Exception) {
+                // invalid date, skip
+            }
+        }
+        if ($endDate) {
+            try {
+                $end = new DateTime($endDate);
+                $qb->andWhere('e.event_datetime <= :endDate')
+                    ->setParameter('endDate', $end);
+            } catch (Exception) {
+                // invalid date, skip
+            }
         }
 
         // --- Filter by event type group ---
@@ -97,18 +121,13 @@ class EventRepository extends ServiceEntityRepository
         // --- Sorting ---
         $allowedSorts = ['event_datetime', 'event_name'];
         $allowedOrders = ['asc', 'desc'];
-
         $sort = in_array($sort, $allowedSorts, true) ? $sort : 'event_datetime';
         $order = in_array(strtolower($order), $allowedOrders, true) ? $order : 'desc';
-
         $qb->orderBy('e.' . $sort, $order);
 
         return $qb->getQuery()->getResult();
     }
 
-    /**
-     * @return Event[] Returns an array of Event objects by Group
-     */
     public function countByEventGroup(): array
     {
         return [
