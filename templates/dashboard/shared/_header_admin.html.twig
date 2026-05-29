@@ -1,11 +1,11 @@
 {# Define route-to-header mapping #}
 {% set routeHeaders = {
     admin_page: {icon: 'wba:user', title: 'usersManagement'},
-    admin_user_edit: {icon: 'wba:user', title: 'usersManagement'},
-    admin_user_show: {icon: 'wba:user', title: 'usersManagement'},
+    admin_dashboard_admins: {icon: 'wba:user', title: 'usersManagement'},
+    admin_dashboard_user_edit: {icon: 'wba:user', title: 'usersManagement'},
+    admin_dashboard_user_show: {icon: 'wba:user', title: 'usersManagement'},
     admin_dashboard_customize: {icon: 'wba:pencil-edit', title: 'landingPageConfiguration'},
     admin_reset_password: {icon: 'wba:cog', title: 'resetPassword'},
-    admin_user_update: {icon: 'wba:user-circle', title: 'accountSettings'},
     admin_dashboard_settings_terms: {icon: 'wba:file-check', title: 'termsAndPolicies'},
     admin_dashboard_settings_radius: {icon: 'wba:file-space', title: 'radiusProfileConfiguration'},
     admin_dashboard_settings_status: {icon: 'wba:barchart', title: 'platformStatus'},
@@ -20,7 +20,7 @@
     admin_dashboard_settings_domains: {icon: 'wba:file-cross', title: 'domainBlacklist'},
     admin_dashboard_settings_certs_management: {icon: 'wba:certificate', title: 'certsManagement'},
     admin_dashboard_return_apps: {icon: 'wba:mobile-arrows', title: 'returnAppsManagement'},
-    dashboard_add_admin: {icon: 'wba:add-user', title: 'addAdmin'},
+    admin_dashboard_add_admin: {icon: 'wba:add-user', title: 'addAdmin'},
     admin_dashboard_activity_logs: {icon: 'wba:clock-counter-clockwise', title: 'activityLogs', class: 'fill-current stroke-none '},
 } %}
 
@@ -45,7 +45,7 @@
       <ul class="py-2 text-sm space-y-1" aria-labelledby="adminActionsDropdownButton">
         <li class="px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
           {# Account Option #}
-            <a href="{{ path('admin_user_show', {id: app.user.id}) }}"
+            <a href="{{ path('admin_dashboard_user_show', {id: app.user.id}) }}"
              class="flex items-center space-x-2">
             <twig:ux:icon name="wba:user-circle" class="w-7 pr-2 mr-2 fill-none stroke-current"/>
             {{ 'account'|trans({}, '_header_admin') }}

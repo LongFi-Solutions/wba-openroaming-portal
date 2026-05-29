@@ -19,10 +19,10 @@
     <div class="py-4 flex flex-col space-y-2 font-medium">
         {% set userManagementRoutes = [
             'admin_page',
-            'admins_management',
-            'admin_user_edit',
-            'admin_user_show',
-            'dashboard_add_admin',
+            'admin_dashboard_admins',
+            'admin_dashboard_user_edit',
+            'admin_dashboard_user_show',
+            'admin_dashboard_add_admin',
         ] %}
         {% set portalSettingsRoutes = [
             'admin_dashboard_settings_status',
@@ -72,7 +72,7 @@
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'admin'|trans({}, '_header_admin'), routes: ['admins_management', 'dashboard_add_admin'], icon: 'wba:admin-management'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'admin'|trans({}, '_header_admin'), routes: ['admin_dashboard_admins', 'dashboard_add_admin'], icon: 'wba:admin-management'}) }}
                         {% endif %}
                     </ul>
                 </div>
@@ -234,7 +234,7 @@
                     {# Account Option #}
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
-                           href="{{ path('admin_user_show', {id: app.user.id}) }}">
+                           href="{{ path('admin_dashboard_user_show', {id: app.user.id}) }}">
                             <twig:ux:icon name="wba:user-circle" class="w-5 mr-4 fill-none stroke-current"/>
                             {{ 'account'|trans({}, '_header_admin') }}
                         </a>

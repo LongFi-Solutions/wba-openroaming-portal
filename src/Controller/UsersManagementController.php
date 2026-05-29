@@ -30,12 +30,14 @@ use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
+use App\Service\UserDataService;
 use App\Service\UserDeletionService;
 use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -71,10 +73,23 @@ class UsersManagementController extends AbstractController
         private readonly EmailGenerator $emailGenerator,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly MailerInterface $mailer,
+        private readonly UserDataService $userDataService,
     ) {
     }
 
-    #[Route('/dashboard/revoke/{id:user<\d+>}', name: 'admin_user_revoke_profiles', methods: ['POST'])]
+    /**
+     * Show User account details
+     * @throws \DateMalformedStringException
+     */
+    #[Route('/dashboard/user/{id:user<\d+>}', name: 'admin_dashboard_user_show')]
+    #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ)]
+    public function showUser(
+        User $user
+    ): Response {
+        return $this->render('dashboard/actions/show.html.twig', $this->userDataService->getData($user));
+    }
+
+    #[Route('/dashboard/user/revoke/{id:user<\d+>}', name: 'admin_dashboard_user_revoke_profiles', methods: ['POST'])]
     #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE)]
     public function revokeUsers(Request $request, User $user): Response
     {
@@ -140,7 +155,7 @@ class UsersManagementController extends AbstractController
     /**
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
-    #[Route('/dashboard/export/users', name: 'admin_user_export')]
+    #[Route('/dashboard/users/export', name: 'admin_dashboard_users_export')]
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function exportUsers(): Response
     {
@@ -265,8 +280,9 @@ class UsersManagementController extends AbstractController
      */
     /**
      * @throws \JsonException
+     * @throws ORMException
      */
-    #[Route('/dashboard/delete/{id:user<\d+>}', name: 'admin_user_delete', methods: ['POST'])]
+    #[Route('/dashboard/user/delete/{id:user<\d+>}', name: 'admin_dashboard_user_delete', methods: ['POST'])]
     #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE)]
     public function deleteUsers(User $user, Request $request): Response
     {
@@ -287,7 +303,7 @@ class UsersManagementController extends AbstractController
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user->getId()]);
         $getUserUuid = $user->getUuid();
 
-        if ($user->getDeletedAt() instanceof \DateTimeInterface) {
+        if ($user->getDeletedAt() instanceof DateTimeInterface) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('userAlreadyDeleted', [], 'controllers')
@@ -326,7 +342,7 @@ class UsersManagementController extends AbstractController
      * @throws \DateMalformedStringException
      * @throws \DateMalformedIntervalStringException
      */
-    #[Route('/dashboard/edit/{id:user<\d+>}', name: 'admin_user_edit')]
+    #[Route('/dashboard/user/edit/{id:user<\d+>}', name: 'admin_dashboard_user_edit')]
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function editUsers(
         Request $request,
@@ -460,7 +476,7 @@ class UsersManagementController extends AbstractController
                     'error',
                     $this->translator->trans('PasswordPasswordConfirmationMustMatch', [], 'controllers')
                 );
-                return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
+                return $this->redirectToRoute('admin_dashboard_user_edit', ['id' => $user->getId()]);
             }
 
             // Get the User Provider && ProviderId
@@ -611,9 +627,11 @@ class UsersManagementController extends AbstractController
     /**
      * @throws \Exception
      * @throws TransportExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
-    #[Route('/dashboard/disable2FA/{id<\d+>}', name: 'app_disable2FA_admin')]
-    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
+    #[Route('/dashboard/user/disable2FA/{id<\d+>}', name: 'admin_dashboard_user_disable2FA')]
+    #[Route('/dashboard/admin/disable2FA/{id<\d+>}', name: 'admin_dashboard_admin_disable2FA')]
+    #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE)]
     public function disabledBy2FA(
         Request $request,
         int $id,
@@ -673,6 +691,12 @@ class UsersManagementController extends AbstractController
             );
         }
 
-        return $this->redirectToRoute('admin_user_show', ['id' => $user->getId()]);
+        // Return to the respective route from which URL was hit
+        $returnRoute = in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true) ||
+        in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true)
+            ? 'admin_user_edit'
+            : 'admin_user_show';
+
+        return $this->redirectToRoute($returnRoute, ['id' => $user->getId()]);
     }
 }

@@ -13,6 +13,7 @@ use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\UserCreationService;
+use App\Service\UserDataService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Random\RandomException;
@@ -31,13 +32,26 @@ class AdminManagementController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly TranslatorInterface $translator,
         private readonly UserCreationService $userCreationService,
+        private readonly UserDataService $userDataService,
     ) {
+    }
+
+    /**
+     * Show Admin account details
+     * @throws \DateMalformedStringException
+     */
+    #[Route('/dashboard/admin/{id:user<\d+>}', name: 'admin_dashboard_admin_show')]
+    #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ)]
+    public function showUser(
+        User $user
+    ): Response {
+        return $this->render('dashboard/actions/show.html.twig', $this->userDataService->getUserData($user));
     }
 
     /**
      * @throws RandomException
      */
-    #[Route('/dashboard/add', name: 'dashboard_add_admin')]
+    #[Route('/dashboard/admin/add', name: 'admin_dashboard_add_admin')]
     #[IsGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE)]
     public function addUsers(Request $request): Response
     {
@@ -79,7 +93,7 @@ class AdminManagementController extends AbstractController
                 $eventMetaData
             );
 
-            return $this->redirectToRoute('admins_management');
+            return $this->redirectToRoute('admin_dashboard_admins');
         }
 
         return $this->render('dashboard/actions/add.html.twig', [
@@ -98,7 +112,7 @@ class AdminManagementController extends AbstractController
     /**
      * @param string $type Type of action
      */
-    #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset')]
+    #[Route('/dashboard/confirm/{type}', name: 'admin_dashboard_confirm_reset')]
     #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE)]
     public function confirmReset(string $type): Response
     {
@@ -115,9 +129,9 @@ class AdminManagementController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/adminPermissionsAdd/{id:user<\d+>}', name: 'admin_add_permissions')]
+    #[Route('/dashboard/admin/addPermissions/{id:user<\d+>}', name: 'admin_dashboard_add_admin_permissions')]
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
-    public function giveAdminPermissions(Request $request, User $user): Response
+    public function addPermissions(Request $request, User $user): Response
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -156,9 +170,9 @@ class AdminManagementController extends AbstractController
         return $this->redirect($request->headers->get('Referer'));
     }
 
-    #[Route('/dashboard/adminPermissionsRemove/{id:user<\d+>}', name: 'admin_remove_permissions')]
+    #[Route('/dashboard/admin/removePermissions/{id:user<\d+>}', name: 'admin_dashboard_remove_user_permissions')]
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
-    public function removeAdminPermissions(Request $request, User $user): Response
+    public function removePermissions(Request $request, User $user): Response
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
