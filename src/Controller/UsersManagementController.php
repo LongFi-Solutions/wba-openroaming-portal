@@ -641,7 +641,6 @@ class UsersManagementController extends AbstractController
      */
     #[Route('/dashboard/user/disable2FA/{id<\d+>}', name: 'admin_dashboard_user_disable2FA')]
     #[Route('/dashboard/admin/disable2FA/{id<\d+>}', name: 'admin_dashboard_admin_disable2FA')]
-    #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE)]
     public function disabledBy2FA(
         Request $request,
         int $id,
@@ -653,6 +652,18 @@ class UsersManagementController extends AbstractController
                 $this->translator->trans('userNotFound', [], 'controllers')
             );
             return $this->redirectToRoute('admin_page');
+        }
+
+        // Check permissions based on the target user's roles
+        $targetIsAdmin = in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true) ||
+            in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true);
+
+        if ($targetIsAdmin) {
+            if (!$this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE)) {
+                throw $this->createAccessDeniedException();
+            }
+        } elseif (!$this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE)) {
+            throw $this->createAccessDeniedException();
         }
 
         $userExternalAuths = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
@@ -702,8 +713,7 @@ class UsersManagementController extends AbstractController
         }
 
         // Return to the respective route from which URL was hit
-        $returnRoute = in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true) ||
-        in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true)
+        $returnRoute = $targetIsAdmin
             ? 'admin_dashboard_admin_show'
             : 'admin_dashboard_user_show';
 
