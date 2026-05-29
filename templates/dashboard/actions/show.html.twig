@@ -4,43 +4,12 @@
 {% block container %}
 
     {# ── Header ──────────────────────────────────────────────────────────────── #}
-    <div class="flex items-center justify-between mb-8 border-b-2 border-gray-300 pb-4">
-        <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-full bg-veryDarkButton text-white flex items-center justify-center text-2xl font-bold">
-                {% if userData.user.firstName and userData.user.lastName %}
-                    {{ userData.user.firstName|first|upper }}{{ userData.user.lastName|first|upper }}
-                {% else %}
-                    {{ userData.user.uuid|first|upper }}
-                {% endif %}
-            </div>
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">
-                    {{ userData.user.firstName }} {{ userData.user.lastName }}
-                </h1>
-                <p class="text-sm text-gray-400 font-mono">{{ userData.user.uuid }}</p>
-            </div>
-        </div>
-        <div class="flex items-center gap-2 flex-wrap justify-end">
-            {% if userData.isBanned %}
-                <span class="pill-error">{{ 'banned'|trans({}, 'edit') }}</span>
-            {% endif %}
-            {% if userData.isDeleted %}
-                <span class="pill-error">{{ 'deleted'|trans({}, 'edit') }}</span>
-            {% endif %}
-            {% if userData.user.isVerified %}
-                <span class="pill-success">{{ 'verified'|trans({}, 'edit') }}</span>
-            {% else %}
-                <span class="pill-warning">{{ 'unverified'|trans({}, 'edit') }}</span>
-            {% endif %}
-            {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
-                <a href="{{ path('admin_dashboard_user_edit', {id: userData.user.id}) }}" class="btn-primary text-sm">
-                    {{ 'edit'|trans({}, 'edit') }}
-                </a>
-            {% endif %}
-        </div>
-    </div>
+    {{ include('dashboard/shared/_user_header.html.twig', {
+        user: userData.user,
+        actions: '<a href="' ~ path('admin_dashboard_user_edit', {id: userData.user.id}) ~ '" class="btn-primary text-sm">' ~ 'edit'|trans({}, 'edit') ~ '</a>'
+    }) }}
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
         {# ── Left column ──────────────────────────────────────────────────────────── #}
         <div class="lg:col-span-1 flex flex-col gap-6">
@@ -260,12 +229,14 @@
                 {% endif %}
             </div>
 
-            {# Recent sessions #}
+            {# Recent Radius Sessions #}
             {% if userData.recentSessions is not empty %}
                 <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
-                        {{ 'recentSessions'|trans({}, 'show') }}
-                    </h2>
+                    <div class="px-6 pt-5 pb-2 border-b border-gray-100">
+                        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                            {{ 'recentRadiusSession'|trans({}, 'show') }}
+                        </h2>
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
                             <thead class="bg-veryLightGreen text-gray-600">
@@ -307,43 +278,22 @@
                 </div>
             {% endif %}
 
-            {# Recent activity events #}
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                        {{ 'recentActivity'|trans({}, 'dashboard') }}
-                    </h2>
-                    <a href="{{ path('admin_dashboard_activity_logs', {query: userData.user.uuid}) }}"
-                       class="text-xs text-veryDarkButton hover:underline">
-                        {{ 'viewAll'|trans({}, 'dashboard') }} →
-                    </a>
-                </div>
-                {% if userData.recentEvents is not empty %}
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead class="bg-veryLightGreen text-gray-600">
-                            <tr>
-                                <th class="px-4 py-2 text-left">{{ 'action'|trans({}, 'dashboard') }}</th>
-                                <th class="px-4 py-2 text-left">{{ 'createdAt'|trans({}, 'dashboard') }}</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for event in userData.recentEvents|slice(0, 10) %}
-                                <tr class="border-b border-gray-100 hover:bg-gray-50 text-xs">
-                                    <td class="px-4 py-2 text-gray-700">{{ event.eventName }}</td>
-                                    <td class="px-4 py-2 text-gray-500">
-                                        {{ event.eventDatetime|date('d/m/Y H:i') }}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <p class="text-sm text-gray-400">—</p>
-                {% endif %}
-            </div>
 
+            {# ── Activity logs — full width below ── #}
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="px-6 pt-5 pb-2 border-b border-gray-100">
+                    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                        {{ 'recentActivity'|trans({}, 'show') }}
+                    </h2>
+                </div>
+                <twig:ActivityLogSearchForm
+                        :user="userData.user"
+                        query=""
+                        filter="all"
+                        page="1"
+                        count="10"
+                />
+            </div>
         </div>
     </div>
 

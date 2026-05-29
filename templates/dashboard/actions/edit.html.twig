@@ -4,7 +4,12 @@
 
 {% block container %}
     {# Content - Edit Users #}
-    <h1 class="text-3xl font-bold text-gray-800 mb-8 border-b-2 border-gray-300 pb-2">{{ user.uuid }}</h1>
+    {# ── Header ──────────────────────────────────────────────────────────────── #}
+    {{ include('dashboard/shared/_user_header.html.twig', {
+        user: userData.user,
+        actions: '<a href="' ~ path('admin_dashboard_user_edit', {id: userData.user.id}) ~ '" class="btn-primary text-sm">' ~ 'edit'|trans({}, 'edit') ~ '</a>'
+    }) }}
+
     <twig:UserUpdateForm
             :userUpdateDTO="userUpdateDTO"
             :form="form"
