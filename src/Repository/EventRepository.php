@@ -56,7 +56,7 @@ class EventRepository extends ServiceEntityRepository
         ?string $searchTerm = null,
         ?string $startDate = null,
         ?string $endDate = null,
-        ?User $user = null,  // ← add this
+        ?User $user = null,
     ): array {
         $qb = $this->createQueryBuilder('e')
             ->join('e.user', 'u');
@@ -70,7 +70,10 @@ class EventRepository extends ServiceEntityRepository
         // --- Search by user email/uuid/EventName ---
         if ($searchTerm) {
             $qb->andWhere(
-                'u.email LIKE :search OR u.uuid LIKE :search OR e.event_name LIKE :search'
+                'u.email LIKE :search 
+                 OR u.uuid LIKE :search 
+                 OR e.event_name LIKE :search
+                 OR e.event_metadata LIKE :search'
             )
                 ->setParameter('search', '%' . $searchTerm . '%');
         }
