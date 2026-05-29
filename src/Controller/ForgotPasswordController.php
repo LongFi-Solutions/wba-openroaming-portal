@@ -272,85 +272,94 @@ class ForgotPasswordController extends AbstractController
                 $currentTime = new DateTime();
                 // Check if the user has not exceeded the attempt limit
                 $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
-                $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
-                    ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
-                    : null;
                 $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
-                if (!$latestEvent || $verificationAttempts < 4) {
-                    // Check if enough time has passed since the last attempt
-                    if (
-                        !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
-                            $lastVerificationCodeTime->add($minInterval) < $currentTime)
-                    ) {
-                        // Increment the attempt count
-                        $attempts = $verificationAttempts + 1;
+                // Check if enough time has passed since the last attempt
+                $attemptsVerification = $this->forgotPasswordService->userCanResetPassword($user, true);
+                if (
+                    $attemptsVerification[ForgotPasswordEnum::SUCCESS->value]
+                ) {
+                    // Increment the attempt count
+                    $attempts = $verificationAttempts + 1;
 
-                        // Save event with attempt count and current time
-                        if (!$latestEvent instanceof Event) {
-                            $latestEvent = new Event();
-                            $latestEvent->setUser($user);
-                            $latestEvent->setEventDatetime(new DateTime());
-                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST->value);
-                            $latestEventMetadata = [
-                                'platform' => PlatformMode::LIVE->value,
-                                'ip' => $request->getClientIp(),
-                                'uuid' => $user->getUuid(),
-                            ];
-                        }
+                    // Save event with attempt count and current time
+                    $latestEvent = new Event();
+                    $latestEvent->setUser($user);
+                    $latestEvent->setEventDatetime(new DateTime());
+                    $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST->value);
+                    $latestEventMetadata = [
+                        'platform' => PlatformMode::LIVE->value,
+                        'ip' => $request->getClientIp(),
+                        'uuid' => $user->getUuid(),
+                    ];
 
-                        $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(
-                            DateTimeInterface::ATOM
-                        );
-                        $latestEventMetadata['verificationAttempts'] = $attempts;
-                        $latestEvent->setEventMetadata($latestEventMetadata);
+                    $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(
+                        DateTimeInterface::ATOM
+                    );
+                    $latestEventMetadata['verificationAttempts'] = $attempts;
+                    $latestEvent->setEventMetadata($latestEventMetadata);
 
-                        $user->setTwoFAcode((string)random_int(100000, 999999));
-                        $user->setTwoFACodeGeneratedAt(new DateTime());
-                        $user->setTwoFAcodeIsActive(true);
-                        $this->eventRepository->save($latestEvent, true);
+                    $user->setTwoFAcode((string)random_int(100000, 999999));
+                    $user->setTwoFACodeGeneratedAt(new DateTime());
+                    $user->setTwoFAcodeIsActive(true);
+                    $this->eventRepository->save($latestEvent, true);
 
-                        $this->entityManager->persist($user);
-                        $this->entityManager->flush();
+                    $this->entityManager->persist($user);
+                    $this->entityManager->flush();
 
-                        $message = $this->translator->trans(
-                            'password_reset_code',
-                            ['%code%' => $user->getTwoFAcode()],
-                            'controllers'
-                        );
-                        $this->sendSMS->sendSmsNoValidation($user, $message);
+                    $message = $this->translator->trans(
+                        'password_reset_code',
+                        ['%code%' => $user->getTwoFAcode()],
+                        'controllers'
+                    );
+                    $this->sendSMS->sendSmsNoValidation($user, $message);
 
-                        $attemptsLeft = 3 - $verificationAttempts;
-                        $message = $this->translator->trans(
-                            'messageSentWithAttemptsLeft',
-                            [
-                                '%uuid%' => $user->getUuid(),
-                                '%attempts%' => $attemptsLeft,
-                            ],
-                            'controllers'
-                        );
-                        $this->addFlash('success', $message);
+                    $message = $this->translator->trans(
+                        'messageSentWithAttemptsLeft',
+                        [
+                            '%uuid%' => $user->getUuid(),
+                        ],
+                        'controllers'
+                    );
+                    $this->addFlash('success', $message);
 
-                        $request->getSession()->set('forgot_password_uuid', $user->getUuid());
+                    $request->getSession()->set('forgot_password_uuid', $user->getUuid());
 
-                        return $this->redirectToRoute('app_site_forgot_password_code');
-                    }
-
+                    return $this->redirectToRoute('app_site_forgot_password_code');
+                }
+                // Inform the user to wait before trying again
+                $timeLeft = $attemptsVerification[ForgotPasswordEnum::TIME_LEFT->value];
+                if ($attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] === ForgotPasswordEnum::ATTEMPTS_EXCEEDED->value) {
+                    $minutes = ($timeLeft->days * 24 * 60)
+                        + ($timeLeft->h * 60)
+                        + $timeLeft->i;
                     $this->addFlash(
                         'error',
                         $this->translator->trans(
-                            'waitBeforeRetry',
-                            [
-                                '%minutes%' => $data[SettingName::SMS_TIMER_RESEND->value]['value']
-                            ],
+                            'tooManyAttemptsMinutes',
+                            ['%minutes%' => $minutes],
+                            'controllers'
+                        )
+                    );
+                } elseif ($attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] === ForgotPasswordEnum::TIME_BETWEEN_REQUESTS->value) {
+                    $seconds = ($timeLeft->days * 24 * 3600)
+                        + ($timeLeft->h * 3600)
+                        + ($timeLeft->i * 60)
+                        + $timeLeft->s;
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans(
+                            'timeBetweenRequests',
+                            ['%seconds%' => $seconds],
                             'controllers'
                         )
                     );
                 } else {
+                    $timeToResetAttempts = $data[SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'];
                     $this->addFlash(
                         'error',
                         $this->translator->trans(
-                            'exceededLimitsRequestForNewPassword',
-                            [],
+                            'waitBeforeTryingAgain',
+                            ['%minutes%' => $timeToResetAttempts],
                             'controllers'
                         )
                     );
@@ -366,7 +375,6 @@ class ForgotPasswordController extends AbstractController
                 );
             }
         }
-
         return $this->render('landing/forgotPassword/forgot_password_sms.html.twig', [
             'forgotPasswordSMSForm' => $form->createView(),
             'data' => $data,

@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Event;
+use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\ForgotPasswordEnum;
 use App\Enum\SettingName;
@@ -24,21 +25,32 @@ readonly class ForgotPasswordService
     /**
      * @throws DateMalformedStringException
      */
-    public Function userCanResetPassword($user): array
+    public Function userCanResetPassword(User $user, bool $isSMS = false): array
     {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
-        $event = $this->eventRepository->findLatestRequestAttemptEvent($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
+        if ($isSMS) {
+            $eventType = AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST->value;
+            $timeToResetAttemptsType = SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS->value;
+            $timeBetweenRequestsType = SettingName::SMS_TIME_INTERVAL_BETWEEN_REQUESTS->value;
+            $attemptsNumberType = SettingName::SMS_ATTEMPTS_NUMBER->value;
+        } else {
+            $eventType = AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value;
+            $timeToResetAttemptsType = SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value;
+            $timeBetweenRequestsType = SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value;
+            $attemptsNumberType = SettingName::EMAIL_ATTEMPTS_NUMBER->value;
+        }
+        $event = $this->eventRepository->findLatestRequestAttemptEvent($user, $eventType);
         if ($event instanceof Event) {
             $limitTimeToReset = new DateTime();
-            $timeToResetAttempts = $data[SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'];
+            $timeToResetAttempts = $data[$timeToResetAttemptsType]['value'];
             $limitTimeToReset->modify('-' . $timeToResetAttempts . ' minutes');
-            $events = $this->eventRepository->findLastEvents($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value, $limitTimeToReset);
-            $attemptsNumber = (int)$data[SettingName::EMAIL_ATTEMPTS_NUMBER->value]['value'];
+            $events = $this->eventRepository->findLastEvents($user, $eventType, $limitTimeToReset);
+            $attemptsNumber = (int)$data[$attemptsNumberType]['value'];
             if (count($events) < $attemptsNumber) {
                 $lastEventTime = $event->getEventDatetime();
                 $limitTime = new DateTime();
-                $timeBetweenRequests = $data[SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value]['value'];
+                $timeBetweenRequests = $data[$timeBetweenRequestsType]['value'];
                 $limitTime->modify('-'.$timeBetweenRequests.' seconds');
                 if ($limitTime > $lastEventTime) {
                     return [
