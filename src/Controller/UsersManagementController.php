@@ -92,7 +92,7 @@ class UsersManagementController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        return $this->render('dashboard/actions/user/show.html.twig', [
+        return $this->render('dashboard/actions/show.html.twig', [
             'data' => $data,
             'currentUser' => $currentUser,
             'userData' => $this->userDataService->getData($user)

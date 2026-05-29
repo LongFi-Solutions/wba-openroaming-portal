@@ -51,7 +51,7 @@ class AdminManagementController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        return $this->render('dashboard/actions/admin/show.html.twig', [
+        return $this->render('dashboard/actions/show.html.twig', [
             'data' => $data,
             'currentUser' => $currentUser,
             'userData' => $this->userDataService->getData($user)
