@@ -2,6 +2,7 @@
 {% set routeHeaders = {
     admin_page: {icon: 'wba:user', title: 'usersManagement'},
     admin_user_edit: {icon: 'wba:user', title: 'usersManagement'},
+    admin_user_show: {icon: 'wba:user', title: 'usersManagement'},
     admin_dashboard_customize: {icon: 'wba:pencil-edit', title: 'landingPageConfiguration'},
     admin_reset_password: {icon: 'wba:cog', title: 'resetPassword'},
     admin_user_update: {icon: 'wba:user-circle', title: 'accountSettings'},
@@ -44,7 +45,7 @@
       <ul class="py-2 text-sm space-y-1" aria-labelledby="adminActionsDropdownButton">
         <li class="px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
           {# Account Option #}
-          <a href="{{ path('admin_user_edit', {id: app.user.id}) }}"
+            <a href="{{ path('admin_user_show', {id: app.user.id}) }}"
              class="flex items-center space-x-2">
             <twig:ux:icon name="wba:user-circle" class="w-7 pr-2 mr-2 fill-none stroke-current"/>
             {{ 'account'|trans({}, '_header_admin') }}

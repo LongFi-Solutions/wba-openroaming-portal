@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\DTO\UserAddDTO;
 use App\DTO\UserUpdateDTO;
 use App\Entity\Event;
 use App\Entity\User;
@@ -12,14 +11,12 @@ use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
-use App\Enum\PermissionLevel;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\ResetPasswordType;
-use App\Form\UserAddType;
 use App\Form\UserUpdateType;
 use App\Repository\EventRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -33,7 +30,6 @@ use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
-use App\Service\UserCreationService;
 use App\Service\UserDeletionService;
 use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
@@ -43,7 +39,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -76,7 +71,6 @@ class UsersManagementController extends AbstractController
         private readonly EmailGenerator $emailGenerator,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly MailerInterface $mailer,
-        private readonly UserCreationService $userCreationService,
     ) {
     }
 
@@ -264,64 +258,6 @@ class UsersManagementController extends AbstractController
         $writer->save($tempFile);
 
         return $this->file($tempFile, 'users.xlsx');
-    }
-
-    /**
-     * @throws RandomException
-     */
-    #[Route('/dashboard/add', name: 'dashboard_add_admin')]
-    #[IsGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE)]
-    public function addUsers(Request $request): Response
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings();
-
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        // Create & handle form
-        $userAddDTO = new UserAddDTO();
-        $form = $this->createForm(UserAddType::class, $userAddDTO);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Convert DTO → Entity data before creation
-            $newUser = $this->userCreationService->createAdminUser($userAddDTO);
-
-            // Flash message
-            $this->addFlash(
-                'success',
-                $this->translator->trans('addedNewUser', [
-                    '%uuid%' => $newUser->getUuid(),
-                ], 'controllers')
-            );
-
-            $eventMetaData = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'userAddedBy' => $newUser->getUuid(),
-                'by' => $currentUser->getUuid(),
-            ];
-
-            $this->eventActions->saveEvent(
-                $currentUser,
-                AnalyticalEventType::ADMIN_ADDED_NEW_USER->value,
-                new DateTime(),
-                $eventMetaData
-            );
-
-            return $this->redirectToRoute('admins_management');
-        }
-
-        return $this->render('dashboard/actions/add.html.twig', [
-            'form' => $form->createView(),
-            'userAddDTO' => $userAddDTO,
-            'data' => $data,
-            'current_user' => $currentUser,
-            'context' => FirewallType::DASHBOARD->value,
-            'isEditingSelf' => false,
-        ]);
     }
 
     /**
@@ -673,29 +609,6 @@ class UsersManagementController extends AbstractController
     }
 
     /**
-     * Render a confirmation password form
-     */
-    /**
-     * @param string $type Type of action
-     */
-    #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset')]
-    #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE)]
-    public function confirmReset(string $type): Response
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings();
-
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        return $this->render('dashboard/actions/confirm.html.twig', [
-            'data' => $data,
-            'type' => $type,
-            'user' => $currentUser,
-        ]);
-    }
-
-    /**
      * @throws \Exception
      * @throws TransportExceptionInterface
      */
@@ -760,89 +673,6 @@ class UsersManagementController extends AbstractController
             );
         }
 
-        return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
-    }
-
-    #[Route('/dashboard/adminPermissionsAdd/{id:user<\d+>}', name: 'admin_add_permissions')]
-    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
-    public function giveAdminPermissions(Request $request, User $user): Response
-    {
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        if ($user->getId() === $currentUser->getId()) {
-            throw $this->createAccessDeniedException();
-        }
-
-        if (
-            $user->getId() !== $currentUser->getId() &&
-            !$this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE)
-        ) {
-            throw $this->createAccessDeniedException();
-        }
-
-        $user->setRoles([AdminRoleType::ROLE_ADMIN->value]);
-
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        $eventMetaData = [
-            'ip' => $request->getClientIp(),
-            'user_agent' => $request->headers->get('User-Agent'),
-            'platform' => PlatformMode::LIVE->value,
-            'giveAdminPermissionsTo' => $user->getUuid(),
-            'by' => $currentUser->getUuid(),
-        ];
-
-        $this->eventActions->saveEvent(
-            $user,
-            AnalyticalEventType::ADMIN_ADDED_PERMISSIONS->value,
-            new DateTime(),
-            $eventMetaData
-        );
-
-        return $this->redirect($request->headers->get('Referer'));
-    }
-
-    #[Route('/dashboard/adminPermissionsRemove/{id:user<\d+>}', name: 'admin_remove_permissions')]
-    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
-    public function removeAdminPermissions(Request $request, User $user): Response
-    {
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        if ($user->getId() === $currentUser->getId()) {
-            throw $this->createAccessDeniedException();
-        }
-
-        if (
-            $user->getId() !== $currentUser->getId() && !$this->isGranted(
-                UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE
-            )
-        ) {
-            throw $this->createAccessDeniedException();
-        }
-
-        $user->setRoles(["ROLE_USER"]);
-        $user->setPermissions([]);
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        $eventMetaData = [
-            'ip' => $request->getClientIp(),
-            'user_agent' => $request->headers->get('User-Agent'),
-            'platform' => PlatformMode::LIVE->value,
-            'removeAdminPermissionsTo' => $user->getUuid(),
-            'by' => $currentUser->getUuid(),
-        ];
-
-        $this->eventActions->saveEvent(
-            $user,
-            AnalyticalEventType::ADMIN_REMOVED_PERMISSIONS->value,
-            new DateTime(),
-            $eventMetaData
-        );
-
-        return $this->redirect($request->headers->get('Referer'));
+        return $this->redirectToRoute('admin_user_show', ['id' => $user->getId()]);
     }
 }

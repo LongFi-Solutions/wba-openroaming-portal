@@ -28,7 +28,7 @@ class ActivityLogsController extends AbstractController
         if (!$this->isGranted(UserAuthenticationVoter::ACTIVITY_LOGS_READ)) {
             /** @var User $currentUser */
             $currentUser = $this->getUser();
-            return $this->redirectToRoute('admin_user_edit', ['id' => $currentUser->getId()]);
+            return $this->redirectToRoute('admin_user_show', ['id' => $currentUser->getId()]);
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
