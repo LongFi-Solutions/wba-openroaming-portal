@@ -23,7 +23,7 @@
                         data-model="filter"
                         data-value="{{ value }}"
                         class="flex flex-row group transition-all duration-100 {{ tab.hoverClass }} {{ filter == value ? tab.activeClass : '' }}">
-                    <h1 class="px-2">{{ tab.label|trans({}, 'dashboard') }}</h1>
+                    <h1 class="px-2">{{ tab.label|trans({}, 'ActivityLogSearchForm') }}</h1>
                     <div class="w-auto h-6 mb-1 px-2 rounded-md text-center transition-all duration-100 {{ filter == value ? tab.badgeActive : tab.badgeHover }}">
                         {{ tab.count }}
                     </div>
