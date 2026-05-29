@@ -4,9 +4,17 @@
 {% block container %}
 
     {# ── Header ──────────────────────────────────────────────────────────────── #}
+    {% set canEdit = isAdmin
+        ? is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE'))
+        : is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
+
     {{ include('dashboard/shared/_user_header.html.twig', {
         user: userData.user,
-        actions: '<a href="' ~ path('admin_dashboard_user_edit', {id: userData.user.id}) ~ '" class="btn-primary text-sm">' ~ 'edit'|trans({}, 'edit') ~ '</a>'
+        showStatus: true,
+        isAdmin: isAdmin,
+        actions: canEdit
+        ? '<a href="' ~ path('admin_dashboard_user_edit', {id: userData.user.id}) ~ '" class="btn-primary text-sm">' ~ 'edit'|trans({}, 'edit') ~ '</a>'
+        : ''
     }) }}
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
@@ -50,7 +58,7 @@
                     </div>
                     {% if userData.isBanned and userData.user.bannedAt %}
                         <div class="flex justify-between gap-2">
-                            <dt class="text-gray-500 shrink-0">{{ 'bannedAt'|trans({}, 'edit') }}</dt>
+                            <dt class="text-gray-500 shrink-0">{{ 'bannedAt'|trans({}, 'show') }}</dt>
                             <dd class="font-medium text-red-500 text-right">
                                 {{ userData.user.bannedAt|date('d/m/Y H:i') }}
                             </dd>
@@ -156,18 +164,37 @@
                 </div>
             {% endif %}
 
-            {# 2FA actions #}
-            {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
+            {# Content - Two-Factor Options #}
+            {% if app.user and userData.user.id == app.user.id %}
                 {% if userData.user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
                             {{ 'TwoFAOptions'|trans({}, 'edit') }}
                         </h2>
-                        <a href="{{ path(
-                            userData.isAdmin ? 'admin_dashboard_admin_disable2FA' : 'admin_dashboard_user_disable2FA',
-                            { id: userData.user.id }
-                        ) }}"
-                           class="btn-logout w-full text-center"
+                        <div class="flex flex-col gap-3">
+                            <a href="{{ path('app_configure2FA', {context: context}) }}"
+                               class="btn-secondary w-full text-center">
+                                {{ 'configureTwoFactorAuthentication'|trans({}, 'edit') }}
+                            </a>
+                            <a href="{{ path('app_disable2FA', {context: context}) }}"
+                               class="btn-logout w-full text-center">
+                                {{ 'disable'|trans({}, 'edit') }}
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                {% set can2FA = userData.isAdmin
+                    ? is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE'))
+                    : is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
+
+                {% if can2FA and userData.user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+                            {{ 'TwoFAOptions'|trans({}, 'edit') }}
+                        </h2>
+                        <a href="{{ path('admin_dashboard_user_disable2FA', {id: userData.user.id}) }}"
+                           class="btn-logout w-full text-center block"
                            data-confirm="{{ 'disable2FAMessage'|trans({}, 'edit')|e('html_attr') }}">
                             {{ 'disable'|trans({}, 'edit') }}
                         </a>
@@ -234,7 +261,7 @@
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <div class="px-6 pt-5 pb-2 border-b border-gray-100">
                         <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                            {{ 'recentRadiusSession'|trans({}, 'show') }}
+                            {{ 'recentSessions'|trans({}, 'show') }}
                         </h2>
                     </div>
                     <div class="overflow-x-auto">
@@ -281,7 +308,7 @@
 
             {# ── Activity logs — full width below ── #}
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div class="px-6 pt-5 pb-2 border-b border-gray-100">
+                <div class="px-6 pt-5 pb-2 gray-100">
                     <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">
                         {{ 'recentActivity'|trans({}, 'show') }}
                     </h2>

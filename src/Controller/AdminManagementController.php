@@ -13,7 +13,6 @@ use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\UserCreationService;
-use App\Service\UserDataService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Random\RandomException;
@@ -32,30 +31,7 @@ class AdminManagementController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly TranslatorInterface $translator,
         private readonly UserCreationService $userCreationService,
-        private readonly UserDataService $userDataService,
     ) {
-    }
-
-    /**
-     * Show Admin account details
-     * @throws \DateMalformedStringException
-     */
-    #[Route('/dashboard/admin/{id:user<\d+>}', name: 'admin_dashboard_admin_show')]
-    #[IsGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_READ)]
-    public function showUser(
-        User $user
-    ): Response {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings();
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        return $this->render('dashboard/actions/show.html.twig', [
-            'data' => $data,
-            'currentUser' => $currentUser,
-            'userData' => $this->userDataService->getData($user)
-        ]);
     }
 
     /**

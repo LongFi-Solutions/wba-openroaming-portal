@@ -5,9 +5,21 @@
 {% block container %}
     {# Content - Edit Users #}
     {# ── Header ──────────────────────────────────────────────────────────────── #}
+    {% set isAdmin = isEditingSelf ? false : (
+        'ROLE_ADMIN' in user.roles or 'ROLE_SUPER_ADMIN' in user.roles
+        ) %}
+
+    {% set canEdit = isAdmin
+        ? is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE'))
+        : is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
+
     {{ include('dashboard/shared/_user_header.html.twig', {
-        user: userData.user,
-        actions: '<a href="' ~ path('admin_dashboard_user_edit', {id: userData.user.id}) ~ '" class="btn-primary text-sm">' ~ 'edit'|trans({}, 'edit') ~ '</a>'
+        user: user,
+        showStatus: false,
+        backUrl: path('admin_dashboard_user_show', {id: user.id}),
+        actions: canEdit
+        ? '<a href="' ~ path('admin_dashboard_user_edit', {id: user.id}) ~ '" class="btn-primary text-sm">' ~ 'edit'|trans({}, 'edit') ~ '</a>'
+        : ''
     }) }}
 
     <twig:UserUpdateForm

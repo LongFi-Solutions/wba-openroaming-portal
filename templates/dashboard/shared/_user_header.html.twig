@@ -9,21 +9,23 @@
         </h1>
     </div>
 
-    <div class="flex items-center gap-2 flex-wrap justify-end">
-        {% if user.bannedAt %}
-            <span class="pill-error">{{ 'banned'|trans({}, 'show') }}</span>
-        {% endif %}
-        {% if user.deletedAt %}
-            <span class="pill-error">{{ 'deleted'|trans({}, 'show') }}</span>
-        {% endif %}
-        {% if user.isVerified %}
-            <span class="pill-success">{{ 'verified'|trans({}, 'show') }}</span>
-        {% else %}
-            <span class="pill-warning">{{ 'unverified'|trans({}, 'show') }}</span>
-        {% endif %}
+    {% if showStatus is not defined or showStatus %}
+        <div class="flex items-center gap-2 flex-wrap justify-end">
+            {% if user.bannedAt %}
+                <span class="pill-error">{{ 'banned'|trans({}, 'show') }}</span>
+            {% endif %}
+            {% if user.deletedAt %}
+                <span class="pill-error">{{ 'deleted'|trans({}, 'show') }}</span>
+            {% endif %}
+            {% if user.isVerified %}
+                <span class="pill-success">{{ 'verified'|trans({}, 'show') }}</span>
+            {% else %}
+                <span class="pill-warning">{{ 'unverified'|trans({}, 'show') }}</span>
+            {% endif %}
 
-        {% if actions is defined %}
-            {{ actions|raw }}
-        {% endif %}
-    </div>
+            {% if actions is defined %}
+                {{ actions|raw }}
+            {% endif %}
+        </div>
+    {% endif %}
 </div>

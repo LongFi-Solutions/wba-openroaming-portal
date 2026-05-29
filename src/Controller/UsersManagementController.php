@@ -30,7 +30,6 @@ use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
-use App\Service\UserDataService;
 use App\Service\UserDeletionService;
 use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
@@ -73,30 +72,7 @@ class UsersManagementController extends AbstractController
         private readonly EmailGenerator $emailGenerator,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly MailerInterface $mailer,
-        private readonly UserDataService $userDataService,
     ) {
-    }
-
-    /**
-     * Show User account details
-     * @throws \DateMalformedStringException
-     */
-    #[Route('/dashboard/user/{id:user<\d+>}', name: 'admin_dashboard_user_show')]
-    #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ)]
-    public function showUser(
-        User $user
-    ): Response {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings();
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        return $this->render('dashboard/actions/show.html.twig', [
-            'data' => $data,
-            'currentUser' => $currentUser,
-            'userData' => $this->userDataService->getData($user)
-        ]);
     }
 
     #[Route('/dashboard/user/revoke/{id:user<\d+>}', name: 'admin_dashboard_user_revoke_profiles', methods: ['POST'])]
@@ -640,7 +616,6 @@ class UsersManagementController extends AbstractController
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/dashboard/user/disable2FA/{id<\d+>}', name: 'admin_dashboard_user_disable2FA')]
-    #[Route('/dashboard/admin/disable2FA/{id<\d+>}', name: 'admin_dashboard_admin_disable2FA')]
     public function disabledBy2FA(
         Request $request,
         int $id,
@@ -712,11 +687,6 @@ class UsersManagementController extends AbstractController
             );
         }
 
-        // Return to the respective route from which URL was hit
-        $returnRoute = $targetIsAdmin
-            ? 'admin_dashboard_admin_show'
-            : 'admin_dashboard_user_show';
-
-        return $this->redirectToRoute($returnRoute, ['id' => $user->getId()]);
+        return $this->redirectToRoute('admin_dashboard_user_show', ['id' => $user->getId()]);
     }
 }
