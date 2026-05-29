@@ -142,7 +142,7 @@ enum AnalyticalEventType: string
 
     public function getLabel(): string
     {
-        return match($this) {
+        return match ($this) {
             // User actions
             self::DOWNLOAD_PROFILE => 'Download Profile',
             self::USER_CREATION => 'User Created',
