@@ -8,6 +8,7 @@ use App\Enum\AnalyticalEventType;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 
@@ -61,74 +62,38 @@ class EventRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('e')
             ->join('e.user', 'u');
 
-        // --- Filter by user ---
-        if ($user !== null) {
-            $qb->andWhere('e.user = :user')
-                ->setParameter('user', $user);
-        }
+        // Apply filter by User
+        $this->applyUserFilter($qb, $user);
 
-        // --- Search by user email/uuid/EventName ---
+        // Search by user email/uuid/EventName
         if ($searchTerm) {
             $qb->andWhere(
-                'u.email LIKE :search 
-                 OR u.uuid LIKE :search 
-                 OR e.event_name LIKE :search
-                 OR e.event_metadata LIKE :search'
-            )
-                ->setParameter('search', '%' . $searchTerm . '%');
+                'u.email LIKE :search OR u.uuid LIKE :search
+             OR e.event_name LIKE :search OR e.event_metadata LIKE :search'
+            )->setParameter('search', '%' . $searchTerm . '%');
         }
 
         // Date range filter
         if ($startDate) {
             try {
-                $start = new DateTime($startDate);
                 $qb->andWhere('e.event_datetime >= :startDate')
-                    ->setParameter('startDate', $start);
+                    ->setParameter('startDate', new DateTime($startDate));
             } catch (Exception) {
                 // invalid date, skip
             }
         }
+
         if ($endDate) {
             try {
-                $end = new DateTime($endDate);
                 $qb->andWhere('e.event_datetime <= :endDate')
-                    ->setParameter('endDate', $end);
+                    ->setParameter('endDate', new DateTime($endDate));
             } catch (Exception) {
                 // invalid date, skip
             }
         }
 
-        // --- Filter by event type group ---
-        match ($filter) {
-            'user_actions' => $qb->andWhere('e.event_name IN (:events)')
-                ->setParameter('events', [
-                    AnalyticalEventType::USER_CREATION->value,
-                    AnalyticalEventType::USER_VERIFICATION->value,
-                    AnalyticalEventType::USER_ACCOUNT_DELETION->value,
-                    AnalyticalEventType::USER_ACCOUNT_UPDATE->value,
-                ]),
-            'admin_actions' => $qb->andWhere('e.event_name IN (:events)')
-                ->setParameter('events', [
-                    AnalyticalEventType::ADMIN_CREATION->value,
-                    AnalyticalEventType::ADMIN_ADDED_PERMISSIONS->value,
-                    AnalyticalEventType::ADMIN_REMOVED_PERMISSIONS->value,
-                    AnalyticalEventType::ADMIN_ADDED_NEW_USER->value,
-                ]),
-            'auth_events' => $qb->andWhere('e.event_name IN (:events)')
-                ->setParameter('events', [
-                    AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value,
-                    AnalyticalEventType::GOOGLE_LOGIN_REQUEST->value,
-                    AnalyticalEventType::MICROSOFT_LOGIN_REQUEST->value,
-                    AnalyticalEventType::LOGOUT_REQUEST->value,
-                ]),
-            'settings_changes' => $qb->andWhere('e.event_name LIKE :prefix')
-                ->setParameter('prefix', 'SETTING_%'),
-            'certificate_events' => $qb->andWhere('e.event_name LIKE :prefix')
-                ->setParameter('prefix', 'CERTIFICATE_%'),
-            default => null, // 'all' — no filter applied
-        };
-
-        // --- Sorting ---
+        // Sort all the Data
+        $this->applyEventGroupFilter($qb, $filter);
         $allowedSorts = ['event_datetime', 'event_name'];
         $allowedOrders = ['asc', 'desc'];
         $sort = in_array($sort, $allowedSorts, true) ? $sort : 'event_datetime';
@@ -138,33 +103,30 @@ class EventRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function countByEventGroup(): array
+    public function countByEventGroup(?User $user = null): array
     {
         return [
-            'all' => $this->count([]),
-            'user_actions' => $this->countByPrefix('USER_'),
-            'admin_actions' => $this->countByPrefix('ADMIN_'),
-            'auth_events' => $this->countByPrefix('LOGIN_', 'LOGOUT_'),
-            'settings_changes' => $this->countByPrefix('SETTING_'),
-            'certificate_events' => $this->countByPrefix('CERTIFICATE_'),
+            'all' => $this->countByGroupFilter('all', $user),
+            'user_actions' => $this->countByGroupFilter('user_actions', $user),
+            'admin_actions' => $this->countByGroupFilter('admin_actions', $user),
+            'auth_events' => $this->countByGroupFilter('auth_events', $user),
+            'settings_changes' => $this->countByGroupFilter('settings_changes', $user),
+            'certificate_events' => $this->countByGroupFilter('certificate_events', $user),
         ];
     }
 
     /**
-     * Helper to count by prefix
+     * Helper to count by group prefix
      */
-    private function countByPrefix(string ...$prefixes): int
+    private function countByGroupFilter(string $group, ?User $user = null): int
     {
         $qb = $this->createQueryBuilder('e')
             ->select('COUNT(e.id)');
 
-        $orX = $qb->expr()->orX();
-        foreach ($prefixes as $i => $prefix) {
-            $orX->add("e.event_name LIKE :prefix$i");
-            $qb->setParameter("prefix$i", $prefix . '%');
-        }
+        $this->applyUserFilter($qb, $user);
+        $this->applyEventGroupFilter($qb, $group);
 
-        return (int)$qb->andWhere($orX)->getQuery()->getSingleScalarResult();
+        return (int)$qb->getQuery()->getSingleScalarResult();
     }
 
     /**
@@ -316,5 +278,45 @@ class EventRepository extends ServiceEntityRepository
             ->setParameter('end', $end)
             ->getQuery()
             ->getResult();
+    }
+
+    private function applyEventGroupFilter(QueryBuilder $qb, string $group): void
+    {
+        match ($group) {
+            'user_actions' => $qb->andWhere('e.event_name IN (:events)')
+                ->setParameter('events', [
+                    AnalyticalEventType::USER_CREATION->value,
+                    AnalyticalEventType::USER_VERIFICATION->value,
+                    AnalyticalEventType::USER_ACCOUNT_DELETION->value,
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE->value,
+                ]),
+            'admin_actions' => $qb->andWhere('e.event_name IN (:events)')
+                ->setParameter('events', [
+                    AnalyticalEventType::ADMIN_CREATION->value,
+                    AnalyticalEventType::ADMIN_ADDED_PERMISSIONS->value,
+                    AnalyticalEventType::ADMIN_REMOVED_PERMISSIONS->value,
+                    AnalyticalEventType::ADMIN_ADDED_NEW_USER->value,
+                ]),
+            'auth_events' => $qb->andWhere('e.event_name IN (:events)')
+                ->setParameter('events', [
+                    AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value,
+                    AnalyticalEventType::GOOGLE_LOGIN_REQUEST->value,
+                    AnalyticalEventType::MICROSOFT_LOGIN_REQUEST->value,
+                    AnalyticalEventType::LOGOUT_REQUEST->value,
+                ]),
+            'settings_changes' => $qb->andWhere('e.event_name LIKE :prefix')
+                ->setParameter('prefix', 'SETTING_%'),
+            'certificate_events' => $qb->andWhere('e.event_name LIKE :prefix')
+                ->setParameter('prefix', 'CERTIFICATE_%'),
+            default => null,
+        };
+    }
+
+    private function applyUserFilter(QueryBuilder $qb, ?User $user): void
+    {
+        if ($user !== null) {
+            $qb->andWhere('e.user = :user')
+                ->setParameter('user', $user);
+        }
     }
 }
