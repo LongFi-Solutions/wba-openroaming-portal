@@ -1,0 +1,54 @@
+{# Recent Radius Sessions #}
+<div class="bg-white rounded-xl shadow-sm">
+    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide px-6 pt-6 pb-4">
+        {{ 'recentRadiusSessions'|trans({}, 'show') }}
+    </h2>
+    {% if userData.recentRadiusSessions is not empty %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-veryLightGreen text-gray-600">
+                <tr>
+                    <th class="px-4 py-2 text-left">{{ 'start'|trans({}, 'show') }}</th>
+                    <th class="px-4 py-2 text-left">{{ 'stop'|trans({}, 'show') }}</th>
+                    <th class="px-4 py-2 text-left">IP</th>
+                    <th class="px-4 py-2 text-left">{{ 'duration'|trans({}, 'show') }}</th>
+                    <th class="px-4 py-2 text-left">Realm</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for session in userData.recentRadiusSessions %}
+                    <tr class="border-b border-gray-100 hover:bg-gray-50 text-xs">
+                        <td class="px-4 py-2 text-gray-700">
+                            {{ session.acctStartTime ? session.acctStartTime|date('d/m/Y H:i') : '—' }}
+                        </td>
+                        <td class="px-4 py-2 text-gray-500">
+                            {% if session.acctStopTime %}
+                                {{ session.acctStopTime|date('d/m/Y H:i') }}
+                            {% else %}
+                                <span class="pill-success text-xs">Active</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-2 font-mono text-gray-700">
+                            {{ session.framedIpAddress is not empty ? session.framedIpAddress : '—' }}
+                        </td>
+                        <td class="px-4 py-2 text-gray-500">
+                            {% if session.acctStopTime is null %}
+                                <span class="text-gray-400">—</span>
+                            {% elseif session.acctSessionTime %}
+                                {{ (session.acctSessionTime / 60)|round(0, 'floor') }} min
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-2 text-gray-500 truncate max-w-[120px]">
+                            {{ session.realm ?: '—' }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-sm text-gray-400 px-6 pb-6">—</p>
+    {% endif %}
+</div>

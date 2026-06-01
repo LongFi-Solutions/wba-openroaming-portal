@@ -1,0 +1,52 @@
+{# Last connection #}
+<div class="bg-white rounded-xl shadow-sm p-6">
+    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+        {{ 'profileConnectionStatus'|trans({}, 'edit') }}
+    </h2>
+    {% if userData.lastAccounting %}
+        <dl class="space-y-3 text-sm">
+            {% if userData.lastAccounting.acctStartTime %}
+                <div class="flex justify-between gap-2">
+                    <dt class="text-gray-500 shrink-0">{{ 'lastStartConnection'|trans({}, 'edit') }}</dt>
+                    <dd class="font-medium text-gray-800 text-right">
+                        {{ userData.lastAccounting.acctStartTime|date('d/m/Y H:i') }} UTC
+                    </dd>
+                </div>
+            {% endif %}
+            {% if userData.lastAccounting.acctStopTime %}
+                <div class="flex justify-between gap-2">
+                    <dt class="text-gray-500 shrink-0">{{ 'lastStopConnection'|trans({}, 'edit') }}</dt>
+                    <dd class="font-medium text-gray-800 text-right">
+                        {{ userData.lastAccounting.acctStopTime|date('d/m/Y H:i') }} UTC
+                    </dd>
+                </div>
+            {% endif %}
+            {% if userData.lastAccounting.framedIpAddress %}
+                <div class="flex justify-between gap-2">
+                    <dt class="text-gray-500 shrink-0">IP</dt>
+                    <dd class="font-mono text-xs text-gray-800 text-right">
+                        {{ userData.lastAccounting.framedIpAddress }}
+                    </dd>
+                </div>
+            {% endif %}
+            {% if userData.lastAccounting.acctSessionTime %}
+                <div class="flex justify-between gap-2">
+                    <dt class="text-gray-500 shrink-0">{{ 'sessionDuration'|trans({}, 'show') }}</dt>
+                    <dd class="font-medium text-gray-800 text-right">
+                        {{ (userData.lastAccounting.acctSessionTime / 60)|round(0, 'floor') }} min
+                    </dd>
+                </div>
+            {% endif %}
+            {% if userData.lastAccounting.realm %}
+                <div class="flex justify-between gap-2">
+                    <dt class="text-gray-500 shrink-0">Realm</dt>
+                    <dd class="font-mono text-xs text-gray-800 text-right truncate max-w-[160px]">
+                        {{ userData.lastAccounting.realm }}
+                    </dd>
+                </div>
+            {% endif %}
+        </dl>
+    {% else %}
+        <p class="text-sm text-gray-400">—</p>
+    {% endif %}
+</div>
