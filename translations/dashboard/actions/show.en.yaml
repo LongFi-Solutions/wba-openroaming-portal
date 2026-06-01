@@ -33,3 +33,6 @@ twoFALabel:
   totp: 'Mobile App (TOTP)'
   sms: 'SMS'
   email: 'Email'
+accessPointIp: 'Access Point IP'
+userIp: 'User IP'
+accessPointMac: 'AP MAC'
