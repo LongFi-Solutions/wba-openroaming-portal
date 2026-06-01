@@ -43,7 +43,12 @@ class CreateBreakingGlassAdminAccountCommand extends Command
         $this
             ->setName('backup:createBreakingGlassAdmin')
             ->setDescription('Creates a temporary emergency administrator account.')
-            ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the creation of a new administrator account.');
+            ->addOption(
+                'yes',
+                'y',
+                InputOption::VALUE_NONE,
+                'Automatically confirm the creation of a new administrator account.'
+            );
     }
 
     /**
