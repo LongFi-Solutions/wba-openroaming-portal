@@ -4,14 +4,14 @@
 {% block container %}
 
     {# ── Header ──────────────────────────────────────────────────────────────── #}
-    {% set canEdit = isAdmin
+    {% set canEdit = userData.isAdmin
         ? is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE'))
         : is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
 
     {{ include('dashboard/shared/_user_header.html.twig', {
         user: userData.user,
         user_profileStatus: true,
-        isAdmin: isAdmin,
+        isAdmin: userData.isAdmin,
         actions: canEdit
         ? '<a href="' ~ path('admin_dashboard_user_edit', {id: userData.user.id}) ~ '" class="btn-primary text-sm">' ~ 'edit'|trans({}, 'edit') ~ '</a>'
         : ''
@@ -25,7 +25,8 @@
             {{ include('dashboard/shared/user_profile/_auth_providers.html.twig', {userData: userData}) }}
             {{ include('dashboard/shared/user_profile/_last_connection.html.twig', {userData: userData}) }}
             {{ include('dashboard/shared/user_profile/_last_radius_auth.html.twig', {userData: userData}) }}
-            {{ include('dashboard/shared/user_profile/_twoFA_operations.html.twig', {userData: userData, context: context, isAdmin: isAdmin}) }}
+            {{ include('dashboard/shared/user_profile/_twoFA_operations.html.twig', {userData: userData, context: context, isAdmin: userData.isAdmin}) }}
+            {{ include('dashboard/shared/user_profile/_permissions.html.twig', {userData: userData}) }}
         </div>
 
         {# ── Right column ─────────────────────────────────────────────────────────── #}

@@ -35,14 +35,11 @@ class UserAccountDetailsController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-
         return $this->render('dashboard/actions/show.html.twig', [
             'data' => $data,
             'context' => FirewallType::DASHBOARD->value,
             'currentUser' => $currentUser,
             'userData' => $this->userDataService->getData($user),
-            'isAdmin' => in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true)
-                || in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true),
         ]);
     }
 }

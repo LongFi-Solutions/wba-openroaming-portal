@@ -36,3 +36,4 @@ twoFALabel:
 accessPointIp: 'IP do Ponto de Acesso'
 userIp: 'IP do Utilizador'
 accessPointMac: 'MAC do AP'
+permissions: 'Permissions'

@@ -142,8 +142,7 @@ readonly class UserDataService
             'lastConnectionPerProfile' => [],
             'recentRadiusSessions' => [],
             'activeSession' => null,
-            'isAdmin' => in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true) ||
-                in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true),
+            'isAdmin' => in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true),
             'isBanned' => $user->getBannedAt() !== null,
             'isDeleted' => $user->getDeletedAt() !== null,
         ];

@@ -436,9 +436,8 @@ class UsersManagementController extends AbstractController
                 )
             );
 
-            // Return to the last page where the user was (with searching filters)
-            $lastPage = $request->headers->get('referer', '/dashboard');
-            return $this->redirect($lastPage);
+            // Return to the user profile details
+            return $this->redirectToRoute('admin_dashboard_user_show', ['id' => $user->getId()]);
         }
 
         return $this->render(
