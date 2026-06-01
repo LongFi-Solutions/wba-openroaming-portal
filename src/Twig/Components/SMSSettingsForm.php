@@ -65,7 +65,6 @@ final class SMSSettingsForm extends AbstractController
             SettingName::SMS_USER_ID->value => $this->SMSSettingsDTO?->smsUserId,
             SettingName::SMS_HANDLE->value => $this->SMSSettingsDTO?->smsHandle,
             SettingName::SMS_FROM->value => $this->SMSSettingsDTO?->smsFrom,
-            SettingName::SMS_TIMER_RESEND->value => $this->SMSSettingsDTO?->smsTimerResend,
             SettingName::DEFAULT_REGION_PHONE_INPUTS->value => $regions,
         ], false);
 

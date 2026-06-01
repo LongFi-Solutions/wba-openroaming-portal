@@ -77,7 +77,7 @@ class SMSSettingsDTO
     /**
      * Map the DTO back to an array for SettingsService.
      *
-     * @return array<string, array{value: string|null}>
+     * @return array<string, array{value: scalar|null}>
      */
     public function toArray(): array
     {

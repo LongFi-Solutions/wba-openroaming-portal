@@ -2,12 +2,14 @@
 
 namespace App\Service;
 
+use App\DTO\ForgotPasswordDTO;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\ForgotPasswordEnum;
 use App\Enum\SettingName;
 use App\Repository\EventRepository;
+use DateInterval;
 use DateMalformedStringException;
 use DateTime;
 
@@ -22,6 +24,11 @@ readonly class ForgotPasswordService
     }
 
     /**
+     * @return array{
+     *      success: bool,
+     *      messageType: string,
+     *      timeLeft: mixed
+     *  }
      * @throws DateMalformedStringException
      */
     public function userCanResetPassword(User $user, bool $isSMS = false): array
@@ -55,29 +62,30 @@ readonly class ForgotPasswordService
                     return [
                         ForgotPasswordEnum::SUCCESS->value => true,
                         ForgotPasswordEnum::MESSAGE_TYPE->value => ForgotPasswordEnum::SUCCESS->value,
-                        ForgotPasswordEnum::TIME_LEFT->value => 0
+                        ForgotPasswordEnum::TIME_LEFT->value => 0,
                     ];
                 }
-                $timeLeft = $limitTime->diff($lastEventTime ?? now());
+                $timeLeft = $limitTime->diff($lastEventTime);
                 return [
                     ForgotPasswordEnum::SUCCESS->value => false,
                     ForgotPasswordEnum::MESSAGE_TYPE->value => ForgotPasswordEnum::TIME_BETWEEN_REQUESTS->value,
-                    ForgotPasswordEnum::TIME_LEFT->value => $timeLeft
+                    ForgotPasswordEnum::TIME_LEFT->value => $timeLeft,
                 ];
             }
             $firstEvent = $events[$attemptsNumber - 1];
             $firstEventTime = $firstEvent->getEventDatetime();
-            $timeLeft = $limitTimeToReset->diff($firstEventTime);
+            $timeLeft = $limitTimeToReset->diff($firstEventTime ?? now());
             return [
                 ForgotPasswordEnum::SUCCESS->value => false,
                 ForgotPasswordEnum::MESSAGE_TYPE->value => ForgotPasswordEnum::ATTEMPTS_EXCEEDED->value,
-                ForgotPasswordEnum::TIME_LEFT->value => $timeLeft
+                ForgotPasswordEnum::TIME_LEFT->value => $timeLeft,
             ];
         }
         return [
             ForgotPasswordEnum::SUCCESS->value => true,
             ForgotPasswordEnum::MESSAGE_TYPE->value => ForgotPasswordEnum::SUCCESS->value,
-            ForgotPasswordEnum::TIME_LEFT->value => 0
+            ForgotPasswordEnum::TIME_LEFT->value => 0,
         ];
     }
+
 }

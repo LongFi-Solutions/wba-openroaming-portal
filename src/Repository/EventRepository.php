@@ -196,6 +196,9 @@ class EventRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return Event[]
+     */
     public function findLastEvents(User $user, string $eventLog, DateTime $limitTime): array
     {
         return $this->createQueryBuilder('e')
