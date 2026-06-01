@@ -30,7 +30,7 @@ readonly class UserDataService
             $user->getUserRadiusProfiles()->toArray()
         );
 
-        if (!empty($radiusUsernames)) {
+        if (empty($radiusUsernames)) {
             return $this->buildEmptyData($user);
         }
 
@@ -119,7 +119,6 @@ readonly class UserDataService
                 in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true),
             'isBanned' => $user->getBannedAt() !== null,
             'isDeleted' => $user->getDeletedAt() !== null,
-            'primaryAuth' => $user->getUserExternalAuths()->first() ?: null,
         ];
     }
 
@@ -147,7 +146,6 @@ readonly class UserDataService
                 in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true),
             'isBanned' => $user->getBannedAt() !== null,
             'isDeleted' => $user->getDeletedAt() !== null,
-            'primaryAuth' => $user->getUserExternalAuths()->first() ?: null,
         ];
     }
 }

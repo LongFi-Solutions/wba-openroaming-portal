@@ -217,44 +217,6 @@
         {{ form_end(formReset) }}
     {% endif %}
 
-    {# Content - Two-Factor Options - both for admin && user account #}
-
-    {% if app.user and user.id == app.user.id %}
-        <h1 class="text-2xl font-semibold mt-6 mb-6">{{ 'TwoFAOptions'|trans({}, 'edit') }}</h1>
-        <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 lg:w-1/2 w-full bg-white justify-start gap-6">
-            <a href="{{ path('app_configure2FA', {context: context}) }}"
-               class="btn-secondary w-full text-center break-words whitespace-normal">
-                {{ 'configureTwoFactorAuthentication'|trans({}, 'edit') }}
-            </a>
-
-            {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                <a href="{{ path('app_disable2FA', {context: context}) }}"
-                   class="btn-logout">{{ 'disable'|trans({}, 'edit') }}</a>
-            {% endif %}
-        </div>
-    {% else %}
-        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
-            {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                <h1 class="text-2xl font-semibold mt-6 mb-6">{{ 'TwoFAOptions'|trans({}, 'edit') }}</h1>
-                <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 lg:w-1/2 w-full bg-white justify-start gap-6">
-                    {% set isAdmin = user.roles|filter(r => r in [
-                        constant('App\\Enum\\AdminRoleType::ROLE_ADMIN'),
-                        constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN')]
-                    )|length > 0 %}
-                    <a href="{{ path(
-                        isAdmin ? 'admin_dashboard_admin_disable2FA' : 'admin_dashboard_user_disable2FA',
-                        {
-                            id: user.id,
-                            returnTo: isAdmin ? 'admin_user_edit' : 'admin_user_show'
-                        }
-                    ) }}" class="btn-logout">
-                        {{ 'disable'|trans({}, 'edit') }}
-                    </a>
-                </div>
-            {% endif %}
-        {% endif %}
-    {% endif %}
-
     {# Content - Profile Connection Status #}
     {% if lastStartConnection is not null or lastStopConnection is not null %}
         <h1 class="text-2xl font-semibold mt-6 mb-6">{{ 'profileConnectionStatus'|trans({}, 'edit') }}</h1>
