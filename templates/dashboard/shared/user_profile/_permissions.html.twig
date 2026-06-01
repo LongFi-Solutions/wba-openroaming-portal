@@ -7,12 +7,13 @@
         {% if userData.user.permissions is not empty %}
             <dl class="space-y-2 text-sm">
                 {% for permission in userData.user.permissions %}
+                    {% set permEnum = constant('App\\Enum\\AdminPermissionsType::' ~ permission) %}
                     <div class="flex items-center justify-between gap-2">
-                        <dt class="text-gray-500 shrink-0">{{ permission|trans({}, 'UserAddType') }}</dt>
-                        <dd>
-                            {% if 'WRITE' in permission %}
+                        <dt class="text-gray-500 shrink-0">{{ permEnum.getLabel()|trans({}, 'UserAddType') }}</dt>
+                            <dd>
+                            {% if permEnum.getLevel() == 'WRITE' %}
                                 <span class="pill-success text-xs">{{ 'write'|trans({}, 'UserAddType') }}</span>
-                            {% elseif 'READ' in permission %}
+                            {% else %}
                                 <span class="pill-warning text-xs">{{ 'read'|trans({}, 'UserAddType') }}</span>
                             {% endif %}
                         </dd>
