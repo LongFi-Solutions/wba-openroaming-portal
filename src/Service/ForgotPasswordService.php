@@ -87,5 +87,4 @@ readonly class ForgotPasswordService
             ForgotPasswordEnum::TIME_LEFT->value => 0,
         ];
     }
-
 }
