@@ -3,36 +3,30 @@
 namespace App\Controller;
 
 use App\DTO\UserUpdateDTO;
-use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
-use App\Entity\UserRadiusProfile;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
-use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\ResetPasswordType;
 use App\Form\UserUpdateType;
-use App\Repository\EventRepository;
 use App\Repository\UserExternalAuthRepository;
-use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\UserAuthenticationVoter;
-use App\Service\EmailGenerator;
 use App\Service\EscapeSpreadSheet;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\PasswordResetDashboardService;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
 use App\Service\UserDeletionService;
 use App\Service\VerificationCodeEmailGenerator;
-use DateInterval;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -47,9 +41,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class UsersManagementController extends AbstractController
@@ -62,16 +58,13 @@ class UsersManagementController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly GetSettings $getSettings,
-        private readonly EventRepository $eventRepository,
         private readonly SendSMS $sendSMS,
         private readonly UserDeletionService $userDeletionService,
         private readonly TwoFAService $twoFAService,
         private readonly VerificationCodeEmailGenerator $verificationCodeEmailGenerator,
         private readonly TranslatorInterface $translator,
-        private readonly UserRadiusProfileRepository $radiusProfileRepository,
-        private readonly EmailGenerator $emailGenerator,
-        private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly MailerInterface $mailer,
+        private readonly PasswordResetDashboardService $passwordResetDashboardService,
     ) {
     }
 
@@ -332,7 +325,6 @@ class UsersManagementController extends AbstractController
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function editUsers(
         Request $request,
-        EntityManagerInterface $em,
         User $user
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
@@ -396,7 +388,7 @@ class UsersManagementController extends AbstractController
         );
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
+        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
             // Use DTO method to map data back
             $userUpdateDTO->updateUser($user, $userUpdateDTO->editingAdmin);
 
@@ -449,11 +441,43 @@ class UsersManagementController extends AbstractController
             return $this->redirect($lastPage);
         }
 
-        $formReset = $this->createForm(ResetPasswordType::class, $user, ['disabled' => !$canWrite]);
+        return $this->render(
+            'dashboard/actions/edit.html.twig',
+            [
+                'form' => $form->createView(),
+                'user' => $user,
+                'data' => $data,
+                'current_user' => $currentUser,
+                'context' => FirewallType::DASHBOARD->value,
+                'userUpdateDTO' => $userUpdateDTO,
+                'isEditingSelf' => $isEditingSelf
+            ]
+        );
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws ServerExceptionInterface
+     */
+    #[Route('/dashboard/user/reset-password/{id:user<\d+>}', name: 'admin_dashboard_user_reset_password')]
+    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
+    public function resetPassword(Request $request, User $user): Response
+    {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE) ||
+            $this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE);
+
+        if (!$canWrite) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $formReset = $this->createForm(ResetPasswordType::class, $user);
         $formReset->handleRequest($request);
 
-        if ($formReset->isSubmitted() && $formReset->isValid() && $canWrite) {
-            // get the both typed passwords by the admin
+        if ($formReset->isSubmitted() && $formReset->isValid()) {
             $newPassword = $formReset->get('password')->getData();
             $confirmPassword = $formReset->get('confirmPassword')->getData();
 
@@ -462,152 +486,35 @@ class UsersManagementController extends AbstractController
                     'error',
                     $this->translator->trans('PasswordPasswordConfirmationMustMatch', [], 'controllers')
                 );
-                return $this->redirectToRoute('admin_dashboard_user_edit', ['id' => $user->getId()]);
+                return $this->redirectToRoute('admin_dashboard_user_reset_password', ['id' => $user->getId()]);
             }
 
-            // Get the User Provider && ProviderId
-            $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
-
-            // Hash the new password
-            $hashedPassword = $this->passwordHasher->hashPassword($user, $newPassword);
-            $user->setPassword($hashedPassword);
-            $user->setForgotPasswordRequest(true);
-            $em->flush();
-
-            if ($user->getEmail()) {
-                // Send email for the user
-                $this->emailGenerator->sendResetPasswordEmailByAdmin($user, $newPassword);
-
-                $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'edited ' => $user->getUuid(),
-                    'by' => $currentUser->getUuid(),
-                ];
-
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-            }
-
-            if (
-                $user->getPhoneNumber() && $userExternalAuth->getProviderId() === UserProvider::PHONE_NUMBER->value
-            ) {
-                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
-                    $user,
-                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value
-                );
-
-                $smsResendInterval = null;
-                if (is_array($data) && isset($data[SettingName::SMS_TIMER_RESEND->value]['value'])) {
-                    $smsResendInterval = $data[SettingName::SMS_TIMER_RESEND->value]['value'];
-                }
-
-                if ($smsResendInterval === null) {
-                    // Fallback value if the setting is missing just for phpstan be happy
-                    $smsResendInterval = 5;
-                }
-
-                $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
-                $currentTime = new DateTime();
-
-                // Retrieve the metadata from the latest event
-                $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
-                $lastResetAccountPasswordTime = isset($latestEventMetadata['lastResetAccountPasswordTime'])
-                    ? new DateTime($latestEventMetadata['lastResetAccountPasswordTime'])
-                    : null;
-                $resetAttempts = $latestEventMetadata['resetAttempts'] ?? 0;
-
-                if (
-                    (!$latestEvent || $resetAttempts < 3)
-                    && (
-                        !$latestEvent
-                        || (
-                            $lastResetAccountPasswordTime instanceof DateTime
-                            && $lastResetAccountPasswordTime->add($minInterval) < $currentTime
-                        )
-                    )
-                ) {
-                    $attempts = $resetAttempts + 1;
-
-                    $message = $this->translator->trans(
-                        'newPasswordMessage',
-                        ['%password%' => $newPassword],
-                        'controllers'
-                    );
-                    $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
-
-                    if ($smsResponse !== '' && $smsResponse !== '0') {
-                        $this->addFlash(
-                            'success',
-                            $this->translator->trans('passwordSentSMS', [], 'controllers')
-                        );
-
-                        $eventMetadata = [
-                            'ip' => $request->getClientIp(),
-                            'edited' => $user->getUuid(),
-                            'by' => $currentUser->getUuid(),
-                            'resetAttempts' => $attempts,
-                            'lastResetAccountPasswordTime' => $currentTime->format('Y-m-d H:i:s'),
-                        ];
-                        $this->eventActions->saveEvent(
-                            $user,
-                            AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
-                            new DateTime(),
-                            $eventMetadata
-                        );
-                    } else {
-                        $this->addFlash(
-                            'error',
-                            $this->translator->trans('passwordNotSentSMS', [], 'controllers')
-                        );
-                    }
-                }
-            }
-            $this->addFlash(
-                'success',
-                $this->translator->trans(
-                    'passwordUpdated',
-                    [
-                        '%uuid%' => $user->getUuid()
-                    ],
-                    'controllers'
-                )
+            $flashes = $this->passwordResetDashboardService->resetPassword(
+                $user,
+                $newPassword,
+                $request->getClientIp(),
+                $request->headers->get('User-Agent'),
+                $currentUser
             );
 
-            // Return to the last page where the user was (with searching filters)
-            $lastPage = $request->headers->get('referer', '/dashboard');
-            return $this->redirect($lastPage);
+            foreach ($flashes as $flash) {
+                $this->addFlash($flash['type'], $flash['message']);
+            }
+
+            $this->addFlash(
+                'success',
+                $this->translator->trans('passwordUpdated', ['%uuid%' => $user->getUuid()], 'controllers')
+            );
+
+            return $this->redirectToRoute('admin_page');
         }
 
-        $lastConnectedProfile = $this->radiusProfileRepository->findUserLastConnection($user);
-
-        if ($lastConnectedProfile instanceof UserRadiusProfile) {
-            $lastStartConnection = $lastConnectedProfile->getLastConnectionStartAt();
-            $lastStopConnection = $lastConnectedProfile->getLastConnectionStopAt();
-        } else {
-            $lastStartConnection = null;
-            $lastStopConnection = null;
-        }
-
-        return $this->render(
-            'dashboard/actions/edit.html.twig',
-            [
-                'form' => $form->createView(),
-                'formReset' => $formReset->createView(),
-                'user' => $user,
-                'data' => $data,
-                'current_user' => $currentUser,
-                'context' => FirewallType::DASHBOARD->value,
-                'userUpdateDTO' => $userUpdateDTO,
-                'lastStartConnection' => $lastStartConnection,
-                'lastStopConnection' => $lastStopConnection,
-                'isEditingSelf' => $isEditingSelf
-            ]
-        );
+        return $this->render('dashboard/actions/reset_password.html.twig', [
+            'formReset' => $formReset->createView(),
+            'user' => $user,
+            'data' => $this->getSettings->getSettings(),
+            'context' => FirewallType::DASHBOARD->value,
+        ]);
     }
 
     /**

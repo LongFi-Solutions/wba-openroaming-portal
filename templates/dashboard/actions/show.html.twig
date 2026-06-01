@@ -25,7 +25,7 @@
             {{ include('dashboard/shared/user_profile/_auth_providers.html.twig', {userData: userData}) }}
             {{ include('dashboard/shared/user_profile/_last_connection.html.twig', {userData: userData}) }}
             {{ include('dashboard/shared/user_profile/_last_radius_auth.html.twig', {userData: userData}) }}
-            {{ include('dashboard/shared/user_profile/_twoFA_operations.html.twig', {userData: userData, context: constant('App\\Enum\\FirewallType::DASHBOARD').value, isAdmin: isAdmin}) }}
+            {{ include('dashboard/shared/user_profile/_twoFA_operations.html.twig', {userData: userData, context: context, isAdmin: isAdmin}) }}
         </div>
 
         {# ── Right column ─────────────────────────────────────────────────────────── #}

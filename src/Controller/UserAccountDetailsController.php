@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\AdminRoleType;
+use App\Enum\FirewallType;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\GetSettings;
 use App\Service\UserDataService;
@@ -37,6 +38,7 @@ class UserAccountDetailsController extends AbstractController
 
         return $this->render('dashboard/actions/show.html.twig', [
             'data' => $data,
+            'context' => FirewallType::DASHBOARD->value,
             'currentUser' => $currentUser,
             'userData' => $this->userDataService->getData($user),
             'isAdmin' => in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true)
