@@ -14,8 +14,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Random\RandomException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Console\Helper\Table;
@@ -35,11 +38,33 @@ class CreateBreakingGlassAdminAccountCommand extends Command
         parent::__construct();
     }
 
+    protected function configure(): void
+    {
+        $this
+            ->setName('backup:createBreakingGlassAdmin')
+            ->setDescription('Creates a temporary emergency administrator account.')
+            ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the creation of a new administrator account.');
+    }
+
     /**
      * @throws RandomException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        if (!$input->getOption('yes')) {
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion(
+                'This action will create or reactivate the break-glass administrator account' .
+                'Do you want to continue? [y/N]',
+                false
+            );
+            /** @var QuestionHelper $helper */
+            if (!$helper->ask($input, $output, $question)) {
+                $output->writeln('Command aborted.');
+                return Command::SUCCESS;
+            }
+        }
+
         $defaultValue = $this->settingRepository->findOneBy(['name' => SettingName::BREAKING_GLASS_ADMIN_EMAIL->value]);
 
         $usedAccount = null;

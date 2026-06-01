@@ -5,7 +5,9 @@ namespace App\EventListener;
 use App\Entity\User;
 use App\Enum\FirewallType;
 use App\Enum\SessionStatus;
+use App\Enum\SettingName;
 use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use App\Service\TwoFAService;
@@ -25,6 +27,7 @@ readonly class SessionValidatorListener
         private UserRepository $userRepository,
         private GetSettings $getSettings,
         private TwoFAService $twoFAService,
+        private SettingRepository $settingRepository,
     ) {
     }
 
@@ -86,8 +89,11 @@ readonly class SessionValidatorListener
                 return;
             }
 
+            $breakingGlassAccount = $this->settingRepository->findOneBy(
+                ['name' => SettingName::BREAKING_GLASS_ADMIN_EMAIL->value]
+            )->getValue();
             if (
-                str_starts_with($user->getEmail(), 'breakglass_')
+                $user->getEmail() === $breakingGlassAccount
             ) {
                 $user->setDeletedAt(new DateTime());
                 $this->userRepository->save($user, true);
