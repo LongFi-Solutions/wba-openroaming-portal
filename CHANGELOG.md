@@ -5,7 +5,6 @@
 - New settings for number of tries for email & sms on a specific time stamp also customizable on the platform
 
 Please make sure to execute the new migration to update and use the new required configuration settings
-
 - Run the migrations with:
   ```bash
   php bin/console doctrine:migrations:migrate
