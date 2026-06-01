@@ -72,10 +72,12 @@ class PlatformStatusSettingsDTO
         $this->timeIntervalNotification = isset($data[SettingName::TIME_INTERVAL_NOTIFICATION->value]['value'])
             ? (int)$data[SettingName::TIME_INTERVAL_NOTIFICATION->value]['value']
             : null;
-        $this->timeIntervalBetweenRequests = isset($data[SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value]['value'])
+        $this->timeIntervalBetweenRequests =
+            isset($data[SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value]['value'])
             ? (int)$data[SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value]['value']
             : null;
-        $this->timeIntervalToResetAttempts = isset($data[SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'])
+        $this->timeIntervalToResetAttempts =
+            isset($data[SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'])
             ? (int)$data[SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value']
             : null;
         $this->attemptsNumber = isset($data[SettingName::EMAIL_ATTEMPTS_NUMBER->value]['value'])
@@ -95,10 +97,12 @@ class PlatformStatusSettingsDTO
             SettingName::PLATFORM_MODE->value => ['value' => $this->platformMode],
             SettingName::TURNSTILE_CHECKER->value => ['value' => $this->turnstileChecker],
             SettingName::API_STATUS->value => ['value' => $this->apiStatus],
-            SettingName::USER_DELETE_TIME->value => ['value' => $this->userDeleteTime],
+            SettingName::USER_DELETE_TIME->value => ['value' =>
+                $this->userDeleteTime],
             SettingName::TIME_INTERVAL_NOTIFICATION->value => ['value' => $this->timeIntervalNotification],
             SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value => ['value' => $this->timeIntervalBetweenRequests],
-            SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value => ['value' => $this->timeIntervalToResetAttempts],
+            SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value =>
+                ['value' => $this->timeIntervalToResetAttempts],
             SettingName::EMAIL_ATTEMPTS_NUMBER->value => ['value' => $this->attemptsNumber],
         ];
     }

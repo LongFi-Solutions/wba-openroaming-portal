@@ -61,10 +61,12 @@ class SMSSettingsDTO
         $this->defaultRegionPhoneInputs = $regionValue
             ? array_map(trim(...), explode(',', $regionValue))
             : [];
-        $this->timeIntervalBetweenRequests = isset($data[SettingName::SMS_TIME_INTERVAL_BETWEEN_REQUESTS->value]['value'])
+        $this->timeIntervalBetweenRequests =
+            isset($data[SettingName::SMS_TIME_INTERVAL_BETWEEN_REQUESTS->value]['value'])
             ? (int)$data[SettingName::SMS_TIME_INTERVAL_BETWEEN_REQUESTS->value]['value']
             : null;
-        $this->timeIntervalToResetAttempts = isset($data[SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'])
+        $this->timeIntervalToResetAttempts =
+            isset($data[SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'])
             ? (int)$data[SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value']
             : null;
         $this->attemptsNumber = isset($data[SettingName::SMS_ATTEMPTS_NUMBER->value]['value'])

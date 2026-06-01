@@ -166,7 +166,10 @@ class ForgotPasswordController extends AbstractController
                     } else {
                         // Inform the user to wait before trying again
                         $timeLeft = $attemptsVerification[ForgotPasswordEnum::TIME_LEFT->value];
-                        if ($attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] === ForgotPasswordEnum::ATTEMPTS_EXCEEDED->value) {
+                        if (
+                            $attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] ===
+                            ForgotPasswordEnum::ATTEMPTS_EXCEEDED->value
+                        ) {
                             $minutes = ($timeLeft->days * 24 * 60)
                                 + ($timeLeft->h * 60)
                                 + $timeLeft->i;
@@ -178,7 +181,10 @@ class ForgotPasswordController extends AbstractController
                                     'controllers'
                                 )
                             );
-                        } elseif ($attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] === ForgotPasswordEnum::TIME_BETWEEN_REQUESTS->value) {
+                        } elseif (
+                            $attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] ===
+                            ForgotPasswordEnum::TIME_BETWEEN_REQUESTS->value
+                        ) {
                             $seconds = ($timeLeft->days * 24 * 3600)
                                 + ($timeLeft->h * 3600)
                                 + ($timeLeft->i * 60)
@@ -192,7 +198,8 @@ class ForgotPasswordController extends AbstractController
                                 )
                             );
                         } else {
-                            $timeToResetAttempts = $data[SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'];
+                            $timeToResetAttempts =
+                                $data[SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'];
                             $this->addFlash(
                                 'error',
                                 $this->translator->trans(
@@ -202,7 +209,6 @@ class ForgotPasswordController extends AbstractController
                                 )
                             );
                         }
-
                     }
                 } else {
                     $this->addFlash(
@@ -328,7 +334,10 @@ class ForgotPasswordController extends AbstractController
                 }
                 // Inform the user to wait before trying again
                 $timeLeft = $attemptsVerification[ForgotPasswordEnum::TIME_LEFT->value];
-                if ($attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] === ForgotPasswordEnum::ATTEMPTS_EXCEEDED->value) {
+                if (
+                    $attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] ===
+                    ForgotPasswordEnum::ATTEMPTS_EXCEEDED->value
+                ) {
                     $minutes = ($timeLeft->days * 24 * 60)
                         + ($timeLeft->h * 60)
                         + $timeLeft->i;
@@ -340,7 +349,10 @@ class ForgotPasswordController extends AbstractController
                             'controllers'
                         )
                     );
-                } elseif ($attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] === ForgotPasswordEnum::TIME_BETWEEN_REQUESTS->value) {
+                } elseif (
+                    $attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] ===
+                    ForgotPasswordEnum::TIME_BETWEEN_REQUESTS->value
+                ) {
                     $seconds = ($timeLeft->days * 24 * 3600)
                         + ($timeLeft->h * 3600)
                         + ($timeLeft->i * 60)

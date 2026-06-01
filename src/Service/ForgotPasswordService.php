@@ -18,14 +18,13 @@ readonly class ForgotPasswordService
     public function __construct(
         private EventRepository $eventRepository,
         private GetSettings $getSettings,
-    )
-    {
+    ) {
     }
 
     /**
      * @throws DateMalformedStringException
      */
-    public Function userCanResetPassword(User $user, bool $isSMS = false): array
+    public function userCanResetPassword(User $user, bool $isSMS = false): array
     {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
@@ -51,7 +50,7 @@ readonly class ForgotPasswordService
                 $lastEventTime = $event->getEventDatetime();
                 $limitTime = new DateTime();
                 $timeBetweenRequests = $data[$timeBetweenRequestsType]['value'];
-                $limitTime->modify('-'.$timeBetweenRequests.' seconds');
+                $limitTime->modify('-' . $timeBetweenRequests . ' seconds');
                 if ($limitTime > $lastEventTime) {
                     return [
                         ForgotPasswordEnum::SUCCESS->value => true,
@@ -66,7 +65,7 @@ readonly class ForgotPasswordService
                     ForgotPasswordEnum::TIME_LEFT->value => $timeLeft
                 ];
             }
-            $firstEvent = $events[$attemptsNumber-1];
+            $firstEvent = $events[$attemptsNumber - 1];
             $firstEventTime = $firstEvent->getEventDatetime();
             $timeLeft = $limitTimeToReset->diff($firstEventTime);
             return [
