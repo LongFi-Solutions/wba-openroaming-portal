@@ -33,10 +33,15 @@
                         <td class="px-4 py-2 text-gray-500">
                             {% if session.acctStopTime is null %}
                                 <span class="text-gray-400">—</span>
-                            {% elseif session.acctSessionTime %}
-                                {{ (session.acctSessionTime / 60)|round(0, 'floor') }} min
                             {% else %}
-                                —
+                                {% set seconds = session.acctStopTime.timestamp - session.acctStartTime.timestamp %}
+                                {% if seconds < 60 %}
+                                    {{ seconds }}s
+                                {% elseif seconds < 3600 %}
+                                    {{ (seconds / 60)|round(0, 'floor') }}min
+                                {% else %}
+                                    {{ (seconds / 3600)|round(0, 'floor') }}h {{ ((seconds % 3600) / 60)|round(0, 'floor') }}min
+                                {% endif %}
                             {% endif %}
                         </td>
                         <td class="px-4 py-2 font-mono text-gray-500">

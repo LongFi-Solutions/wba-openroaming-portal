@@ -24,7 +24,6 @@
             {{ include('dashboard/shared/user_profile/_active_session.html.twig', {userData: userData}) }}
             {{ include('dashboard/shared/user_profile/_auth_providers.html.twig', {userData: userData}) }}
             {{ include('dashboard/shared/user_profile/_last_connection.html.twig', {userData: userData}) }}
-            {{ include('dashboard/shared/user_profile/_last_radius_auth.html.twig', {userData: userData}) }}
             {{ include('dashboard/shared/user_profile/_twoFA_operations.html.twig', {userData: userData, context: context, isAdmin: userData.isAdmin}) }}
             {{ include('dashboard/shared/user_profile/_permissions.html.twig', {userData: userData}) }}
         </div>
