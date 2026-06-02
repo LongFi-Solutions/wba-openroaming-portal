@@ -26,15 +26,21 @@ class UserAccountDetailsController extends AbstractController
      * @throws \DateMalformedStringException
      */
     #[Route('/dashboard/user/{id:user<\d+>}', name: 'admin_dashboard_user_show')]
-    #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ)]
+    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function showUser(
         User $user
     ): Response {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings();
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        // Call the getSettings method of GetSettings class to retrieve the data
+        if (
+            $this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ) ||
+            $currentUser->getId() !== $user->getId()
+        ) {
+            throw $this->createAccessDeniedException();
+        }
+        $data = $this->getSettings->getSettings();
         return $this->render('dashboard/actions/show.html.twig', [
             'data' => $data,
             'context' => FirewallType::DASHBOARD->value,
