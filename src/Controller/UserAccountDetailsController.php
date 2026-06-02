@@ -33,13 +33,16 @@ class UserAccountDetailsController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        // Call the getSettings method of GetSettings class to retrieve the data
+        $permissions = $this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ);
+        if ($currentUser->getId() === $user->getId()) {
+            $permissions = true;
+        }
         if (
-            $this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ) ||
-            $currentUser->getId() !== $user->getId()
+           !$permissions
         ) {
             throw $this->createAccessDeniedException();
         }
+        // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
         return $this->render('dashboard/actions/show.html.twig', [
             'data' => $data,
