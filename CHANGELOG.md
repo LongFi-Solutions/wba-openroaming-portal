@@ -1,5 +1,15 @@
 # Changelog
 
+# Release V1.12.0
+
+- New settings to configure the number of retry attempts for email & SMS at a specific timeframe, with customization available on the dashboard.
+
+Please make sure to execute the new migration to update and use the new required configuration settings
+- Run the migrations with:
+  ```bash
+  php bin/console doctrine:migrations:migrate
+  ```
+
 # Release V1.11.0
 
 - Updated both statistics pages on the dashboard interface

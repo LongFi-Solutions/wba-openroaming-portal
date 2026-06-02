@@ -158,6 +158,12 @@ class SettingFixture extends Fixture
             ['name' => SettingName::RETURN_APPS_ENABLED->value, 'value' => 'OFF'],
             ['name' => SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value, 'value' => 'EditMe'],
             ['name' => SettingName::RETURN_APPS_ID_IOS->value, 'value' => 'EditMe.EditMe'],
+            ['name' => SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value, 'value' => '60'],
+            ['name' => SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value, 'value' => '30'],
+            ['name' => SettingName::EMAIL_ATTEMPTS_NUMBER->value, 'value' => '5'],
+            ['name' => SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS->value, 'value' => '60'],
+            ['name' => SettingName::SMS_TIME_INTERVAL_BETWEEN_REQUESTS->value, 'value' => '30'],
+            ['name' => SettingName::SMS_ATTEMPTS_NUMBER->value, 'value' => '5'],
         ];
 
         foreach ($settings as $settingData) {
