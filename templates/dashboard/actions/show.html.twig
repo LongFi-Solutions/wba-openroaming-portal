@@ -32,7 +32,9 @@
         <div class="lg:col-span-2 flex flex-col gap-6">
             {{ include('dashboard/shared/user_profile/tables/_radius_profile.html.twig', {userData: userData}) }}
             {{ include('dashboard/shared/user_profile/tables/_recent_radius_sessions.html.twig', {userData: userData}) }}
-            {{ include('dashboard/shared/user_profile/tables/_activity_logs.html.twig', {userData: userData}) }}
+            {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ACTIVITY_LOGS_READ')) %}
+                {{ include('dashboard/shared/user_profile/tables/_activity_logs.html.twig', {userData: userData}) }}
+            {% endif %}
         </div>
     </div>
 
