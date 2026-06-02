@@ -2,7 +2,7 @@
 
 # Release V1.12.0
 
-- New settings for number of tries for email & sms on a specific time stamp also customizable on the platform
+- New settings to configure the number of retry attempts for email & SMS at a specific timestamp, with customization available on the dashboard.
 
 Please make sure to execute the new migration to update and use the new required configuration settings
 - Run the migrations with:
