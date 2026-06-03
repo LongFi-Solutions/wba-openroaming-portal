@@ -103,6 +103,9 @@ class EventRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * @return array<string, int>
+     */
     public function countByEventGroup(?User $user = null): array
     {
         return [
