@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Entity\Event;
 use App\Entity\Setting;
+use App\Enum\AnalyticalEventType;
+use App\Enum\PlatformMode;
 use App\Enum\SettingName;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -79,6 +83,18 @@ class ResetBreakingGlassAccountSettingCommand extends Command
                     $this->entityManager->persist($setting);
                 }
             }
+
+            $event = new Event();
+            $event->setEventDatetime(new DateTime());
+            $event->setEventName(AnalyticalEventType::BREAKING_GLASS_ACCOUNT_RESET->value);
+            $hostname = gethostname();
+            $ip = gethostbyname($hostname);
+            $eventMetadata = [
+                'platform' => PlatformMode::LIVE->value,
+                'ip' => $ip,
+            ];
+            $event->setEventMetadata($eventMetadata);
+            $this->entityManager->persist($event);
 
             $this->entityManager->flush();
             $this->entityManager->commit();
