@@ -20,6 +20,7 @@ readonly class UserDataService
     }
 
     /**
+     * @return array<string, mixed>
      * @throws \DateMalformedStringException
      */
     public function getData(User $user): array
@@ -123,6 +124,7 @@ readonly class UserDataService
     }
 
     /**
+     * @return array<string, mixed>
      * @throws \DateMalformedStringException
      */
     private function buildEmptyData(User $user): array
