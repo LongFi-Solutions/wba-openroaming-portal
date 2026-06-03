@@ -317,7 +317,7 @@ class EventRepository extends ServiceEntityRepository
 
     private function applyUserFilter(QueryBuilder $qb, ?User $user): void
     {
-        if ($user !== null) {
+        if ($user instanceof \App\Entity\User) {
             $qb->andWhere('e.user = :user')
                 ->setParameter('user', $user);
         }

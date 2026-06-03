@@ -76,7 +76,7 @@ class ActivityLogSearchForm extends AbstractController
 
     private function resolvedQuery(): ?string
     {
-        if (!$this->query) {
+        if ($this->query === '' || $this->query === '0') {
             return null;
         }
 
@@ -140,7 +140,7 @@ class ActivityLogSearchForm extends AbstractController
     public function getEventCounts(): array
     {
         // When scoped to a user, count only their events
-        if ($this->user !== null) {
+        if ($this->user instanceof User) {
             return $this->eventRepository->countByEventGroup($this->user);
         }
         return $this->eventRepository->countByEventGroup();
@@ -148,6 +148,6 @@ class ActivityLogSearchForm extends AbstractController
 
     public function isUserScoped(): bool
     {
-        return $this->user !== null;
+        return $this->user instanceof User;
     }
 }
