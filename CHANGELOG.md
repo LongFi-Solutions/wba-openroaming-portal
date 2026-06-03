@@ -8,7 +8,7 @@
   per generation). It also has white-flag to skip 2FA validation and when it logs in this account is immediately
   disabled.
 - New Activity logs only of the portal (Users interaction and settings management)
-- New UserProfile details page with information about the profiles download per user, connectivity status, event logs per user and other important information
+- New UserProfile details page with information about the profiles downloaded per user, connectivity status, event logs and other important information
 - Minor rework on some pages (Reset password per user on the dashboard is now a dedicated page and the edit has also been modified to comply with these changes)
 
 Please make sure to execute the new migration to update and use the new required configuration settings
