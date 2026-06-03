@@ -1,0 +1,27 @@
+{# Only show for non-super-admin users that have permissions #}
+{% if userData.isAdmin %}
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+            {{ 'permissions'|trans({}, 'show') }}
+        </h2>
+        {% if userData.user.permissions is not empty %}
+            <dl class="space-y-2 text-sm">
+                {% for permission in userData.user.permissions %}
+                    {% set permEnum = constant('App\\Enum\\AdminPermissionsType::' ~ permission) %}
+                    <div class="flex items-center justify-between gap-2">
+                        <dt class="text-gray-500 shrink-0">{{ permEnum.getLabel()|trans({}, 'UserAddType') }}</dt>
+                            <dd>
+                            {% if permEnum.getLevel() == 'WRITE' %}
+                                <span class="pill-success text-xs">{{ 'write'|trans({}, 'UserAddType') }}</span>
+                            {% else %}
+                                <span class="pill-warning text-xs">{{ 'read'|trans({}, 'UserAddType') }}</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                {% endfor %}
+            </dl>
+        {% else %}
+            <p class="text-sm text-gray-400">—</p>
+        {% endif %}
+    </div>
+{% endif %}

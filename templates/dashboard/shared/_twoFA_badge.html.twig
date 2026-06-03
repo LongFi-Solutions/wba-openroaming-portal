@@ -1,0 +1,9 @@
+{% if twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
+    <span class="pill-error">{{ 'disabled'|trans({}, '_user') }}</span>
+{% elseif twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value %}
+    <span class="pill-success">Email</span>
+{% elseif twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value %}
+    <span class="pill-success">SMS</span>
+{% elseif twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value %}
+    <span class="pill-success">TOTP</span>
+{% endif %}

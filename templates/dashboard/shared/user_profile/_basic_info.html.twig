@@ -1,0 +1,48 @@
+{# Basic info #}
+<div class="bg-white rounded-xl shadow-sm p-6">
+    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+        {{ 'basicInfo'|trans({}, 'show') }}
+    </h2>
+    <dl class="space-y-3 text-sm">
+        <div class="flex justify-between gap-2">
+            <dt class="text-gray-500 shrink-0">{{ 'firstName'|trans({}, 'edit') }}</dt>
+            <dd class="font-medium text-gray-800 text-right">{{ userData.user.firstName ?: '—' }}</dd>
+        </div>
+        <div class="flex justify-between gap-2">
+            <dt class="text-gray-500 shrink-0">{{ 'lastName'|trans({}, 'edit') }}</dt>
+            <dd class="font-medium text-gray-800 text-right">{{ userData.user.lastName ?: '—' }}</dd>
+        </div>
+        <div class="flex justify-between gap-2">
+            <dt class="text-gray-500 shrink-0">Email</dt>
+            <dd class="font-medium text-gray-800 truncate max-w-[180px] text-right">
+                {{ userData.user.email ?: '—' }}
+            </dd>
+        </div>
+        {% if userData.user.phoneNumber %}
+            <div class="flex justify-between gap-2">
+                <dt class="text-gray-500 shrink-0">{{ 'phoneNumber'|trans({}, 'edit') }}</dt>
+                <dd class="font-medium text-gray-800 text-right font-mono text-xs">
+                    {{ userData.user.phoneNumber }}
+                </dd>
+            </div>
+        {% endif %}
+        <div class="flex justify-between gap-2">
+            <dt class="text-gray-500 shrink-0">{{ 'createdAt'|trans({}, 'dashboard') }}</dt>
+            <dd class="font-medium text-gray-800 text-right">
+                {{ userData.user.createdAt|date('d/m/Y H:i') }}
+            </dd>
+        </div>
+        {% if userData.isBanned and userData.user.bannedAt %}
+            <div class="flex justify-between gap-2">
+                <dt class="text-gray-500 shrink-0">{{ 'bannedAt'|trans({}, 'show') }}</dt>
+                <dd class="font-medium text-red-500 text-right">
+                    {{ userData.user.bannedAt|date('d/m/Y H:i') }}
+                </dd>
+            </div>
+        {% endif %}
+        <div class="flex justify-between gap-2">
+            <dt class="text-gray-500 shrink-0">2FA</dt>
+            {{ include('dashboard/shared/_twoFA_badge.html.twig', { twoFAtype: userData.user.twoFAtype }) }}
+        </div>
+    </dl>
+</div>
