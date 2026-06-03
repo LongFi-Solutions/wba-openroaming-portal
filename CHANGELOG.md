@@ -3,6 +3,11 @@
 # Release V1.12.0
 
 - New settings to configure the number of retry attempts for email & SMS at a specific timeframe, with customization available on the dashboard.
+- New settings for number of tries for email & sms on a specific time stamp also customizable on the platform
+- New command for breaking glass cases that generate a new pair of credentials for the dashboard access (one time use
+  per generation). It also has white-flag to skip 2FA validation and when it logins this account is immediately
+  disabled.
+- New Activity logs only of the portal (Users interaction and settings management)
 
 Please make sure to execute the new migration to update and use the new required configuration settings
 - Run the migrations with:
