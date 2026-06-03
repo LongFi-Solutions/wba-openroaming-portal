@@ -70,6 +70,7 @@
 
     {# Actions Buttons #}
     {% set isSuperAdmin = constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in user.roles %}
+    {% if not isSuperAdmin %}
         <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>
             {# Items Button Dropdown #}
             <button type="button" class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
@@ -162,4 +163,5 @@
                 </ul>
             </div>
         </td>
+    {% endif %}
 </tr>
