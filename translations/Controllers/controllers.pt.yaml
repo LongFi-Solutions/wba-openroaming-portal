@@ -57,7 +57,7 @@ emailNotAssociatedWithValidAccount: 'Este email não está associado a uma conta
 emailDoesntExist: 'Este email não existe. Certifique-se de que cria uma conta com um email na plataforma!'
 cantAccessThisPageLoggedIn: 'Não pode aceder a esta página enquanto estiver com sessão iniciada.'
 newRandomPasswordMessage: 'A nova palavra-passe aleatória da sua conta é: %password%%0APor favor, certifique-se de que inicia sessão para concluir o pedido.'
-messageSentWithAttemptsLeft: 'Enviámos-lhe uma mensagem para: %uuid%.'
+messageSentWithAttemptsLeft: 'Enviámos-lhe uma mensagem para: %uuid%. Tem %attempts% tentativa(s) restante(s).'
 waitBeforeRetry: 'Por favor, aguarde %minutes% minuto(s) antes de tentar novamente.'
 exceededLimitsRequestForNewPassword: 'Excedeu o limite de pedidos para uma nova palavra-passe. Por favor, contacte o nosso suporte para obter ajuda.'
 PhoneNumberDoesntExist: 'Este número de telefone não existe. Por favor, insira um número válido do sistema!'
@@ -201,5 +201,3 @@ tooManyAttempts: "Demasiadas tentativas. Tente novamente em %seconds% segundos."
 redirectingToApp: 'Redirecionado para a aplicação.'
 certificateProcessBlocked: "Ocorreu um erro de configuração. Por favor contacte a nossa equipa de suporte."
 emailAliasesNotAllowed: 'Não é permitido o uso de aliases de email para o registo.'
-tooManyAttemptsMinutes: "Demasiadas tentativas. Tente novamente em %minutes% minutos."
-timeBetweenRequests: "Deve esperar %seconds% segundos antes de solicitar um novo email. Por favor, tente novamente mais tarde."

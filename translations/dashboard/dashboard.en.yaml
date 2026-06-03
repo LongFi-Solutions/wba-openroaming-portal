@@ -27,3 +27,11 @@ abortedCertificatesWarning: 'The certificate configuration is incomplete or inco
 freeradius_is_not_ev_cert_warning: "The uploaded FreeRADIUS certificates are not valid EV certificates. Downloading OpenRoaming Windows 10 profiles is disabled because it is not supported."
 evWarningValidateNow: 'Validate Certificates'
 certProcessInvalid: 'The installed certificates are invalid. Please verify or renew them.'
+eventMetadata: 'Event Metadata'
+searchLogs: 'Search logs...'
+noLogs: 'No logs found'
+noLogsFoundWith: 'No logs found with'
+logsPerPage: 'Logs per page'
+action: 'Action'
+ipAddress: 'IP Address'
+activityLogs: 'Activity Logs'
