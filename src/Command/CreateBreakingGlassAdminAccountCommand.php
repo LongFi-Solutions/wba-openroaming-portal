@@ -137,7 +137,7 @@ class CreateBreakingGlassAdminAccountCommand extends Command
             $ip = gethostbyname($hostname);
         }
         $eventMetadata = [
-            'platform' => PlatformMode::LIVE->value,
+            'platform' => PlatformMode::CLI->value,
             'ip' => $ip,
         ];
         $event->setEventMetadata($eventMetadata);
