@@ -9,6 +9,7 @@ use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\EventRepository;
 use DateTime;
+use DateTimeInterface;
 
 readonly class UserDataService
 {
@@ -31,7 +32,7 @@ readonly class UserDataService
             $user->getUserRadiusProfiles()->toArray()
         );
 
-        if (empty($radiusUsernames)) {
+        if ($radiusUsernames === []) {
             return $this->buildEmptyData($user);
         }
 
@@ -118,8 +119,8 @@ readonly class UserDataService
             // Computed helpers for the template
             'isAdmin' => in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true) ||
                 in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true),
-            'isBanned' => $user->getBannedAt() !== null,
-            'isDeleted' => $user->getDeletedAt() !== null,
+            'isBanned' => $user->getBannedAt() instanceof DateTimeInterface,
+            'isDeleted' => $user->getDeletedAt() instanceof DateTimeInterface,
         ];
     }
 
@@ -145,8 +146,8 @@ readonly class UserDataService
             'recentRadiusSessions' => [],
             'activeSession' => null,
             'isAdmin' => in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true),
-            'isBanned' => $user->getBannedAt() !== null,
-            'isDeleted' => $user->getDeletedAt() !== null,
+            'isBanned' => $user->getBannedAt() instanceof DateTimeInterface,
+            'isDeleted' => $user->getDeletedAt() instanceof DateTimeInterface,
         ];
     }
 }
