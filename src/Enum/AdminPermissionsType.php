@@ -83,4 +83,4 @@ enum AdminPermissionsType: string
     {
         return str_ends_with($this->value, '_WRITE') ? 'WRITE' : 'READ';
     }
-    }
+}
