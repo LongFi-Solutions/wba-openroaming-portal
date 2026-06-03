@@ -81,9 +81,9 @@ class CreateBreakingGlassAdminAccountCommand extends Command
         }
         $plainPassword = bin2hex(random_bytes(16));
         $validEmail = !($defaultValue->getValue() === null) && str_starts_with(
-                $defaultValue->getValue(),
-                'breakglass_'
-            );
+            $defaultValue->getValue(),
+            'breakglass_'
+        );
         if ($usedAccount instanceof User && $validEmail) {
             $hashedPassword = $this->passwordHasher->hashPassword(
                 $usedAccount,
