@@ -67,6 +67,7 @@ class UserUpdateDTO
     public PermissionLevel $smsConfig = PermissionLevel::NONE;
     public PermissionLevel $portalStatistics = PermissionLevel::NONE;
     public PermissionLevel $connectivityStatistics = PermissionLevel::NONE;
+    public PermissionLevel $activityLogs = PermissionLevel::NONE;
 
     public function __construct(?User $user = null)
     {
@@ -173,5 +174,6 @@ class UserUpdateDTO
         'smsConfig' => 'SMS_CONFIG',
         'portalStatistics' => 'PORTAL_STATISTICS',
         'connectivityStatistics' => 'CONNECTIVITY_STATISTICS',
+        'activityLogs' => 'ACTIVITY_LOGS',
     ];
 }
