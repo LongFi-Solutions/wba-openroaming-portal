@@ -18,7 +18,9 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
     name: 'reset:breakingGlassAccountSetting',
-    description: 'Hello PhpStorm')]
+    description: 'Hello PhpStorm'
+)]
+
 class ResetBreakingGlassAccountSettingCommand extends Command
 {
     public function __construct(
@@ -39,7 +41,8 @@ class ResetBreakingGlassAccountSettingCommand extends Command
         // Check if the --yes option is provided (comes from a controller), then skip the confirmation prompt
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This action will RESET the breaking glass setting used to save the default email value for this account. ' .
+            $question = new ConfirmationQuestion('This action will RESET' .
+                ' the breaking glass setting used to save the default email value for this account. ' .
                 'Are you sure you want to proceed? [y/N]', false);
             /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
@@ -99,6 +102,4 @@ EOL;
 
         return Command::SUCCESS;
     }
-
-
 }
