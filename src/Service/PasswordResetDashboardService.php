@@ -108,8 +108,8 @@ readonly class PasswordResetDashboardService
 
         $canSend = (!$latestEvent || $resetAttempts < 3)
             && (!$latestEvent || ($lastResetTime instanceof DateTime && $lastResetTime->add(
-                        $minInterval
-                    ) < $currentTime));
+                $minInterval
+            ) < $currentTime));
 
         if (!$canSend) {
             return $flashes;

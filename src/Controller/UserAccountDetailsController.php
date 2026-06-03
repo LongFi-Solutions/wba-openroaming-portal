@@ -38,7 +38,7 @@ class UserAccountDetailsController extends AbstractController
             $permissions = true;
         }
         if (
-           !$permissions
+            !$permissions
         ) {
             throw $this->createAccessDeniedException();
         }
@@ -52,5 +52,3 @@ class UserAccountDetailsController extends AbstractController
         ]);
     }
 }
-
-
