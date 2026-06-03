@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\GetSettings;
@@ -26,9 +25,7 @@ class ActivityLogsController extends AbstractController
     public function activityLogs(): Response
     {
         if (!$this->isGranted(UserAuthenticationVoter::ACTIVITY_LOGS_READ)) {
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
-            return $this->redirectToRoute('admin_dashboard_user_show', ['id' => $currentUser->getId()]);
+            throw $this->createAccessDeniedException();
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data

@@ -69,7 +69,7 @@ class AdminController extends AbstractController
 
         // Redirect to User Profile
         if (!$this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ)) {
-            return $this->redirectToRoute('admin_dashboard_user_show', ['id' => $currentUser->getId()]);
+            return $this->redirectToRoute('admin_dashboard_user_edit', ['id' => $currentUser->getId()]);
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data

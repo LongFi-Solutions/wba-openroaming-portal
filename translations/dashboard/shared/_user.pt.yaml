@@ -5,6 +5,7 @@ verified: 'Verificado'
 disabled: 'Desativado'
 notBanned: 'Não Banido'
 moreDetails: 'Mais Detalhes'
+edit: 'Editar'
 delete: 'Eliminar'
 revoke: 'Revogar'
 confirm_delete: "Tem a certeza de que desejas remover o utilizador com o UUID %uuid%?"
