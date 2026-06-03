@@ -14,7 +14,7 @@ export default class extends Controller {
         'end',
         'startTimePreset',
         'endTimePreset',
-        'timeRow'
+        'timeRow',
     ];
     static values = {
         activePreset: String,
@@ -128,12 +128,16 @@ export default class extends Controller {
     #applyTimeInputs(start, end) {
         // Use timeRow targets for presets, not the picker ones
         const startInput = this.hasStartTimePresetTarget
-          ? this.startTimePresetTarget
-          : this.hasStartTimeTarget ? this.startTimeTarget : null;
+            ? this.startTimePresetTarget
+            : this.hasStartTimeTarget
+              ? this.startTimeTarget
+              : null;
 
         const endInput = this.hasEndTimePresetTarget
-          ? this.endTimePresetTarget
-          : this.hasEndTimeTarget ? this.endTimeTarget : null;
+            ? this.endTimePresetTarget
+            : this.hasEndTimeTarget
+              ? this.endTimeTarget
+              : null;
 
         // Pick the visible one
         if (startInput?.value) {
@@ -208,7 +212,7 @@ export default class extends Controller {
         const m1 = { y: this.#viewYear, m: this.#viewMonth };
         const m2 = this.#nextMonth(m1);
         this.calendarGridTarget.innerHTML =
-          this.#buildCal(m1.y, m1.m, 'left') + this.#buildCal(m2.y, m2.m, 'right');
+            this.#buildCal(m1.y, m1.m, 'left') + this.#buildCal(m2.y, m2.m, 'right');
         this.#updateFooter();
         this.#updateTriggerLabel();
     }
@@ -251,18 +255,18 @@ export default class extends Controller {
         let html = `<div>
             <div class="flex items-center justify-between mb-2">
                 ${
-          side === 'left'
-            ? `<button type="button" data-action="click->date-filter#prevMonth"
+                    side === 'left'
+                        ? `<button type="button" data-action="click->date-filter#prevMonth"
                                class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 text-base">&#8249;</button>`
-            : `<div class="w-6"></div>`
-        }
+                        : `<div class="w-6"></div>`
+                }
                 <span class="text-xs font-medium text-gray-700">${MONTHS[month]} ${year}</span>
                 ${
-          side === 'right'
-            ? `<button type="button" data-action="click->date-filter#nextMonth"
+                    side === 'right'
+                        ? `<button type="button" data-action="click->date-filter#nextMonth"
                                class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 text-base">&#8250;</button>`
-            : `<div class="w-6"></div>`
-        }
+                        : `<div class="w-6"></div>`
+                }
             </div>
             <div class="grid grid-cols-7 gap-[2px]">`;
 
@@ -280,15 +284,15 @@ export default class extends Controller {
             const isToday = this.#sameDay(date, today);
 
             const isBlocked =
-              this.#selecting &&
-              this.#rangeStart &&
-              (() => {
-                  const diff = Math.round(Math.abs(date - this.#rangeStart) / 86400000) + 1;
-                  return diff > 365;
-              })();
+                this.#selecting &&
+                this.#rangeStart &&
+                (() => {
+                    const diff = Math.round(Math.abs(date - this.#rangeStart) / 86400000) + 1;
+                    return diff > 365;
+                })();
 
             let cls =
-              'w-full aspect-square flex items-center justify-center text-[11px] transition-colors duration-75 ';
+                'w-full aspect-square flex items-center justify-center text-[11px] transition-colors duration-75 ';
 
             if (isBlocked) {
                 cls += 'text-gray-300 cursor-not-allowed ';
@@ -296,10 +300,10 @@ export default class extends Controller {
                 cls += 'bg-[#7DB928] text-white font-medium rounded-md cursor-pointer ';
             } else if (isStart) {
                 cls +=
-                  'bg-[#7DB928] text-white font-medium rounded-l-md rounded-r-none cursor-pointer ';
+                    'bg-[#7DB928] text-white font-medium rounded-l-md rounded-r-none cursor-pointer ';
             } else if (isEnd) {
                 cls +=
-                  'bg-[#7DB928] text-white font-medium rounded-r-md rounded-l-none cursor-pointer ';
+                    'bg-[#7DB928] text-white font-medium rounded-r-md rounded-l-none cursor-pointer ';
             } else if (isIn) {
                 cls += 'bg-[#7DB928]/10 text-[#3B6D11] rounded-none cursor-pointer ';
             } else if (isToday) {
@@ -450,11 +454,11 @@ export default class extends Controller {
 
     #sameDay(a, b) {
         return (
-          a &&
-          b &&
-          a.getFullYear() === b.getFullYear() &&
-          a.getMonth() === b.getMonth() &&
-          a.getDate() === b.getDate()
+            a &&
+            b &&
+            a.getFullYear() === b.getFullYear() &&
+            a.getMonth() === b.getMonth() &&
+            a.getDate() === b.getDate()
         );
     }
 
@@ -486,9 +490,9 @@ export default class extends Controller {
     #updateTriggerLabel() {
         const eff = this.#selecting && this.#hoverDay ? this.#hoverDay : this.#rangeEnd;
         const fmt = (d) =>
-          d
-            ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-            : '…';
+            d
+                ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                : '…';
         const fmtTime = (d) => {
             if (!d) return '';
             const pad = (n) => String(n).padStart(2, '0');
@@ -553,12 +557,12 @@ export default class extends Controller {
             el = document.createElement('div');
             el.dataset.rangeWarning = '';
             el.className =
-              'flex items-center gap-2 mt-2 px-3 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs';
+                'flex items-center gap-2 mt-2 px-3 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs';
             el.innerHTML = `<svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
                 <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3.5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4.5zm0 7a.875.875 0 1 1 0-1.75.875.875 0 0 1 0 1.75z"/>
             </svg><span></span>`;
             const footer = this.pickerDropdownTarget.querySelector(
-              '.flex.items-center.justify-between.border-t'
+                '.flex.items-center.justify-between.border-t'
             );
             this.pickerDropdownTarget.insertBefore(el, footer);
         }
