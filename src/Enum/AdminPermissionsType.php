@@ -58,7 +58,7 @@ enum AdminPermissionsType: string
 
     public function getLabel(): string
     {
-        return match($this) {
+        return match ($this) {
             self::USERS_MANAGEMENT_WRITE, self::USERS_MANAGEMENT_READ => 'usersManagement',
             self::ADMIN_MANAGEMENT_WRITE, self::ADMIN_MANAGEMENT_READ => 'adminManagement',
             self::PLATFORM_STATUS_WRITE, self::PLATFORM_STATUS_READ => 'platformStatus',
@@ -83,4 +83,4 @@ enum AdminPermissionsType: string
     {
         return str_ends_with($this->value, '_WRITE') ? 'WRITE' : 'READ';
     }
-}
+    }
