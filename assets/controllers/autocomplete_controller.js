@@ -19,7 +19,7 @@ export default class extends Controller {
     }
   }
 
-  selectSuggestion(event) {
+  selectSuggestion() {
     this.close();
   }
 
