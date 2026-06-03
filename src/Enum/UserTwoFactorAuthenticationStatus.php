@@ -10,4 +10,5 @@ enum UserTwoFactorAuthenticationStatus: int
     case TOTP = 1;
     case SMS = 2;
     case EMAIL = 3;
+    case BYPASS = 4;
 }

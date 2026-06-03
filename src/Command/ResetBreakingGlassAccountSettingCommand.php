@@ -9,6 +9,7 @@ use App\Entity\Setting;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
+use App\Repository\SettingRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -22,13 +23,14 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
     name: 'reset:breakingGlassAccountSetting',
-    description: 'Hello PhpStorm'
+    description: 'Reset Breaking last saved account'
 )]
 
 class ResetBreakingGlassAccountSettingCommand extends Command
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
+        private readonly SettingRepository $settingRepository
     ) {
         parent::__construct();
     }
@@ -37,7 +39,7 @@ class ResetBreakingGlassAccountSettingCommand extends Command
     {
         $this
             ->setName('reset:breakingGlassAccountSetting')
-            ->setDescription('Reset the breaking glass account setting')
+            ->setDescription('Reset Breaking last saved account')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -63,14 +65,13 @@ class ResetBreakingGlassAccountSettingCommand extends Command
         $this->entityManager->beginTransaction();
 
         try {
-            $settingsRepository = $this->entityManager->getRepository(Setting::class);
 
             foreach ($settings as $settingData) {
                 $name = $settingData['name'];
                 $value = $settingData['value'];
 
                 // Look for all the settings using the name
-                $setting = $settingsRepository->findOneBy(['name' => $name]);
+                $setting = $this->settingRepository->findOneBy(['name' => $name]);
 
                 if ($setting !== null) {
                     // Update the already existing value
