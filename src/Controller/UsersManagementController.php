@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTO\UserAddDTO;
 use App\DTO\UserUpdateDTO;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
@@ -14,6 +15,7 @@ use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\ResetPasswordType;
+use App\Form\UserAddType;
 use App\Form\UserUpdateType;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
@@ -25,6 +27,7 @@ use App\Service\PasswordResetDashboardService;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
+use App\Service\UserCreationService;
 use App\Service\UserDeletionService;
 use App\Service\VerificationCodeEmailGenerator;
 use DateTime;
@@ -65,6 +68,7 @@ class UsersManagementController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly MailerInterface $mailer,
         private readonly PasswordResetDashboardService $passwordResetDashboardService,
+        private readonly UserCreationService $userCreationService,
     ) {
     }
 
@@ -255,7 +259,7 @@ class UsersManagementController extends AbstractController
     }
 
     /**
-     * @throws RandomException
+     * @throws \Random\RandomException
      */
     #[Route('/dashboard/add', name: 'admin_dashboard_add_admin')]
     #[IsGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE)]
