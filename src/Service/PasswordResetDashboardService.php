@@ -35,9 +35,10 @@ readonly class PasswordResetDashboardService
      * Resets the user's password, sends notifications, and logs the event.
      * Returns an array of flash messages: [['type' => 'success'|'error', 'message' => '...']]
      *
-     * @throws \DateMalformedStringException
-     * @throws \DateMalformedIntervalStringException
-     * @throws TransportExceptionInterface
+     * @return array<int, array{type: string, message: string}>
+     * * @throws \DateMalformedStringException
+     * * @throws \DateMalformedIntervalStringException
+     * * @throws TransportExceptionInterface
      */
     public function resetPassword(
         User $user,
