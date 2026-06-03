@@ -77,7 +77,12 @@ class CreateBreakingGlassAdminAccountCommand extends Command
             $usedAccount = $this->userRepository->findOneBy(['email' => $defaultValue->getValue()]);
         }
         $plainPassword = bin2hex(random_bytes(16));
-        if ($usedAccount instanceof User && $defaultValue->getValue() !== null) {
+        if ($defaultValue->getValue() === null) {
+            $validEmail = false;
+        } else {
+            $validEmail = str_starts_with($defaultValue->getValue(), 'breakglass_');
+        }
+        if ($usedAccount instanceof User && $validEmail) {
             $hashedPassword = $this->passwordHasher->hashPassword(
                 $usedAccount,
                 $plainPassword
