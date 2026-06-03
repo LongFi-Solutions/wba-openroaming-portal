@@ -9,12 +9,12 @@
         {# Bottom Row: Filter Tabs — full width, wraps naturally #}
         <div class="flex flex-row flex-wrap items-center justify-center gap-4">
             {% set filters = {
-                'all': { label: 'all', count: this.eventCounts.all, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
-                'user_actions': { label: 'userActions', count: this.eventCounts.user_actions, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
-                'admin_actions': { label: 'adminActions', count: this.eventCounts.admin_actions, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
-                'auth_events': { label: 'authEvents', count: this.eventCounts.auth_events, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
-                'settings_changes': { label: 'settingsChanges', count: this.eventCounts.settings_changes, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
-                'certificate_events': { label: 'certificateEvents', count: this.eventCounts.certificate_events, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
+                all: {label: 'all', count: this.eventCounts.all, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white'},
+                user_actions: {label: 'userActions', count: this.eventCounts.user_actions, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white'},
+                admin_actions: {label: 'adminActions', count: this.eventCounts.admin_actions, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white'},
+                auth_events: {label: 'authEvents', count: this.eventCounts.auth_events, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white'},
+                settings_changes: {label: 'settingsChanges', count: this.eventCounts.settings_changes, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white'},
+                certificate_events: {label: 'certificateEvents', count: this.eventCounts.certificate_events, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white'},
             } %}
 
             {% for value, tab in filters %}
@@ -85,7 +85,7 @@
                 activePreset: '',
                 selectedStartDate: startDate,
                 selectedEndDate: endDate,
-                showTime: true
+                showTime: true,
             }) }}
 
         </div>
@@ -115,7 +115,7 @@
             {% for log in logs %}
                 {{ include('dashboard/shared/_activity_log.html.twig', {
                     log: log,
-                    showUser: not this.userScoped
+                    showUser: not this.userScoped,
                 }) }}
             {% else %}
                 <tr>
@@ -141,7 +141,7 @@
     {% for log in logs %}
         {{ include('dashboard/shared/_activity_log_modal.html.twig', {
             log: log,
-            showUser: not this.userScoped
+            showUser: not this.userScoped,
         }) }}
     {% endfor %}
 

@@ -1,6 +1,6 @@
 {# Clickable Row — triggers modal by ID #}
 <tr class="border-b hover:bg-veryLightGreen transition-all duration-100 cursor-pointer"
-        {{ stimulus_controller('modal-trigger', { modalId: 'log-modal-' ~ log.id }) }}
+        {{ stimulus_controller('modal-trigger', {modalId: 'log-modal-' ~ log.id}) }}
     data-action="click->modal-trigger#open">
 
     {% if showUser is not defined or showUser %}
