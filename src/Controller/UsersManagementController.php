@@ -146,7 +146,7 @@ class UsersManagementController extends AbstractController
     /**
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
-    #[Route('/dashboard/export/users', name: 'admin_user_export')]
+    #[Route('/dashboard/export/users', name: 'admin_dashboard_users_export')]
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function exportUsers(): Response
     {
@@ -269,7 +269,7 @@ class UsersManagementController extends AbstractController
     /**
      * @throws RandomException
      */
-    #[Route('/dashboard/add', name: 'dashboard_add_admin')]
+    #[Route('/dashboard/add', name: 'admin_dashboard_add_admin')]
     #[IsGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE)]
     public function addUsers(Request $request): Response
     {
@@ -390,7 +390,7 @@ class UsersManagementController extends AbstractController
      * @throws \DateMalformedStringException
      * @throws \DateMalformedIntervalStringException
      */
-    #[Route('/dashboard/edit/{id:user<\d+>}', name: 'admin_user_edit')]
+    #[Route('/dashboard/edit/{id:user<\d+>}', name: 'admin_dashboard_user_edit')]
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function editUsers(
         Request $request,
@@ -524,7 +524,7 @@ class UsersManagementController extends AbstractController
                     'error',
                     $this->translator->trans('PasswordPasswordConfirmationMustMatch', [], 'controllers')
                 );
-                return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
+                return $this->redirectToRoute('admin_dashboard_user_edit', ['id' => $user->getId()]);
             }
 
             // Get the User Provider && ProviderId
@@ -760,7 +760,7 @@ class UsersManagementController extends AbstractController
             );
         }
 
-        return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
+        return $this->redirectToRoute('admin_dashboard_user_edit', ['id' => $user->getId()]);
     }
 
     #[Route('/dashboard/adminPermissionsAdd/{id:user<\d+>}', name: 'admin_add_permissions')]

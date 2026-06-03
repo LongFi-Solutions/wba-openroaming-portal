@@ -49,10 +49,6 @@ class SMSSettingsType extends AbstractType
                 'required' => false,
                 'disabled' => $this->disabled,
             ])
-            ->add('smsTimerResend', IntegerType::class, [
-                'required' => false,
-                'disabled' => $this->disabled,
-            ])
             ->add('defaultRegionPhoneInputs', ChoiceType::class, [
                 'choices' => $choices,
                 'multiple' => true,
@@ -60,7 +56,20 @@ class SMSSettingsType extends AbstractType
                 'required' => false,
                 'autocomplete' => true,
                 'disabled' => $this->disabled,
-            ]);
+            ])
+            ->add('timeIntervalBetweenRequests', IntegerType::class, [
+                'required' => false,
+                'disabled' => $this->disabled,
+            ])
+            ->add('timeIntervalToResetAttempts', IntegerType::class, [
+                'required' => false,
+                'disabled' => $this->disabled,
+            ])
+            ->add('attemptsNumber', IntegerType::class, [
+                'required' => false,
+                'disabled' => $this->disabled,
+            ])
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

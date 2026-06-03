@@ -62,6 +62,18 @@ class PlatformStatusSettingsType extends AbstractType
             ->add('timeIntervalNotification', IntegerType::class, [
                 'required' => false,
                 'disabled' => $this->disabled,
+            ])
+            ->add('timeIntervalBetweenRequests', IntegerType::class, [
+                'required' => false,
+                'disabled' => $this->disabled,
+            ])
+            ->add('timeIntervalToResetAttempts', IntegerType::class, [
+                'required' => false,
+                'disabled' => $this->disabled,
+            ])
+            ->add('attemptsNumber', IntegerType::class, [
+                'required' => false,
+                'disabled' => $this->disabled,
             ]);
     }
 
