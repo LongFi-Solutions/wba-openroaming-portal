@@ -75,7 +75,12 @@
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ACTIVITY_LOGS_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'activityLogs'|trans({}, '_header_admin'), routes: ['admin_dashboard_activity_logs'], icon: 'wba:clock-counter-clockwise'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {
+                                label: 'activityLogs'|trans({}, '_header_admin'),
+                                routes: ['admin_dashboard_activity_logs'],
+                                icon: 'wba:clock-counter-clockwise',
+                                iconClass: 'fill-current stroke-none'
+                            }) }}
                         {% endif %}
                     </ul>
                 </div>
