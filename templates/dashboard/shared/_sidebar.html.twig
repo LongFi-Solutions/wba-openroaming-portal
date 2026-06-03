@@ -23,7 +23,8 @@
             'admin_dashboard_user_edit',
             'admin_dashboard_user_show',
             'admin_dashboard_add_admin',
-            'admin_dashboard_user_reset_password'
+            'admin_dashboard_user_reset_password',
+            'admin_dashboard_activity_logs',
         ] %}
         {% set portalSettingsRoutes = [
             'admin_dashboard_settings_status',
@@ -45,9 +46,6 @@
         {% set portalStatisticsRoutes = [
             'admin_dashboard_statistics',
             'admin_dashboard_statistics_freeradius',
-        ] %}
-        {% set activityLogsRoutes = [
-            'admin_dashboard_activity_logs',
         ] %}
 
         {# User Management - Submenu #}
@@ -74,6 +72,10 @@
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_READ')) %}
                             {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'admin'|trans({}, '_header_admin'), routes: ['admin_dashboard_admins', 'dashboard_add_admin'], icon: 'wba:admin-management'}) }}
+                        {% endif %}
+
+                        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ACTIVITY_LOGS_READ')) %}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'activityLogs'|trans({}, '_header_admin'), routes: ['admin_dashboard_activity_logs'], icon: 'wba:clock-counter-clockwise'}) }}
                         {% endif %}
                     </ul>
                 </div>
@@ -203,16 +205,6 @@
                     </ul>
                 </div>
             </div>
-        {% endif %}
-
-        {# Activity Logs - Direct link #}
-        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ACTIVITY_LOGS_READ')) %}
-            <a href="{{ path('admin_dashboard_activity_logs') }}"
-               class="w-full duration-300 rounded p-2 flex flex-row items-center cursor-pointer hover:shadow hover:text-lightGreen
-       {% if app.request.attributes.get('_route') in activityLogsRoutes %}selected{% endif %}">
-                <twig:ux:icon name='wba:clock-counter-clockwise' class="w-5 mr-2 fill-current stroke-none" />
-                {{ 'activityLogs'|trans({}, '_header_admin') }}
-            </a>
         {% endif %}
 
         {# Options - Submenu (only shows on lower resolutions) #}
