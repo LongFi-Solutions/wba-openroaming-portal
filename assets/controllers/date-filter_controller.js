@@ -12,10 +12,14 @@ export default class extends Controller {
         'footerSummary',
         'start',
         'end',
+        'startTimePreset',
+        'endTimePreset',
+        'timeRow'
     ];
     static values = {
         activePreset: String,
         translations: Object,
+        showTime: { type: Boolean, default: false },
     };
 
     #rangeStart = null;
@@ -51,12 +55,16 @@ export default class extends Controller {
 
     // ── Preset pills ──────────────────────────────────────────────────────────
 
+    #lastPresetStart = null;
+    #lastPresetEnd = null;
+
     applyPreset(event) {
         const value = event.currentTarget.dataset.value;
         this.markActive(value);
 
         if (value === 'custom') {
             this.showCustomPicker();
+            if (this.showTimeValue) this.#hideTimeRow();
             return;
         }
 
@@ -95,7 +103,61 @@ export default class extends Controller {
                 return;
         }
 
+        // Apply current time input values
+        if (this.showTimeValue) {
+            this.#showTimeRow();
+            this.#applyTimeInputs(start, end);
+
+            // Store for reapply
+            this.#lastPresetStart = new Date(start);
+            this.#lastPresetEnd = new Date(end);
+        }
+
         this.#submitPreset(value, start, end);
+    }
+
+    reapply() {
+        if (!this.showTimeValue) return;
+        if (!this.#lastPresetStart || !this.#lastPresetEnd) return;
+        const start = new Date(this.#lastPresetStart);
+        const end = new Date(this.#lastPresetEnd);
+        this.#applyTimeInputs(start, end);
+        this.#submitPreset('custom', start, end);
+    }
+
+    #applyTimeInputs(start, end) {
+        // Use timeRow targets for presets, not the picker ones
+        const startInput = this.hasStartTimePresetTarget
+          ? this.startTimePresetTarget
+          : this.hasStartTimeTarget ? this.startTimeTarget : null;
+
+        const endInput = this.hasEndTimePresetTarget
+          ? this.endTimePresetTarget
+          : this.hasEndTimeTarget ? this.endTimeTarget : null;
+
+        // Pick the visible one
+        if (startInput?.value) {
+            const [sh, sm] = startInput.value.split(':').map(Number);
+            start.setHours(sh, sm, 0, 0);
+        }
+        if (endInput?.value) {
+            const [eh, em] = endInput.value.split(':').map(Number);
+            end.setHours(eh, em, 59, 0);
+        }
+    }
+
+    #showTimeRow() {
+        if (this.hasTimeRowTarget) {
+            this.timeRowTarget.classList.remove('hidden');
+            this.timeRowTarget.classList.add('flex');
+        }
+    }
+
+    #hideTimeRow() {
+        if (this.hasTimeRowTarget) {
+            this.timeRowTarget.classList.add('hidden');
+            this.timeRowTarget.classList.remove('flex');
+        }
     }
 
     markActive(value) {
@@ -146,7 +208,7 @@ export default class extends Controller {
         const m1 = { y: this.#viewYear, m: this.#viewMonth };
         const m2 = this.#nextMonth(m1);
         this.calendarGridTarget.innerHTML =
-            this.#buildCal(m1.y, m1.m, 'left') + this.#buildCal(m2.y, m2.m, 'right');
+          this.#buildCal(m1.y, m1.m, 'left') + this.#buildCal(m2.y, m2.m, 'right');
         this.#updateFooter();
         this.#updateTriggerLabel();
     }
@@ -189,18 +251,18 @@ export default class extends Controller {
         let html = `<div>
             <div class="flex items-center justify-between mb-2">
                 ${
-                    side === 'left'
-                        ? `<button type="button" data-action="click->date-filter#prevMonth"
+          side === 'left'
+            ? `<button type="button" data-action="click->date-filter#prevMonth"
                                class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 text-base">&#8249;</button>`
-                        : `<div class="w-6"></div>`
-                }
+            : `<div class="w-6"></div>`
+        }
                 <span class="text-xs font-medium text-gray-700">${MONTHS[month]} ${year}</span>
                 ${
-                    side === 'right'
-                        ? `<button type="button" data-action="click->date-filter#nextMonth"
+          side === 'right'
+            ? `<button type="button" data-action="click->date-filter#nextMonth"
                                class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 text-base">&#8250;</button>`
-                        : `<div class="w-6"></div>`
-                }
+            : `<div class="w-6"></div>`
+        }
             </div>
             <div class="grid grid-cols-7 gap-[2px]">`;
 
@@ -218,15 +280,15 @@ export default class extends Controller {
             const isToday = this.#sameDay(date, today);
 
             const isBlocked =
-                this.#selecting &&
-                this.#rangeStart &&
-                (() => {
-                    const diff = Math.round(Math.abs(date - this.#rangeStart) / 86400000) + 1;
-                    return diff > 365;
-                })();
+              this.#selecting &&
+              this.#rangeStart &&
+              (() => {
+                  const diff = Math.round(Math.abs(date - this.#rangeStart) / 86400000) + 1;
+                  return diff > 365;
+              })();
 
             let cls =
-                'w-full aspect-square flex items-center justify-center text-[11px] transition-colors duration-75 ';
+              'w-full aspect-square flex items-center justify-center text-[11px] transition-colors duration-75 ';
 
             if (isBlocked) {
                 cls += 'text-gray-300 cursor-not-allowed ';
@@ -234,10 +296,10 @@ export default class extends Controller {
                 cls += 'bg-[#7DB928] text-white font-medium rounded-md cursor-pointer ';
             } else if (isStart) {
                 cls +=
-                    'bg-[#7DB928] text-white font-medium rounded-l-md rounded-r-none cursor-pointer ';
+                  'bg-[#7DB928] text-white font-medium rounded-l-md rounded-r-none cursor-pointer ';
             } else if (isEnd) {
                 cls +=
-                    'bg-[#7DB928] text-white font-medium rounded-r-md rounded-l-none cursor-pointer ';
+                  'bg-[#7DB928] text-white font-medium rounded-r-md rounded-l-none cursor-pointer ';
             } else if (isIn) {
                 cls += 'bg-[#7DB928]/10 text-[#3B6D11] rounded-none cursor-pointer ';
             } else if (isToday) {
@@ -350,16 +412,35 @@ export default class extends Controller {
         this.#selecting = false;
         this.#hoverDay = null;
         this.#renderCalendars();
+
+        // Notify Live Component pages
+        this.dispatch('cleared', { bubbles: true });
     }
 
     applyCustomRange() {
         if (!this.#rangeStart || !this.#rangeEnd) return;
 
         const start = new Date(this.#rangeStart);
-        start.setHours(0, 0, 0, 0);
-
         const end = new Date(this.#rangeEnd);
-        end.setHours(23, 59, 0, 0);
+
+        if (this.showTimeValue) {
+            // Read time inputs if they exist
+            if (this.hasStartTimeTarget && this.startTimeTarget.value) {
+                const [sh, sm] = this.startTimeTarget.value.split(':').map(Number);
+                start.setHours(sh, sm, 0, 0);
+            } else {
+                start.setHours(0, 0, 0, 0);
+            }
+            if (this.hasEndTimeTarget && this.endTimeTarget.value) {
+                const [eh, em] = this.endTimeTarget.value.split(':').map(Number);
+                end.setHours(eh, em, 59, 0);
+            } else {
+                end.setHours(23, 59, 59, 0);
+            }
+        } else {
+            start.setHours(0, 0, 0, 0);
+            end.setHours(23, 59, 59, 0);
+        }
 
         this.#closePicker();
         this.#submitPreset('custom', start, end);
@@ -369,11 +450,11 @@ export default class extends Controller {
 
     #sameDay(a, b) {
         return (
-            a &&
-            b &&
-            a.getFullYear() === b.getFullYear() &&
-            a.getMonth() === b.getMonth() &&
-            a.getDate() === b.getDate()
+          a &&
+          b &&
+          a.getFullYear() === b.getFullYear() &&
+          a.getMonth() === b.getMonth() &&
+          a.getDate() === b.getDate()
         );
     }
 
@@ -405,21 +486,42 @@ export default class extends Controller {
     #updateTriggerLabel() {
         const eff = this.#selecting && this.#hoverDay ? this.#hoverDay : this.#rangeEnd;
         const fmt = (d) =>
-            d
-                ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-                : '…';
+          d
+            ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+            : '…';
+        const fmtTime = (d) => {
+            if (!d) return '';
+            const pad = (n) => String(n).padStart(2, '0');
+            return ` ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        };
 
         if (!this.#rangeStart) {
-            this.rangeLabelTarget.innerHTML = `<span class="text-gray-400">${this.t('pickRange')}</span>`; // ← translated
+            this.rangeLabelTarget.innerHTML = `<span class="text-gray-400">${this.t('pickRange')}</span>`;
             return;
         }
 
-        this.rangeLabelTarget.innerHTML = `<span class="text-gray-800 font-medium">${fmt(this.#rangeStart)}</span>
-             <span class="text-gray-400 mx-1">→</span>
-             <span class="text-gray-800 font-medium">${fmt(eff)}</span>`;
+        this.rangeLabelTarget.innerHTML = `
+        <span class="text-gray-800 font-medium">${fmt(this.#rangeStart)}${fmtTime(this.#rangeStart)}</span>
+        <span class="text-gray-400 mx-1">→</span>
+        <span class="text-gray-800 font-medium">${fmt(eff)}${fmtTime(eff)}</span>`;
     }
 
     #submitPreset(preset, start, end) {
+        // Dispatch a custom event so Live Component pages can intercept
+        this.dispatch('applied', {
+            detail: {
+                preset,
+                startDate: this.formatDate(start),
+                endDate: this.formatDate(end),
+            },
+            bubbles: true,
+        });
+
+        // Only do the form submit if NOT inside a live component
+        if (this.element.closest('[data-controller~="live"]')) {
+            return; // Live Component will handle it via the event above
+        }
+
         const form = document.createElement('form');
         form.method = 'get';
         form.action = window.location.pathname;
@@ -442,7 +544,7 @@ export default class extends Controller {
 
     formatDate(date) {
         const pad = (n) => String(n).padStart(2, '0');
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
     }
 
     #showWarning(msg) {
@@ -451,12 +553,12 @@ export default class extends Controller {
             el = document.createElement('div');
             el.dataset.rangeWarning = '';
             el.className =
-                'flex items-center gap-2 mt-2 px-3 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs';
+              'flex items-center gap-2 mt-2 px-3 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs';
             el.innerHTML = `<svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
                 <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3.5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4.5zm0 7a.875.875 0 1 1 0-1.75.875.875 0 0 1 0 1.75z"/>
             </svg><span></span>`;
             const footer = this.pickerDropdownTarget.querySelector(
-                '.flex.items-center.justify-between.border-t'
+              '.flex.items-center.justify-between.border-t'
             );
             this.pickerDropdownTarget.insertBefore(el, footer);
         }

@@ -1,0 +1,159 @@
+<div {{ attributes }}>
+    {# Hidden inputs for date range — bound to Live Component props #}
+    <input type="hidden" data-model="startDate" value="{{ startDate }}">
+    <input type="hidden" data-model="endDate" value="{{ endDate }}">
+
+    {# Search Bar + Filter Tabs — matches dashboard.html.twig style #}
+    <div class="sm:w-auto px-5 py-4 space-y-4">
+
+        {# Bottom Row: Filter Tabs — full width, wraps naturally #}
+        <div class="flex flex-row flex-wrap items-center justify-center gap-4">
+            {% set filters = {
+                'all': { label: 'all', count: this.eventCounts.all, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
+                'user_actions': { label: 'userActions', count: this.eventCounts.user_actions, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
+                'admin_actions': { label: 'adminActions', count: this.eventCounts.admin_actions, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
+                'auth_events': { label: 'authEvents', count: this.eventCounts.auth_events, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
+                'settings_changes': { label: 'settingsChanges', count: this.eventCounts.settings_changes, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
+                'certificate_events': { label: 'certificateEvents', count: this.eventCounts.certificate_events, activeClass: 'text-veryDarkButton border-b-2 border-y-veryDarkButton', hoverClass: 'hover:text-veryDarkButton hover:border-b-2 hover:border-y-veryDarkButton/50', badgeActive: 'bg-veryDarkButton text-white', badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white' },
+            } %}
+
+            {% for value, tab in filters %}
+                <button type="button"
+                        data-action="click->live#update"
+                        data-model="filter"
+                        data-value="{{ value }}"
+                        class="flex flex-row group transition-all duration-100 {{ tab.hoverClass }} {{ filter == value ? tab.activeClass : '' }}">
+                    <h1 class="px-2">{{ tab.label|trans({}, 'ActivityLogSearchForm') }}</h1>
+                    <div class="w-auto h-6 mb-1 px-2 rounded-md text-center transition-all duration-100 {{ filter == value ? tab.badgeActive : tab.badgeHover }}">
+                        {{ tab.count }}
+                    </div>
+                </button>
+            {% endfor %}
+        </div>
+
+        {# Top Row: Search Bar + Date Filter #}
+        <div class="flex flex-col lg:flex-row justify-center items-center gap-4 mb-4">
+
+            {# Search Input #}
+            <div class="relative w-full md:w-3/6"
+                    {{ stimulus_controller('autocomplete') }}>
+                <div class="flex flex-row items-center border rounded-md">
+                    <button type="button">
+                        <svg class="w-5 mx-3 text-gray-400" fill="none" stroke="currentColor"
+                             stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                             aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+                        </svg>
+                    </button>
+                    <label class="w-full">
+                        <input type="text"
+                               class="form-widget w-full p-2 bg-transparent border-none outline-none"
+                               placeholder="{{ 'searchLogs'|trans({}, 'dashboard') }}"
+                               data-model="debounce(300)|query"
+                               data-autocomplete-target="input"
+                               data-action="keydown->autocomplete#keydown focus->autocomplete#open"
+                               autocomplete="off"/>
+                    </label>
+                </div>
+
+                {# Autocomplete Suggestions Dropdown #}
+                {% set suggestions = this.suggestions %}
+                {% if suggestions is not empty %}
+                    <ul {{ stimulus_target('autocomplete', 'suggestions') }}
+                            class="absolute z-30 w-full bg-white border border-gray-200 rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
+                        {% for suggestion in suggestions %}
+                            <li>
+                                <button type="button"
+                                        class="w-full text-left px-4 py-2 text-sm hover:bg-veryLightGreen transition-colors duration-100"
+                                        data-action="click->live#update click->autocomplete#selectSuggestion"
+                                        data-model="query"
+                                        data-value="{{ suggestion.value }}">
+                                    {# Show human label #}
+                                    <span class="font-medium">{{ suggestion.label }}</span>
+                                    {# Show raw value as hint #}
+                                    <span class="text-xs text-gray-400 ml-2 font-mono">{{ suggestion.value }}</span>
+                                </button>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            {# Date Filter #}
+            {{ include('dashboard/shared/_date_filter_form.html.twig', {
+                activePreset: '',
+                selectedStartDate: startDate,
+                selectedEndDate: endDate,
+                showTime: true
+            }) }}
+
+        </div>
+    </div>
+
+    {# Table #}
+    <div class="overflow-x-auto max-w-full mt-3">
+        <table class="w-full items-start">
+            <thead class="text-sm text-gray-700 bg-veryLightGreen">
+            <tr>
+                {% if not this.userScoped %}
+                    <th scope="col" class="px-6 py-3 text-left">UUID</th>
+                {% endif %}
+                <th scope="col" class="px-6 py-3 text-left">
+                    {{ 'action'|trans({}, 'dashboard') }}
+                </th>
+                <th scope="col" class="px-6 py-3 text-left">
+                    {{ 'ipAddress'|trans({}, 'dashboard') }}
+                </th>
+                <th scope="col" class="px-6 py-3 text-left">
+                    {{ 'createdAt'|trans({}, 'dashboard') }}
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {% set logs = this.logs %}
+            {% for log in logs %}
+                {{ include('dashboard/shared/_activity_log.html.twig', {
+                    log: log,
+                    showUser: not this.userScoped
+                }) }}
+            {% else %}
+                <tr>
+                    <td colspan="4">
+                        <div class="flex flex-row justify-center items-start mt-2 p-4">
+                            <div class="pill-error">
+                                {% if query %}
+                                    {{ 'noLogsFoundWith'|trans({}, 'dashboard') }} "{{ query }}"
+                                {% else %}
+                                    {{ 'noLogs'|trans({}, 'dashboard') }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# Modals outside table #}
+    {% set logs = this.logs %}
+    {% for log in logs %}
+        {{ include('dashboard/shared/_activity_log_modal.html.twig', {
+            log: log,
+            showUser: not this.userScoped
+        }) }}
+    {% endfor %}
+
+    {# Pagination #}
+    <div class="m-8">
+        <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
+        {{ include('dashboard/shared/pagination/_pagination_live.html.twig', {
+            label: 'logsPerPage'|trans({}, 'dashboard'),
+            occurrencies: this.totalLogs,
+            totalPages: this.totalPages,
+            page: page,
+            count: count,
+        }) }}
+    </div>
+</div>

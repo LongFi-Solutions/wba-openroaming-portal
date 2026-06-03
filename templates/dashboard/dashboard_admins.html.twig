@@ -5,40 +5,9 @@
 {% import 'dashboard/shared/_sort_arrow.html.twig' as sharedSort %}
 
 {% block container %}
-    {% set eeaStatus = isEEAUser() %}
-    {% set message = '' %}
-    {% if eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::LOCATION_ERROR').value %}
-        {% set message = 'locationError'|trans({}, 'dashboard') %}
-    {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::MISSING_FILE').value %}
-        {% set message = 'missingFile'|trans({}, 'dashboard') %}
-    {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::INVALID_DB').value %}
-        {% set message = 'invalidDb'|trans({}, 'dashboard') %}
-    {% endif %}
+    {# Render generic warning toast of the platform #}
+    {{ include('/dashboard/shared/_dashboard_toasts.html.twig')}}
 
-    {# Certificate Process Status - Checks if the certificates are applied correctly #}
-    {% if isCertificateAborted() %}
-        {% set isDashboard = app.request.pathinfo starts with '/dashboard' %}
-        {% set toastType = isDashboard ? 'toast-error-dashboard' : 'toast-error' %}
-
-        {{ include('shared/_toast.html.twig', {
-            message: 'abortedCertificatesWarning'|trans({}, 'dashboard'),
-            toast_type: toastType,
-        }) }}
-    {% endif %}
-
-    {% if message != '' %}
-        {{ include('shared/_toast.html.twig', {
-            message: message,
-            toast_type: 'toast-warning-dashboard',
-        }) }}
-    {% endif %}
-
-    {% if not isFreeradiusCertEV() %}
-        {{ include('shared/_toast.html.twig', {
-            message: 'freeradius_is_not_ev_cert_warning'|trans({}, 'dashboard'),
-            toast_type: 'toast-warning-dashboard',
-        }) }}
-    {% endif %}
     <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
         <div class="w-full">
             <div class="sm:w-auto px-5 py-4">
@@ -46,7 +15,7 @@
 
                     {# Left Search Filters #}
                     <div class="flex flex-col md:flex-row sm:items-center gap-4 sm:gap-6">
-                        <a href="{{ path('admins_management', {filter: 'all', u: app.request.query.get('u')}) }}"
+                        <a href="{{ path('admin_dashboard_admins', {filter: 'all', u: app.request.query.get('u')}) }}"
                            class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                             <h1 class="px-2">
                                 {{ 'all'|trans({}, 'dashboard') }}
@@ -55,7 +24,7 @@
                                 {{ allUsersCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admins_management', {filter: constant('App\\Enum\\UserVerificationStatus::VERIFIED').value, u: app.request.query.get('u')}) }}"
+                        <a href="{{ path('admin_dashboard_admins', {filter: constant('App\\Enum\\UserVerificationStatus::VERIFIED').value, u: app.request.query.get('u')}) }}"
                            class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED').value %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
                             <h1 class="px-2">
                                 {{ 'verified'|trans({}, 'dashboard') }}
@@ -64,7 +33,7 @@
                                 {{ verifiedUsersCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admins_management', {filter: constant('App\\Enum\\UserVerificationStatus::BANNED').value, u: app.request.query.get('u')}) }}"
+                        <a href="{{ path('admin_dashboard_admins', {filter: constant('App\\Enum\\UserVerificationStatus::BANNED').value, u: app.request.query.get('u')}) }}"
                            class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED').value %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
                             <h1 class="px-2">
                                 {{ 'banned'|trans({}, 'dashboard') }}
@@ -77,7 +46,7 @@
 
                     {# Midle Search Bar #}
                     <div class="w-full md:w-3/6">
-                        <form action="{{ path('admins_management') }}" method="GET">
+                        <form action="{{ path('admin_dashboard_admins') }}" method="GET">
 
                             <div class="flex flex-row items-center border rounded-md">
                                 {# Search Icon #}
@@ -105,11 +74,11 @@
                     {% set isSuperAdmin = constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in currentUser.roles %}
                     {% if isSuperAdmin or is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE')) %}
 
-                    <div class="flex items-center space-x-6">
-                        <a href="{{ path('dashboard_add_admin') }}" class="btn-primary px-4 min-w-[150px]">
-                            {{ 'addAdmin'|trans({}, 'dashboard') }}
-                        </a>
-                    </div>
+                        <div class="flex items-center space-x-6">
+                            <a href="{{ path('admin_dashboard_add_admin') }}" class="btn-primary px-4 min-w-[150px]">
+                                {{ 'addAdmin'|trans({}, 'dashboard') }}
+                            </a>
+                        </div>
                     {% endif %}
                 </div>
             </div>
@@ -191,7 +160,7 @@
             {# Users Table Pagination #}
             <div class="m-8">
                 <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-                {{ include('dashboard/shared/pagination/_pagination_tables.html.twig', {label: 'usersPerPage'|trans({}, 'dashboard'), route: 'admins_management', occurrencies: allUsersCount}) }}
+                {{ include('dashboard/shared/pagination/_pagination_tables.html.twig', {label: 'usersPerPage'|trans({}, 'dashboard'), route: 'admin_dashboard_admins', occurrencies: allUsersCount}) }}
             </div>
         </div>
     </div>

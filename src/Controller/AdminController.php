@@ -69,7 +69,7 @@ class AdminController extends AbstractController
 
         // Redirect to User Profile
         if (!$this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ)) {
-            return $this->redirectToRoute('admin_user_edit', ['id' => $currentUser->getId()]);
+            return $this->redirectToRoute('admin_dashboard_user_show', ['id' => $currentUser->getId()]);
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
@@ -126,7 +126,7 @@ class AdminController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/admins', name: 'admins_management')]
+    #[Route('/dashboard/admins', name: 'admin_dashboard_admins')]
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function adminRolesManagement(
         Request $request,
@@ -246,7 +246,7 @@ class AdminController extends AbstractController
                     )
                 );
 
-                return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
+                return $this->redirectToRoute('admin_dashboard_confirm_reset', ['type' => $type]);
             }
 
             $timeLeft = $this->verificationCodeGenerator->timeLeftToResendCode($timeIntervalInSeconds, $lastResend);
@@ -260,7 +260,7 @@ class AdminController extends AbstractController
                 )
             );
 
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
+            return $this->redirectToRoute('admin_dashboard_confirm_reset', ['type' => $type]);
         }
 
         return $this->redirectToRoute('admin_page');

@@ -66,7 +66,7 @@ class SettingsController extends AbstractController
     /**
      * @param string $type Type of action
      */
-    #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
+    #[Route('/dashboard/confirm-checker/{type}', name: 'admin_dashboard_confirm_checker')]
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function checkSettings(Request $request, string $type): Response
     {
@@ -467,7 +467,7 @@ class SettingsController extends AbstractController
             'error',
             $this->translator->trans('incorrectVerificationCode', [], 'controllers')
         );
-        return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
+        return $this->redirectToRoute('admin_dashboard_confirm_reset', ['type' => $type]);
     }
 
     #[Route(
