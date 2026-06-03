@@ -14,7 +14,7 @@
         isAdmin: userData.isAdmin,
         actions: canEdit
         ? '<a href="' ~ path('admin_dashboard_user_edit', {id: userData.user.id}) ~ '" class="btn-primary text-sm">' ~ 'edit'|trans({}, 'edit') ~ '</a>'
-        : ''
+        : '',
     }) }}
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">

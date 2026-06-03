@@ -19,7 +19,7 @@
         backUrl: path('admin_dashboard_user_show', {id: user.id}),
         actions: canEdit
         ? '<a href="' ~ path('admin_dashboard_user_edit', {id: user.id}) ~ '" class="btn-primary text-sm">' ~ 'edit'|trans({}, 'edit') ~ '</a>'
-        : ''
+        : '',
     }) }}
 
     <twig:UserUpdateForm
@@ -44,7 +44,7 @@
                              alt="Info icon"/>
                     </div>
                     {{ include('dashboard/shared/settings_actions/_description.html.twig', {
-                        description: 'UUIDDescription'|trans({}, 'edit')
+                        description: 'UUIDDescription'|trans({}, 'edit'),
                     }) }}
                     <div class="text-red-500 mt-1">
                         {{ form_errors(form.uuid) }}
