@@ -47,6 +47,9 @@ class ActivityLogSearchForm extends AbstractController
     ) {
     }
 
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
     public function getSuggestions(): array
     {
         if (strlen($this->query) < 2) {
@@ -89,6 +92,7 @@ class ActivityLogSearchForm extends AbstractController
     }
 
     /**
+     * @return array<int, \App\Entity\Event>
      * @throws \DateMalformedStringException
      */
     public function getLogs(): array
@@ -130,6 +134,9 @@ class ActivityLogSearchForm extends AbstractController
         return (int)ceil($this->getTotalLogs() / $this->count);
     }
 
+    /**
+     * @return array<string, int>
+     */
     public function getEventCounts(): array
     {
         // When scoped to a user, count only their events
