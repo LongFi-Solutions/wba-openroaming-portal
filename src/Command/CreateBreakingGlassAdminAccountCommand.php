@@ -80,7 +80,7 @@ class CreateBreakingGlassAdminAccountCommand extends Command
             $usedAccount = $this->userRepository->findOneBy(['email' => $defaultValue->getValue()]);
         }
         $plainPassword = bin2hex(random_bytes(16));
-        $validEmail = !($defaultValue->getValue() === null) && str_starts_with(
+        $validEmail = $defaultValue->getValue() !== null && str_starts_with(
             $defaultValue->getValue(),
             'breakglass_'
         );
@@ -134,11 +134,7 @@ class CreateBreakingGlassAdminAccountCommand extends Command
         $event->setEventDatetime(new DateTime());
         $event->setEventName(AnalyticalEventType::BREAKING_GLASS_ACCOUNT_GENERATION->value);
         $hostname = gethostname();
-        if (!$hostname) {
-            $ip = '';
-        } else {
-            $ip = gethostbyname($hostname);
-        }
+        $ip = $hostname ? gethostbyname($hostname) : '';
         $eventMetadata = [
             'platform' => PlatformMode::CLI->value,
             'ip' => $ip,

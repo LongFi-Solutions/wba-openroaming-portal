@@ -88,11 +88,7 @@ class ResetBreakingGlassAccountSettingCommand extends Command
             $event->setEventDatetime(new DateTime());
             $event->setEventName(AnalyticalEventType::BREAKING_GLASS_ACCOUNT_RESET->value);
             $hostname = gethostname();
-            if (!$hostname) {
-                $ip = '';
-            } else {
-                $ip = gethostbyname($hostname);
-            }
+            $ip = $hostname ? gethostbyname($hostname) : '';
             $eventMetadata = [
                 'platform' => PlatformMode::CLI->value,
                 'ip' => $ip,
