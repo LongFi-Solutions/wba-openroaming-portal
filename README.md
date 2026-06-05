@@ -527,6 +527,8 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 82. `SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS`: Time window (in minutes) after which the SMS request attempts counter is reset
 83. `SMS_TIME_INTERVAL_BETWEEN_REQUESTS`: Minimum cooldown (in seconds) between consecutive SMS requests
 84. `SMS_ATTEMPTS_NUMBER`: Maximum number of allowed requests within the defined time window
+85. `BREAKING_GLASS_ADMIN_EMAIL`: Defines the email for the one time usage admin account.
+
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
 ## Contact Information?

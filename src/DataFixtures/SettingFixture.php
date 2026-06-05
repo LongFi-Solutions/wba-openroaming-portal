@@ -164,6 +164,7 @@ class SettingFixture extends Fixture
             ['name' => SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS->value, 'value' => '60'],
             ['name' => SettingName::SMS_TIME_INTERVAL_BETWEEN_REQUESTS->value, 'value' => '30'],
             ['name' => SettingName::SMS_ATTEMPTS_NUMBER->value, 'value' => '5'],
+            ['name' => SettingName::BREAKING_GLASS_ADMIN_EMAIL->value, 'value' => ''],
         ];
 
         foreach ($settings as $settingData) {

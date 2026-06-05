@@ -103,12 +103,20 @@ class ForgotPasswordController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+
         $user = new User();
         $form = $this->createForm(ForgotPasswordEmailType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $this->userRepository->findOneBy(['uuid' => $user->getEmail()]);
+            if ($user->getEmail() === $data[SettingName::BREAKING_GLASS_ADMIN_EMAIL->value]['value']) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('emailDoesntExist', [], 'controllers')
+                );
+                return $this->redirectToRoute('app_site_forgot_password_email');
+            }
             if ($user) {
                 // Check if the provider is "PORTAL_ACCOUNT" and the providerId "EMAIL"
                 $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
