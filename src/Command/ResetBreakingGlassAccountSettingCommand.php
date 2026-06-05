@@ -65,7 +65,6 @@ class ResetBreakingGlassAccountSettingCommand extends Command
         $this->entityManager->beginTransaction();
 
         try {
-
             foreach ($settings as $settingData) {
                 $name = $settingData['name'];
                 $value = $settingData['value'];
