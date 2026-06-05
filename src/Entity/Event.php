@@ -27,7 +27,7 @@ class Event
     private ?array $event_metadata = null;
 
     #[ORM\ManyToOne(inversedBy: 'event')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $user = null;
 
     public function getId(): ?int

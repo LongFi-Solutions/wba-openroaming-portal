@@ -8,4 +8,5 @@ enum PlatformMode: string
 {
     case LIVE = 'Live';
     case DEMO = 'Demo';
+    case CLI = 'CLI';
 }

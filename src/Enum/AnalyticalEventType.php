@@ -139,6 +139,8 @@ enum AnalyticalEventType: string
     case RADIUS_TLS_UPDATED = 'RADIUS_TLS_UPDATED';
     case RETURN_APPS_UPDATED = 'RETURN_APPS_UPDATED';
     case RETURN_APPS_RESET_REQUEST = 'RETURN_APPS_RESET_REQUEST';
+    case BREAKING_GLASS_ACCOUNT_GENERATION = 'BREAKING_GLASS_ACCOUNT_GENERATION';
+    case BREAKING_GLASS_ACCOUNT_RESET = 'BREAKING_GLASS_ACCOUNT_RESET';
 
     public function getLabel(): string
     {
@@ -295,6 +297,8 @@ enum AnalyticalEventType: string
             self::RADIUS_TLS_UPDATED => 'RADIUS TLS Updated',
             self::RETURN_APPS_UPDATED => 'Return Apps Updated',
             self::RETURN_APPS_RESET_REQUEST => 'Return Apps Reset',
+            self::BREAKING_GLASS_ACCOUNT_GENERATION => 'Breaking Account Generation',
+            self::BREAKING_GLASS_ACCOUNT_RESET => 'Breaking Account Reset',
         };
     }
 }

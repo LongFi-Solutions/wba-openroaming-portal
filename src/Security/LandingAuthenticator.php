@@ -74,6 +74,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             $userLoader = fn(string $id) => $this->userRepository->findOneBy([
                 'email' => $id,
                 'deletedAt' => null,
+                'isDisabled' => false,
             ]);
         } elseif ($loginMethod === UserProvider::PHONE_NUMBER->value) {
             $phoneUtil = PhoneNumberUtil::getInstance();
@@ -100,6 +101,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
                 return $this->userRepository->findOneBy([
                     'phoneNumber' => $phoneNumberObj,
                     'deletedAt' => null,
+                    'isDisabled' => false,
                 ]);
             };
         } else {
