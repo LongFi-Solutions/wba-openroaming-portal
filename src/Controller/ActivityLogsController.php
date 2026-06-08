@@ -20,14 +20,11 @@ class ActivityLogsController extends AbstractController
     /**
      * Activity Logs Page
      */
-    #[Route('/dashboard/activityLogs', name: 'admin_dashboard_activity_logs')]
+    #[Route('/dashboard/activity-logs', name: 'admin_dashboard_activity_logs')]
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::ACTIVITY_LOGS_READ)]
     public function activityLogs(): Response
     {
-        if (!$this->isGranted(UserAuthenticationVoter::ACTIVITY_LOGS_READ)) {
-            throw $this->createAccessDeniedException();
-        }
-
         // Call the getSettings method of GetSettings class to retrieve the data
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
