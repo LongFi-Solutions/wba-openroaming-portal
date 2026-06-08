@@ -255,14 +255,14 @@ class EventRepository extends ServiceEntityRepository
     public function findDownloadProfileEvents(DateTime $start, DateTime $end): array
     {
         return $this->createQueryBuilder('e')
-            ->join('e.user', 'u')
+            ->select('e.event_metadata')
             ->andWhere('e.event_name = :event')
             ->andWhere('e.event_datetime BETWEEN :start AND :end')
             ->setParameter('event', AnalyticalEventType::DOWNLOAD_PROFILE->value)
             ->setParameter('start', $start)
             ->setParameter('end', $end)
             ->getQuery()
-            ->getResult();
+            ->getArrayResult();
     }
 
     /**
@@ -273,14 +273,14 @@ class EventRepository extends ServiceEntityRepository
     public function findUserCreationEvents(DateTime $start, DateTime $end): array
     {
         return $this->createQueryBuilder('e')
-            ->join('e.user', 'u')
+            ->select('e.event_metadata')
             ->andWhere('e.event_name = :event')
             ->andWhere('e.event_datetime BETWEEN :start AND :end')
             ->setParameter('event', AnalyticalEventType::USER_CREATION->value)
             ->setParameter('start', $start)
             ->setParameter('end', $end)
             ->getQuery()
-            ->getResult();
+            ->getArrayResult();
     }
 
     private function applyEventGroupFilter(QueryBuilder $qb, string $group): void

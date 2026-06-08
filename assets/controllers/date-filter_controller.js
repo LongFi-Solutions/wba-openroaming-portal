@@ -283,27 +283,15 @@ export default class extends Controller {
             const isIn = this.#between(date, this.#rangeStart, eff);
             const isToday = this.#sameDay(date, today);
 
-            const isBlocked =
-                this.#selecting &&
-                this.#rangeStart &&
-                (() => {
-                    const diff = Math.round(Math.abs(date - this.#rangeStart) / 86400000) + 1;
-                    return diff > 365;
-                })();
-
             let cls =
-                'w-full aspect-square flex items-center justify-center text-[11px] transition-colors duration-75 ';
+              'w-full aspect-square flex items-center justify-center text-[11px] transition-colors duration-75 ';
 
-            if (isBlocked) {
-                cls += 'text-gray-300 cursor-not-allowed ';
-            } else if (isStart && isEnd) {
+            if (isStart && isEnd) {
                 cls += 'bg-[#7DB928] text-white font-medium rounded-md cursor-pointer ';
             } else if (isStart) {
-                cls +=
-                    'bg-[#7DB928] text-white font-medium rounded-l-md rounded-r-none cursor-pointer ';
+                cls += 'bg-[#7DB928] text-white font-medium rounded-l-md rounded-r-none cursor-pointer ';
             } else if (isEnd) {
-                cls +=
-                    'bg-[#7DB928] text-white font-medium rounded-r-md rounded-l-none cursor-pointer ';
+                cls += 'bg-[#7DB928] text-white font-medium rounded-r-md rounded-l-none cursor-pointer ';
             } else if (isIn) {
                 cls += 'bg-[#7DB928]/10 text-[#3B6D11] rounded-none cursor-pointer ';
             } else if (isToday) {
@@ -313,8 +301,8 @@ export default class extends Controller {
             }
 
             html += `<button type="button" class="${cls}"
-             ${isBlocked ? 'disabled' : `data-action="click->date-filter#clickDay mouseenter->date-filter#hoverDay"`}
-             data-year="${year}" data-month="${month}" data-day="${d}">${d}</button>`;
+        data-action="click->date-filter#clickDay mouseenter->date-filter#hoverDay"
+        data-year="${year}" data-month="${month}" data-day="${d}">${d}</button>`;
         }
 
         html += `</div></div>`;
@@ -368,12 +356,6 @@ export default class extends Controller {
                 end = new Date(date);
             }
 
-            const days = Math.round(Math.abs(end - start) / 86400000) + 1;
-            if (days > 365) {
-                this.#showWarning(this.t('maxRangeError')); // ← translated
-                return;
-            }
-
             this.#rangeStart = start;
             this.#rangeEnd = end;
             this.#selecting = false;
@@ -393,15 +375,6 @@ export default class extends Controller {
 
         if (this.#hoverDay && this.#sameDay(newHover, this.#hoverDay)) return;
         this.#hoverDay = newHover;
-
-        if (this.#rangeStart) {
-            const days = Math.round(Math.abs(newHover - this.#rangeStart) / 86400000) + 1;
-            if (days > 365) {
-                this.#showWarning(this.t('maxRangeHint')); // ← translated
-            } else {
-                this.#clearWarning();
-            }
-        }
 
         clearTimeout(this.#hoverTimer);
         this.#hoverTimer = setTimeout(() => {
