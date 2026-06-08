@@ -65,6 +65,11 @@
                 TOTP
             </span>
         {% endif %}
+        {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::BYPASS').value %}
+            <span class="pill-warning">
+                {{ 'byPass'|trans({}, '_user') }}
+            </span>
+        {% endif %}
     </td>
 
     {# Banned At #}
