@@ -2,6 +2,7 @@
 
 namespace App\Twig\Components;
 
+use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Repository\EventRepository;
@@ -43,8 +44,11 @@ class ActivityLogSearchForm extends AbstractController
     public string $endDate = '';
 
     private ?int $cachedTotal = null;
+
+    /** @var array<int, Event>|null */
     private ?array $cachedLogs = null;
 
+    /** @var array<string, int>|null */
     private ?array $cachedEventCounts = null;
 
     public function __construct(
