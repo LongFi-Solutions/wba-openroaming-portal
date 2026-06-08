@@ -46,18 +46,6 @@ class EventRepository extends ServiceEntityRepository
         }
     }
 
-    /**
-     * @param string $filter
-     * @param string $sort
-     * @param string $order
-     * @param string|null $searchTerm
-     * @param string|null $startDate
-     * @param string|null $endDate
-     * @param User|null $user
-     * @param int $page
-     * @param int $count
-     * @return QueryBuilder
-     */
     public function searchWithFilter(
         string $filter = 'all',
         string $sort = 'event_datetime',
