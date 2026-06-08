@@ -1,12 +1,12 @@
 {# Clickable Row — triggers modal by ID #}
 <tr class="border-b hover:bg-veryLightGreen transition-all duration-100 cursor-pointer"
-        {{ stimulus_controller('modal-trigger', {modalId: 'log-modal-' ~ log.id}) }}
+        {{ stimulus_controller('modal-trigger', {modalId: 'event-modal-' ~ event.id}) }}
     data-action="click->modal-trigger#open">
 
     {% if showUser is not defined or showUser %}
         <td class="px-6 py-4 font-medium">
-            {% if log.user is not null %}
-                {{ log.user.uuid }}
+            {% if event.user is not null %}
+                {{ event.user.uuid }}
             {% else %}
                 <span class="pill-error">{{ 'noInformation'|trans({}, '_user') }}</span>
             {% endif %}
@@ -14,19 +14,19 @@
     {% endif %}
 
     <td class="p-4 font-medium">
-        {% set eventType = constant('App\\Enum\\AnalyticalEventType::' ~ log.eventName) is defined
-            ? constant('App\\Enum\\AnalyticalEventType::' ~ log.eventName)
+        {% set eventType = constant('App\\Enum\\AnalyticalEventType::' ~ event.eventName) is defined
+            ? constant('App\\Enum\\AnalyticalEventType::' ~ event.eventName)
             : null %}
         <span class="pill-info">
-            {{ eventType ? eventType.label : log.eventName }}
+            {{ eventType ? eventType.label : event.eventName }}
         </span>
     </td>
 
     <td class="p-4 text-gray-500">
-        {{ log.eventMetadata.ip ?? '-' }}
+        {{ event.eventMetadata.ip ?? '-' }}
     </td>
 
     <td class="px-6 py-4 font-medium">
-        {{ log.eventDatetime|date('d/m/Y H:i') }}
+        {{ event.eventDatetime|date('d/m/Y H:i') }}
     </td>
 </tr>

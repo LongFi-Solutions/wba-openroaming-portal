@@ -111,10 +111,10 @@
             </tr>
             </thead>
             <tbody>
-            {% set logs = this.logs %}
-            {% for log in logs %}
+            {% set events = this.events %}
+            {% for event in events %}
                 {{ include('dashboard/shared/_activity_log.html.twig', {
-                    log: log,
+                    event: event,
                     showUser: not this.userScoped,
                 }) }}
             {% else %}
@@ -137,10 +137,10 @@
     </div>
 
     {# Modals outside table #}
-    {% set logs = this.logs %}
-    {% for log in logs %}
+    {% set events = this.events %}
+    {% for event in events %}
         {{ include('dashboard/shared/_activity_log_modal.html.twig', {
-            log: log,
+            event: event,
             showUser: not this.userScoped,
         }) }}
     {% endfor %}
@@ -150,7 +150,7 @@
         <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
         {{ include('dashboard/shared/pagination/_pagination_live.html.twig', {
             label: 'logsPerPage'|trans({}, 'dashboard'),
-            occurrencies: this.totalLogs,
+            occurrencies: this.totalEvents,
             totalPages: this.totalPages,
             page: page,
             count: count,
