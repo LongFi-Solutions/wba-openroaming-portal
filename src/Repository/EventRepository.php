@@ -68,8 +68,7 @@ class EventRepository extends ServiceEntityRepository
         ?User $user = null,
         int $page = 1,
         int $count = 10
-    ): QueryBuilder
-    {
+    ): QueryBuilder {
         return $this->buildFilterQuery($filter, $sort, $order, $searchTerm, $startDate, $endDate, $user)
             ->setFirstResult(($page - 1) * $count)
             ->setMaxResults($count);
