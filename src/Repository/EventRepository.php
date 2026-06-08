@@ -94,7 +94,10 @@ class EventRepository extends ServiceEntityRepository
             ->join('e.user', 'u')
             ->addSelect('u')
             ->where(
-                'u.email LIKE :search OR u.uuid LIKE :search OR e.event_name LIKE :search OR e.event_metadata LIKE :search'
+                'u.email LIKE :search OR
+                 u.uuid LIKE :search OR
+                  e.event_name LIKE :search OR
+                   e.event_metadata LIKE :search'
             )
             ->setParameter('search', '%' . $searchTerm . '%');
 
