@@ -6,4 +6,6 @@
     <span class="pill-success">SMS</span>
 {% elseif twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value %}
     <span class="pill-success">TOTP</span>
+{% elseif twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::BYPASS').value %}
+    <span class="pill-warning">{{ 'byPass'|trans({}, '_user') }}</span>
 {% endif %}
