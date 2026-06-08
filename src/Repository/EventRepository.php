@@ -58,49 +58,72 @@ class EventRepository extends ServiceEntityRepository
         ?string $startDate = null,
         ?string $endDate = null,
         ?User $user = null,
+        int $page = 1,
+        int $count = 10
     ): array {
+        return $this->buildFilterQuery($filter, $sort, $order, $searchTerm, $startDate, $endDate, $user)
+            ->setFirstResult(($page - 1) * $count)
+            ->setMaxResults($count)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countWithFilter(
+        string $filter = 'all',
+        ?string $searchTerm = null,
+        ?string $startDate = null,
+        ?string $endDate = null,
+        ?User $user = null
+    ): int {
+        return (int)$this->buildFilterQuery($filter, 'e.id', 'asc', $searchTerm, $startDate, $endDate, $user)
+            ->select('COUNT(e.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    private function buildFilterQuery(
+        string $filter,
+        string $sort,
+        string $order,
+        ?string $searchTerm,
+        ?string $startDate,
+        ?string $endDate,
+        ?User $user
+    ): QueryBuilder {
         $qb = $this->createQueryBuilder('e')
-            ->join('e.user', 'u');
+            ->join('e.user', 'u')
+            ->addSelect('u')
+            ->where(
+                'u.email LIKE :search OR u.uuid LIKE :search OR e.event_name LIKE :search OR e.event_metadata LIKE :search'
+            )
+            ->setParameter('search', '%' . $searchTerm . '%');
 
-        // Apply filter by User
-        $this->applyUserFilter($qb, $user);
-
-        // Search by user email/uuid/EventName
-        if ($searchTerm) {
-            $qb->andWhere(
-                'u.email LIKE :search OR u.uuid LIKE :search
-             OR e.event_name LIKE :search OR e.event_metadata LIKE :search'
-            )->setParameter('search', '%' . $searchTerm . '%');
-        }
-
-        // Date range filter
-        if ($startDate) {
+        if (!is_null($startDate)) {
             try {
                 $qb->andWhere('e.event_datetime >= :startDate')
                     ->setParameter('startDate', new DateTime($startDate));
             } catch (Exception) {
-                // invalid date, skip
             }
         }
 
-        if ($endDate) {
+        if (!is_null($endDate)) {
             try {
                 $qb->andWhere('e.event_datetime <= :endDate')
                     ->setParameter('endDate', new DateTime($endDate));
             } catch (Exception) {
-                // invalid date, skip
             }
         }
 
-        // Sort all the Data
+        $this->applyUserFilter($qb, $user);
         $this->applyEventGroupFilter($qb, $filter);
+
         $allowedSorts = ['event_datetime', 'event_name'];
         $allowedOrders = ['asc', 'desc'];
         $sort = in_array($sort, $allowedSorts, true) ? $sort : 'event_datetime';
         $order = in_array(strtolower($order), $allowedOrders, true) ? $order : 'desc';
         $qb->orderBy('e.' . $sort, $order);
 
-        return $qb->getQuery()->getResult();
+        return $qb;
     }
 
     /**
@@ -317,7 +340,7 @@ class EventRepository extends ServiceEntityRepository
 
     private function applyUserFilter(QueryBuilder $qb, ?User $user): void
     {
-        if ($user instanceof \App\Entity\User) {
+        if ($user instanceof User) {
             $qb->andWhere('e.user = :user')
                 ->setParameter('user', $user);
         }

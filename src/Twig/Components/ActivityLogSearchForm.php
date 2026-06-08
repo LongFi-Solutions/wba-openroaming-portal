@@ -42,6 +42,11 @@ class ActivityLogSearchForm extends AbstractController
     #[LiveProp(writable: true)]
     public string $endDate = '';
 
+    private ?int $cachedTotal = null;
+    private ?array $cachedLogs = null;
+
+    private ?array $cachedEventCounts = null;
+
     public function __construct(
         private readonly EventRepository $eventRepository,
     ) {
@@ -97,18 +102,20 @@ class ActivityLogSearchForm extends AbstractController
      */
     public function getLogs(): array
     {
-        $all = $this->eventRepository->searchWithFilter(
-            $this->filter,
-            $this->sort,
-            $this->order,
-            $this->resolvedQuery(),
-            $this->startDate ?: null,
-            $this->endDate ?: null,
-            $this->user
-        );
-
-        $offset = ($this->page - 1) * $this->count;
-        return array_slice($all, $offset, $this->count);
+        if ($this->cachedLogs === null) {
+            $this->cachedLogs = $this->eventRepository->searchWithFilter(
+                $this->filter,
+                $this->sort,
+                $this->order,
+                $this->resolvedQuery(),
+                $this->startDate ?: null,
+                $this->endDate ?: null,
+                $this->user,
+                $this->page,
+                $this->count
+            );
+        }
+        return $this->cachedLogs;
     }
 
     /**
@@ -116,19 +123,21 @@ class ActivityLogSearchForm extends AbstractController
      */
     public function getTotalLogs(): int
     {
-        return count(
-            $this->eventRepository->searchWithFilter(
+        if ($this->cachedTotal === null) {
+            $this->cachedTotal = $this->eventRepository->countWithFilter(
                 $this->filter,
-                $this->sort,
-                $this->order,
                 $this->resolvedQuery(),
                 $this->startDate ?: null,
                 $this->endDate ?: null,
                 $this->user
-            )
-        );
+            );
+        }
+        return $this->cachedTotal;
     }
 
+    /**
+     * @throws \DateMalformedStringException
+     */
     public function getTotalPages(): int
     {
         return (int)ceil($this->getTotalLogs() / $this->count);
@@ -139,11 +148,13 @@ class ActivityLogSearchForm extends AbstractController
      */
     public function getEventCounts(): array
     {
-        // When scoped to a user, count only their events
-        if ($this->user instanceof User) {
-            return $this->eventRepository->countByEventGroup($this->user);
+        if ($this->cachedEventCounts === null) {
+            // When scoped to a user, count only their events
+            $this->cachedEventCounts = $this->user instanceof User
+                ? $this->eventRepository->countByEventGroup($this->user)
+                : $this->eventRepository->countByEventGroup();
         }
-        return $this->eventRepository->countByEventGroup();
+        return $this->cachedEventCounts;
     }
 
     public function isUserScoped(): bool
