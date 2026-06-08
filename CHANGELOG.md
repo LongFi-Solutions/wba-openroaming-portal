@@ -1,13 +1,28 @@
 # Changelog
 
+# Release V1.12.0
+
+- New settings to configure the number of retry attempts for email & SMS at a specific timeframe, with customization available on the dashboard.
+- New settings for number of tries for email & sms on a specific time stamp also customizable on the platform
+- New command for breaking glass cases that generate a new pair of credentials for the dashboard access (one time use
+  per generation). It also has white-flag to skip 2FA validation and when it logins this account is immediately
+  disabled.
+
+Please make sure to execute the new migration to update and use the new required configuration settings
+- Run the migrations with:
+  ```bash
+  php bin/console doctrine:migrations:migrate
+  ```
+
 # Release V1.11.0
 
 - Updated both statistics pages on the dashboard interface
 - Minor improvements with other UI elements
 - Improved date-filtering on both statistics pages
 - Code Optimizations
+- Updated `DATABASE_URL` and `DATABASE_FREERADIUS_URL` in `.env` to use full MySQL version string (e.g. `serverVersion=8.0.44`) to fix deprecations — please update your `.env` accordingly and follow the `.env.sample`
 
-No migrations & actions are needed for this release
+No migrations are needed for this release
 
 # Release V1.10.5
 
