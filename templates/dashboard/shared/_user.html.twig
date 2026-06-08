@@ -69,7 +69,7 @@
     </td>
 
     {# Actions Buttons #}
-    <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>         {# Items Button Dropdown #}
+    <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>
             <button type="button" class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
                     {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
                     {{ stimulus_target('nav-submenu', 'button') }}>
