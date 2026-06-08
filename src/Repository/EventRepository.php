@@ -195,4 +195,20 @@ class EventRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @return Event[]
+     */
+    public function findLastEvents(User $user, string $eventLog, DateTime $limitTime): array
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.user = :user')
+            ->andWhere('e.event_name = :event')
+            ->andWhere('e.event_datetime >= :limitTime')
+            ->setParameter('user', $user)
+            ->setParameter('event', $eventLog)
+            ->setParameter('limitTime', $limitTime)
+            ->getQuery()
+            ->getResult();
+    }
 }
