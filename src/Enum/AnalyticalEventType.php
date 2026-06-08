@@ -141,4 +141,164 @@ enum AnalyticalEventType: string
     case RETURN_APPS_RESET_REQUEST = 'RETURN_APPS_RESET_REQUEST';
     case BREAKING_GLASS_ACCOUNT_GENERATION = 'BREAKING_GLASS_ACCOUNT_GENERATION';
     case BREAKING_GLASS_ACCOUNT_RESET = 'BREAKING_GLASS_ACCOUNT_RESET';
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            // User actions
+            self::DOWNLOAD_PROFILE => 'Download Profile',
+            self::USER_CREATION => 'User Created',
+            self::USER_VERIFICATION => 'User Verified',
+            self::USER_SMS_ATTEMPT => 'SMS Attempt',
+            self::USER_ACCOUNT_UPDATE => 'Account Updated',
+            self::USER_ACCOUNT_UPDATE_FROM_UI => 'Account Updated (UI)',
+            self::USER_ACCOUNT_UPDATE_PASSWORD => 'Password Updated',
+            self::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI => 'Password Updated (UI)',
+            self::USER_ACCOUNT_DELETION => 'Account Deleted',
+            self::USER_AUTO_DELETED => 'Account Auto-Deleted',
+            self::USER_AUTO_DELETE_CODE => 'Auto-Delete Code Sent',
+            self::AUTO_DELETE_UNCONFIRMED_ACCOUNTS => 'Unconfirmed Accounts Deleted',
+            self::USER_REVOKE_PROFILES => 'Profiles Revoked',
+
+            // Admin actions
+            self::ADMIN_CREATION => 'Admin Created',
+            self::ADMIN_VERIFICATION => 'Admin Verified',
+            self::ADMIN_CHANGED_LOGIN_WITH_UUID_ONLY => 'Login UUID-Only Changed',
+            self::ADMIN_ADDED_PERMISSIONS => 'Permissions Added',
+            self::ADMIN_REMOVED_PERMISSIONS => 'Permissions Removed',
+            self::ADMIN_ADDED_NEW_USER => 'Admin Added New User',
+            self::ADMIN_REVOKE_PROFILES => 'Admin Revoked Profiles',
+            self::DELETED_USER_BY => 'User Deleted by Admin',
+            self::EXPORT_USERS_TABLE_REQUEST => 'Users Exported',
+            self::EXPORT_FREERADIUS_STATISTICS_REQUEST => 'FreeRADIUS Stats Exported',
+
+            // Auth events
+            self::LOGIN_TRADITIONAL_REQUEST => 'Traditional Login',
+            self::MICROSOFT_LOGIN_REQUEST => 'Microsoft Login',
+            self::GOOGLE_LOGIN_REQUEST => 'Google Login',
+            self::LOGOUT_REQUEST => 'Logout',
+            self::FORGOT_PASSWORD_EMAIL_REQUEST => 'Forgot Password (Email)',
+            self::FORGOT_PASSWORD_SMS_REQUEST => 'Forgot Password (SMS)',
+            self::FORGOT_PASSWORD_REQUEST_ACCEPTED => 'Password Reset Accepted',
+            self::LOGIN_WITH_UUID_ONLY_LINK => 'UUID Login Link',
+            self::LOGIN_WITH_UUID_ONLY_CODE => 'UUID Login Code',
+            self::LOGIN_WITH_UUID_ONLY_CODE_RESEND => 'UUID Login Code Resent',
+            self::LOGIN_WITH_UUID_ONLY_LOGIN => 'UUID Login',
+            self::VERIFICATION_CODE_LOGIN_RESEND => 'Verification Code Resent',
+
+            // 2FA
+            self::ENABLE_LOCAL_2FA => '2FA Enabled (Local)',
+            self::ENABLE_TOTP_2FA => '2FA Enabled (TOTP)',
+            self::DISABLE_2FA => '2FA Disabled',
+            self::DISABLED_2FA_BY => '2FA Disabled by Admin',
+            self::VERIFY_TOTP_2FA => '2FA Verified (TOTP)',
+            self::VERIFY_LOCAL_2FA => '2FA Verified (Local)',
+            self::VERIFY_OTP_2FA => '2FA Verified (OTP)',
+            self::GENERATE_OTP_2FA => '2FA OTP Generated',
+            self::TWO_FA_CODE_DISABLE => '2FA Code Disable',
+            self::TWO_FA_CODE_ENABLE => '2FA Code Enable',
+            self::TWO_FA_CODE_VERIFY => '2FA Code Verify',
+            self::TWO_FA_CODE_DISABLE_RESEND => '2FA Disable Code Resent',
+            self::TWO_FA_CODE_VALIDATE_RESEND => '2FA Validate Code Resent',
+            self::TWO_FA_CODE_VERIFY_RESEND => '2FA Verify Code Resent',
+
+            // Settings changes
+            self::SETTING_PAGE_STYLE_REQUEST => 'Page Style Updated',
+            self::SETTING_PAGE_STYLE_RESET_REQUEST => 'Page Style Reset',
+            self::SETTING_PLATFORM_STATUS_REQUEST => 'Platform Status Updated',
+            self::SETTING_PLATFORM_STATUS_RESET_REQUEST => 'Platform Status Reset',
+            self::SETTING_PLATFORM_2FA_REQUEST => '2FA Settings Updated',
+            self::SETTING_PLATFORM_2FA_RESET_REQUEST => '2FA Settings Reset',
+            self::SETTING_TERMS_REQUEST => 'Terms Updated',
+            self::SETTING_TERMS_RESET_REQUEST => 'Terms Reset',
+            self::SETTING_RADIUS_CONF_REQUEST => 'RADIUS Config Updated',
+            self::SETTING_RADIUS_CONF_RESET_REQUEST => 'RADIUS Config Reset',
+            self::SETTING_AUTHS_CONF_REQUEST => 'Auth Methods Updated',
+            self::SETTING_AUTHS_CONF_RESET_REQUEST => 'Auth Methods Reset',
+            self::SETTING_LDAP_CONF_REQUEST => 'LDAP Config Updated',
+            self::SETTING_LDAP_CONF_RESET_REQUEST => 'LDAP Config Reset',
+            self::SETTING_CAPPORT_CONF_REQUEST => 'Captive Portal Updated',
+            self::SETTING_CAPPORT_CONF_RESET_REQUEST => 'Captive Portal Reset',
+            self::SETTING_SCHEDULE_CONF_REQUEST => 'Schedule Config Updated',
+            self::SETTING_SCHEDULE_CONF_RESET_REQUEST => 'Schedule Config Reset',
+            self::SETTING_RESET_CODE_REQUEST => 'Reset Code Requested',
+            self::SETTING_SMS_CONF_REQUEST => 'SMS Config Updated',
+            self::SETTING_SMS_CONF_CLEAR_REQUEST => 'SMS Config Cleared',
+            self::SETTING_DOMAIN_BLACKLIST_REQUEST => 'Domain Blacklist Updated',
+
+            // API
+            self::AUTH_LOCAL_API => 'API Local Auth',
+            self::AUTH_SAML_API => 'API SAML Auth',
+            self::AUTH_GOOGLE_API => 'API Google Auth',
+            self::AUTH_MICROSOFT_API => 'API Microsoft Auth',
+            self::GET_USER_API => 'API Get User',
+            self::USER_ACCOUNT_DELETION_API => 'API Account Deletion',
+            self::USER_ACCOUNT_PASSWORD_RESET_API => 'API Password Reset',
+            self::CONFIG_PROFILE_ANDROID => 'Android Profile Downloaded',
+            self::CONFIG_PROFILE_IOS => 'iOS Profile Downloaded',
+
+            // Domain Blacklist
+            self::BLACKLIST_DOMAIN_ADDED => 'Domain Blacklisted',
+            self::BLACKLIST_DOMAIN_REMOVED => 'Domain Removed from Blacklist',
+            self::BLACKLIST_DOMAIN_EDITED => 'Blacklisted Domain Edited',
+            self::BLACKLIST_SOURCE_ADDED => 'Blacklist Source Added',
+            self::BLACKLIST_SOURCE_REMOVED => 'Blacklist Source Removed',
+            self::BLACKLIST_SOURCE_ACTIVATED => 'Blacklist Source Activated',
+            self::BLACKLIST_SOURCE_DEACTIVATED => 'Blacklist Source Deactivated',
+            self::BLACKLIST_SOURCES_MANUAL_REFRESH_ALL => 'All Blacklist Sources Refreshed',
+            self::BLACKLIST_SOURCES_MANUAL_REFRESH => 'Blacklist Source Refreshed',
+            self::BLACKLIST_SOURCES_COMMAND_REFRESH => 'Blacklist Source Refreshed (Command)',
+
+            // Certificates
+            self::CERTIFICATE_SETUP_PROCESS_CREATION => 'Certificate Process Started',
+            self::CERTIFICATE_SETUP_PROCESS_ABORTED => 'Certificate Process Aborted',
+            self::CERTIFICATE_SETUP_PROCESS_RADSECPROXY_UPLOAD => 'RadSec Certificate Uploaded',
+            self::CERTIFICATE_SETUP_PROCESS_RADSECPROXY_CONFIG => 'RadSec Certificate Configured',
+            self::CERTIFICATE_SETUP_PROCESS_RADSECPROXY_TEST => 'RadSec Certificate Tested',
+            self::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_MANUAL => 'FreeRADIUS Certificate Uploaded (Manual)',
+            self::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_AUTO => 'FreeRADIUS Certificate Uploaded (Auto)',
+            self::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_AUTO_DOMAIN => 'FreeRADIUS Certificate Domain Uploaded',
+            self::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_CONFIG => 'FreeRADIUS Certificate Configured',
+            self::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_TEST => 'FreeRADIUS Certificate Tested',
+            self::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_CLOUDFLARE_DNS_CHALLENGE => 'Cloudflare DNS Challenge',
+            self::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_CLOUDFLARE_HTTP_CHALLENGE => 'Cloudflare HTTP Challenge',
+            self::CERTIFICATE_VALIDATION_RAN => 'Certificate Validation Ran',
+            self::CERTIFICATES_IDENTITY_VERIFIED_CODE => 'Certificate Identity Code Sent',
+            self::CERTIFICATES_IDENTITY_VERIFIED_RESEND_CODE => 'Certificate Identity Code Resent',
+            self::CERTIFICATES_IDENTITY_VERIFIED => 'Certificate Identity Verified',
+
+            // Installation
+            self::INSTALLATION_DATABASE_CONFIG => 'Installation: Database Config',
+            self::INSTALLATION_SETTINGS_CONFIG => 'Installation: Settings Config',
+            self::INSTALLATION_ADMIN_CONFIG => 'Installation: Admin Config',
+            self::INSTALLATION_COMMAND_CONFIG => 'Installation: Commands Config',
+            self::INSTALLATION_CONFIG_ABORTED => 'Installation: Aborted',
+            self::INSTALLATION_ADMIN_CONFIRM_CODE_SENT => 'Installation: Confirm Code Sent',
+            self::INSTALLATION_ADMIN_CONFIRM_CODE_RESENT => 'Installation: Confirm Code Resent',
+            self::INSTALLATION_IDENTITY_VERIFIED_CODE => 'Installation: Identity Code Sent',
+            self::INSTALLATION_IDENTITY_VERIFIED_RESEND_CODE => 'Installation: Identity Code Resent',
+            self::INSTALLATION_IDENTITY_VERIFIED => 'Installation: Identity Verified',
+
+            // System
+            self::SYSTEM_RESET_REQUEST_STARTED => 'System Reset Started',
+            self::SYSTEM_RESET_REQUEST_IN_PROGRESS => 'System Reset In Progress',
+            self::SYSTEM_RESET_REQUEST_COMPLETED => 'System Reset Completed',
+
+            // Notifications
+            self::NOTIFY_ADMIN_EXPIRED_CERT => 'Admin Notified: Expired Certificate',
+            self::NOTIFY_ADMIN_EXPIRING_CERT_ONE_DAY => 'Admin Notified: Certificate Expires in 1 Day',
+            self::NOTIFY_ADMIN_EXPIRING_CERT_THREE_DAYS => 'Admin Notified: Certificate Expires in 3 Days',
+            self::NOTIFY_ADMIN_EXPIRING_CERT_WEEK => 'Admin Notified: Certificate Expires in 1 Week',
+            self::NOTIFY_ADMIN_EXPIRING_CERT_MONTH => 'Admin Notified: Certificate Expires in 1 Month',
+            self::NOTIFY_ADMIN_EXPIRING_CERT_TWO_MONTHS => 'Admin Notified: Certificate Expires in 2 Months',
+            self::NOTIFY_ADMIN_EXPIRING_CERT_THREE_MONTHS => 'Admin Notified: Certificate Expires in 3 Months',
+
+            // Other
+            self::RADIUS_TLS_UPDATED => 'RADIUS TLS Updated',
+            self::RETURN_APPS_UPDATED => 'Return Apps Updated',
+            self::RETURN_APPS_RESET_REQUEST => 'Return Apps Reset',
+            self::BREAKING_GLASS_ACCOUNT_GENERATION => 'Breaking Account Generation',
+            self::BREAKING_GLASS_ACCOUNT_RESET => 'Breaking Account Reset',
+        };
+    }
 }

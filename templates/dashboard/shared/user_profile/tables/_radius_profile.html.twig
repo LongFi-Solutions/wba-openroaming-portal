@@ -1,0 +1,50 @@
+{# RADIUS profiles #}
+<div class="bg-white rounded-xl shadow-sm">
+    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide px-6 pt-6 pb-4">
+        {{ 'radiusProfiles'|trans({}, 'show') }}
+    </h2>
+    {% if userData.radiusProfiles is not empty %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-veryLightGreen text-gray-600">
+                <tr>
+                    <th class="px-4 py-2 text-left">{{ 'profile'|trans({}, 'show') }}</th>
+                    <th class="px-4 py-2 text-left">Status</th>
+                    <th class="px-4 py-2 text-left">{{ 'issuedAt'|trans({}, 'show') }}</th>
+                    <th class="px-4 py-2 text-left">{{ 'validUntil'|trans({}, 'show') }}</th>
+                    <th class="px-4 py-2 text-left">{{ 'lastConnection'|trans({}, 'show') }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for profile in userData.radiusProfiles %}
+                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                        <td class="px-4 py-2 font-mono text-xs">{{ profile.radiusUser }}</td>
+                        <td class="px-4 py-2">
+                            {% if profile.status == 1 %}
+                                <span class="pill-success text-xs">{{ 'active'|trans({}, 'show') }}</span>
+                            {% else %}
+                                <span class="pill-error text-xs">
+                                        {{ profile.revokedReason ?: 'inactive'|trans({}, 'show') }}
+                                    </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-2 text-gray-500 text-xs">
+                            {{ profile.issuedAt|date('d/m/Y H:i') }}
+                        </td>
+                        <td class="px-4 py-2 text-gray-500 text-xs">
+                            {{ profile.validUntil ? profile.validUntil|date('d/m/Y H:i') : '—' }}
+                        </td>
+                        <td class="px-4 py-2 text-gray-500 text-xs">
+                            {{ userData.lastConnectionPerProfile[profile.radiusUser] is defined
+                            ? userData.lastConnectionPerProfile[profile.radiusUser]|date('d/m/Y H:i')
+                            : '—' }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-sm text-gray-400 px-6 pb-6">—</p>
+    {% endif %}
+</div>
