@@ -9,6 +9,7 @@ use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 
@@ -50,6 +51,10 @@ class EventRepository extends ServiceEntityRepository
      * @return Event[] Returns an array of Event objects
      * @throws \DateMalformedStringException
      */
+    /**
+     * @return Paginator<Event>
+     * @throws \DateMalformedStringException
+     */
     public function searchWithFilter(
         string $filter = 'all',
         string $sort = 'event_datetime',
@@ -60,25 +65,12 @@ class EventRepository extends ServiceEntityRepository
         ?User $user = null,
         int $page = 1,
         int $count = 10
-    ): array {
-        return $this->buildFilterQuery($filter, $sort, $order, $searchTerm, $startDate, $endDate, $user)
+    ): Paginator {
+        $qb = $this->buildFilterQuery($filter, $sort, $order, $searchTerm, $startDate, $endDate, $user)
             ->setFirstResult(($page - 1) * $count)
-            ->setMaxResults($count)
-            ->getQuery()
-            ->getResult();
-    }
+            ->setMaxResults($count);
 
-    public function countWithFilter(
-        string $filter = 'all',
-        ?string $searchTerm = null,
-        ?string $startDate = null,
-        ?string $endDate = null,
-        ?User $user = null
-    ): int {
-        return (int)$this->buildFilterQuery($filter, 'e.id', 'asc', $searchTerm, $startDate, $endDate, $user)
-            ->select('COUNT(e.id)')
-            ->getQuery()
-            ->getSingleScalarResult();
+        return new Paginator($qb);
     }
 
     private function buildFilterQuery(

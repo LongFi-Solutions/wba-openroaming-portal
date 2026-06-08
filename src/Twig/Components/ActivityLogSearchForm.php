@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Repository\EventRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
@@ -29,7 +30,7 @@ class ActivityLogSearchForm extends AbstractController
     public int $page = 1;
 
     #[LiveProp(writable: true)]
-    public int $count = 10;
+    public int $count = 7;
 
     #[LiveProp(writable: true)]
     public string $sort = 'event_datetime';
@@ -43,10 +44,8 @@ class ActivityLogSearchForm extends AbstractController
     #[LiveProp(writable: true)]
     public string $endDate = '';
 
-    private ?int $cachedTotal = null;
-
-    /** @var array<int, Event>|null */
-    private ?array $cachedLogs = null;
+    /** @var Paginator<Event>|null */
+    private ?Paginator $cachedPaginator = null;
 
     /** @var array<string, int>|null */
     private ?array $cachedEventCounts = null;
@@ -100,14 +99,13 @@ class ActivityLogSearchForm extends AbstractController
         return $this->query;
     }
 
-    /**
-     * @return array<int, \App\Entity\Event>
+    /** @return Paginator<Event>
      * @throws \DateMalformedStringException
      */
-    public function getLogs(): array
+    public function getEvents(): Paginator
     {
-        if ($this->cachedLogs === null) {
-            $this->cachedLogs = $this->eventRepository->searchWithFilter(
+        if ($this->cachedPaginator === null) {
+            $this->cachedPaginator = $this->eventRepository->searchWithFilter(
                 $this->filter,
                 $this->sort,
                 $this->order,
@@ -119,32 +117,8 @@ class ActivityLogSearchForm extends AbstractController
                 $this->count
             );
         }
-        return $this->cachedLogs;
-    }
 
-    /**
-     * @throws \DateMalformedStringException
-     */
-    public function getTotalLogs(): int
-    {
-        if ($this->cachedTotal === null) {
-            $this->cachedTotal = $this->eventRepository->countWithFilter(
-                $this->filter,
-                $this->resolvedQuery(),
-                $this->startDate ?: null,
-                $this->endDate ?: null,
-                $this->user
-            );
-        }
-        return $this->cachedTotal;
-    }
-
-    /**
-     * @throws \DateMalformedStringException
-     */
-    public function getTotalPages(): int
-    {
-        return (int)ceil($this->getTotalLogs() / $this->count);
+        return $this->cachedPaginator;
     }
 
     /**
@@ -153,12 +127,20 @@ class ActivityLogSearchForm extends AbstractController
     public function getEventCounts(): array
     {
         if ($this->cachedEventCounts === null) {
-            // When scoped to a user, count only their events
-            $this->cachedEventCounts = $this->user instanceof User
-                ? $this->eventRepository->countByEventGroup($this->user)
-                : $this->eventRepository->countByEventGroup();
+            $this->cachedEventCounts = $this->eventRepository->countByEventGroup(
+                $this->user
+            );
         }
+
         return $this->cachedEventCounts;
+    }
+
+    /**
+     * @throws \DateMalformedStringException
+     */
+    public function getTotalPages(): int
+    {
+        return (int) ceil(count($this->getEvents()) / $this->count);
     }
 
     public function isUserScoped(): bool

@@ -150,7 +150,7 @@
         <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
         {{ include('dashboard/shared/pagination/_pagination_live.html.twig', {
             label: 'logsPerPage'|trans({}, 'dashboard'),
-            occurrencies: this.totalEvents,
+            occurrencies: this.events|length,
             totalPages: this.totalPages,
             page: page,
             count: count,
