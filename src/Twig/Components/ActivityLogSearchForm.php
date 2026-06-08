@@ -6,11 +6,15 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Repository\EventRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
+use Symfony\UX\LiveComponent\Attribute\LiveAction;
+use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
+use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
 
 #[AsLiveComponent]
 class ActivityLogSearchForm extends AbstractController
@@ -44,20 +48,45 @@ class ActivityLogSearchForm extends AbstractController
     #[LiveProp(writable: true)]
     public string $endDate = '';
 
-    /** @var Paginator<Event>|null */
-    private ?Paginator $cachedPaginator = null;
-
-    /** @var array<string, int>|null */
-    private ?array $cachedEventCounts = null;
-
     public function __construct(
         private readonly EventRepository $eventRepository,
     ) {
     }
 
     /**
+     * @return Paginator<Event>
+     */
+    #[ExposeInTemplate]
+    public function getEvents(): Paginator
+    {
+        return new Paginator($this->getQueryBuilder());
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    #[ExposeInTemplate]
+    public function getEventCounts(): array
+    {
+        return $this->eventRepository->countByEventGroup($this->user);
+    }
+
+    #[ExposeInTemplate]
+    public function getTotalPages(): int
+    {
+        return (int)ceil(count($this->getEvents()) / $this->count);
+    }
+
+    #[ExposeInTemplate]
+    public function isUserScoped(): bool
+    {
+        return $this->user instanceof User;
+    }
+
+    /**
      * @return array<int, array{value: string, label: string}>
      */
+    #[ExposeInTemplate]
     public function getSuggestions(): array
     {
         if (strlen($this->query) < 2) {
@@ -82,6 +111,32 @@ class ActivityLogSearchForm extends AbstractController
         return $suggestions;
     }
 
+    #[LiveAction]
+    public function changeFilter(#[LiveArg] string $filter): void
+    {
+        $this->filter = $filter;
+        $this->page = 1;
+    }
+
+    #[LiveAction]
+    public function prevPage(): void
+    {
+        $this->page--;
+    }
+
+    #[LiveAction]
+    public function nextPage(): void
+    {
+        $this->page++;
+    }
+
+    #[LiveAction]
+    public function changeSort(#[LiveArg] string $field): void
+    {
+        $this->sort = $field;
+        $this->order = $this->order === 'desc' ? 'asc' : 'desc';
+    }
+
     private function resolvedQuery(): ?string
     {
         if ($this->query === '' || $this->query === '0') {
@@ -99,52 +154,18 @@ class ActivityLogSearchForm extends AbstractController
         return $this->query;
     }
 
-    /** @return Paginator<Event>
-     * @throws \DateMalformedStringException
-     */
-    public function getEvents(): Paginator
+    private function getQueryBuilder(): QueryBuilder
     {
-        if ($this->cachedPaginator === null) {
-            $this->cachedPaginator = $this->eventRepository->searchWithFilter(
-                $this->filter,
-                $this->sort,
-                $this->order,
-                $this->resolvedQuery(),
-                $this->startDate ?: null,
-                $this->endDate ?: null,
-                $this->user,
-                $this->page,
-                $this->count
-            );
-        }
-
-        return $this->cachedPaginator;
-    }
-
-    /**
-     * @return array<string, int>
-     */
-    public function getEventCounts(): array
-    {
-        if ($this->cachedEventCounts === null) {
-            $this->cachedEventCounts = $this->eventRepository->countByEventGroup(
-                $this->user
-            );
-        }
-
-        return $this->cachedEventCounts;
-    }
-
-    /**
-     * @throws \DateMalformedStringException
-     */
-    public function getTotalPages(): int
-    {
-        return (int) ceil(count($this->getEvents()) / $this->count);
-    }
-
-    public function isUserScoped(): bool
-    {
-        return $this->user instanceof User;
+        return $this->eventRepository->searchWithFilter(
+            $this->filter,
+            $this->sort,
+            $this->order,
+            $this->resolvedQuery(),
+            $this->startDate ?: null,
+            $this->endDate ?: null,
+            $this->user,
+            $this->page,
+            $this->count
+        );
     }
 }

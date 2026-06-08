@@ -9,7 +9,6 @@ use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 
@@ -48,12 +47,16 @@ class EventRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return Event[] Returns an array of Event objects
-     * @throws \DateMalformedStringException
-     */
-    /**
-     * @return Paginator<Event>
-     * @throws \DateMalformedStringException
+     * @param string $filter
+     * @param string $sort
+     * @param string $order
+     * @param string|null $searchTerm
+     * @param string|null $startDate
+     * @param string|null $endDate
+     * @param User|null $user
+     * @param int $page
+     * @param int $count
+     * @return QueryBuilder
      */
     public function searchWithFilter(
         string $filter = 'all',
@@ -65,12 +68,11 @@ class EventRepository extends ServiceEntityRepository
         ?User $user = null,
         int $page = 1,
         int $count = 10
-    ): Paginator {
-        $qb = $this->buildFilterQuery($filter, $sort, $order, $searchTerm, $startDate, $endDate, $user)
+    ): QueryBuilder
+    {
+        return $this->buildFilterQuery($filter, $sort, $order, $searchTerm, $startDate, $endDate, $user)
             ->setFirstResult(($page - 1) * $count)
             ->setMaxResults($count);
-
-        return new Paginator($qb);
     }
 
     private function buildFilterQuery(
