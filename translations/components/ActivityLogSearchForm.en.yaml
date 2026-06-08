@@ -1,0 +1,6 @@
+all: 'All'
+userActions: 'User Actions'
+adminActions: 'Admin Actions'
+authEvents: 'Auth Events'
+settingsChanges: 'Settings Changes'
+certificateEvents: 'Certificate Events'

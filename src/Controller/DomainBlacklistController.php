@@ -363,7 +363,7 @@ class DomainBlacklistController extends AbstractController
 
     #[Route(
         '/dashboard/settings/domain-source/delete/{id<\d+>}',
-        name: 'admin_domain_source_delete',
+        name: 'admin_dashboard_domain_source_delete',
         methods: ['POST']
     )]
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
@@ -416,7 +416,7 @@ class DomainBlacklistController extends AbstractController
 
     #[Route(
         '/dashboard/settings/domain-source/{id<\d+>}/toggle',
-        name: 'admin_domain_source_toggle',
+        name: 'admin_dashboard_domain_source_toggle',
         methods: ['POST']
     )]
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
@@ -480,7 +480,7 @@ class DomainBlacklistController extends AbstractController
      */
     #[Route(
         '/dashboard/settings/domain-source/refresh',
-        name: 'admin_domain_source_refresh_all',
+        name: 'admin_dashboard_domain_source_refresh_all',
         methods: ['GET']
     )]
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
@@ -548,7 +548,7 @@ class DomainBlacklistController extends AbstractController
      */
     #[Route(
         '/dashboard/settings/domain-source/{id<\d+>}/refresh',
-        name: 'admin_domain_source_refresh',
+        name: 'admin_dashboard_domain_source_refresh',
         methods: ['POST']
     )]
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]

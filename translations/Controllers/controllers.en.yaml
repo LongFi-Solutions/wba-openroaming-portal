@@ -57,7 +57,7 @@ emailNotAssociatedWithValidAccount: 'This email is not associated with a valid a
 emailDoesntExist: "This email doesn't exist, please make sure to create a account with a email on the platform!"
 cantAccessThisPageLoggedIn: "You can't access this page logged in."
 newRandomPasswordMessage: "Your new random account password is: %password%%0APlease make sure to login to complete the request."
-messageSentWithAttemptsLeft: 'We have sent you a message to: %uuid%.'
+messageSentWithAttemptsLeft: 'We have sent you a message to: %uuid%. You have %attempts% attempt(s) left.'
 waitBeforeRetry: "Please wait %minutes% minute(s) before trying again."
 exceededLimitsRequestForNewPassword: 'You have exceeded the limits of request for a new password. Please contact our support for help.'
 PhoneNumberDoesntExist: "This phone number doesn't exist, please submit a valid one from the system!"
@@ -203,5 +203,3 @@ tooManyAttempts: "Too many requests. Please try again in %seconds% seconds."
 redirectingToApp: 'Redirected to the app.'
 certificateProcessBlocked: "A configuration error has occurred. Please contact our support team."
 emailAliasesNotAllowed: 'Email aliases are not allowed for registration.'
-tooManyAttemptsMinutes: "Too many requests. Please try again in %minutes% minutes."
-timeBetweenRequests: "You must wait %seconds% seconds before requesting a new email. Please try again later."

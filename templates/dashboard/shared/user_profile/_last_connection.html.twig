@@ -1,0 +1,59 @@
+{# Last connection #}
+<div class="bg-white rounded-xl shadow-sm p-6">
+    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+        {{ 'profileConnectionStatus'|trans({}, 'edit') }}
+    </h2>
+    {% if userData.lastAccounting %}
+        <dl class="space-y-3 text-sm">
+            {% if userData.lastAccounting.acctStartTime %}
+                <div class="flex justify-between gap-2">
+                    <dt class="text-gray-500 shrink-0">{{ 'lastStartConnection'|trans({}, 'edit') }}</dt>
+                    <dd class="font-medium text-gray-800 text-right">
+                        {{ userData.lastAccounting.acctStartTime|date('d/m/Y H:i') }} UTC
+                    </dd>
+                </div>
+            {% endif %}
+            {% if userData.lastAccounting.acctStopTime %}
+                <div class="flex justify-between gap-2">
+                    <dt class="text-gray-500 shrink-0">{{ 'lastStopConnection'|trans({}, 'edit') }}</dt>
+                    <dd class="font-medium text-gray-800 text-right">
+                        {{ userData.lastAccounting.acctStopTime|date('d/m/Y H:i') }} UTC
+                    </dd>
+                </div>
+                <div class="flex justify-between gap-2">
+                    <dt class="text-gray-500 shrink-0">{{ 'sessionDuration'|trans({}, 'show') }}</dt>
+                    <dd class="font-medium text-gray-800 text-right">
+                        {% set seconds = userData.lastAccounting.acctStopTime.timestamp - userData.lastAccounting.acctStartTime.timestamp %}
+                        {% if seconds < 60 %}
+                            {{ seconds }}s
+                        {% elseif seconds < 3600 %}
+                            {{ (seconds / 60)|round(0, 'floor') }}min
+                        {% else %}
+                            {{ (seconds / 3600)|round(0, 'floor') }}h {{ ((seconds % 3600) / 60)|round(0, 'floor') }}min
+                        {% endif %}
+                    </dd>
+                </div>
+            {% endif %}
+            {% if userData.lastAccounting.framedIpAddress %}
+                <div class="flex justify-between gap-2">
+                    <dt class="text-gray-500 shrink-0">IP</dt>
+                    <dd class="font-mono text-xs text-gray-800 text-right">
+                        {{ userData.lastAccounting.framedIpAddress }}
+                    </dd>
+                </div>
+            {% endif %}
+            <div class="flex justify-between gap-2">
+                <dt class="text-gray-500 shrink-0">Reply</dt>
+                <dd class="text-right">
+                    {% if userData.lastAuth.reply == 'Access-Accept' %}
+                        <span class="pill-success text-xs">{{ userData.lastAuth.reply }}</span>
+                    {% else %}
+                        <span class="pill-error text-xs">{{ userData.lastAuth.reply }}</span>
+                    {% endif %}
+                </dd>
+            </div>
+        </dl>
+    {% else %}
+        <p class="text-sm text-gray-400">—</p>
+    {% endif %}
+</div>

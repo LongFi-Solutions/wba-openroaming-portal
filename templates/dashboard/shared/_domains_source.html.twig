@@ -47,7 +47,7 @@
                 <li>
                     {% if domainsSource.isActive is defined and domainsSource.isActive == 1 %}
                         <form method="post"
-                              action="{{ path('admin_domain_source_refresh', {id: domainsSource.id}) }}">
+                              action="{{ path('admin_dashboard_domain_source_refresh', {id: domainsSource.id}) }}">
                             <button type="submit"
                                     class="flex items-center px-2 py-2 w-full hover:text-blue-500">
                                 <twig:ux:icon name="wba:refresh-outline" class="w-5 mr-3 fill-none stroke-current"/>
@@ -60,7 +60,7 @@
                 {# Toggle Source #}
                 <li>
                     <form method="post"
-                          action="{{ path('admin_domain_source_toggle', {id: domainsSource.id}) }}">
+                          action="{{ path('admin_dashboard_domain_source_toggle', {id: domainsSource.id}) }}">
                         <button type="submit"
                                 class="flex items-center px-2 py-2 w-full
                        {{ domainsSource.isActive()
@@ -79,7 +79,7 @@
                 {# Delete #}
                 <li {{ stimulus_controller('alert') }}>
                     <form method="post"
-                          action="{{ path('admin_domain_source_delete', {id: domainsSource.id}) }}"
+                          action="{{ path('admin_dashboard_domain_source_delete', {id: domainsSource.id}) }}"
                             {{ stimulus_target('alert', 'form') }}>
                         <input type="hidden" name="_method" value="DELETE">
 
