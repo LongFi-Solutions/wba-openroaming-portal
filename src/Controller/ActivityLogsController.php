@@ -42,9 +42,11 @@ class ActivityLogsController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/activity-log/export/{format}',
+    #[Route(
+        '/dashboard/activity-log/export/{format}',
         name: 'admin_dashboard_activity_logs_export',
-        requirements: ['format' => 'csv|json'])]
+        requirements: ['format' => 'csv|json']
+    )]
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     #[IsGranted(UserAuthenticationVoter::ACTIVITY_LOGS_READ)]
     public function export(Request $request, string $format): Response
