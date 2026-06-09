@@ -62,6 +62,18 @@ class EventRepository extends ServiceEntityRepository
             ->setMaxResults($count);
     }
 
+    public function searchWithFilterUnpaginated(
+        string $filter = 'all',
+        string $sort = 'event_datetime',
+        string $order = 'desc',
+        ?string $searchTerm = null,
+        ?string $startDate = null,
+        ?string $endDate = null,
+        ?User $user = null,
+    ): QueryBuilder {
+        return $this->buildFilterQuery($filter, $sort, $order, $searchTerm, $startDate, $endDate, $user);
+    }
+
     private function buildFilterQuery(
         string $filter,
         string $sort,
