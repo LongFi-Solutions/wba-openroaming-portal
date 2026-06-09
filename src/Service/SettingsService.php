@@ -30,28 +30,39 @@ readonly class SettingsService
 
     /**
      * Update or create multiple settings from a generic array.
+     * Returns a changeset of [name => ['old' => ..., 'new' => ...]] for changed fields.
      *
      * @param array<string, array{value: bool|float|int|string|null}> $settingsData
+     * @return array<string, array{old: string|null, new: string|null}>
      */
-    public function updateSettingsFromArray(array $settingsData): void
+    public function updateSettingsFromArray(array $settingsData): array
     {
+        $changeset = [];
+
         foreach ($settingsData as $name => $item) {
             $value = $item['value'] ?? null;
-
-            // Try to fetch existing setting
             $setting = $this->settingRepository->findOneBy(['name' => $name]);
-
-            $valueToSet = $value !== null ? (string)$value : null;
+            $valueToSet = $value !== null ? (string) $value : null;
 
             if ($setting) {
+                $oldValue = $setting->getValue();
+
+                if ($oldValue !== $valueToSet) {
+                    $changeset[$name] = ['old' => $oldValue, 'new' => $valueToSet];
+                }
+
                 $setting->setValue($valueToSet);
             } else {
+                $changeset[$name] = ['old' => null, 'new' => $valueToSet];
+
                 $setting = new Setting();
                 $setting->setName($name);
                 $setting->setValue($valueToSet);
                 $this->entityManager->persist($setting);
             }
         }
+
+        return $changeset;
     }
 
     /**

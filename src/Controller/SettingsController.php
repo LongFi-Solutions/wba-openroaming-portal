@@ -628,7 +628,7 @@ class SettingsController extends AbstractController
             $dto = $form->getData();
 
             // Save updated settings
-            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
 
             // Log the event
@@ -640,6 +640,7 @@ class SettingsController extends AbstractController
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
+                    'changeset'  => $changeset,
                 ]
             );
 
