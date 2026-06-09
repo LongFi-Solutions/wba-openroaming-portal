@@ -27,10 +27,10 @@ readonly class EventActions
         $event->setEventDatetime($dateTime);
         $event->setEventName($eventName);
         $metadata = [
-            'ip' => $eventMetadata['ip'] ?? 'Not Defined',
-            'user_agent' => $eventMetadata['user_agent'] ?? 'Not Defined',
-            'platform' => $eventMetadata['platform'] ?? 'Not Defined',
-            'uuid' => $eventMetadata['uuid'] ?? 'Not Defined',
+            'ip' => $eventMetadata['ip'] ?? null,
+            'user_agent' => $eventMetadata['user_agent'] ?? null,
+            'platform' => $eventMetadata['platform'] ?? null,
+            'uuid' => $eventMetadata['uuid'] ?? null,
         ];
 
         foreach ($eventMetadata as $key => $value) {
