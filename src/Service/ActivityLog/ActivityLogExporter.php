@@ -53,8 +53,8 @@ final readonly class ActivityLogExporter
             foreach ($events as $event) {
                 fputcsv($handle, [
                     $event->getUser()?->getUuid(),
-                    $event->getEventType()->getLabel(),
-                    $event->getIpAddress(),
+                    $event->getEventName(),
+                    $event->getEventMetadata()['ip'] ?? null,
                     $event->getEventDatetime()?->format('Y-m-d H:i:s'),
                 ]);
             }
@@ -81,8 +81,8 @@ final readonly class ActivityLogExporter
                 }
                 fwrite($handle, json_encode([
                     'uuid' => $event->getUser()?->getUuid(),
-                    'action' => $event->getEventType()->getLabel(),
-                    'ip_address' => $event->getIpAddress(),
+                    'action' => $event->getEventName(),
+                    'ip_address' => $event->getEventMetadata()['ip'] ?? null,
                     'created_at' => $event->getEventDatetime()?->format('Y-m-d H:i:s'),
                 ], JSON_THROW_ON_ERROR));
                 $first = false;
