@@ -190,7 +190,7 @@ class CertificateManagementController extends AbstractController
             $processEntity = $processState['process'];
             $processEntity->setFreeradiusDomainName($domain);
 
-            $this->settingsService->updateSettingsFromArray($settingsToUpdate);
+            $changeset = $this->settingsService->updateSettingsFromArray($settingsToUpdate);
             $this->settingsService->flush();
             $this->entityManager->persist($processEntity);
             $this->entityManager->flush();
@@ -203,6 +203,7 @@ class CertificateManagementController extends AbstractController
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
                     'by' => $currentUser->getUuid(),
+                    'changeset'  => $changeset,
                 ]
             );
 

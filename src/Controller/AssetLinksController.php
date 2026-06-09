@@ -153,7 +153,7 @@ class AssetLinksController extends AbstractController
         );
         $form->handleRequest($request);
         if ($canWrite && $form->isSubmitted() && $form->isValid()) {
-            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $submittedValues = $form->get('fingerprints')->getData();
 
             $currentEntities = $this->returnAppFingerprintRepository->findActiveFingerprints();
@@ -189,6 +189,7 @@ class AssetLinksController extends AbstractController
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
+                    'changeset'  => $changeset,
                 ]
             );
 

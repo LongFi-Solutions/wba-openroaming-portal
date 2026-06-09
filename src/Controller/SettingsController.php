@@ -683,7 +683,7 @@ class SettingsController extends AbstractController
             $dto = $form->getData();
 
             // Save updated settings
-            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
 
             // Log the event
@@ -695,6 +695,7 @@ class SettingsController extends AbstractController
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
+                    'changeset'  => $changeset,
                 ]
             );
 
@@ -734,7 +735,7 @@ class SettingsController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
-            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
 
             // Log the event
@@ -746,6 +747,7 @@ class SettingsController extends AbstractController
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
+                    'changeset'  => $changeset,
                 ]
             );
 
@@ -784,7 +786,7 @@ class SettingsController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
-            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
 
             // Log the event
@@ -796,6 +798,7 @@ class SettingsController extends AbstractController
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
+                    'changeset'  => $changeset,
                 ]
             );
 
@@ -939,7 +942,7 @@ class SettingsController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
-            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
 
             // Log the event
@@ -951,6 +954,7 @@ class SettingsController extends AbstractController
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
+                    'changeset'  => $changeset,
                 ]
             );
 
@@ -983,13 +987,16 @@ class SettingsController extends AbstractController
         // Initialize DTO from settings
         $dto = new SMSSettingsDTO($data);
 
+        $oldValues = new SMSSettingsDTO($data);
+
         // Create form bound to DTO
         $form = $this->createForm(SMSSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
-            $this->settingsService->updateSettingsFromArray($dto->toArray());
+
+            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
 
             // Log the event
@@ -1001,6 +1008,7 @@ class SettingsController extends AbstractController
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
+                    'changeset'  => $changeset,
                 ]
             );
 
