@@ -48,7 +48,7 @@ final readonly class ActivityLogExporter
         $response = new StreamedResponse(function () use ($events): void {
             $handle = fopen('php://output', 'wb');
 
-            fputcsv($handle, ['UUID', 'Action', 'IP Address', 'Created At', 'Metadata']);
+            fputcsv($handle, ['UUID', 'Action', 'IP Address', 'Created At', 'Metadata'], escape: '\\');
 
             foreach ($events as $event) {
                 fputcsv($handle, [
@@ -57,7 +57,8 @@ final readonly class ActivityLogExporter
                     $event->getEventMetadata()['ip'] ?? null,
                     $event->getEventDatetime()?->format('Y-m-d H:i:s'),
                     json_encode($event->getEventMetadata(), JSON_THROW_ON_ERROR),
-                ]);
+                ],
+                escape: '\\');
             }
 
             fclose($handle);

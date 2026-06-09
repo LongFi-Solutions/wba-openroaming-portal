@@ -19,8 +19,6 @@ class ActivityLogsController extends AbstractController
 {
     public function __construct(
         private readonly GetSettings $getSettings,
-        private readonly UserRepository $userRepository,
-        private readonly EventRepository $eventRepository,
         private readonly ActivityLogExporter $activityLogExporter,
     ) {
     }

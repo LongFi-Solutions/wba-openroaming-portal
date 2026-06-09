@@ -362,9 +362,9 @@ class CertificateManagementController extends AbstractController
         $user = $this->getUser();
 
         if ($type === InstallationType::INSTALLATION->value) {
-            $eventType = AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_CODE->value;
+            $eventType = AnalyticalEventType::INSTALLATION_IDENTITY_PASSWORD->value;
         } else {
-            $eventType = AnalyticalEventType::CERTIFICATES_IDENTITY_VERIFIED_CODE->value;
+            $eventType = AnalyticalEventType::CERTIFICATES_IDENTITY_PASSWORD->value;
         }
 
         $form = $this->createForm(VerifyPasswordType::class);

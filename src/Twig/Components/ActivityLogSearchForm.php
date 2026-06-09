@@ -177,7 +177,7 @@ class ActivityLogSearchForm extends AbstractController
     #[LiveAction]
     public function exportLogs(): RedirectResponse
     {
-        return $this->redirect($this->generateUrl('admin_dashboard_activity_logs_export', [
+        return $this->redirectToRoute('admin_dashboard_activity_logs_export', [
             'format' => $this->exportFormat,
             'filter' => $this->filter,
             'query' => $this->query,
@@ -186,6 +186,6 @@ class ActivityLogSearchForm extends AbstractController
             'startDate' => $this->startDate,
             'endDate' => $this->endDate,
             'userId' => $this->user?->getId(),
-        ]));
+        ]);
     }
 }
