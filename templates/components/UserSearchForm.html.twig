@@ -1,32 +1,53 @@
-{# templates/components/UserSearchForm.html.twig #}
+{% import 'dashboard/shared/_sort_arrow.html.twig' as sharedSort %}
 <div {{ attributes }}>
 
-    <div class="sm:w-auto px-5 py-4 space-y-4">
+    <div class="sm:w-auto px-5 py-4">
+        <div class="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0 sm:space-x-4">
 
-        {# Filter Tabs #}
-        <div class="flex flex-col md:flex-row sm:items-center gap-4 sm:gap-6">
-            {% set tabs = {
-                all:      {label: 'all',      count: this.userCounts.all,      activeClass: 'border-b-2 border-y-veryDarkButton', badgeActive: 'bg-veryDarkButton text-white'},
-                verified: {label: 'verified',  count: this.userCounts.verified, activeClass: 'text-lightGreen border-b-2 border-y-lightGreen', badgeActive: 'bg-lightGreen text-white'},
-                banned:   {label: 'banned',    count: this.userCounts.banned,   activeClass: 'text-red-400 border-b-2 border-y-red-400', badgeActive: 'bg-red-400 text-white'},
-            } %}
+            {# Left Filter Tabs #}
+            <div class="flex flex-col md:flex-row sm:items-center gap-4 sm:gap-6">
+                {% set tabs = {
+                    all: {
+                        label: 'all',
+                        count: this.userCounts.all,
+                        activeClass: 'border-b-2 border-y-veryDarkButton',
+                        hoverClass: 'hover:border-b-2 hover:border-y-veryDarkButton',
+                        badgeActive: 'bg-veryDarkButton',
+                        badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white'
+                    },
+                    Verified: {
+                        label: 'verified',
+                        count: this.userCounts.verified,
+                        activeClass: 'text-lightGreen border-b-2 border-y-lightGreen',
+                        hoverClass: 'hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50',
+                        badgeActive: 'bg-lightGreen',
+                        badgeHover: 'group-hover:bg-lightGreen group-hover:text-white'
+                    },
+                    Banned: {
+                        label: 'banned',
+                        count: this.userCounts.banned,
+                        activeClass: 'text-red-400 border-b-2 border-y-red-400',
+                        hoverClass: 'hover:text-red-400 hover:border-b-2 hover:border-y-red-400',
+                        badgeActive: 'bg-red-400',
+                        badgeHover: 'group-hover:bg-red-400 group-hover:text-white'
+                    },
+                } %}
 
-            {% for value, tab in tabs %}
-                <button type="button"
-                        data-action="live#action"
-                        data-live-action-param="changeFilter"
-                        data-live-filter-param="{{ value }}"
-                        class="flex flex-row group hover:border-b-2 transition-all duration-100 {{ filter == value ? tab.activeClass : '' }}">
-                    <h1 class="px-2">{{ tab.label|trans({}, 'dashboard') }}</h1>
-                    <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen rounded-md text-center transition-all duration-100 {{ filter == value ? tab.badgeActive : 'group-hover:bg-veryDarkButton group-hover:text-white' }}">
-                        {{ tab.count }}
-                    </div>
-                </button>
-            {% endfor %}
-        </div>
+                {% for value, tab in tabs %}
+                    <button type="button"
+                            data-action="live#action"
+                            data-live-action-param="changeFilter"
+                            data-live-filter-param="{{ value }}"
+                            class="flex flex-row group transition-all duration-100 {{ tab.hoverClass }} {{ filter == value ? tab.activeClass : '' }}">
+                        <h1 class="px-2">{{ tab.label|trans({}, 'dashboard') }}</h1>
+                        <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen rounded-md text-center transition-all duration-100 {{ tab.badgeHover }} {{ filter == value ? tab.badgeActive : '' }}">
+                            {{ tab.count }}
+                        </div>
+                    </button>
+                {% endfor %}
+            </div>
 
-        {# Search Bar #}
-        <div class="flex flex-col lg:flex-row justify-between items-center gap-4">
+            {# Middle Search Bar #}
             <div class="w-full md:w-3/6">
                 <div class="flex flex-row items-center border rounded-md">
                     <button type="button">
@@ -46,11 +67,15 @@
                 </div>
             </div>
 
-            {% if export_users is defined and export_users == constant('App\\Enum\\OperationMode::ON').value %}
-                <a href="{{ path('admin_dashboard_users_export') }}" class="btn-primary px-4 min-w-[150px]">
-                    {{ 'exportEverything'|trans({}, 'dashboard') }}
-                </a>
+            {# Right Button #}
+            {% if this.exportUsers == constant('App\\Enum\\OperationMode::ON').value %}
+                <div class="flex items-center space-x-6">
+                    <a href="{{ path('admin_dashboard_users_export') }}" class="btn-primary px-4 min-w-[150px]">
+                        {{ 'exportEverything'|trans({}, 'dashboard') }}
+                    </a>
+                </div>
             {% endif %}
+
         </div>
     </div>
 
@@ -64,7 +89,7 @@
                     <button type="button"
                             data-action="live#action"
                             data-live-action-param="changeSort"
-                            data-live-field-param="uuid"
+                            data-live-filter-param="uuid"
                             class="p-1 hover:shadow-md rounded-lg cursor-pointer">
                         {{ sharedSort.sortArrow('uuid', sort, order) }}
                     </button>
@@ -79,7 +104,7 @@
                     <button type="button"
                             data-action="live#action"
                             data-live-action-param="changeSort"
-                            data-live-field-param="createdAt"
+                            data-live-filter-param="createdAt"
                             class="p-1 hover:shadow-md rounded-lg cursor-pointer">
                         {{ sharedSort.sortArrow('createdAt', sort, order) }}
                     </button>
@@ -88,12 +113,11 @@
             </tr>
             </thead>
             <tbody>
-            {% set users = this.users %}
-            {% for user in users %}
+            {% for user in this.users %}
                 {{ include('dashboard/shared/_user.html.twig', {
                     user: user,
-                    delete_users: delete_users is defined ? delete_users : null,
-                    formRevokeProfiles: formRevokeProfiles is defined ? formRevokeProfiles : null,
+                    delete_users: this.deleteUsers,
+                    formRevokeProfiles: this.formRevokeProfiles,
                 }) }}
             {% else %}
                 <tr>
@@ -102,9 +126,9 @@
                             <div class="pill-error">
                                 {% if query %}
                                     {{ 'noUsersFoundWith'|trans({}, 'dashboard') }} "{{ query }}"
-                                {% elseif filter == 'verified' %}
+                                {% elseif filter == constant('App\\Enum\\UserVerificationStatus::VERIFIED').value %}
                                     {{ 'noVerifiedUsers'|trans({}, 'dashboard') }}
-                                {% elseif filter == 'banned' %}
+                                {% elseif filter == constant('App\\Enum\\UserVerificationStatus::BANNED').value %}
                                     {{ 'noBannedUsers'|trans({}, 'dashboard') }}
                                 {% else %}
                                     {{ 'noUsers'|trans({}, 'dashboard') }}

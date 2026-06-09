@@ -2,8 +2,14 @@
 
 namespace App\Twig\Components;
 
-use App\Entity\User;
+use App\Form\RevokeProfilesType;
 use App\Repository\UserRepository;
+use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Tools\Pagination\Paginator;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -19,7 +25,7 @@ class UserSearchForm
     #[LiveProp(writable: true)]
     public string $query = '';
 
-    #[LiveProp(writable: true)]
+    #[LiveProp(writable: true, url: true)]
     public string $filter = 'all';
 
     #[LiveProp(writable: true)]
@@ -34,38 +40,38 @@ class UserSearchForm
     #[LiveProp(writable: true)]
     public string $order = 'desc';
 
+    private ?array $cachedCounts = null;
+
     public function __construct(
         private readonly UserRepository $userRepository,
+        private readonly FormFactoryInterface $formFactory,
+        private readonly Security $security,
+        private readonly ParameterBagInterface $parameterBag,
     ) {
     }
 
-    /**
-     * @return User[]
-     */
     #[ExposeInTemplate]
-    public function getUsers(): array
+    public function getUsers(): Paginator
     {
-        $all = $this->userRepository->searchWithFilter(
-            $this->filter,
-            $this->sort,
-            $this->order,
-            $this->query ?: null,
-        );
-
-        return array_slice($all, ($this->page - 1) * $this->count, $this->count);
+        return new Paginator($this->getQueryBuilder());
     }
 
     #[ExposeInTemplate]
     public function getTotalPages(): int
     {
-        $all = $this->userRepository->searchWithFilter(
+        return (int)ceil(count($this->getUsers()) / $this->count);
+    }
+
+    private function getQueryBuilder(): QueryBuilder
+    {
+        return $this->userRepository->searchWithFilter(
             $this->filter,
             $this->sort,
             $this->order,
             $this->query ?: null,
+            $this->page,
+            $this->count,
         );
-
-        return (int)ceil(count($all) / $this->count);
     }
 
     /**
@@ -74,11 +80,35 @@ class UserSearchForm
     #[ExposeInTemplate]
     public function getUserCounts(): array
     {
-        return [
-            'all' => $this->userRepository->countUsers(null, 'all'),
-            'verified' => $this->userRepository->countVerifiedUsers(),
-            'banned' => $this->userRepository->countBannedUsers(),
-        ];
+        if ($this->cachedCounts === null) {
+            $this->cachedCounts = [
+                'all' => $this->userRepository->countUsers(null, 'all'),
+                'verified' => $this->userRepository->countVerifiedUsers(),
+                'banned' => $this->userRepository->countBannedUsers(),
+            ];
+        }
+
+        return $this->cachedCounts;
+    }
+
+    #[ExposeInTemplate]
+    public function getFormRevokeProfiles(): FormView
+    {
+        return $this->formFactory
+            ->create(RevokeProfilesType::class, $this->security->getUser())
+            ->createView();
+    }
+
+    #[ExposeInTemplate]
+    public function getExportUsers(): mixed
+    {
+        return $this->parameterBag->get('app.export_users');
+    }
+
+    #[ExposeInTemplate]
+    public function getDeleteUsers(): mixed
+    {
+        return $this->parameterBag->get('app.pgp_public_key');
     }
 
     #[LiveAction]

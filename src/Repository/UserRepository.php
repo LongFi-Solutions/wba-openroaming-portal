@@ -10,6 +10,7 @@ use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -121,50 +122,44 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      *
      * @return User[]
      */
+    // UserRepository
     public function searchWithFilter(
         string $filter,
-        ?string $sort,
-        ?string $order,
-        ?string $searchTerm = null
-    ): array {
-        $qb = $this->createQueryBuilder('u');
-
-        $qb->where('u.roles NOT LIKE :admin')
+        string $sort,
+        string $order,
+        ?string $query,
+        int $page,
+        int $count,
+    ): QueryBuilder {
+        $qb = $this->createQueryBuilder('u')
+            ->where('u.deletedAt IS NULL')
+            ->andWhere('u.roles NOT LIKE :admin')
             ->andWhere('u.roles NOT LIKE :superAdmin')
             ->setParameter('admin', '%ROLE_ADMIN%')
-            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
+            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%')
+            ->orderBy('u.' . $sort, $order)
+            ->setFirstResult(($page - 1) * $count)
+            ->setMaxResults($count);
 
-
-        // Add filters based on verification status
         if ($filter === UserVerificationStatus::VERIFIED->value) {
-            $qb->andWhere('u.isVerified = :Verified')
-                ->setParameter(UserVerificationStatus::VERIFIED->value, true);
+            $qb->andWhere('u.isVerified = true');
         } elseif ($filter === UserVerificationStatus::BANNED->value) {
             $qb->andWhere('u.bannedAt IS NOT NULL');
         }
 
-        // Exclude deleted users
-        $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
-
-        $qb->leftJoin('u.userExternalAuths', 'ua');
-
-        // Apply the search term, if provided
-        if ($searchTerm) {
+        if ($query !== null) {
             $qb->andWhere(
                 $qb->expr()->orX(
-                    'u.uuid LIKE :searchTerm',
-                    'u.email LIKE :searchTerm',
-                    'u.first_name LIKE :searchTerm',
-                    'u.last_name LIKE :searchTerm',
+                    $qb->expr()->like('u.email', ':query'),
+                    $qb->expr()->like('u.uuid', ':query'),
+                    $qb->expr()->like('u.firstName', ':query'),
+                    $qb->expr()->like('u.lastName', ':query'),
+                    $qb->expr()->like('u.phoneNumber', ':query'),
                 )
-            )->setParameter('searchTerm', '%' . $searchTerm . '%');
+            )->setParameter('query', '%' . $query . '%');
         }
 
-        $field = $sort === 'uuid' ? 'u.uuid' : 'u.createdAt';
-        // Order by creation date (newest first)
-        return $qb->orderBy($field, $order)
-            ->getQuery()
-            ->getResult();
+        return $qb;
     }
 
     /**

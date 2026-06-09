@@ -10,11 +10,7 @@
 
     <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
         <div class="w-full">
-            {{ component('UserSearchForm', {
-                export_users: export_users,
-                delete_users: delete_users,
-                formRevokeProfiles: formRevokeProfiles,
-            }) }}
+            {{ component('UserSearchForm') }}
         </div>
     </div>
 {% endblock %}
