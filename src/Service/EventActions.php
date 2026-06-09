@@ -26,7 +26,20 @@ readonly class EventActions
         $event->setUser($user);
         $event->setEventDatetime($dateTime);
         $event->setEventName($eventName);
-        $event->setEventMetadata($eventMetadata);
+        $metadata = [
+            'ip' => $eventMetadata['ip'] ?? 'Not Defined',
+            'user_agent' => $eventMetadata['user_agent'] ?? 'Not Defined',
+            'platform' => $eventMetadata['platform'] ?? 'Not Defined',
+            'uuid' => $eventMetadata['uuid'] ?? 'Not Defined',
+        ];
+
+        foreach ($eventMetadata as $key => $value) {
+            if (!array_key_exists($key, $metadata)) {
+                $metadata[$key] = $value;
+            }
+        }
+
+        $event->setEventMetadata($metadata);
 
         $this->entityManager->persist($event);
         $this->entityManager->flush();

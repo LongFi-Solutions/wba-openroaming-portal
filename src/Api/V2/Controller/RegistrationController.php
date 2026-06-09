@@ -187,7 +187,7 @@ class RegistrationController extends AbstractController
 
         $eventMetaData = [
             'ip' => $request->getClientIp(),
-            'uuid' => $user->getEmail(),
+            'uuid' => $user->getUuid(),
             'provider' => UserProvider::PORTAL_ACCOUNT->value,
             'registrationType' => UserProvider::EMAIL->value,
         ];

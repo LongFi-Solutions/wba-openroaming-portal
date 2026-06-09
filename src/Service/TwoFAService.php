@@ -426,13 +426,14 @@ readonly class TwoFAService
         $this->entityManager->flush();
     }
 
-    public function event2FA(string $ip, User $user, string $eventType, string $userAgent): void
+    public function event2FA(string $ip, User $user, string $eventType, string $userAgent, ?User $admin = null): void
     {
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
             'user_agent' => $userAgent,
             'uuid' => $user->getUuid(),
             'ip' => $ip,
+            'editedBy' => $admin?->getUuid() ?? 'ByHimself',
         ];
         $this->eventActions->saveEvent(
             $user,
