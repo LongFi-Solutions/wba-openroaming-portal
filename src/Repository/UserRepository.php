@@ -119,10 +119,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      * Applies verification / banned filters.
      * Excludes soft-deleted users.
      *
-     *
-     * @return User[]
+     * @return QueryBuilder
      */
-    // UserRepository
     public function searchWithFilter(
         string $filter,
         string $sort,
