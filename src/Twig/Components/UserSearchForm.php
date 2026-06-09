@@ -2,6 +2,7 @@
 
 namespace App\Twig\Components;
 
+use App\Entity\User;
 use App\Form\RevokeProfilesType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\QueryBuilder;
@@ -40,6 +41,10 @@ class UserSearchForm
     #[LiveProp(writable: true)]
     public string $order = 'desc';
 
+    /** @var Paginator<User>|null */
+    private ?Paginator $cachedUsers = null;
+
+    /** @var array<string, int>|null */
     private ?array $cachedCounts = null;
 
     public function __construct(
@@ -50,10 +55,17 @@ class UserSearchForm
     ) {
     }
 
+    /**
+     * @return Paginator<User>
+     */
     #[ExposeInTemplate]
     public function getUsers(): Paginator
     {
-        return new Paginator($this->getQueryBuilder());
+        if ($this->cachedUsers === null) {
+            $this->cachedUsers = new Paginator($this->getQueryBuilder());
+        }
+
+        return $this->cachedUsers;
     }
 
     #[ExposeInTemplate]
