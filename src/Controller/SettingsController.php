@@ -987,8 +987,6 @@ class SettingsController extends AbstractController
         // Initialize DTO from settings
         $dto = new SMSSettingsDTO($data);
 
-        $oldValues = new SMSSettingsDTO($data);
-
         // Create form bound to DTO
         $form = $this->createForm(SMSSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
