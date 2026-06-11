@@ -408,7 +408,7 @@ class DomainBlacklistController extends AbstractController
                 EventMetadataKeysType::IP->value => $request->getClientIp(),
                 EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
                 EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                'domain-source-removed' => $domainSourceData,
+                EventMetadataKeysType::DOMAIN_SOURCE_REMOVED->value => $domainSource->getUrl(),
             ]
         );
 
