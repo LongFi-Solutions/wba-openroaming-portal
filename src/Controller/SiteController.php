@@ -285,11 +285,11 @@ class SiteController extends AbstractController
                     $entityManager->persist($userAuths);
                     // Defines the Event to the table
                     $eventMetadata = [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'platform' => PlatformMode::DEMO->value,
-                        'uuid' => $user->getUuid(),
-                        'registrationType' => UserProvider::EMAIL->value,
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
+                        EventMetadataKeysType::PLATFORM->value => PlatformMode::DEMO->value,
+                        EventMetadataKeysType::REGISTRATION_TYPE->value => UserProvider::EMAIL->value,
                     ];
                     $this->eventActions->saveEvent(
                         $user,
