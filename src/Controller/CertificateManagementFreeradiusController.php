@@ -14,6 +14,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Enum\CertificateTestResult;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
@@ -112,7 +113,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         $session = $request->getSession();
         $session->set(
             SessionStatus::FREERADIUS_SETUP_PROCESS_TYPE->value,
-            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_MANUAL->value,
+            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERADIUS_UPLOAD_MANUAL->value,
         );
 
         // Prepare DTO
@@ -226,12 +227,12 @@ class CertificateManagementFreeradiusController extends AbstractController
             $user = $this->getUser();
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_MANUAL->value,
+                AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERADIUS_UPLOAD_MANUAL->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $user->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
                 ]
             );
 
