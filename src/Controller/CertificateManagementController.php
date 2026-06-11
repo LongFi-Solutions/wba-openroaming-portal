@@ -12,7 +12,6 @@ use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\InstallationType;
-use App\Enum\PlatformMode;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
@@ -201,10 +200,10 @@ class CertificateManagementController extends AbstractController
                 AnalyticalEventType::RADIUS_TLS_UPDATED->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $currentUser->getUuid(),
-                    'changeset'  => $changeset,
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value => $changeset,
                 ]
             );
 
