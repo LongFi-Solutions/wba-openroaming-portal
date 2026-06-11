@@ -274,11 +274,11 @@ class DomainBlacklistController extends AbstractController
                 AnalyticalEventType::BLACKLIST_DOMAIN_EDITED->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $currentUser->getUuid(),
-                    'domain-edited-before' => $oldDomainData->getPattern(),
-                    'domain-edited-after' => $domain->getPattern(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::DOMAIN_EDITED_BEFORE->value => $oldDomainData->getPattern(),
+                    EventMetadataKeysType::DOMAIN_EDITED_AFTER->value => $domain->getPattern(),
                 ]
             );
 

@@ -19,4 +19,6 @@ enum EventMetadataKeysType: string
     case FORMAT = 'format';
     case DOMAIN_ADDED = 'domain_added';
     case DOMAIN_REMOVED = 'domain_removed';
+    case DOMAIN_EDITED_BEFORE = 'domain-edited-before';
+    case DOMAIN_EDITED_AFTER = 'domain-edited-after';
 }
