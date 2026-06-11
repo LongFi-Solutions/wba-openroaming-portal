@@ -297,9 +297,9 @@ class ForgotPasswordController extends AbstractController
                     $latestEvent->setEventDatetime(new DateTime());
                     $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST->value);
                     $latestEventMetadata = [
-                        'platform' => PlatformMode::LIVE->value,
-                        'ip' => $request->getClientIp(),
-                        'uuid' => $user->getUuid(),
+                        EventMetadataKeysType::PLATFORM->value => PlatformMode::LIVE->value,
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
                     ];
 
                     $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(
