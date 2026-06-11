@@ -465,11 +465,11 @@ class DomainBlacklistController extends AbstractController
             $eventType->value,
             new DateTime(),
             [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'by' => $currentUser->getUuid(),
-                'domain_source_url' => $domainSource->getUrl(),
-                'active' => $isActive,
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::DOMAIN_SOURCE_URL->value => $domainSource->getUrl(),
+                EventMetadataKeysType::DOMAIN_SOURCE_RESULT_STATUS->value => $isActive,
             ]
         );
 
