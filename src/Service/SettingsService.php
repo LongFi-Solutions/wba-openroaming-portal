@@ -48,12 +48,12 @@ readonly class SettingsService
                 $oldValue = $setting->getValue();
 
                 if ($oldValue !== $valueToSet) {
-                    $changeset[$name] = ['old' => $oldValue, 'new' => $valueToSet];
+                    $changeset[$name] = ['oldValue' => $oldValue, 'newValue' => $valueToSet];
                 }
 
                 $setting->setValue($valueToSet);
             } else {
-                $changeset[$name] = ['old' => null, 'new' => $valueToSet];
+                $changeset[$name] = ['oldValue' => null, 'newValue' => $valueToSet];
 
                 $setting = new Setting();
                 $setting->setName($name);
@@ -69,11 +69,12 @@ readonly class SettingsService
      * Update or create multiple settings from a generic array.
      *
      * @param array<string, array{value: int|string|null}> $settingsData
+     * @return array<string, array{old: string|null, new: string|null}>
      */
     public function updateAuthSettingsToTranslateFromArray(
         array $settingsData,
         ?string $locale = LanguageType::EN->value
-    ): void {
+    ): array {
         $authSettingsToTranslate = [
             SettingName::AUTH_METHOD_SAML_LABEL->value,
             SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value,
@@ -88,6 +89,9 @@ readonly class SettingsService
             SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value,
             SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value,
         ];
+
+        $changeset = [];
+
         foreach ($settingsData as $name => $item) {
             $value = $item['value'] ?? null;
 
@@ -95,18 +99,22 @@ readonly class SettingsService
             $setting = $this->settingRepository->findOneBy(['name' => $name]);
 
             if ($setting) {
+                $oldValue = $setting->getValue();
                 if (in_array($name, $authSettingsToTranslate, true)) {
                     // Get the translated setting
                     $settingTranslation = $this->settingTranslationRepository->findOneBy(
                         ['setting' => $setting, 'locale' => $locale]
                     );
                     if ($value === null) {
+                        $changeset[$name] = ['oldValue' => $oldValue, 'newValue' => ''];
                         $settingTranslation?->setTranslation('');
                     } else {
+                        $changeset[$name] = ['oldValue' => $oldValue, 'newValue' => $value];
                         $settingTranslation?->setTranslation((string)$value);
                     }
                 } else {
                     $setting->setValue((string)$value);
+                    $changeset[$name] = ['oldValue' => $oldValue, 'newValue' => $value];
                 }
             } else {
                 // Create new setting if it doesn't exist
@@ -114,8 +122,11 @@ readonly class SettingsService
                 $setting->setName($name);
                 $setting->setValue((string)$value);
                 $this->entityManager->persist($setting);
+                $changeset[$name] = ['oldValue' => '', 'newValue' => $value];
             }
         }
+
+        return $changeset;
     }
 
     public function flush(): void
