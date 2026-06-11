@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Event;
 use App\Entity\User;
+use App\Enum\EventMetadataKeysType;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -27,10 +28,10 @@ readonly class EventActions
         $event->setEventDatetime($dateTime);
         $event->setEventName($eventName);
         $metadata = [
-            'ip' => $eventMetadata['ip'] ?? null,
-            'user_agent' => $eventMetadata['user_agent'] ?? null,
-            'platform' => $eventMetadata['platform'] ?? null,
-            'uuid' => $eventMetadata['uuid'] ?? null,
+            EventMetadataKeysType::IP->value => $eventMetadata['ip'] ?? null,
+            EventMetadataKeysType::USER_AGENT->value => $eventMetadata['user_agent'] ?? null,
+            EventMetadataKeysType::PLATFORM->value => $eventMetadata['platform'] ?? null,
+            EventMetadataKeysType::UUID->value => $eventMetadata['uuid'] ?? null,
         ];
 
         foreach ($eventMetadata as $key => $value) {
