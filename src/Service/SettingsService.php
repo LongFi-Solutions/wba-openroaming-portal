@@ -31,7 +31,7 @@ readonly class SettingsService
     /**
      * Update or create multiple settings from a generic array.
      *
-     * @param array<string, array{value: int|string|null|bool}> $settingsData
+     * @param array<string, array{value: bool|float|int|string|null}> $settingsData
      */
     public function updateSettingsFromArray(array $settingsData): void
     {
