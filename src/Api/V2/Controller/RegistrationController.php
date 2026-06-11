@@ -378,9 +378,9 @@ class RegistrationController extends AbstractController
 
                     // Defines the Event to the table
                     $eventMetadata = [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'uuid' => $user->getUuid(),
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
                     ];
 
                     $this->eventActions->saveEvent(
@@ -762,9 +762,9 @@ class RegistrationController extends AbstractController
 
                     // Defines the Event to the table
                     $eventMetadata = [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'uuid' => $user->getUuid(),
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
                     ];
 
                     $this->eventActions->saveEvent(
