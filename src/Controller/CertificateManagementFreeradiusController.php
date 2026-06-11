@@ -665,9 +665,9 @@ class CertificateManagementFreeradiusController extends AbstractController
                     AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERADIUS_UPLOAD_CLOUDFLARE_HTTP_CHALLENGE->value,
                     new DateTime(),
                     [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'by' => $currentUser->getUuid(),
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                     ]
                 );
 
@@ -959,9 +959,9 @@ class CertificateManagementFreeradiusController extends AbstractController
                 ::CERTIFICATE_SETUP_PROCESS_FREERADIUS_UPLOAD_CLOUDFLARE_DNS_CHALLENGE->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $user->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
                 ]
             );
 
