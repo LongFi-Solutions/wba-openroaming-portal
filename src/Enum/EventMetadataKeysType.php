@@ -22,4 +22,7 @@ enum EventMetadataKeysType: string
     case DOMAIN_EDITED_BEFORE = 'domain-edited-before';
     case DOMAIN_EDITED_AFTER = 'domain-edited-after';
     case DOMAIN_SOURCE_ADDED = 'domain-source-added';
+    case DOMAIN_SOURCE_REMOVED = 'domain-source-removed';
+    case DOMAIN_SOURCE_URL = 'domain-source-url';
+    case DOMAIN_SOURCE_RESULT_STATUS = 'domain-source-result-status';
 }
