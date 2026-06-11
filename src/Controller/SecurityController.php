@@ -348,10 +348,9 @@ class SecurityController extends AbstractController
                         } elseif ($smsResponse === SMSResponse::SMS_SUCCESS_CODE->value) {
                             // Save event for code sent
                             $eventMetaData = [
-                                'platform' => PlatformMode::LIVE->value,
-                                'user_agent' => $request->headers->get('User-Agent'),
-                                'uuid' => $loginUser->getUuid(),
-                                'ip' => $request->getClientIp(),
+                                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                                EventMetadataKeysType::UUID->value => $loginUser->getUuid(),
                             ];
                             $this->eventActions->saveEvent(
                                 $loginUser,
