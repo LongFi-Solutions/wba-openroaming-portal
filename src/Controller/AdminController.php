@@ -7,6 +7,7 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\LanguageType;
 use App\Enum\SettingName;
 use App\Enum\SettingType;
@@ -303,6 +304,7 @@ class AdminController extends AbstractController
         $form->handleRequest($request);
         if ($canWrite && $form->isSubmitted() && $form->isValid()) {
             // Update the settings based on the form submission
+            $changeset = [];
             foreach ($settings as $setting) {
                 $settingName = $setting->getName();
 
@@ -323,6 +325,10 @@ class AdminController extends AbstractController
                         $sanitizedValue = $this->htmlSanitizerService->sanitize($submittedValue);
                         if ($locale === LanguageType::EN->value) {
                             // Update the setting value
+                            $changeset[$settingName] = [
+                                'oldValue' => $data[$settingName]['value'],
+                                'newValue' => $sanitizedValue,
+                            ];
                             $setting->setValue($sanitizedValue);
                         }
                         // Get the translated setting
@@ -330,13 +336,26 @@ class AdminController extends AbstractController
                             ['setting' => $setting, 'locale' => $locale]
                         );
                         if ($settingName === SettingName::ADDITIONAL_LABEL->value && $submittedValue === null) {
+                            $changeset[$settingName] = [
+                                'oldValue' => $data[$settingName]['value'],
+                                'newValue' => '',
+                            ];
                             $settingTranslation?->setTranslation('');
                         } else {
+                            $changeset[$settingName] = [
+                                'oldValue' => $data[$settingName]['value'],
+                                'newValue' => $sanitizedValue,
+                            ];
                             $settingTranslation?->setTranslation($sanitizedValue);
                         }
                     } else {
                         // Get the value from the submitted form data
                         $submittedValue = $customTypeDTO->{$settingName} ?? null;
+
+                        $changeset[$settingName] = [
+                            'oldValue' => $data[$settingName]['value'],
+                            'newValue' => $submittedValue,
+                        ];
 
                         // Update the setting value
                         $setting->setValue($submittedValue);
@@ -369,12 +388,19 @@ class AdminController extends AbstractController
                             . '/public/resources/uploaded/';
 
                         $file->move($destinationDirectory, $newFilename);
+
+                        $changeset[$settingName] = [
+                            'oldValue' => $data[$settingName]['value'],
+                            'newValue' => '/resources/uploaded/' . $newFilename,
+                        ];
+
                         $setting->setValue('/resources/uploaded/' . $newFilename);
                     }
                     // PLS MAKE SURE TO USE THIS COMMAND ON THE WEB CONTAINER
                     // chown -R www-data:www-data /var/www/openroaming/public/resources/uploaded/
                 }
             }
+
 
             $this->addFlash(
                 'success',
@@ -386,9 +412,10 @@ class AdminController extends AbstractController
             );
 
             $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $currentUser->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::CHANGESET->value => $changeset,
             ];
             $this->eventActions->saveEvent(
                 $currentUser,

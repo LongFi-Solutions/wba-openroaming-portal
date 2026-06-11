@@ -11,6 +11,7 @@ enum EventMetadataKeysType: string
     case DOWNLOADED_PROFILE_TYPE  = 'type';
     case REGISTRATION_TYPE = 'registration_type';
     case VERIFICATION_ATTEMPTS = 'verification_attempts';
+    case CHANGESET = 'changeset';
     case PERFORMED_ON_UUID = 'performed_on_uuid';
     case RESET_ATTEMPTS = 'reset_attempts';
     case LAST_RESET_ACCOUNT_PASSWORD_TIME = 'last_reset_account_password_time';
