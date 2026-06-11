@@ -5,6 +5,7 @@ namespace App\Api\V1\Controller;
 use App\Api\V1\BaseResponse;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -218,8 +219,8 @@ class TwoFAController extends AbstractController
 
         // Defines the Event to the table
         $eventMetadata = [
-            'ip' => $request->getClientIp(),
-            'uuid' => $user->getUuid(),
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
         ];
         $this->eventActions->saveEvent(
             $user,
