@@ -15,4 +15,5 @@ enum EventMetadataKeysType: string
     case PERFORMED_ON_UUID = 'performed_on_uuid';
     case RESET_ATTEMPTS = 'reset_attempts';
     case LAST_RESET_ACCOUNT_PASSWORD_TIME = 'last_reset_account_password_time';
+    case ADMIN_ACCOUNT_CREATED = 'admin_account_created';
 }

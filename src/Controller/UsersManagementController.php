@@ -298,10 +298,10 @@ class UsersManagementController extends AbstractController
             );
 
             $eventMetaData = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'userAddedBy' => $newUser->getUuid(),
-                'by' => $currentUser->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::ADMIN_ACCOUNT_CREATED->value => $newUser->getUuid(),
             ];
 
             $this->eventActions->saveEvent(
