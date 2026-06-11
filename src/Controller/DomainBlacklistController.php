@@ -13,6 +13,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
 use App\Enum\DomainSourceStatus;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\OperationMode;
 use App\Form\DomainBlacklistAddType;
 use App\Form\DomainBlacklistEditType;
@@ -89,9 +90,9 @@ class DomainBlacklistController extends AbstractController
                 AnalyticalEventType::BLACKLIST_DOMAIN_ADDED->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ]
             );
 
