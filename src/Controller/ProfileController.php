@@ -161,7 +161,7 @@ class ProfileController extends AbstractController
         $response->headers->set('Content-Type', 'application/x-wifi-config');
         $response->headers->set('Content-Transfer-Encoding', 'base64');
 
-        $eventMetadata = [
+        $eventMetaData = [
             EventMetadataKeysType::IP->value => $request->getClientIp(),
             EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
             EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
@@ -176,7 +176,7 @@ class ProfileController extends AbstractController
             $user,
             AnalyticalEventType::DOWNLOAD_PROFILE->value,
             new DateTime(),
-            $eventMetadata
+            $eventMetaData
         );
 
         return $response;
@@ -314,9 +314,9 @@ class ProfileController extends AbstractController
 
         // Save the event Action using the service
         $userAgent = $request->headers->get('User-Agent');
-        $eventMetadata = [];
+        $eventMetaData = [];
         if (stripos((string)$userAgent, 'iPhone') !== false || stripos((string)$userAgent, 'iPad') !== false) {
-            $eventMetadata = [
+            $eventMetaData = [
                 EventMetadataKeysType::IP->value => $request->getClientIp(),
                 EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
                 EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
@@ -326,7 +326,7 @@ class ProfileController extends AbstractController
                 EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value => OSType::IOS->value,
             ];
         } elseif (stripos((string)$userAgent, 'Mac OS') !== false) {
-            $eventMetadata = [
+            $eventMetaData = [
                 EventMetadataKeysType::IP->value => $request->getClientIp(),
                 EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
                 EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
@@ -341,7 +341,7 @@ class ProfileController extends AbstractController
             $user,
             AnalyticalEventType::DOWNLOAD_PROFILE->value,
             new DateTime(),
-            $eventMetadata
+            $eventMetaData
         );
 
         return $response;
@@ -489,7 +489,7 @@ class ProfileController extends AbstractController
         $cache = new CacheUtils();
         $cache->write('profile_' . $uuid, $signedProfileContents);
 
-        $eventMetadata = [
+        $eventMetaData = [
             EventMetadataKeysType::IP->value => $request->getClientIp(),
             EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
             EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
@@ -504,7 +504,7 @@ class ProfileController extends AbstractController
             $user,
             AnalyticalEventType::DOWNLOAD_PROFILE->value,
             new DateTime(),
-            $eventMetadata
+            $eventMetaData
         );
 
         return $this->redirect(
