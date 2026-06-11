@@ -640,6 +640,7 @@ class SettingsController extends AbstractController
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
+                    'platform' => $data[SettingName::PLATFORM_MODE->value]['value'],
                     'changeset'  => $changeset,
                 ]
             );

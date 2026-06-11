@@ -8,5 +8,5 @@ enum EventMetadataKeysType: string
     case USER_AGENT = 'user_agent';
     case PLATFORM = 'platform';
     case UUID = 'uuid';
-
+    case DOWNLOADED_PROFILE_TYPE  = 'type';
 }
