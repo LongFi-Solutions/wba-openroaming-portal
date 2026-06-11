@@ -14,6 +14,7 @@ use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\LanguageType;
 use App\Enum\SettingName;
 use App\Enum\SettingType;
@@ -103,9 +104,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
 
                 $this->eventActions->saveEvent(
@@ -138,9 +139,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -172,9 +173,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -206,9 +207,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -240,9 +241,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -308,9 +309,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -342,9 +343,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -376,9 +377,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -410,9 +411,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -443,9 +444,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
