@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\DTO\ScheduleDTO;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Form\ScheduleType;
@@ -51,11 +52,16 @@ class ScheduleAutomationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid() && $canWrite) {
+            $changeset = [];
             foreach (
                 $scheduleDTO->toCronExpressions(
                     $this->cronExpressionHelperService
                 ) as $settingName => $cronExpression
             ) {
+                $changeset[$settingName] = [
+                    'oldValue' => $data[$settingName]['value'],
+                    'newValue' => $cronExpression,
+                ];
                 $this->saveSetting($settingName, $cronExpression, $scheduleDTO->use_advanced_mode);
             }
 
@@ -65,9 +71,10 @@ class ScheduleAutomationController extends AbstractController
                 AnalyticalEventType::SETTING_SCHEDULE_CONF_REQUEST->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value => $changeset
                 ]
             );
 

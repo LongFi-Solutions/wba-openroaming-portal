@@ -959,10 +959,10 @@ class SettingsController extends AbstractController
                 AnalyticalEventType::SETTING_CAPPORT_CONF_REQUEST->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
-                    'changeset'  => $changeset,
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value  => $changeset,
                 ]
             );
 
