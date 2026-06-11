@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
+use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Form\AutoDeleteCodeType;
@@ -57,8 +59,8 @@ class UserAccountDeletionController extends AbstractController
         }
 
         if (
-            in_array('ROLE_ADMIN', $currentUser->getRoles(), true) ||
-            in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles(), true)
+            in_array(AdminRoleType::ROLE_ADMIN->value, $currentUser->getRoles(), true) ||
+            in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $currentUser->getRoles(), true)
         ) {
             $this->addFlash(
                 'error',
@@ -90,7 +92,7 @@ class UserAccountDeletionController extends AbstractController
             $loginWithUuidOnly = $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value;
         }
 
-        if ($loginWithUuidOnly) {
+        if ($loginWithUuidOnly && $data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::LIVE->value) {
             if (
                 $this->twoFAService->canValidationCode($currentUser, AnalyticalEventType::USER_AUTO_DELETE_CODE->value)
             ) {
@@ -134,6 +136,7 @@ class UserAccountDeletionController extends AbstractController
 
                 return $this->redirectToRoute('app_landing');
             }
+
             $this->addFlash(
                 'error',
                 $this->translator->trans('invalidPassword', [], 'controllers')
