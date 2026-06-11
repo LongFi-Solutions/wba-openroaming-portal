@@ -547,6 +547,7 @@ class SettingsController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Update settings using the service
+            $changeset = [];
             foreach (
                 [
                     SettingName::TOS->value => $form->get(SettingName::TOS->value)->getData(),
@@ -557,6 +558,10 @@ class SettingsController extends AbstractController
                     )->getData(),
                 ] as $name => $value
             ) {
+                $changeset[$name] = [
+                    'oldValue' => $data[$name]['value'],
+                    'newValue' => $value,
+                ];
                 $this->settingsService->update($name, $value);
             }
             $this->settingsService->flush();
@@ -582,9 +587,10 @@ class SettingsController extends AbstractController
                 AnalyticalEventType::SETTING_TERMS_REQUEST->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value => $changeset
                 ]
             );
 
