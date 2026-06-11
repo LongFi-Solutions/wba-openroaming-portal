@@ -127,6 +127,7 @@ class DomainBlacklistController extends AbstractController
                     EventMetadataKeysType::IP->value => $request->getClientIp(),
                     EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
                     EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::DOMAIN_SOURCE_ADDED->value => $source->getUrl(),
                 ]
             );
 
@@ -404,9 +405,9 @@ class DomainBlacklistController extends AbstractController
             AnalyticalEventType::BLACKLIST_SOURCE_REMOVED->value,
             new DateTime(),
             [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'by' => $currentUser->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 'domain-source-removed' => $domainSourceData,
             ]
         );
