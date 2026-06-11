@@ -10,9 +10,9 @@ use App\Entity\UserExternalAuth;
 use App\Entity\UserRadiusProfile;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
-use App\Enum\PermissionLevel;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
@@ -482,16 +482,18 @@ class UsersManagementController extends AbstractController
 
             $this->userRepository->save($user, true);
 
+            $eventMetaData = [
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
+            ];
+
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI->value,
+                AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_DASHBOARD->value,
                 new DateTime(),
-                [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'edited' => $user->getUuid(),
-                    'by' => $currentUser->getUuid(),
-                ]
+                $eventMetaData
             );
 
             $uuid = $user->getUuid();
@@ -540,18 +542,18 @@ class UsersManagementController extends AbstractController
                 // Send email for the user
                 $this->emailGenerator->sendResetPasswordEmailByAdmin($user, $newPassword);
 
-                $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'edited ' => $user->getUuid(),
-                    'by' => $currentUser->getUuid(),
+                $eventMetaData = [
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
                 ];
 
                 $this->eventActions->saveEvent(
                     $user,
                     AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
                     new DateTime(),
-                    $eventMetadata
+                    $eventMetaData
                 );
             }
 
@@ -569,7 +571,7 @@ class UsersManagementController extends AbstractController
                 }
 
                 if ($smsResendInterval === null) {
-                    // Fallback value if the setting is missing just for phpstan be happy
+                    // Fallback value if the setting is missing just for php-stan be happy
                     $smsResendInterval = 5;
                 }
 
@@ -578,10 +580,14 @@ class UsersManagementController extends AbstractController
 
                 // Retrieve the metadata from the latest event
                 $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
-                $lastResetAccountPasswordTime = isset($latestEventMetadata['lastResetAccountPasswordTime'])
-                    ? new DateTime($latestEventMetadata['lastResetAccountPasswordTime'])
+                $lastResetAccountPasswordTime = isset(
+                    $latestEventMetadata[EventMetadataKeysType::LAST_RESET_ACCOUNT_PASSWORD_TIME->value]
+                )
+                    ? new DateTime(
+                        $latestEventMetadata[EventMetadataKeysType::LAST_RESET_ACCOUNT_PASSWORD_TIME->value]
+                    )
                     : null;
-                $resetAttempts = $latestEventMetadata['resetAttempts'] ?? 0;
+                $resetAttempts = $latestEventMetadata[EventMetadataKeysType::RESET_ATTEMPTS->value] ?? 0;
 
                 if (
                     (!$latestEvent || $resetAttempts < 3)
@@ -608,18 +614,19 @@ class UsersManagementController extends AbstractController
                             $this->translator->trans('passwordSentSMS', [], 'controllers')
                         );
 
-                        $eventMetadata = [
-                            'ip' => $request->getClientIp(),
-                            'edited' => $user->getUuid(),
-                            'by' => $currentUser->getUuid(),
-                            'resetAttempts' => $attempts,
-                            'lastResetAccountPasswordTime' => $currentTime->format('Y-m-d H:i:s'),
+                        $eventMetaData = [
+                            EventMetadataKeysType::IP->value => $request->getClientIp(),
+                            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                            EventMetadataKeysType::UUID->value => $user->getUuid(),
+                            EventMetadataKeysType::RESET_ATTEMPTS->value => $attempts,
+                            EventMetadataKeysType::LAST_RESET_ACCOUNT_PASSWORD_TIME->value =>
+                                $currentTime->format('Y-m-d H:i:s'),
                         ];
                         $this->eventActions->saveEvent(
                             $user,
                             AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
                             new DateTime(),
-                            $eventMetadata
+                            $eventMetaData
                         );
                     } else {
                         $this->addFlash(
