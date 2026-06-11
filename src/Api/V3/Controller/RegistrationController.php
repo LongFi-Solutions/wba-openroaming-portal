@@ -7,6 +7,7 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
@@ -724,11 +725,10 @@ class RegistrationController extends AbstractController
                     }
 
                     $eventMetadata = [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'uuid' => $user->getUuid(),
-                        'lastVerificationCodeTime' => $currentTime->format(DateTimeInterface::ATOM),
-                        'verificationAttempts' => $verificationAttempts,
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
+                        EventMetadataKeysType::VERIFICATION_ATTEMPTS->value => $verificationAttempts,
                     ];
                     $latestEvent->setEventMetadata($eventMetadata);
 
