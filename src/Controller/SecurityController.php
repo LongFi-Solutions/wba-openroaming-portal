@@ -656,17 +656,16 @@ class SecurityController extends AbstractController
                 }
 
                 // Defines the Event to the table
-                $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
+                $eventMetaData = [
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $user,
                     AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LOGIN->value,
                     new DateTime(),
-                    $eventMetadata
+                    $eventMetaData
                 );
 
                 $this->addFlash(
