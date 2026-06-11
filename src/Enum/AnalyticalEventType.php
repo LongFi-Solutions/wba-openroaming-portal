@@ -15,6 +15,8 @@ enum AnalyticalEventType: string
     case USER_ACCOUNT_UPDATE_PASSWORD = 'USER_ACCOUNT_UPDATE_PASSWORD';
     case USER_ACCOUNT_UPDATE_PASSWORD_FROM_DASHBOARD = 'USER_ACCOUNT_UPDATE_PASSWORD_FROM_DASHBOARD';
     case USER_ACCOUNT_DELETION = 'USER_ACCOUNT_DELETION';
+    case SUPER_ADMIN_CREATION = 'SUPER_ADMIN_CREATION';
+    case SUPER_ADMIN_VERIFICATION = 'SUPER_ADMIN_VERIFICATION';
     case ADMIN_CREATION = 'ADMIN_CREATION';
     case ADMIN_VERIFICATION = 'ADMIN_VERIFICATION';
     case ADMIN_CHANGED_LOGIN_WITH_UUID_ONLY = 'ADMIN_CHANGED_LOGIN_WITH_UUID_ONLY';
@@ -159,6 +161,8 @@ enum AnalyticalEventType: string
             self::USER_REVOKE_PROFILES => 'User Profiles Revoked',
 
             // Admin actions
+            self::SUPER_ADMIN_CREATION => 'Super Admin Created',
+            self::SUPER_ADMIN_VERIFICATION => 'Super Admin Verified',
             self::ADMIN_CREATION => 'Admin Created',
             self::ADMIN_VERIFICATION => 'Admin Verified',
             self::ADMIN_CHANGED_LOGIN_WITH_UUID_ONLY => 'Login UUID-Only Changed',

@@ -104,8 +104,8 @@ class ResetAdminCommand extends Command
             $this->entityManager->persist($userExternalAuth);
 
           // Save the event Action using the service
-            $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_CREATION->value, new DateTime(), []);
-            $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_VERIFICATION->value, new DateTime(), []);
+            $this->eventActions->saveEvent($admin, AnalyticalEventType::SUPER_ADMIN_CREATION->value, new DateTime(), []);
+            $this->eventActions->saveEvent($admin, AnalyticalEventType::SUPER_ADMIN_VERIFICATION->value, new DateTime(), []);
         }
 
         // Set password

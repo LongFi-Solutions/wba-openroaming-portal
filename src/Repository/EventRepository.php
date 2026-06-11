@@ -314,7 +314,10 @@ class EventRepository extends ServiceEntityRepository
                 ]),
             'admin_actions' => $qb->andWhere('e.event_name IN (:events)')
                 ->setParameter('events', [
+                    AnalyticalEventType::SUPER_ADMIN_CREATION->value,
+                    AnalyticalEventType::SUPER_ADMIN_VERIFICATION->value,
                     AnalyticalEventType::ADMIN_CREATION->value,
+                    AnalyticalEventType::ADMIN_VERIFICATION->value,
                     AnalyticalEventType::ADMIN_ADDED_PERMISSIONS->value,
                     AnalyticalEventType::ADMIN_REMOVED_PERMISSIONS->value,
                     AnalyticalEventType::ADMIN_ADDED_NEW_USER->value,
