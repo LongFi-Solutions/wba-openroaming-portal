@@ -204,6 +204,7 @@ enum AnalyticalEventType: string
             self::TWO_FA_CODE_DISABLE_RESEND => '2FA Disable Code Resent',
             self::TWO_FA_CODE_VALIDATE_RESEND => '2FA Validate Code Resent',
             self::TWO_FA_CODE_VERIFY_RESEND => '2FA Verify Code Resent',
+            self::TWO_FACTOR_AUTH_RESEND_INTERVAL => '2FA Authentication Resend Interval',
 
             // Settings changes
             self::SETTING_PAGE_STYLE_REQUEST => 'Page Style Updated',
@@ -300,6 +301,7 @@ enum AnalyticalEventType: string
             self::RETURN_APPS_RESET_REQUEST => 'Return Apps Reset',
             self::BREAKING_GLASS_ACCOUNT_GENERATION => 'Breaking Glass Account Generation',
             self::BREAKING_GLASS_ACCOUNT_RESET => 'Breaking Glass Account Reset',
+            self::EXPORT_ACTIVITY_LOGS_REQUEST => 'Export Activity Logs Request',
         };
     }
 }

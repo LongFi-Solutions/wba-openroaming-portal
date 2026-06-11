@@ -413,7 +413,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $user = $this->getUser();
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_CONFIG->value,
+                    AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERADIUS_CONFIG->value,
                     new DateTime(),
                     [
                         'ip' => $request->getClientIp(),
@@ -662,7 +662,7 @@ class CertificateManagementFreeradiusController extends AbstractController
 
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_CLOUDFLARE_HTTP_CHALLENGE->value,
+                    AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERADIUS_UPLOAD_CLOUDFLARE_HTTP_CHALLENGE->value,
                     new DateTime(),
                     [
                         'ip' => $request->getClientIp(),
@@ -894,7 +894,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         $session = $request->getSession();
         $session->set(
             SessionStatus::FREERADIUS_SETUP_PROCESS_TYPE->value,
-            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_CLOUDFLARE_DNS_CHALLENGE->value,
+            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERADIUS_UPLOAD_CLOUDFLARE_DNS_CHALLENGE->value,
         );
 
         $dto = new CloudflareDTO();
@@ -956,7 +956,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType
-                ::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_CLOUDFLARE_DNS_CHALLENGE->value,
+                ::CERTIFICATE_SETUP_PROCESS_FREERADIUS_UPLOAD_CLOUDFLARE_DNS_CHALLENGE->value,
                 new DateTime(),
                 [
                     'ip' => $request->getClientIp(),
