@@ -344,12 +344,9 @@ class GoogleController extends AbstractController
 
             // Defines the Event to the table
             $eventMetadata = [
-                'platform' => $this->settingRepository->findOneBy(
-                    ['name' => SettingName::PLATFORM_MODE->value]
-                )->getValue(),
-                'ip' => $_SERVER['REMOTE_ADDR'],
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
-                'uuid' => $user->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
             ];
             $this->eventActions->saveEvent(
                 $user,
