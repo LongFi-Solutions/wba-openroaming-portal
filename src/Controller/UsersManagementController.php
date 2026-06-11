@@ -729,13 +729,16 @@ class UsersManagementController extends AbstractController
             true
         );
 
+        $currentUser = $this->getUser();
+
         // Change user 2FA status
         $this->twoFAService->disable2FA($user);
         $this->twoFAService->event2FA(
             $request->getClientIp(),
             $user,
             AnalyticalEventType::DISABLED_2FA_BY->value,
-            $request->headers->get('User-Agent')
+            $request->headers->get('User-Agent'),
+            $currentUser
         );
 
         if ($user->getEmail()) {
