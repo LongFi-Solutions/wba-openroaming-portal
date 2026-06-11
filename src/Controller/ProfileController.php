@@ -92,7 +92,6 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
         $radiusUser = $this->createOrUpdateRadiusUser(
@@ -168,6 +167,7 @@ class ProfileController extends AbstractController
             EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
                 ['name' => SettingName::PLATFORM_MODE->value]
             )->getValue(),
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
             EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value => OSType::ANDROID->value,
         ];
 
@@ -322,6 +322,7 @@ class ProfileController extends AbstractController
                 EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
                     ['name' => SettingName::PLATFORM_MODE->value]
                 )->getValue(),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
                 EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value => OSType::IOS->value,
             ];
         } elseif (stripos((string)$userAgent, 'Mac OS') !== false) {
@@ -331,6 +332,7 @@ class ProfileController extends AbstractController
                 EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
                     ['name' => SettingName::PLATFORM_MODE->value]
                 )->getValue(),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
                 EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value => OSType::MACOS->value,
             ];
         }
@@ -493,6 +495,7 @@ class ProfileController extends AbstractController
             EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
                 ['name' => SettingName::PLATFORM_MODE->value]
             )->getValue(),
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
             EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value => OSType::WINDOWS->value,
         ];
 
