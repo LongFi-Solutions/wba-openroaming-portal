@@ -539,10 +539,9 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_landing');
             }
             $eventMetaData = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'platform' => PlatformMode::LIVE->value,
-                'uuid' => $user->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
             ];
             $this->eventActions->saveEvent(
                 $user,
