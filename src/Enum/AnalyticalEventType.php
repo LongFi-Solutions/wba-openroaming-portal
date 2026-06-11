@@ -13,7 +13,7 @@ enum AnalyticalEventType: string
     case USER_ACCOUNT_UPDATE = 'USER_ACCOUNT_UPDATE';
     case USER_ACCOUNT_UPDATE_FROM_DASHBOARD = 'USER_ACCOUNT_UPDATE_FROM_DASHBOARD';
     case USER_ACCOUNT_UPDATE_PASSWORD = 'USER_ACCOUNT_UPDATE_PASSWORD';
-    case USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI = 'USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI';
+    case USER_ACCOUNT_UPDATE_PASSWORD_FROM_DASHBOARD = 'USER_ACCOUNT_UPDATE_PASSWORD_FROM_DASHBOARD';
     case USER_ACCOUNT_DELETION = 'USER_ACCOUNT_DELETION';
     case ADMIN_CREATION = 'ADMIN_CREATION';
     case ADMIN_VERIFICATION = 'ADMIN_VERIFICATION';
@@ -148,15 +148,15 @@ enum AnalyticalEventType: string
             self::USER_CREATION => 'User Created',
             self::USER_VERIFICATION => 'User Verified',
             self::USER_SMS_ATTEMPT => 'SMS Attempt',
-            self::USER_ACCOUNT_UPDATE => 'Account Updated',
-            self::USER_ACCOUNT_UPDATE_FROM_DASHBOARD => 'Account Updated (Dashboard)',
-            self::USER_ACCOUNT_UPDATE_PASSWORD => 'Password Updated',
-            self::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI => 'Password Updated (Dashboard)',
-            self::USER_ACCOUNT_DELETION => 'Account Deleted',
-            self::USER_AUTO_DELETED => 'Account Auto-Deleted',
-            self::USER_AUTO_DELETE_CODE => 'Auto-Delete Code Sent',
+            self::USER_ACCOUNT_UPDATE => 'User Account Updated',
+            self::USER_ACCOUNT_UPDATE_FROM_DASHBOARD => 'User Account Updated (Dashboard)',
+            self::USER_ACCOUNT_UPDATE_PASSWORD => 'User Password Updated',
+            self::USER_ACCOUNT_UPDATE_PASSWORD_FROM_DASHBOARD => 'User Password Updated (Dashboard)',
+            self::USER_ACCOUNT_DELETION => 'User Account Deleted',
+            self::USER_AUTO_DELETED => 'User Account Auto-Deleted',
+            self::USER_AUTO_DELETE_CODE => 'User Auto-Delete Code Sent',
             self::AUTO_DELETE_UNCONFIRMED_ACCOUNTS => 'Unconfirmed Accounts Deleted',
-            self::USER_REVOKE_PROFILES => 'Profiles Revoked',
+            self::USER_REVOKE_PROFILES => 'User Profiles Revoked',
 
             // Admin actions
             self::ADMIN_CREATION => 'Admin Created',

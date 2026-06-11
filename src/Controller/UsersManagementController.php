@@ -551,7 +551,7 @@ class UsersManagementController extends AbstractController
 
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_DASHBOARD->value,
                     new DateTime(),
                     $eventMetaData
                 );
@@ -562,7 +562,7 @@ class UsersManagementController extends AbstractController
             ) {
                 $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
                     $user,
-                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_DASHBOARD->value
                 );
 
                 $smsResendInterval = null;
@@ -624,7 +624,7 @@ class UsersManagementController extends AbstractController
                         ];
                         $this->eventActions->saveEvent(
                             $user,
-                            AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
+                            AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_DASHBOARD->value,
                             new DateTime(),
                             $eventMetaData
                         );
