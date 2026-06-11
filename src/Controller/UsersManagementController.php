@@ -104,19 +104,18 @@ class UsersManagementController extends AbstractController
         if (
             !$this->isGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)
             && (
-                in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles())
-                || in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles())
+                in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true)
+                || in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true)
             )
         ) {
             throw $this->createAccessDeniedException();
         }
 
         $eventMetaData = [
-            'ip' => $request->getClientIp(),
-            'user_agent' => $request->headers->get('User-Agent'),
-            'platform' => PlatformMode::LIVE->value,
-            'userRevoked' => $user->getUuid(),
-            'by' => $currentUser->getUuid(),
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+            EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid()
         ];
 
         $this->eventActions->saveEvent(
