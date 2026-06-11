@@ -11,6 +11,7 @@ use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DataBaseSetupType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\InstallationStep;
 use App\Enum\InstallationType;
 use App\Enum\PlatformMode;
@@ -180,9 +181,9 @@ class InstallationController extends AbstractController
                     AnalyticalEventType::SYSTEM_RESET_REQUEST_IN_PROGRESS->value,
                     new DateTime(),
                     [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'by' => $user->getUuid(),
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
                     ]
                 );
             }
@@ -205,9 +206,9 @@ class InstallationController extends AbstractController
                 AnalyticalEventType::INSTALLATION_DATABASE_CONFIG->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $user->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
                 ]
             );
 
@@ -286,9 +287,9 @@ class InstallationController extends AbstractController
                 AnalyticalEventType::INSTALLATION_COMMAND_CONFIG->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $user->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
                 ]
             );
 
@@ -495,9 +496,9 @@ class InstallationController extends AbstractController
                     AnalyticalEventType::INSTALLATION_SETTINGS_CONFIG->value,
                     new DateTime(),
                     [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'by' => $user->getUuid(),
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
                     ]
                 );
 
@@ -598,6 +599,10 @@ class InstallationController extends AbstractController
         );
     }
 
+    /**
+     * @throws TransportExceptionInterface
+     * @throws RandomException
+     */
     #[Route(
         '/dashboard/settings/certificatesManagement/installation/admin/sendCode',
         name: 'admin_dashboard_settings_certs_installation_admin_sendCode'
@@ -624,10 +629,9 @@ class InstallationController extends AbstractController
                 ) {
                     $this->installationService->sendAdminConfirmationCode($lastInstallation);
                     $eventMetaData = [
-                        'platform' => PlatformMode::LIVE->value,
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'uuid' => $admin->getUuid(),
-                        'ip' => $request->getClientIp(),
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $admin->getUuid(),
                     ];
                     $this->eventActions->saveEvent(
                         $admin,
@@ -722,9 +726,9 @@ class InstallationController extends AbstractController
                     AnalyticalEventType::INSTALLATION_ADMIN_CONFIG->value,
                     new DateTime(),
                     [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'by' => $user->getUuid(),
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
                     ]
                 );
 
@@ -844,9 +848,9 @@ class InstallationController extends AbstractController
             AnalyticalEventType::INSTALLATION_CONFIG_ABORTED->value,
             new DateTime(),
             [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'by' => $user->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
             ]
         );
 
@@ -906,10 +910,9 @@ class InstallationController extends AbstractController
             if ($lastInstallation instanceof InstallationProgress) {
                 $this->installationService->sendAdminConfirmationCode($lastInstallation);
                 $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $user,

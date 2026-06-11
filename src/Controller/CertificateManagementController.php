@@ -12,7 +12,6 @@ use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\InstallationType;
-use App\Enum\PlatformMode;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
@@ -201,10 +200,10 @@ class CertificateManagementController extends AbstractController
                 AnalyticalEventType::RADIUS_TLS_UPDATED->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $currentUser->getUuid(),
-                    'changeset'  => $changeset,
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value => $changeset,
                 ]
             );
 
@@ -327,9 +326,9 @@ class CertificateManagementController extends AbstractController
             AnalyticalEventType::SYSTEM_RESET_REQUEST_STARTED->value,
             new DateTime(),
             [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'by' => $user->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
             ]
         );
 
@@ -383,10 +382,9 @@ class CertificateManagementController extends AbstractController
                     $session->set(SessionStatus::CERTIFICATE_VERIFICATION->value, true);
                 }
                 $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $user,
