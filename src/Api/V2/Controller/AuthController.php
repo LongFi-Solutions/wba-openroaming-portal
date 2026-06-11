@@ -239,9 +239,9 @@ class AuthController extends AbstractController
 
             // Defines the Event to the table
             $eventMetaData = [
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
             ];
 
             $this->eventActions->saveEvent(
