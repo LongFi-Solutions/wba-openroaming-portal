@@ -98,12 +98,12 @@ class CertificateManagementController extends AbstractController
                 AnalyticalEventType::CERTIFICATE_VALIDATION_RAN->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $currentUser->getUuid(),
-                    'success' => empty($errors),
-                    'isEv' => $isEv,
-                    'errors' => $errors,
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::VALIDATION_SUCCESS->value => empty($errors),
+                    EventMetadataKeysType::IS_EV_CERTIFICATE->value => $isEv,
+                    EventMetadataKeysType::VALIDATION_ERRORS->value => $errors,
                 ]
             );
 

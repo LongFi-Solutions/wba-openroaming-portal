@@ -25,4 +25,7 @@ enum EventMetadataKeysType: string
     case DOMAIN_SOURCE_REMOVED = 'domain-source-removed';
     case DOMAIN_SOURCE_URL = 'domain-source-url';
     case DOMAIN_SOURCE_RESULT_STATUS = 'domain-source-result-status';
+    case VALIDATION_SUCCESS = 'validation-success';
+    case IS_EV_CERTIFICATE = 'is_ev_certificate';
+    case VALIDATION_ERRORS = 'validation_errors';
 }
