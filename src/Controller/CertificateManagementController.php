@@ -10,6 +10,7 @@ use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\InstallationType;
 use App\Enum\PlatformMode;
 use App\Enum\ProcessStatusType;

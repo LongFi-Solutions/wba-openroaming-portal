@@ -42,7 +42,7 @@ final readonly class FreeradiusTestOrchestrator
 
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_TEST->value,
+            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERADIUS_TEST->value,
             new DateTime(),
             [
                 'ip' => $request->getClientIp(),
