@@ -11,6 +11,7 @@ use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DataBaseSetupType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\InstallationStep;
 use App\Enum\InstallationType;
 use App\Enum\PlatformMode;
@@ -598,6 +599,10 @@ class InstallationController extends AbstractController
         );
     }
 
+    /**
+     * @throws TransportExceptionInterface
+     * @throws RandomException
+     */
     #[Route(
         '/dashboard/settings/certificatesManagement/installation/admin/sendCode',
         name: 'admin_dashboard_settings_certs_installation_admin_sendCode'
@@ -624,10 +629,9 @@ class InstallationController extends AbstractController
                 ) {
                     $this->installationService->sendAdminConfirmationCode($lastInstallation);
                     $eventMetaData = [
-                        'platform' => PlatformMode::LIVE->value,
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'uuid' => $admin->getUuid(),
-                        'ip' => $request->getClientIp(),
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $admin->getUuid(),
                     ];
                     $this->eventActions->saveEvent(
                         $admin,
