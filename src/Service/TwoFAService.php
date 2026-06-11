@@ -429,11 +429,10 @@ readonly class TwoFAService
     public function event2FA(string $ip, User $user, string $eventType, string $userAgent, ?User $admin = null): void
     {
         $eventMetaData = [
-            'platform' => PlatformMode::LIVE->value,
-            'user_agent' => $userAgent,
-            'uuid' => $user->getUuid(),
-            'ip' => $ip,
-            'editedBy' => $admin?->getUuid() ?? 'ByHimself',
+            EventMetadataKeysType::USER_AGENT->value => $userAgent,
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
+            EventMetadataKeysType::IP->value => $ip,
+            EventMetadataKeysType::PERFORMED_ON_UUID->value => $admin?->getUuid() ?? 'ByHimself',
         ];
         $this->eventActions->saveEvent(
             $user,
