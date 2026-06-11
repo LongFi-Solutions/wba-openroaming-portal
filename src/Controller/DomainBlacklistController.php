@@ -528,9 +528,9 @@ class DomainBlacklistController extends AbstractController
             $user = $this->entityManager->getReference(User::class, $currentUser->getId());
 
             $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $currentUser->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
             ];
             $this->eventActions->saveEvent(
                 $user,
