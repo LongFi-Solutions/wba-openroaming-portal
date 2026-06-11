@@ -7,6 +7,7 @@ namespace App\Command;
 use App\Entity\Event;
 use App\Entity\Setting;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
@@ -90,8 +91,8 @@ class ResetBreakingGlassAccountSettingCommand extends Command
             $hostname = gethostname();
             $ip = $hostname ? gethostbyname($hostname) : '';
             $eventMetadata = [
-                'platform' => PlatformMode::CLI->value,
-                'ip' => $ip,
+                EventMetadataKeysType::PLATFORM->value => PlatformMode::CLI->value,
+                EventMetadataKeysType::IP->value => $ip,
             ];
             $event->setEventMetadata($eventMetadata);
             $this->entityManager->persist($event);
