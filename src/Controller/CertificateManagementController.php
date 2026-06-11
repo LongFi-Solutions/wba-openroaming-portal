@@ -383,10 +383,9 @@ class CertificateManagementController extends AbstractController
                     $session->set(SessionStatus::CERTIFICATE_VERIFICATION->value, true);
                 }
                 $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $user,
