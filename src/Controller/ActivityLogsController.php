@@ -2,13 +2,18 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Enum\AdminRoleType;
+use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Repository\EventRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\ActivityLog\ActivityLogExporter;
 use App\Service\ActivityLog\ExportFilters;
+use App\Service\EventActions;
 use App\Service\GetSettings;
+use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,6 +25,7 @@ class ActivityLogsController extends AbstractController
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly ActivityLogExporter $activityLogExporter,
+        private readonly EventActions $eventActions,
     ) {
     }
 
@@ -49,6 +55,22 @@ class ActivityLogsController extends AbstractController
     #[IsGranted(UserAuthenticationVoter::ACTIVITY_LOGS_READ)]
     public function export(Request $request, string $format): Response
     {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        // Event log
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::EXPORT_ACTIVITY_LOGS_REQUEST->value,
+            new DateTime(),
+            [
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::FORMAT->value => $format
+            ]
+        );
+
         return $this->activityLogExporter->export(
             ExportFilters::fromRequest($request),
             $format,
