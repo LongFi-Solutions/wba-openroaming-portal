@@ -311,7 +311,7 @@ class UsersManagementController extends AbstractController
                 $eventMetaData
             );
 
-            return $this->redirectToRoute('admins_management');
+            return $this->redirectToRoute('admin_dashboard_admins');
         }
 
         return $this->render('dashboard/actions/add.html.twig', [
