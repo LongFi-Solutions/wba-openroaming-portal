@@ -9,5 +9,5 @@ enum EventMetadataKeysType: string
     case PLATFORM = 'platform';
     case UUID = 'uuid';
     case DOWNLOADED_PROFILE_TYPE  = 'type';
-    case VERIFICATION_ATTEMPTS = 'verificationAttempts';
+    case VERIFICATION_ATTEMPTS = 'verification_attempts';
 }

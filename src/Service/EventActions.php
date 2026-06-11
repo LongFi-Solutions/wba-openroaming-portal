@@ -30,7 +30,6 @@ readonly class EventActions
         $metadata = [
             EventMetadataKeysType::IP->value => $eventMetadata['ip'] ?? null,
             EventMetadataKeysType::USER_AGENT->value => $eventMetadata['user_agent'] ?? null,
-            EventMetadataKeysType::PLATFORM->value => $eventMetadata['platform'] ?? null,
             EventMetadataKeysType::UUID->value => $eventMetadata['uuid'] ?? null,
         ];
 
