@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\ForgotPasswordEnum;
 use App\Enum\PlatformMode;
@@ -141,9 +142,9 @@ class ForgotPasswordController extends AbstractController
                         $latestEvent->setEventDatetime(new DateTime());
                         $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
                         $latestEventMetadata = [
-                            'platform' => PlatformMode::LIVE->value,
-                            'ip' => $request->getClientIp(),
-                            'uuid' => $user->getUuid(),
+                            EventMetadataKeysType::PLATFORM->value => PlatformMode::LIVE->value,
+                            EventMetadataKeysType::IP->value => $request->getClientIp(),
+                            EventMetadataKeysType::UUID->value => $user->getUuid(),
                         ];
                         $currentTime = new DateTime();
                         $latestEventMetadata['lastVerificationCodeTime'] =

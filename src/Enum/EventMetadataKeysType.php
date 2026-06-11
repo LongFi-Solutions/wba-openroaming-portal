@@ -10,5 +10,5 @@ enum EventMetadataKeysType: string
     case UUID = 'uuid';
     case DOWNLOADED_PROFILE_TYPE  = 'type';
     case REGISTRATION_TYPE = 'registration_type';
-    case VERIFICATION_ATTEMPTS = 'verificationAttempts';
+    case VERIFICATION_ATTEMPTS = 'verification_attempts';
 }
