@@ -186,12 +186,17 @@ class RegistrationController extends AbstractController
 
         $this->emailGenerator->sendRegistrationEmail($user, $data['password'], true);
 
+        // Save user creation event
         $eventMetaData = [
-            'ip' => $request->getClientIp(),
-            'uuid' => $user->getUuid(),
-            'provider' => UserProvider::PORTAL_ACCOUNT->value,
-            'registrationType' => UserProvider::EMAIL->value,
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
+            EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::PLATFORM_MODE->value]
+            )->getValue(),
+            EventMetadataKeysType::REGISTRATION_TYPE->value => UserProvider::EMAIL->value
         ];
+
         $this->eventActions->saveEvent(
             $user,
             AnalyticalEventType::USER_CREATION->value,
@@ -527,10 +532,13 @@ class RegistrationController extends AbstractController
 
         // Save user creation event
         $eventMetaData = [
-            'uuid' => $user->getUuid(),
-            'provider' => UserProvider::PORTAL_ACCOUNT->value,
-            'registrationType' => UserProvider::PHONE_NUMBER->value,
-            'ip' => $request->getClientIp(),
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
+            EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::PLATFORM_MODE->value]
+            )->getValue(),
+            EventMetadataKeysType::REGISTRATION_TYPE->value => UserProvider::PHONE_NUMBER->value
         ];
 
         $this->eventActions->saveEvent(

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
@@ -29,6 +30,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -36,7 +38,6 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class GoogleController extends AbstractController
 {
@@ -193,7 +194,7 @@ class GoogleController extends AbstractController
         }
 
         // Find or create the user based on the Google user ID and email
-        $user = $this->findOrCreateGoogleUser($googleUserId, $email, $firstname, $lastname);
+        $user = $this->findOrCreateGoogleUser($googleUserId, $email, $firstname, $lastname, $request);
 
         // If the user is null, redirect to the landing page
         if (!$user instanceof User) {
@@ -239,7 +240,8 @@ class GoogleController extends AbstractController
         string $googleUserId,
         string $email,
         ?string $firstname,
-        ?string $lastname
+        ?string $lastname,
+        ?Request $request = null
     ): ?User {
         // Check if a user with the given email exists
         $userGoogle = $this->userRepository->findOneBy(['uuid' => $email]);
@@ -290,25 +292,29 @@ class GoogleController extends AbstractController
         $this->entityManager->persist($userAuth);
         $this->entityManager->flush();
 
-        $event_metadata = [
-            'platform' => PlatformMode::LIVE->value,
-            'uuid' => $user->getUuid(),
-            'ip' => $_SERVER['REMOTE_ADDR'],
-            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
-            'registrationType' => UserProvider::GOOGLE_ACCOUNT->value,
+        $baseMetaData = [
+            EventMetadataKeysType::IP->value => $request?->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request?->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
+            EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::PLATFORM_MODE->value]
+            )->getValue(),
         ];
 
         $this->eventActions->saveEvent(
             $user,
             AnalyticalEventType::USER_CREATION->value,
             new DateTime(),
-            $event_metadata
+            [
+                $baseMetaData,
+                EventMetadataKeysType::REGISTRATION_TYPE->value => UserProvider::GOOGLE_ACCOUNT->value,
+            ]
         );
         $this->eventActions->saveEvent(
             $user,
             AnalyticalEventType::USER_VERIFICATION->value,
             new DateTime(),
-            []
+            $baseMetaData
         );
 
         return $user;
