@@ -794,11 +794,10 @@ class UsersManagementController extends AbstractController
         $this->entityManager->flush();
 
         $eventMetaData = [
-            'ip' => $request->getClientIp(),
-            'user_agent' => $request->headers->get('User-Agent'),
-            'platform' => PlatformMode::LIVE->value,
-            'giveAdminPermissionsTo' => $user->getUuid(),
-            'by' => $currentUser->getUuid(),
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+            EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
         ];
 
         $this->eventActions->saveEvent(
@@ -836,11 +835,10 @@ class UsersManagementController extends AbstractController
         $this->entityManager->flush();
 
         $eventMetaData = [
-            'ip' => $request->getClientIp(),
-            'user_agent' => $request->headers->get('User-Agent'),
-            'platform' => PlatformMode::LIVE->value,
-            'removeAdminPermissionsTo' => $user->getUuid(),
-            'by' => $currentUser->getUuid(),
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+            EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
         ];
 
         $this->eventActions->saveEvent(
