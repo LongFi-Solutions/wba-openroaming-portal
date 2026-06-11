@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Entity\OTPcode;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\TwoFAType;
@@ -323,10 +324,9 @@ readonly class TwoFAService
 
         if ($eventType !== AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value) {
             $eventMetaData = [
-                'platform' => PlatformMode::LIVE->value,
-                'user_agent' => $userAgent ?? 'Unknown',
-                'uuid' => $user->getUuid(),
-                'ip' => $ip ?? null,
+                EventMetadataKeysType::IP->value => $ip,
+                EventMetadataKeysType::USER_AGENT->value => $userAgent,
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
             ];
             $this->eventActions->saveEvent(
                 $user,
