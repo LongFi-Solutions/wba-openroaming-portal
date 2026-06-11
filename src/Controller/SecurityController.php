@@ -6,6 +6,7 @@ use App\DTO\LoginChoiceDTO;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
@@ -231,10 +232,9 @@ class SecurityController extends AbstractController
                         );
 
                         $eventMetaData = [
-                            'platform' => PlatformMode::LIVE->value,
-                            'user_agent' => $request->headers->get('User-Agent'),
-                            'uuid' => $loginUser->getUuid(),
-                            'ip' => $request->getClientIp(),
+                            EventMetadataKeysType::IP->value => $request->getClientIp(),
+                            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                            EventMetadataKeysType::UUID->value => $loginUser->getUuid(),
                         ];
                         $this->eventActions->saveEvent(
                             $loginUser,
@@ -330,10 +330,9 @@ class SecurityController extends AbstractController
                         if ($smsResponse === SMSResponse::SMS_SUCCESS_LINK->value) {
                             // Save event for link sent
                             $eventMetaData = [
-                                'platform' => PlatformMode::LIVE->value,
-                                'user_agent' => $request->headers->get('User-Agent'),
-                                'uuid' => $loginUser->getUuid(),
-                                'ip' => $request->getClientIp(),
+                                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                                EventMetadataKeysType::UUID->value => $loginUser->getUuid(),
                             ];
                             $this->eventActions->saveEvent(
                                 $loginUser,

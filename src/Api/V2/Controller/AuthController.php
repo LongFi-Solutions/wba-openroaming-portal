@@ -9,6 +9,7 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Enum\SMSResponse;
@@ -295,7 +296,7 @@ class AuthController extends AbstractController
             }
         } else {
             $timeIntervalToResendCode = $this->settingRepository->findOneBy(
-                ['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL']
+                ['name' => AnalyticalEventType::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
             )->getValue();
             $message = $this->magicLinkService->timeToResend($timeIntervalToResendCode, $event);
 
@@ -306,9 +307,9 @@ class AuthController extends AbstractController
         }
 
         $eventMetaData = [
-            'user_agent' => $request->headers->get('User-Agent'),
-            'uuid' => $user->getUuid(),
-            'ip' => $request->getClientIp(),
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
         ];
         $this->eventActions->saveEvent(
             $user,
