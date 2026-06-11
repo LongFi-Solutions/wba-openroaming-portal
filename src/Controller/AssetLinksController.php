@@ -6,11 +6,12 @@ use App\DTO\ReturnAppsSettingsDTO;
 use App\Entity\ReturnAppFingerprint;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Form\ReturnAppsType;
 use App\Repository\ReturnAppFingerprintRepository;
 use App\Repository\SettingRepository;
-use App\Enum\SettingName;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -186,10 +187,10 @@ class AssetLinksController extends AbstractController
                 AnalyticalEventType::RETURN_APPS_UPDATED->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
-                    'changeset'  => $changeset,
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value => $changeset,
                 ]
             );
 
