@@ -616,10 +616,10 @@ class DomainBlacklistController extends AbstractController
             $user = $this->entityManager->getReference(User::class, $currentUser->getId());
 
             $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $currentUser->getUuid(),
-                'source' => $domainSource->getUrl(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
+                EventMetadataKeysType::DOMAIN_SOURCE_URL->value => $domainSource->getUrl(),
             ];
             $this->eventActions->saveEvent(
                 $user,
