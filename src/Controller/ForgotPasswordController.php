@@ -684,10 +684,9 @@ class ForgotPasswordController extends AbstractController
             $this->entityManager->flush();
 
             $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'platform' => PlatformMode::LIVE->value,
-                'uuid' => $currentUser->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
                 $currentUser,
