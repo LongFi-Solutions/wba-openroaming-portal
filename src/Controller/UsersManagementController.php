@@ -505,8 +505,8 @@ class UsersManagementController extends AbstractController
             $eventMetaData = [
                 EventMetadataKeysType::IP->value => $request->getClientIp(),
                 EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
+                EventMetadataKeysType::PERFORMED_ON_UUID->value => $currentUser->getUuid(),
                 EventMetadataKeysType::CHANGESET->value => $formattedChanges,
             ];
 
@@ -566,8 +566,8 @@ class UsersManagementController extends AbstractController
                 $eventMetaData = [
                     EventMetadataKeysType::IP->value => $request->getClientIp(),
                     EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                    EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
+                    EventMetadataKeysType::PERFORMED_ON_UUID->value => $currentUser->getUuid(),
                 ];
 
                 $this->eventActions->saveEvent(
@@ -862,8 +862,8 @@ class UsersManagementController extends AbstractController
         $eventMetaData = [
             EventMetadataKeysType::IP->value => $request->getClientIp(),
             EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-            EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-            EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
+            EventMetadataKeysType::PERFORMED_ON_UUID->value => $currentUser->getUuid(),
         ];
 
         $this->eventActions->saveEvent(

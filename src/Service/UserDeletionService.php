@@ -125,7 +125,7 @@ readonly class UserDeletionService
         $eventMetadata = [
             EventMetadataKeysType::IP->value => $request->getClientIp(),
             EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-            EventMetadataKeysType::UUID->value => $user->getUuid(),
+            EventMetadataKeysType::UUID->value => $admin->getUuid(),
             EventMetadataKeysType::PERFORMED_ON_UUID->value => $deletedUserUuid
         ];
 
