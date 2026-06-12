@@ -30,10 +30,10 @@ readonly class SettingsService
 
     /**
      * Update or create multiple settings from a generic array.
-     * Returns a changeset of [name => ['old' => ..., 'new' => ...]] for changed fields.
+     * Returns a changeset of [name => ['oldValue' => ..., 'newValue' => ...]] for changed fields.
      *
      * @param array<string, array{value: bool|float|int|string|null}> $settingsData
-     * @return array<string, array{old: string|null, new: string|null}>
+     * @return array<string, array{oldValue: string|null, newValue: string|null}>
      */
     public function updateSettingsFromArray(array $settingsData): array
     {
@@ -69,7 +69,7 @@ readonly class SettingsService
      * Update or create multiple settings from a generic array.
      *
      * @param array<string, array{value: int|string|null}> $settingsData
-     * @return array<string, array{old: string|null, new: string|null}>
+     * @return array<string, array{oldValue: string|null, newValue: int|string|null}>
      */
     public function updateAuthSettingsToTranslateFromArray(
         array $settingsData,
