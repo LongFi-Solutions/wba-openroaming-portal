@@ -59,10 +59,12 @@ class ScheduleAutomationController extends AbstractController
                     $this->cronExpressionHelperService
                 ) as $settingName => $cronExpression
             ) {
-                $changeset[$settingName] = [
-                    'oldValue' => $data[$settingName]['value'],
-                    'newValue' => $cronExpression,
-                ];
+                if ($data[$settingName]['value'] !== $cronExpression) {
+                    $changeset[$settingName] = [
+                        'oldValue' => $data[$settingName]['value'],
+                        'newValue' => $cronExpression,
+                    ];
+                }
                 $this->saveSetting($settingName, $cronExpression, $scheduleDTO->use_advanced_mode);
             }
 
