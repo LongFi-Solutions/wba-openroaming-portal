@@ -92,7 +92,11 @@ class UserAccountDeletionController extends AbstractController
             $loginWithUuidOnly = $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value;
         }
 
-        if ($loginWithUuidOnly && $data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::LIVE->value) {
+        if (
+            $loginWithUuidOnly
+            && is_array($data)
+            && ($data[SettingName::PLATFORM_MODE->value]['value'] ?? null) === PlatformMode::LIVE->value
+        ) {
             if (
                 $this->twoFAService->canValidationCode($currentUser, AnalyticalEventType::USER_AUTO_DELETE_CODE->value)
             ) {
