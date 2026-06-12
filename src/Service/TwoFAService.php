@@ -454,7 +454,6 @@ readonly class TwoFAService
                 $eventMetaData
             );
         }
-
     }
 
     public function canValidationCode(User $user, string $eventType): bool
