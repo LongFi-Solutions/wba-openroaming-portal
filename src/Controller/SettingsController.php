@@ -558,20 +558,41 @@ class SettingsController extends AbstractController
                     )->getData(),
                 ] as $name => $value
             ) {
-                $changeset[$name] = [
-                    'oldValue' => $data[$name]['value'],
-                    'newValue' => $value,
-                ];
+                if ($data[$name]['value'] !== $value) {
+                    $changeset[$name] = [
+                        'oldValue' => $data[$name]['value'],
+                        'newValue' => $value,
+                    ];
+                }
                 $this->settingsService->update($name, $value);
             }
             $this->settingsService->flush();
 
+            if (
+                $tosTextEditor->getContent() !==
+                $form->get(TextEditorName::TOS_EDITOR->value)->getData()
+            ) {
+                $changeset[TextEditorName::TOS_EDITOR->value] = [
+                    'oldValue' => $tosTextEditor->getContent(),
+                    'newValue' => $form->get(TextEditorName::TOS_EDITOR->value)->getData(),
+                ];
+            }
             // Update TextEditors
             $tosTextEditor->setContent(
                 $this->htmlSanitizerService->sanitize(
                     $form->get(TextEditorName::TOS_EDITOR->value)->getData()
                 )
             );
+
+            if (
+                $privacyPolicyTextEditor->getContent() !==
+                $form->get(TextEditorName::PRIVACY_POLICY_EDITOR->value)->getData()
+            ) {
+                $changeset[TextEditorName::PRIVACY_POLICY_EDITOR->value] = [
+                    'oldValue' => $privacyPolicyTextEditor->getContent(),
+                    'newValue' => $form->get(TextEditorName::PRIVACY_POLICY_EDITOR->value)->getData(),
+                ];
+            }
             $privacyPolicyTextEditor->setContent(
                 $this->htmlSanitizerService->sanitize(
                     $form->get(TextEditorName::PRIVACY_POLICY_EDITOR->value)->getData()
