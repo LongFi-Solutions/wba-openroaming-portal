@@ -457,9 +457,24 @@ class UsersManagementController extends AbstractController
         );
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
+        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
             // Use DTO method to map data back
             $userUpdateDTO->updateUser($user, $userUpdateDTO->editingAdmin);
+
+            $uow = $em->getUnitOfWork();
+
+            $uow->computeChangeSets();
+
+            $changeset = $uow->getEntityChangeSet($user);
+
+            $formattedChanges = [];
+
+            foreach ($changeset as $field => [$oldValue, $newValue]) {
+                $formattedChanges[$field] = [
+                    'newValue' => $newValue,
+                    'oldValue' => $oldValue,
+                ];
+            }
 
             if ($userUpdateDTO->banned) {
                 $this->profileManager->disableProfiles(
@@ -486,6 +501,7 @@ class UsersManagementController extends AbstractController
                 EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
                 EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
+                EventMetadataKeysType::CHANGESET->value => $formattedChanges,
             ];
 
             $this->eventActions->saveEvent(
