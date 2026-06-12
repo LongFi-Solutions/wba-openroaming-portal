@@ -391,7 +391,7 @@ class AdminController extends AbstractController
                         $destinationDirectory = $this->getParameter('kernel.project_dir')
                             . '/public/resources/uploaded/';
 
-                        //$file->move($destinationDirectory, $newFilename);
+                        $file->move($destinationDirectory, $newFilename);
 
                         if ($data[$settingName]['value'] !== '/resources/uploaded/' . $newFilename) {
                             $changeset[$settingName] = [
