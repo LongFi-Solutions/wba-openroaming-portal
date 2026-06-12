@@ -764,6 +764,11 @@ class UsersManagementController extends AbstractController
             $currentUser
         );
 
+        $this->addFlash(
+            'success',
+            $this->translator->trans('twoFASuccessfullyDisabled', [], 'controllers')
+        );
+
         if ($user->getEmail()) {
             $this->mailer->send($this->verificationCodeEmailGenerator->createEmail2FADisabledBy($user));
         } elseif (

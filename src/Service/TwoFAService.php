@@ -428,22 +428,33 @@ readonly class TwoFAService
 
     public function event2FA(string $ip, User $user, string $eventType, string $userAgent, ?User $admin = null): void
     {
-        // The actor: an admin acting on someone else, or the user acting on themselves
-        $performedBy = $admin ?? $user;
+        if ($admin) {
+            $eventMetaData = [
+                EventMetadataKeysType::USER_AGENT->value => $userAgent,
+                EventMetadataKeysType::UUID->value => $admin->getUuid(),
+                EventMetadataKeysType::IP->value => $ip,
+                EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
+            ];
+            $this->eventActions->saveEvent(
+                $admin,
+                $eventType,
+                new DateTime(),
+                $eventMetaData
+            );
+        } else {
+            $eventMetaData = [
+                EventMetadataKeysType::USER_AGENT->value => $userAgent,
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
+                EventMetadataKeysType::IP->value => $ip,
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                $eventType,
+                new DateTime(),
+                $eventMetaData
+            );
+        }
 
-        $eventMetaData = [
-            EventMetadataKeysType::USER_AGENT->value => $userAgent,
-            EventMetadataKeysType::UUID->value => $performedBy->getUuid(),
-            EventMetadataKeysType::IP->value => $ip,
-            EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
-        ];
-
-        $this->eventActions->saveEvent(
-            $user,
-            $eventType,
-            new DateTime(),
-            $eventMetaData
-        );
     }
 
     public function canValidationCode(User $user, string $eventType): bool
