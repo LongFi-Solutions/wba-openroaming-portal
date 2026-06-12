@@ -505,13 +505,13 @@ class UsersManagementController extends AbstractController
             $eventMetaData = [
                 EventMetadataKeysType::IP->value => $request->getClientIp(),
                 EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                EventMetadataKeysType::UUID->value => $user->getUuid(),
-                EventMetadataKeysType::PERFORMED_ON_UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
                 EventMetadataKeysType::CHANGESET->value => $formattedChanges,
             ];
 
             $this->eventActions->saveEvent(
-                $user,
+                $currentUser,
                 AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_DASHBOARD->value,
                 new DateTime(),
                 $eventMetaData
@@ -566,12 +566,12 @@ class UsersManagementController extends AbstractController
                 $eventMetaData = [
                     EventMetadataKeysType::IP->value => $request->getClientIp(),
                     EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                    EventMetadataKeysType::UUID->value => $user->getUuid(),
-                    EventMetadataKeysType::PERFORMED_ON_UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
                 ];
 
                 $this->eventActions->saveEvent(
-                    $user,
+                    $currentUser,
                     AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_DASHBOARD->value,
                     new DateTime(),
                     $eventMetaData
@@ -862,12 +862,12 @@ class UsersManagementController extends AbstractController
         $eventMetaData = [
             EventMetadataKeysType::IP->value => $request->getClientIp(),
             EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-            EventMetadataKeysType::UUID->value => $user->getUuid(),
-            EventMetadataKeysType::PERFORMED_ON_UUID->value => $currentUser->getUuid(),
+            EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+            EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
         ];
 
         $this->eventActions->saveEvent(
-            $user,
+            $currentUser,
             AnalyticalEventType::ADMIN_REMOVED_PERMISSIONS->value,
             new DateTime(),
             $eventMetaData
