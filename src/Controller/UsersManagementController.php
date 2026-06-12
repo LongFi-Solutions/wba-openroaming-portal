@@ -119,7 +119,7 @@ class UsersManagementController extends AbstractController
         ];
 
         $this->eventActions->saveEvent(
-            $user,
+            $currentUser,
             AnalyticalEventType::ADMIN_REVOKE_PROFILES->value,
             new DateTime(),
             $eventMetaData
@@ -820,7 +820,7 @@ class UsersManagementController extends AbstractController
         ];
 
         $this->eventActions->saveEvent(
-            $user,
+            $currentUser,
             AnalyticalEventType::ADMIN_ADDED_PERMISSIONS->value,
             new DateTime(),
             $eventMetaData
