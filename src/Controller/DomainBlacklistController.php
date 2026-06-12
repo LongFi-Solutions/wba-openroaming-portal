@@ -382,7 +382,7 @@ class DomainBlacklistController extends AbstractController
             );
         }
 
-        $domainSourceData = $domainSource->getUrl();
+        $domainSource->getUrl();
         $this->entityManager->remove($domainSource);
         $this->entityManager->flush();
 
