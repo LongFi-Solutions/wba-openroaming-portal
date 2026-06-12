@@ -287,29 +287,30 @@ class MicrosoftController extends AbstractController
         $this->entityManager->persist($userAuth);
         $this->entityManager->flush();
 
-        $baseMetaData = [
-            EventMetadataKeysType::IP->value => $request?->getClientIp(),
-            EventMetadataKeysType::USER_AGENT->value => $request?->headers->get('User-Agent'),
-            EventMetadataKeysType::UUID->value => $user->getUuid(),
-            EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
-                ['name' => SettingName::PLATFORM_MODE->value]
-            )->getValue(),
-        ];
-
         $this->eventActions->saveEvent(
             $user,
             AnalyticalEventType::USER_CREATION->value,
             new DateTime(),
             [
-                $baseMetaData,
+                EventMetadataKeysType::IP->value => $request?->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request?->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
+                EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
+                    ['name' => SettingName::PLATFORM_MODE->value]
+                )->getValue(),
                 EventMetadataKeysType::REGISTRATION_TYPE->value => UserProvider::MICROSOFT_ACCOUNT->value,
             ]
         );
+
         $this->eventActions->saveEvent(
             $user,
             AnalyticalEventType::USER_VERIFICATION->value,
             new DateTime(),
-            $baseMetaData
+            [
+                EventMetadataKeysType::IP->value => $request?->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request?->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
+            ]
         );
 
         return $user;
