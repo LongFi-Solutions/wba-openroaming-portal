@@ -43,6 +43,7 @@ class ScheduleAutomationController extends AbstractController
         $currentUser = $this->getUser();
         $canWrite = $this->isGranted(UserAuthenticationVoter::CRON_SCHEDULE_WRITE);
 
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         $scheduleDTO = new ScheduleDTO($this->settingRepository, $this->cronExpressionHelperService);
