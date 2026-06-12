@@ -469,7 +469,13 @@ class UsersManagementController extends AbstractController
 
             $formattedChanges = [];
 
-            foreach ($changeset as $field => [$oldValue, $newValue]) {
+            foreach ($changeset as $field => $change) {
+                if (!is_array($change)) {
+                    continue;
+                }
+
+                [$oldValue, $newValue] = $change;
+
                 $formattedChanges[$field] = [
                     'newValue' => $newValue,
                     'oldValue' => $oldValue,
