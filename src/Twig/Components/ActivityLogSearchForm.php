@@ -2,13 +2,21 @@
 
 namespace App\Twig\Components;
 
+use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\ExportFileType;
 use App\Repository\EventRepository;
+use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
+use Symfony\UX\LiveComponent\Attribute\LiveAction;
+use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
+use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
 
 #[AsLiveComponent]
 class ActivityLogSearchForm extends AbstractController
@@ -28,7 +36,7 @@ class ActivityLogSearchForm extends AbstractController
     public int $page = 1;
 
     #[LiveProp(writable: true)]
-    public int $count = 10;
+    public int $count = 7;
 
     #[LiveProp(writable: true)]
     public string $sort = 'event_datetime';
@@ -42,14 +50,48 @@ class ActivityLogSearchForm extends AbstractController
     #[LiveProp(writable: true)]
     public string $endDate = '';
 
+    #[LiveProp(writable: true)]
+    public string $exportFormat = ExportFileType::CSV->value;
+
     public function __construct(
         private readonly EventRepository $eventRepository,
     ) {
     }
 
     /**
+     * @return Paginator<Event>
+     */
+    #[ExposeInTemplate]
+    public function getEvents(): Paginator
+    {
+        return new Paginator($this->getQueryBuilder());
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    #[ExposeInTemplate]
+    public function getEventCounts(): array
+    {
+        return $this->eventRepository->countByEventGroup($this->user);
+    }
+
+    #[ExposeInTemplate]
+    public function getTotalPages(): int
+    {
+        return (int)ceil(count($this->getEvents()) / $this->count);
+    }
+
+    #[ExposeInTemplate]
+    public function isUserScoped(): bool
+    {
+        return $this->user instanceof User;
+    }
+
+    /**
      * @return array<int, array{value: string, label: string}>
      */
+    #[ExposeInTemplate]
     public function getSuggestions(): array
     {
         if (strlen($this->query) < 2) {
@@ -74,6 +116,32 @@ class ActivityLogSearchForm extends AbstractController
         return $suggestions;
     }
 
+    #[LiveAction]
+    public function changeFilter(#[LiveArg] string $filter): void
+    {
+        $this->filter = $filter;
+        $this->page = 1;
+    }
+
+    #[LiveAction]
+    public function prevPage(): void
+    {
+        $this->page--;
+    }
+
+    #[LiveAction]
+    public function nextPage(): void
+    {
+        $this->page++;
+    }
+
+    #[LiveAction]
+    public function changeSort(#[LiveArg] string $field): void
+    {
+        $this->sort = $field;
+        $this->order = $this->order === 'desc' ? 'asc' : 'desc';
+    }
+
     private function resolvedQuery(): ?string
     {
         if ($this->query === '' || $this->query === '0') {
@@ -91,63 +159,33 @@ class ActivityLogSearchForm extends AbstractController
         return $this->query;
     }
 
-    /**
-     * @return array<int, \App\Entity\Event>
-     * @throws \DateMalformedStringException
-     */
-    public function getLogs(): array
+    private function getQueryBuilder(): QueryBuilder
     {
-        $all = $this->eventRepository->searchWithFilter(
+        return $this->eventRepository->searchWithFilter(
             $this->filter,
             $this->sort,
             $this->order,
             $this->resolvedQuery(),
             $this->startDate ?: null,
             $this->endDate ?: null,
-            $this->user
-        );
-
-        $offset = ($this->page - 1) * $this->count;
-        return array_slice($all, $offset, $this->count);
-    }
-
-    /**
-     * @throws \DateMalformedStringException
-     */
-    public function getTotalLogs(): int
-    {
-        return count(
-            $this->eventRepository->searchWithFilter(
-                $this->filter,
-                $this->sort,
-                $this->order,
-                $this->resolvedQuery(),
-                $this->startDate ?: null,
-                $this->endDate ?: null,
-                $this->user
-            )
+            $this->user,
+            $this->page,
+            $this->count
         );
     }
 
-    public function getTotalPages(): int
+    #[LiveAction]
+    public function exportLogs(): RedirectResponse
     {
-        return (int)ceil($this->getTotalLogs() / $this->count);
-    }
-
-    /**
-     * @return array<string, int>
-     */
-    public function getEventCounts(): array
-    {
-        // When scoped to a user, count only their events
-        if ($this->user instanceof User) {
-            return $this->eventRepository->countByEventGroup($this->user);
-        }
-        return $this->eventRepository->countByEventGroup();
-    }
-
-    public function isUserScoped(): bool
-    {
-        return $this->user instanceof User;
+        return $this->redirectToRoute('admin_dashboard_activity_logs_export', [
+            'format' => $this->exportFormat,
+            'filter' => $this->filter,
+            'query' => $this->query,
+            'sort' => $this->sort,
+            'order' => $this->order,
+            'startDate' => $this->startDate,
+            'endDate' => $this->endDate,
+            'userId' => $this->user?->getId(),
+        ]);
     }
 }

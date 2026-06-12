@@ -8,6 +8,7 @@ use App\Controller\MicrosoftController;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
@@ -214,9 +215,9 @@ class AuthController extends AbstractController
 
         // Defines the Event to the table
         $eventMetaData = [
-            'user_agent' => $request->headers->get('User-Agent'),
-            'uuid' => $user->getUuid(),
-            'ip' => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
         ];
 
         $this->eventActions->saveEvent(

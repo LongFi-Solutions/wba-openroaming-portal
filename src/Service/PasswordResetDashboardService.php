@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\EventRepository;
@@ -57,14 +58,14 @@ readonly class PasswordResetDashboardService
         if ($user->getEmail()) {
             $this->emailGenerator->sendResetPasswordEmailByAdmin($user, $newPassword);
             $this->eventActions->saveEvent(
-                $user,
-                AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
+                $byUser,
+                AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_DASHBOARD->value,
                 new DateTime(),
                 [
-                    'ip' => $clientIp,
-                    'user_agent' => $userAgent,
-                    'edited' => $user->getUuid(),
-                    'by' => $byUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $clientIp,
+                    EventMetadataKeysType::USER_AGENT->value => $userAgent,
+                    EventMetadataKeysType::UUID->value => $byUser->getUuid(),
+                    EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
                 ]
             );
         }
@@ -90,7 +91,7 @@ readonly class PasswordResetDashboardService
 
         $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
             $user,
-            AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value
+            AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_DASHBOARD->value
         );
 
         $smsResendInterval = (is_array($data) && isset($data[SettingName::SMS_TIMER_RESEND->value]['value']))
@@ -125,14 +126,13 @@ readonly class PasswordResetDashboardService
             ];
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
+                AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_DASHBOARD->value,
                 new DateTime(),
                 [
-                    'ip' => $clientIp,
-                    'edited' => $user->getUuid(),
-                    'by' => $byUser->getUuid(),
-                    'resetAttempts' => $resetAttempts + 1,
-                    'lastResetAccountPasswordTime' => $currentTime->format('Y-m-d H:i:s'),
+                    EventMetadataKeysType::IP->value => $clientIp,
+                    EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
+                    EventMetadataKeysType::UUID->value => $byUser->getUuid(),
+                    EventMetadataKeysType::RESET_ATTEMPTS->value => $resetAttempts + 1,
                 ]
             );
         } else {

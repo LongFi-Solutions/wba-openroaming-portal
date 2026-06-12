@@ -46,10 +46,6 @@ class EventRepository extends ServiceEntityRepository
         }
     }
 
-    /**
-     * @return Event[] Returns an array of Event objects
-     * @throws \DateMalformedStringException
-     */
     public function searchWithFilter(
         string $filter = 'all',
         string $sort = 'event_datetime',
@@ -58,49 +54,72 @@ class EventRepository extends ServiceEntityRepository
         ?string $startDate = null,
         ?string $endDate = null,
         ?User $user = null,
-    ): array {
+        int $page = 1,
+        int $count = 10
+    ): QueryBuilder {
+        return $this->buildFilterQuery($filter, $sort, $order, $searchTerm, $startDate, $endDate, $user)
+            ->setFirstResult(($page - 1) * $count)
+            ->setMaxResults($count);
+    }
+
+    public function searchWithFilterUnpaginated(
+        string $filter = 'all',
+        string $sort = 'event_datetime',
+        string $order = 'desc',
+        ?string $searchTerm = null,
+        ?string $startDate = null,
+        ?string $endDate = null,
+        ?User $user = null,
+    ): QueryBuilder {
+        return $this->buildFilterQuery($filter, $sort, $order, $searchTerm, $startDate, $endDate, $user);
+    }
+
+    private function buildFilterQuery(
+        string $filter,
+        string $sort,
+        string $order,
+        ?string $searchTerm,
+        ?string $startDate,
+        ?string $endDate,
+        ?User $user
+    ): QueryBuilder {
         $qb = $this->createQueryBuilder('e')
-            ->join('e.user', 'u');
+            ->join('e.user', 'u')
+            ->addSelect('u')
+            ->where(
+                'u.email LIKE :search OR
+                 u.uuid LIKE :search OR
+                  e.event_name LIKE :search OR
+                   e.event_metadata LIKE :search'
+            )
+            ->setParameter('search', '%' . $searchTerm . '%');
 
-        // Apply filter by User
-        $this->applyUserFilter($qb, $user);
-
-        // Search by user email/uuid/EventName
-        if ($searchTerm) {
-            $qb->andWhere(
-                'u.email LIKE :search OR u.uuid LIKE :search
-             OR e.event_name LIKE :search OR e.event_metadata LIKE :search'
-            )->setParameter('search', '%' . $searchTerm . '%');
-        }
-
-        // Date range filter
-        if ($startDate) {
+        if (!is_null($startDate)) {
             try {
                 $qb->andWhere('e.event_datetime >= :startDate')
                     ->setParameter('startDate', new DateTime($startDate));
             } catch (Exception) {
-                // invalid date, skip
             }
         }
 
-        if ($endDate) {
+        if (!is_null($endDate)) {
             try {
                 $qb->andWhere('e.event_datetime <= :endDate')
                     ->setParameter('endDate', new DateTime($endDate));
             } catch (Exception) {
-                // invalid date, skip
             }
         }
 
-        // Sort all the Data
+        $this->applyUserFilter($qb, $user);
         $this->applyEventGroupFilter($qb, $filter);
+
         $allowedSorts = ['event_datetime', 'event_name'];
         $allowedOrders = ['asc', 'desc'];
         $sort = in_array($sort, $allowedSorts, true) ? $sort : 'event_datetime';
         $order = in_array(strtolower($order), $allowedOrders, true) ? $order : 'desc';
         $qb->orderBy('e.' . $sort, $order);
 
-        return $qb->getQuery()->getResult();
+        return $qb;
     }
 
     /**
@@ -108,28 +127,66 @@ class EventRepository extends ServiceEntityRepository
      */
     public function countByEventGroup(?User $user = null): array
     {
-        return [
-            'all' => $this->countByGroupFilter('all', $user),
-            'user_actions' => $this->countByGroupFilter('user_actions', $user),
-            'admin_actions' => $this->countByGroupFilter('admin_actions', $user),
-            'auth_events' => $this->countByGroupFilter('auth_events', $user),
-            'settings_changes' => $this->countByGroupFilter('settings_changes', $user),
-            'certificate_events' => $this->countByGroupFilter('certificate_events', $user),
-        ];
-    }
-
-    /**
-     * Helper to count by group prefix
-     */
-    private function countByGroupFilter(string $group, ?User $user = null): int
-    {
         $qb = $this->createQueryBuilder('e')
-            ->select('COUNT(e.id)');
+            ->select('COUNT(e.id) as all_events')
+            ->addSelect(
+                'SUM(CASE WHEN e.event_name IN (:user_events) THEN 1 ELSE 0 END) as user_actions'
+            )
+            ->addSelect(
+                'SUM(CASE WHEN e.event_name IN (:admin_events) THEN 1 ELSE 0 END) as admin_actions'
+            )
+            ->addSelect(
+                'SUM(CASE WHEN e.event_name IN (:auth_events) THEN 1 ELSE 0 END) as auth_events'
+            )
+            ->addSelect(
+                'SUM(CASE WHEN e.event_name LIKE :setting_prefix THEN 1 ELSE 0 END) as settings_changes'
+            )
+            ->addSelect(
+                'SUM(CASE WHEN e.event_name LIKE :cert_prefix THEN 1 ELSE 0 END) as certificate_events'
+            );
 
-        $this->applyUserFilter($qb, $user);
-        $this->applyEventGroupFilter($qb, $group);
+        $qb->setParameter('user_events', [
+            AnalyticalEventType::USER_CREATION->value,
+            AnalyticalEventType::USER_VERIFICATION->value,
+            AnalyticalEventType::USER_ACCOUNT_DELETION->value,
+            AnalyticalEventType::USER_ACCOUNT_UPDATE->value,
+        ]);
 
-        return (int)$qb->getQuery()->getSingleScalarResult();
+        $qb->setParameter('admin_events', [
+            AnalyticalEventType::ADMIN_CREATION->value,
+            AnalyticalEventType::ADMIN_ADDED_PERMISSIONS->value,
+            AnalyticalEventType::ADMIN_REMOVED_PERMISSIONS->value,
+            AnalyticalEventType::ADMIN_ADDED_NEW_USER->value,
+        ]);
+
+        $qb->setParameter('auth_events', [
+            AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value,
+            AnalyticalEventType::GOOGLE_LOGIN_REQUEST->value,
+            AnalyticalEventType::MICROSOFT_LOGIN_REQUEST->value,
+            AnalyticalEventType::LOGOUT_REQUEST->value,
+        ]);
+
+
+        $qb->setParameter('setting_prefix', 'SETTING_%');
+        $qb->setParameter('cert_prefix', 'CERTIFICATE_%');
+
+
+        if ($user instanceof User) {
+            $qb->andWhere('e.user = :user')
+                ->setParameter('user', $user);
+        }
+
+
+        $result = $qb->getQuery()->getSingleResult();
+
+        return [
+            'all' => (int)($result['all_events'] ?? 0),
+            'user_actions' => (int)($result['user_actions'] ?? 0),
+            'admin_actions' => (int)($result['admin_actions'] ?? 0),
+            'auth_events' => (int)($result['auth_events'] ?? 0),
+            'settings_changes' => (int)($result['settings_changes'] ?? 0),
+            'certificate_events' => (int)($result['certificate_events'] ?? 0),
+        ];
     }
 
     /**
@@ -295,7 +352,10 @@ class EventRepository extends ServiceEntityRepository
                 ]),
             'admin_actions' => $qb->andWhere('e.event_name IN (:events)')
                 ->setParameter('events', [
+                    AnalyticalEventType::SUPER_ADMIN_CREATION->value,
+                    AnalyticalEventType::SUPER_ADMIN_VERIFICATION->value,
                     AnalyticalEventType::ADMIN_CREATION->value,
+                    AnalyticalEventType::ADMIN_VERIFICATION->value,
                     AnalyticalEventType::ADMIN_ADDED_PERMISSIONS->value,
                     AnalyticalEventType::ADMIN_REMOVED_PERMISSIONS->value,
                     AnalyticalEventType::ADMIN_ADDED_NEW_USER->value,
@@ -317,7 +377,7 @@ class EventRepository extends ServiceEntityRepository
 
     private function applyUserFilter(QueryBuilder $qb, ?User $user): void
     {
-        if ($user instanceof \App\Entity\User) {
+        if ($user instanceof User) {
             $qb->andWhere('e.user = :user')
                 ->setParameter('user', $user);
         }

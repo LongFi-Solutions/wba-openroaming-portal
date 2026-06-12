@@ -1,4 +1,4 @@
-<div id="log-modal-{{ log.id }}"
+<div id="event-modal-{{ event.id }}"
         {{ stimulus_controller('modal') }}
      data-action="click->modal#close"
      class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 opacity-0 transition-opacity duration-200">
@@ -14,11 +14,11 @@
             {# Modal Header #}
             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between gap-4">
                 <div class="flex items-center gap-2 min-w-0">
-                    <twig:ux:icon name="ph:clock-counter-clockwise" class="w-5 h-5 text-primary shrink-0"/>
-                    <h5 class="text-lg font-semibold text-gray-800 truncate">{{ log.eventName }}</h5>
+                    <twig:ux:icon name="wba:clock-counter-clockwise" class="w-5 h-5 text-primary shrink-0"/>
+                    <h5 class="text-lg font-semibold text-gray-800 truncate">{{ event.eventName }}</h5>
                 </div>
                 <div class="flex items-center gap-3 shrink-0">
-                    <p class="text-sm text-gray-400 whitespace-nowrap">{{ log.eventDatetime|date('d/m/Y H:i:s') }}</p>
+                    <p class="text-sm text-gray-400 whitespace-nowrap">{{ event.eventDatetime|date('d/m/Y H:i:s') }}</p>
                     <button {{ stimulus_action('modal', 'close') }}
                             class="text-gray-400 hover:text-gray-600 transition">
                         <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 fill-current"/>
@@ -32,30 +32,30 @@
                 {# Pills row #}
                 <div class="flex flex-wrap gap-2 text-sm">
                     {% if showUser is not defined or showUser %}
-                        {% if log.user is not null %}
+                        {% if event.user is not null %}
                             <span class="px-3 py-1 bg-gray-50 border border-gray-200 rounded-full text-gray-700">
-                                <strong>UUID:</strong> {{ log.user.uuid }}
+                                <strong>UUID:</strong> {{ event.user.uuid }}
                             </span>
                         {% endif %}
                     {% endif %}
-                    {% if log.eventMetadata.by is defined %}
+                    {% if event.eventMetadata.by is defined %}
                         <span class="px-3 py-1 bg-gray-50 border border-gray-200 rounded-full text-gray-700">
-                            <strong>By:</strong> {{ log.eventMetadata.by }}
+                            <strong>By:</strong> {{ event.eventMetadata.by }}
                         </span>
                     {% endif %}
-                    {% if log.eventMetadata.ip is defined %}
+                    {% if event.eventMetadata.ip is defined %}
                         <span class="px-3 py-1 bg-gray-50 border border-gray-200 rounded-full text-gray-700">
-                            <strong>IP:</strong> {{ log.eventMetadata.ip }}
+                            <strong>IP:</strong> {{ event.eventMetadata.ip }}
                         </span>
                     {% endif %}
                 </div>
 
                 {# Errors block #}
-                {% if log.eventMetadata.errors is defined and log.eventMetadata.errors is not empty %}
+                {% if event.eventMetadata.errors is defined and event.eventMetadata.errors is not empty %}
                     <div class="rounded-lg bg-red-50 border border-red-200 px-4 py-3">
                         <p class="text-sm font-semibold text-red-600 mb-1">Errors</p>
                         <ul class="list-disc list-inside text-sm text-red-500 space-y-1">
-                            {% for error in log.eventMetadata.errors %}
+                            {% for error in event.eventMetadata.errors %}
                                 <li>{{ error }}</li>
                             {% endfor %}
                         </ul>
@@ -67,7 +67,7 @@
                     <p class="text-sm font-medium text-gray-700">{{ 'eventMetadata'|trans({}, 'dashboard') }}</p>
                     <div class="relative rounded-md overflow-hidden">
                     <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono text-xs overflow-x-auto whitespace-pre-wrap break-words"
-                         data-clipboard-target="code">{{ log.eventMetadata|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                         data-clipboard-target="code">{{ event.eventMetadata|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
                         <button type="button"
                                 class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
                                 title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"

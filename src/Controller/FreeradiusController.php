@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\TimeRangePresetStatistics;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
@@ -239,9 +240,9 @@ class FreeradiusController extends AbstractController
             AnalyticalEventType::EXPORT_FREERADIUS_STATISTICS_REQUEST->value,
             new DateTime(),
             [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $currentUser->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
             ]
         );
 
