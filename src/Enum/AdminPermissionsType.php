@@ -75,8 +75,8 @@ enum AdminPermissionsType: string
             self::LDAP_SYNCHRONIZATION_WRITE, self::LDAP_SYNCHRONIZATION_READ => 'LDAPSynchronization',
             self::RADIUS_PROFILE_CONFIG_WRITE, self::RADIUS_PROFILE_CONFIG_READ => 'radiusProfileConfiguration',
             self::SMS_CONFIG_WRITE, self::SMS_CONFIG_READ => 'SMSConfiguration',
-            self::PORTAL_STATISTICS_READ => 'portalStatistics',
-            self::CONNECTIVITY_STATISTICS_READ => 'connectivityStatistics',
+            self::PORTAL_STATISTICS_READ, self::PORTAL_STATISTICS_WRITE => 'portalStatistics',
+            self::CONNECTIVITY_STATISTICS_READ, self::CONNECTIVITY_STATISTICS_WRITE => 'connectivityStatistics',
             self::ACTIVITY_LOGS_WRITE, self::ACTIVITY_LOGS_READ => 'activityLogs',
         };
     }
