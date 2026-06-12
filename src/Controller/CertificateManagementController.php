@@ -10,8 +10,8 @@ use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\InstallationType;
-use App\Enum\PlatformMode;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
@@ -97,12 +97,12 @@ class CertificateManagementController extends AbstractController
                 AnalyticalEventType::CERTIFICATE_VALIDATION_RAN->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $currentUser->getUuid(),
-                    'success' => empty($errors),
-                    'isEv' => $isEv,
-                    'errors' => $errors,
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::VALIDATION_SUCCESS->value => empty($errors),
+                    EventMetadataKeysType::IS_EV_CERTIFICATE->value => $isEv,
+                    EventMetadataKeysType::VALIDATION_ERRORS->value => $errors,
                 ]
             );
 
@@ -190,7 +190,7 @@ class CertificateManagementController extends AbstractController
             $processEntity = $processState['process'];
             $processEntity->setFreeradiusDomainName($domain);
 
-            $this->settingsService->updateSettingsFromArray($settingsToUpdate);
+            $changeset = $this->settingsService->updateSettingsFromArray($settingsToUpdate);
             $this->settingsService->flush();
             $this->entityManager->persist($processEntity);
             $this->entityManager->flush();
@@ -200,9 +200,10 @@ class CertificateManagementController extends AbstractController
                 AnalyticalEventType::RADIUS_TLS_UPDATED->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value => $changeset,
                 ]
             );
 
@@ -263,9 +264,9 @@ class CertificateManagementController extends AbstractController
             AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_ABORTED->value,
             new DateTime(),
             [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'by' => $user->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
             ]
         );
 
@@ -325,9 +326,9 @@ class CertificateManagementController extends AbstractController
             AnalyticalEventType::SYSTEM_RESET_REQUEST_STARTED->value,
             new DateTime(),
             [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'by' => $user->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
             ]
         );
 
@@ -362,9 +363,9 @@ class CertificateManagementController extends AbstractController
         $user = $this->getUser();
 
         if ($type === InstallationType::INSTALLATION->value) {
-            $eventType = AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_CODE->value;
+            $eventType = AnalyticalEventType::INSTALLATION_IDENTITY_PASSWORD->value;
         } else {
-            $eventType = AnalyticalEventType::CERTIFICATES_IDENTITY_VERIFIED_CODE->value;
+            $eventType = AnalyticalEventType::CERTIFICATES_IDENTITY_PASSWORD->value;
         }
 
         $form = $this->createForm(VerifyPasswordType::class);
@@ -381,10 +382,9 @@ class CertificateManagementController extends AbstractController
                     $session->set(SessionStatus::CERTIFICATE_VERIFICATION->value, true);
                 }
                 $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $user,

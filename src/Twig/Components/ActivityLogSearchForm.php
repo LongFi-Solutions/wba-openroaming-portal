@@ -5,10 +5,12 @@ namespace App\Twig\Components;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\ExportFileType;
 use App\Repository\EventRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -47,6 +49,9 @@ class ActivityLogSearchForm extends AbstractController
 
     #[LiveProp(writable: true)]
     public string $endDate = '';
+
+    #[LiveProp(writable: true)]
+    public string $exportFormat = ExportFileType::CSV->value;
 
     public function __construct(
         private readonly EventRepository $eventRepository,
@@ -167,5 +172,20 @@ class ActivityLogSearchForm extends AbstractController
             $this->page,
             $this->count
         );
+    }
+
+    #[LiveAction]
+    public function exportLogs(): RedirectResponse
+    {
+        return $this->redirectToRoute('admin_dashboard_activity_logs_export', [
+            'format' => $this->exportFormat,
+            'filter' => $this->filter,
+            'query' => $this->query,
+            'sort' => $this->sort,
+            'order' => $this->order,
+            'startDate' => $this->startDate,
+            'endDate' => $this->endDate,
+            'userId' => $this->user?->getId(),
+        ]);
     }
 }

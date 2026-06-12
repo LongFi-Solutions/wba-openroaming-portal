@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
@@ -96,23 +97,22 @@ class UsersManagementController extends AbstractController
         if (
             !$this->isGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)
             && (
-                in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles())
-                || in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles())
+                in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true)
+                || in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true)
             )
         ) {
             throw $this->createAccessDeniedException();
         }
 
         $eventMetaData = [
-            'ip' => $request->getClientIp(),
-            'user_agent' => $request->headers->get('User-Agent'),
-            'platform' => PlatformMode::LIVE->value,
-            'userRevoked' => $user->getUuid(),
-            'by' => $currentUser->getUuid(),
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+            EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid()
         ];
 
         $this->eventActions->saveEvent(
-            $user,
+            $currentUser,
             AnalyticalEventType::ADMIN_REVOKE_PROFILES->value,
             new DateTime(),
             $eventMetaData
@@ -290,10 +290,10 @@ class UsersManagementController extends AbstractController
             );
 
             $eventMetaData = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'userAddedBy' => $newUser->getUuid(),
-                'by' => $currentUser->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::ADMIN_ACCOUNT_CREATED->value => $newUser->getUuid(),
             ];
 
             $this->eventActions->saveEvent(
@@ -303,7 +303,7 @@ class UsersManagementController extends AbstractController
                 $eventMetaData
             );
 
-            return $this->redirectToRoute('admins_management');
+            return $this->redirectToRoute('admin_dashboard_admins');
         }
 
         return $this->render('dashboard/actions/add.html.twig', [
@@ -454,6 +454,27 @@ class UsersManagementController extends AbstractController
             // Use DTO method to map data back
             $userUpdateDTO->updateUser($user, $userUpdateDTO->editingAdmin);
 
+            $uow = $em->getUnitOfWork();
+
+            $uow->computeChangeSets();
+
+            $changeset = $uow->getEntityChangeSet($user);
+
+            $formattedChanges = [];
+
+            foreach ($changeset as $field => $change) {
+                if (!is_array($change)) {
+                    continue;
+                }
+
+                [$oldValue, $newValue] = $change;
+
+                $formattedChanges[$field] = [
+                    'newValue' => $newValue,
+                    'oldValue' => $oldValue,
+                ];
+            }
+
             if ($userUpdateDTO->banned) {
                 $this->profileManager->disableProfiles(
                     $user,
@@ -474,16 +495,19 @@ class UsersManagementController extends AbstractController
 
             $this->userRepository->save($user, true);
 
+            $eventMetaData = [
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
+                EventMetadataKeysType::CHANGESET->value => $formattedChanges,
+            ];
+
             $this->eventActions->saveEvent(
-                $user,
-                AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI->value,
+                $currentUser,
+                AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_DASHBOARD->value,
                 new DateTime(),
-                [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'edited' => $user->getUuid(),
-                    'by' => $currentUser->getUuid(),
-                ]
+                $eventMetaData
             );
 
             $uuid = $user->getUuid();
@@ -618,13 +642,22 @@ class UsersManagementController extends AbstractController
             true
         );
 
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
         // Change user 2FA status
         $this->twoFAService->disable2FA($user);
         $this->twoFAService->event2FA(
             $request->getClientIp(),
             $user,
             AnalyticalEventType::DISABLED_2FA_BY->value,
-            $request->headers->get('User-Agent')
+            $request->headers->get('User-Agent'),
+            $currentUser
+        );
+
+        $this->addFlash(
+            'success',
+            $this->translator->trans('twoFASuccessfullyDisabled', [], 'controllers')
         );
 
         if ($user->getEmail()) {
