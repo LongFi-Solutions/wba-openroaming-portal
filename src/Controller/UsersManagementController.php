@@ -541,9 +541,6 @@ class UsersManagementController extends AbstractController
     }
 
     /**
-     * @param Request $request
-     * @param User $user
-     * @return Response
      * @throws TransportExceptionInterface
      * @throws \DateMalformedIntervalStringException
      * @throws \DateMalformedStringException
