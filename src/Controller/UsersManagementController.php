@@ -729,6 +729,7 @@ class UsersManagementController extends AbstractController
             true
         );
 
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
 
         // Change user 2FA status
