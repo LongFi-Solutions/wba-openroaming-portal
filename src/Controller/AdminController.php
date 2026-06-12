@@ -325,10 +325,12 @@ class AdminController extends AbstractController
                         $sanitizedValue = $this->htmlSanitizerService->sanitize($submittedValue);
                         if ($locale === LanguageType::EN->value) {
                             // Update the setting value
-                            $changeset[$settingName] = [
-                                'oldValue' => $data[$settingName]['value'],
-                                'newValue' => $sanitizedValue,
-                            ];
+                            if ($data[$settingName]['value'] !== $sanitizedValue) {
+                                $changeset[$settingName] = [
+                                    'oldValue' => $data[$settingName]['value'],
+                                    'newValue' => $sanitizedValue,
+                                ];
+                            }
                             $setting->setValue($sanitizedValue);
                         }
                         // Get the translated setting
@@ -342,21 +344,23 @@ class AdminController extends AbstractController
                             ];
                             $settingTranslation?->setTranslation('');
                         } else {
-                            $changeset[$settingName] = [
-                                'oldValue' => $data[$settingName]['value'],
-                                'newValue' => $sanitizedValue,
-                            ];
+                            if ($data[$settingName]['value'] !== $sanitizedValue) {
+                                $changeset[$settingName] = [
+                                    'oldValue' => $data[$settingName]['value'],
+                                    'newValue' => $sanitizedValue,
+                                ];
+                            }
                             $settingTranslation?->setTranslation($sanitizedValue);
                         }
                     } else {
                         // Get the value from the submitted form data
                         $submittedValue = $customTypeDTO->{$settingName} ?? null;
-
-                        $changeset[$settingName] = [
-                            'oldValue' => $data[$settingName]['value'],
-                            'newValue' => $submittedValue,
-                        ];
-
+                        if ($data[$settingName]['value'] !== $submittedValue) {
+                            $changeset[$settingName] = [
+                                'oldValue' => $data[$settingName]['value'],
+                                'newValue' => $submittedValue,
+                            ];
+                        }
                         // Update the setting value
                         $setting->setValue($submittedValue);
                     }
@@ -387,13 +391,14 @@ class AdminController extends AbstractController
                         $destinationDirectory = $this->getParameter('kernel.project_dir')
                             . '/public/resources/uploaded/';
 
-                        $file->move($destinationDirectory, $newFilename);
+                        //$file->move($destinationDirectory, $newFilename);
 
-                        $changeset[$settingName] = [
-                            'oldValue' => $data[$settingName]['value'],
-                            'newValue' => '/resources/uploaded/' . $newFilename,
-                        ];
-
+                        if ($data[$settingName]['value'] !== '/resources/uploaded/' . $newFilename) {
+                            $changeset[$settingName] = [
+                                'oldValue' => $data[$settingName]['value'],
+                                'newValue' => '/resources/uploaded/' . $newFilename,
+                            ];
+                        }
                         $setting->setValue('/resources/uploaded/' . $newFilename);
                     }
                     // PLS MAKE SURE TO USE THIS COMMAND ON THE WEB CONTAINER
