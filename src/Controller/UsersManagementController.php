@@ -454,7 +454,7 @@ class UsersManagementController extends AbstractController
             // Use DTO method to map data back
             $userUpdateDTO->updateUser($user, $userUpdateDTO->editingAdmin);
 
-            $uow = $em->getUnitOfWork();
+            $uow = $this->entityManager->getUnitOfWork();
 
             $uow->computeChangeSets();
 
@@ -542,9 +542,8 @@ class UsersManagementController extends AbstractController
 
     /**
      * @throws TransportExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ClientExceptionInterface
-     * @throws ServerExceptionInterface
+     * @throws \DateMalformedIntervalStringException
+     * @throws \DateMalformedStringException
      */
     #[Route('/dashboard/user/reset-password/{id:user<\d+>}', name: 'admin_dashboard_user_reset_password')]
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
