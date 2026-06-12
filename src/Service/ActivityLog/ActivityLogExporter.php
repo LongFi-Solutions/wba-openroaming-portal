@@ -2,10 +2,12 @@
 
 namespace App\Service\ActivityLog;
 
+use App\Entity\Event;
 use App\Enum\ExportFileType;
 use App\Repository\EventRepository;
 use App\Repository\UserRepository;
 use DateTimeImmutable;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final readonly class ActivityLogExporter
@@ -40,13 +42,21 @@ final readonly class ActivityLogExporter
         return match ($format) {
             ExportFileType::CSV->value => $this->streamCsv($events, $date),
             ExportFileType::JSON->value => $this->streamJson($events, $date),
+            default => throw new RuntimeException(sprintf('Unsupported export format "%s".', $format)),
         };
     }
 
+    /**
+     * @param iterable<Event> $events
+     */
     private function streamCsv(iterable $events, string $date): StreamedResponse
     {
         $response = new StreamedResponse(function () use ($events): void {
             $handle = fopen('php://output', 'wb');
+
+            if ($handle === false) {
+                throw new RuntimeException('Unable to open output stream.');
+            }
 
             fputcsv($handle, ['UUID', 'Action', 'IP Address', 'Created At', 'Metadata'], escape: '\\');
 
@@ -54,11 +64,11 @@ final readonly class ActivityLogExporter
                 fputcsv(
                     $handle,
                     [
-                    $event->getUser()?->getUuid(),
-                    $event->getEventName(),
-                    $event->getEventMetadata()['ip'] ?? null,
-                    $event->getEventDatetime()?->format('Y-m-d H:i:s'),
-                    json_encode($event->getEventMetadata(), JSON_THROW_ON_ERROR),
+                        $event->getUser()?->getUuid(),
+                        $event->getEventName(),
+                        $event->getEventMetadata()['ip'] ?? null,
+                        $event->getEventDatetime()?->format('Y-m-d H:i:s'),
+                        json_encode($event->getEventMetadata(), JSON_THROW_ON_ERROR),
                     ],
                     escape: '\\'
                 );
@@ -73,10 +83,18 @@ final readonly class ActivityLogExporter
         return $response;
     }
 
+    /**
+     * @param iterable<Event> $events
+     */
     private function streamJson(iterable $events, string $date): StreamedResponse
     {
         $response = new StreamedResponse(function () use ($events): void {
             $handle = fopen('php://output', 'wb');
+
+            if ($handle === false) {
+                throw new RuntimeException('Unable to open output stream.');
+            }
+
             fwrite($handle, '[');
             $first = true;
 
