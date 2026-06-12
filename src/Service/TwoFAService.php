@@ -428,12 +428,16 @@ readonly class TwoFAService
 
     public function event2FA(string $ip, User $user, string $eventType, string $userAgent, ?User $admin = null): void
     {
+        // The actor: an admin acting on someone else, or the user acting on themselves
+        $performedBy = $admin ?? $user;
+
         $eventMetaData = [
             EventMetadataKeysType::USER_AGENT->value => $userAgent,
-            EventMetadataKeysType::UUID->value => $user->getUuid(),
+            EventMetadataKeysType::UUID->value => $performedBy->getUuid(),
             EventMetadataKeysType::IP->value => $ip,
-            EventMetadataKeysType::PERFORMED_ON_UUID->value => $admin?->getUuid() ?? 'ByHimself',
+            EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
         ];
+
         $this->eventActions->saveEvent(
             $user,
             $eventType,
