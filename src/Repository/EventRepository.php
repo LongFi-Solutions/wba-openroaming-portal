@@ -143,7 +143,6 @@ class EventRepository extends ServiceEntityRepository
             )
             ->addSelect(
                 'SUM(CASE WHEN e.event_name LIKE :cert_prefix THEN 1 ELSE 0 END) as certificate_events'
-
             );
 
         $qb->setParameter('user_events', [
