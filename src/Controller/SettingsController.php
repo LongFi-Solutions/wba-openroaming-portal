@@ -892,7 +892,11 @@ class SettingsController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid() && $canWrite) {
-            $changeset =$this->settingsService->updateAuthSettingsToTranslateFromArray($authSettingsTypeDTO->toArray(), $language);
+            $changeset =
+                $this->settingsService->updateAuthSettingsToTranslateFromArray(
+                    $authSettingsTypeDTO->toArray(),
+                    $language
+                );
 
             $this->settingsService->flush();
 

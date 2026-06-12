@@ -51,14 +51,17 @@ final readonly class ActivityLogExporter
             fputcsv($handle, ['UUID', 'Action', 'IP Address', 'Created At', 'Metadata'], escape: '\\');
 
             foreach ($events as $event) {
-                fputcsv($handle, [
+                fputcsv(
+                    $handle,
+                    [
                     $event->getUser()?->getUuid(),
                     $event->getEventName(),
                     $event->getEventMetadata()['ip'] ?? null,
                     $event->getEventDatetime()?->format('Y-m-d H:i:s'),
                     json_encode($event->getEventMetadata(), JSON_THROW_ON_ERROR),
-                ],
-                escape: '\\');
+                    ],
+                    escape: '\\'
+                );
             }
 
             fclose($handle);
