@@ -19,12 +19,12 @@ use App\Enum\LanguageType;
 use App\Enum\SettingName;
 use App\Enum\SettingType;
 use App\Enum\TextEditorName;
+use App\Form\AuthSettingsType;
 use App\Form\CapportSettingsType;
 use App\Form\LDAPSettingsType;
 use App\Form\PlatformStatusSettingsType;
 use App\Form\RadiusSettingsType;
 use App\Form\SMSSettingsType;
-use App\Form\AuthSettingsType;
 use App\Form\TermsType;
 use App\Form\TwoFASettingsType;
 use App\Repository\TextEditorRepository;
@@ -515,6 +515,7 @@ class SettingsController extends AbstractController
         $this->entityManager->persist($privacyPolicyTextEditor);
         $this->entityManager->flush();
 
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -542,10 +543,17 @@ class SettingsController extends AbstractController
             ),
         ]);
 
-        $form = $this->createForm(TermsType::class, null, ['settings' => $settings, 'disabled' => !$canWrite]);
+        $form = $this->createForm(
+            TermsType::class,
+            null,
+            [
+                'settings' => $settings,
+                'disabled' => !$canWrite
+            ]
+        );
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
+        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
             // Update settings using the service
             $changeset = [];
             foreach (
