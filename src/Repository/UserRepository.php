@@ -150,8 +150,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                 $qb->expr()->orX(
                     $qb->expr()->like('u.email', ':query'),
                     $qb->expr()->like('u.uuid', ':query'),
-                    $qb->expr()->like('u.firstName', ':query'),
-                    $qb->expr()->like('u.lastName', ':query'),
+                    $qb->expr()->like('u.first_name', ':query'),
+                    $qb->expr()->like('u.last_name', ':query'),
                     $qb->expr()->like('u.phoneNumber', ':query'),
                 )
             )->setParameter('query', '%' . $query . '%');
