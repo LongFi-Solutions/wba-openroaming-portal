@@ -61,7 +61,7 @@ class UserSearchForm
     #[ExposeInTemplate]
     public function getUsers(): Paginator
     {
-        if ($this->cachedUsers === null) {
+        if (!$this->cachedUsers instanceof Paginator) {
             $this->cachedUsers = new Paginator($this->getQueryBuilder());
         }
 
