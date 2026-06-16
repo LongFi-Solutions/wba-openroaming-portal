@@ -119,14 +119,6 @@ final class ScheduleForm extends AbstractController
                     $this->scheduleDTO->ldap_sync_cron->advanced
                 );
 
-            $this->scheduleDTO->freeradius_last_connection_cron =
-                new ScheduleSettingDTO(
-                    SettingName::FREERADIUS_LAST_CONNECTION_CRON->value,
-                    $this->settingRepository,
-                    $this->cronHelper,
-                    $this->scheduleDTO->freeradius_last_connection_cron->advanced
-                );
-
             $this->scheduleDTO->domain_blacklist_import_cron =
                 new ScheduleSettingDTO(
                     SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value,
