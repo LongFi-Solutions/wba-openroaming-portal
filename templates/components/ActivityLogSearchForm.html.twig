@@ -31,11 +31,24 @@
             {% endfor %}
         </div>
 
-        {# Top Row: Search Bar + Date Filter #}
-        <div class="flex flex-col lg:flex-row justify-center items-center gap-4 mb-4">
+        {# Top Row: Search Bar + Date Filter + Export Controls #}
+        <div class="flex flex-col justify-center items-center gap-4 mb-4">
+            <div class="flex md:flex-row flex-col justify-center items-center gap-4">
+                {# Search Input #}
+                {# Date Filter #}
+                {{ include('dashboard/shared/_date_filter_form.html.twig', {
+                    activePreset: '',
+                    selectedStartDate: startDate,
+                    selectedEndDate: endDate,
+                    showTime: true,
+                }) }}
+
+                {# Export Controls #}
+                {{ include('dashboard/shared/_export_activity_logs_controls.html.twig') }}
+            </div>
 
             {# Search Input #}
-            <div class="relative w-full md:w-3/6"
+            <div class="relative md:w-1/2 w-full"
                     {{ stimulus_controller('autocomplete') }}>
                 <div class="flex flex-row items-center border rounded-md">
                     <button type="button">
@@ -79,15 +92,6 @@
                     </ul>
                 {% endif %}
             </div>
-
-            {# Date Filter #}
-            {{ include('dashboard/shared/_date_filter_form.html.twig', {
-                activePreset: '',
-                selectedStartDate: startDate,
-                selectedEndDate: endDate,
-                showTime: true,
-            }) }}
-
         </div>
     </div>
 

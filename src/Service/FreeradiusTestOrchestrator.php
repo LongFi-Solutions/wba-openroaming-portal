@@ -6,6 +6,7 @@ use App\Entity\CertificateSetupProcess;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\CertificateTestResult;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use DateTime;
@@ -42,12 +43,12 @@ final readonly class FreeradiusTestOrchestrator
 
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_TEST->value,
+            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERADIUS_TEST->value,
             new DateTime(),
             [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'by' => $user->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
             ]
         );
 
@@ -58,9 +59,9 @@ final readonly class FreeradiusTestOrchestrator
                 AnalyticalEventType::SYSTEM_RESET_REQUEST_COMPLETED->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $user->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
                 ]
             );
 

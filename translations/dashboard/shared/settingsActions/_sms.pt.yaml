@@ -9,3 +9,6 @@ sms_provider_notice: 'Isto é para o fornecedor
       BudgetSMS.net
   </a>,
   deverá criar e financiar uma conta com eles.'
+timeIntervalBetweenRequests: 'Intervalo entre pedidos'
+timeIntervalToResetAttempts: 'Tempo para reiniciar tentativas'
+attemptsNumber: 'Número de tentativas'
