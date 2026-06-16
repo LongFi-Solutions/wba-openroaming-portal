@@ -283,7 +283,7 @@ class EventRepository extends ServiceEntityRepository
     /**
      * Find events where any field is null or empty.
      *
-     * @return Event[] Returns an array of Event objects
+     * @return array<int, array{event_metadata: string|null}>
      */
     public function findEventsWithNullOrEmptyFields(): array
     {
@@ -325,7 +325,7 @@ class EventRepository extends ServiceEntityRepository
     /**
      * Counts USER_CREATION events by platform mode.
      *
-     * @return Event[] Returns an array of Event objects
+     * @return array<int, array{event_metadata: string|null}>
      */
     public function findUserCreationEvents(DateTime $start, DateTime $end): array
     {

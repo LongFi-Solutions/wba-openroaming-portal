@@ -32,7 +32,6 @@ class FreeradiusController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly ParameterBagInterface $parameterBag,
         private readonly EventActions $eventActions,
-        private readonly TranslatorInterface $translator,
         private readonly FreeradiusConnectionService $freeradiusConnectionService,
         private readonly FreeradiusStatistics $statisticsFreeradius,
         private readonly DashboardFormatter $statisticsFreeradiusFormatter,

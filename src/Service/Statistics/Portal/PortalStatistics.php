@@ -171,7 +171,6 @@ readonly class PortalStatistics
         return $this->buildChartData($result);
     }
 
-
     /**
      * Fetch data related to verified users
      * @return array<string, mixed>

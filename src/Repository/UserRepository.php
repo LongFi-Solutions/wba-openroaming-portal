@@ -63,6 +63,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         }
     }
 
+    /**
+     * @return array<int, array{type: string|null, cnt: int}>
+     */
     public function count2FAStatsByDateRange(DateTime $start, DateTime $end): array
     {
         return $this->createQueryBuilder('u')
