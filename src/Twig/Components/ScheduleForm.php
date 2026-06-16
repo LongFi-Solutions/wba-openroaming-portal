@@ -89,8 +89,6 @@ final class ScheduleForm extends AbstractController
 
             $this->scheduleDTO->ldap_sync_cron->advanced =
                 $this->scheduleDTO->ldap_sync_cron->toCronExpression(false, $this->cronHelper);
-            $this->scheduleDTO->freeradius_last_connection_cron->advanced =
-                $this->scheduleDTO->freeradius_last_connection_cron->toCronExpression(false, $this->cronHelper);
             $this->scheduleDTO->domain_blacklist_import_cron->advanced =
                 $this->scheduleDTO->domain_blacklist_import_cron->toCronExpression(false, $this->cronHelper);
         } else {
