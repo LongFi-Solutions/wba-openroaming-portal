@@ -119,7 +119,7 @@ readonly class PortalStatistics
      */
     public function getDevicesStats(DateTime $start, DateTime $end): array
     {
-        $rows = $this->eventRepository->findDownloadProfileEvents($start, $end);
+        $events = $this->eventRepository->findDownloadProfileEvents($start, $end);
 
         $result = [
             OSType::ANDROID->value => 0,
