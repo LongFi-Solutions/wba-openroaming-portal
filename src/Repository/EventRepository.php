@@ -283,7 +283,7 @@ class EventRepository extends ServiceEntityRepository
     /**
      * Find events where any field is null or empty.
      *
-     * @return array<int, array{event_metadata: string|null}>
+     * @return Event[]
      */
     public function findEventsWithNullOrEmptyFields(): array
     {
