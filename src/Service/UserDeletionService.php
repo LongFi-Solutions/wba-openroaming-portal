@@ -6,6 +6,7 @@ use App\Entity\DeletedUserData;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserVerificationStatus;
 use App\Repository\UserRepository;
@@ -36,7 +37,6 @@ readonly class UserDeletionService
     public function deleteUser(User $user, array $userExternalAuths, Request $request, User $admin): array
     {
         $deletedUserUuid = $user->getUuid();
-        $deletedUserByUuid = $admin->getUuid();
 
         $phoneNumber = null;
         if ($user->getPhoneNumber() instanceof PhoneNumber) {
@@ -123,11 +123,11 @@ readonly class UserDeletionService
         $this->entityManager->flush();
 
         $eventMetadata = [
-            'uuid' => $deletedUserUuid,
-            'deletedBy' => $deletedUserByUuid,
-            'ip' => $request->getClientIp(),
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value => $admin->getUuid(),
+            EventMetadataKeysType::PERFORMED_ON_UUID->value => $deletedUserUuid
         ];
-
 
         $this->eventActions->saveEvent(
             $admin,

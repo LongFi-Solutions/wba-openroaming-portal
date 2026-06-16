@@ -3,9 +3,9 @@
 namespace App\Service;
 
 use App\Entity\User;
-use App\Enum\FirewallType;
-use App\Enum\PlatformMode;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
+use App\Enum\FirewallType;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Random\RandomException;
@@ -54,10 +54,9 @@ readonly class PasswordResetRequestHandler
 
         // Log the event
         $eventMetadata = [
-            'ip' => $request->getClientIp(),
-            'user_agent' => $request->headers->get('User-Agent'),
-            'platform' => PlatformMode::LIVE->value,
-            'uuid' => $user->getUuid(),
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
         ];
 
         $this->eventActions->saveEvent(

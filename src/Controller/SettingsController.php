@@ -14,16 +14,17 @@ use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\LanguageType;
 use App\Enum\SettingName;
 use App\Enum\SettingType;
 use App\Enum\TextEditorName;
+use App\Form\AuthSettingsType;
 use App\Form\CapportSettingsType;
 use App\Form\LDAPSettingsType;
 use App\Form\PlatformStatusSettingsType;
 use App\Form\RadiusSettingsType;
 use App\Form\SMSSettingsType;
-use App\Form\AuthSettingsType;
 use App\Form\TermsType;
 use App\Form\TwoFASettingsType;
 use App\Repository\TextEditorRepository;
@@ -66,7 +67,7 @@ class SettingsController extends AbstractController
     /**
      * @param string $type Type of action
      */
-    #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
+    #[Route('/dashboard/confirm-checker/{type}', name: 'admin_dashboard_confirm_checker')]
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function checkSettings(Request $request, string $type): Response
     {
@@ -103,9 +104,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
 
                 $this->eventActions->saveEvent(
@@ -138,9 +139,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -172,9 +173,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -206,9 +207,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -240,9 +241,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -274,9 +275,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -308,9 +309,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -342,9 +343,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -376,9 +377,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -410,9 +411,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -443,9 +444,9 @@ class SettingsController extends AbstractController
                 );
 
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
@@ -467,7 +468,7 @@ class SettingsController extends AbstractController
             'error',
             $this->translator->trans('incorrectVerificationCode', [], 'controllers')
         );
-        return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
+        return $this->redirectToRoute('admin_dashboard_confirm_reset', ['type' => $type]);
     }
 
     #[Route(
@@ -514,6 +515,7 @@ class SettingsController extends AbstractController
         $this->entityManager->persist($privacyPolicyTextEditor);
         $this->entityManager->flush();
 
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -541,11 +543,19 @@ class SettingsController extends AbstractController
             ),
         ]);
 
-        $form = $this->createForm(TermsType::class, null, ['settings' => $settings, 'disabled' => !$canWrite]);
+        $form = $this->createForm(
+            TermsType::class,
+            null,
+            [
+                'settings' => $settings,
+                'disabled' => !$canWrite
+            ]
+        );
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
+        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
             // Update settings using the service
+            $changeset = [];
             foreach (
                 [
                     SettingName::TOS->value => $form->get(SettingName::TOS->value)->getData(),
@@ -556,16 +566,41 @@ class SettingsController extends AbstractController
                     )->getData(),
                 ] as $name => $value
             ) {
+                if ($data[$name]['value'] !== $value) {
+                    $changeset[$name] = [
+                        'oldValue' => $data[$name]['value'],
+                        'newValue' => $value,
+                    ];
+                }
                 $this->settingsService->update($name, $value);
             }
             $this->settingsService->flush();
 
+            if (
+                $tosTextEditor->getContent() !==
+                $form->get(TextEditorName::TOS_EDITOR->value)->getData()
+            ) {
+                $changeset[TextEditorName::TOS_EDITOR->value] = [
+                    'oldValue' => $tosTextEditor->getContent(),
+                    'newValue' => $form->get(TextEditorName::TOS_EDITOR->value)->getData(),
+                ];
+            }
             // Update TextEditors
             $tosTextEditor->setContent(
                 $this->htmlSanitizerService->sanitize(
                     $form->get(TextEditorName::TOS_EDITOR->value)->getData()
                 )
             );
+
+            if (
+                $privacyPolicyTextEditor->getContent() !==
+                $form->get(TextEditorName::PRIVACY_POLICY_EDITOR->value)->getData()
+            ) {
+                $changeset[TextEditorName::PRIVACY_POLICY_EDITOR->value] = [
+                    'oldValue' => $privacyPolicyTextEditor->getContent(),
+                    'newValue' => $form->get(TextEditorName::PRIVACY_POLICY_EDITOR->value)->getData(),
+                ];
+            }
             $privacyPolicyTextEditor->setContent(
                 $this->htmlSanitizerService->sanitize(
                     $form->get(TextEditorName::PRIVACY_POLICY_EDITOR->value)->getData()
@@ -581,9 +616,10 @@ class SettingsController extends AbstractController
                 AnalyticalEventType::SETTING_TERMS_REQUEST->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value => $changeset
                 ]
             );
 
@@ -628,7 +664,7 @@ class SettingsController extends AbstractController
             $dto = $form->getData();
 
             // Save updated settings
-            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
 
             // Log the event
@@ -637,9 +673,10 @@ class SettingsController extends AbstractController
                 AnalyticalEventType::SETTING_LDAP_CONF_REQUEST->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value  => $changeset,
                 ]
             );
 
@@ -682,7 +719,7 @@ class SettingsController extends AbstractController
             $dto = $form->getData();
 
             // Save updated settings
-            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
 
             // Log the event
@@ -691,9 +728,10 @@ class SettingsController extends AbstractController
                 AnalyticalEventType::SETTING_RADIUS_CONF_REQUEST->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value  => $changeset,
                 ]
             );
 
@@ -733,7 +771,7 @@ class SettingsController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
-            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
 
             // Log the event
@@ -742,9 +780,10 @@ class SettingsController extends AbstractController
                 AnalyticalEventType::SETTING_PLATFORM_STATUS_REQUEST->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value  => $changeset,
                 ]
             );
 
@@ -783,7 +822,7 @@ class SettingsController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
-            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
 
             // Log the event
@@ -792,9 +831,10 @@ class SettingsController extends AbstractController
                 AnalyticalEventType::SETTING_PLATFORM_2FA_REQUEST->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value  => $changeset,
                 ]
             );
 
@@ -881,15 +921,20 @@ class SettingsController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid() && $canWrite) {
-            $this->settingsService->updateAuthSettingsToTranslateFromArray($authSettingsTypeDTO->toArray(), $language);
+            $changeset =
+                $this->settingsService->updateAuthSettingsToTranslateFromArray(
+                    $authSettingsTypeDTO->toArray(),
+                    $language
+                );
 
             $this->settingsService->flush();
 
 
             $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $currentUser->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::CHANGESET->value  => $changeset,
             ];
 
             $this->eventActions->saveEvent(
@@ -938,7 +983,7 @@ class SettingsController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
-            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
 
             // Log the event
@@ -947,9 +992,10 @@ class SettingsController extends AbstractController
                 AnalyticalEventType::SETTING_CAPPORT_CONF_REQUEST->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value  => $changeset,
                 ]
             );
 
@@ -988,7 +1034,8 @@ class SettingsController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
-            $this->settingsService->updateSettingsFromArray($dto->toArray());
+
+            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
 
             // Log the event
@@ -997,9 +1044,10 @@ class SettingsController extends AbstractController
                 AnalyticalEventType::SETTING_SMS_CONF_REQUEST->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value  => $changeset,
                 ]
             );
 

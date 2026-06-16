@@ -12,10 +12,14 @@ export default class extends Controller {
         'footerSummary',
         'start',
         'end',
+        'startTimePreset',
+        'endTimePreset',
+        'timeRow',
     ];
     static values = {
         activePreset: String,
         translations: Object,
+        showTime: { type: Boolean, default: false },
     };
 
     #rangeStart = null;
@@ -51,12 +55,16 @@ export default class extends Controller {
 
     // ── Preset pills ──────────────────────────────────────────────────────────
 
+    #lastPresetStart = null;
+    #lastPresetEnd = null;
+
     applyPreset(event) {
         const value = event.currentTarget.dataset.value;
         this.markActive(value);
 
         if (value === 'custom') {
             this.showCustomPicker();
+            if (this.showTimeValue) this.#hideTimeRow();
             return;
         }
 
@@ -95,7 +103,65 @@ export default class extends Controller {
                 return;
         }
 
+        // Apply current time input values
+        if (this.showTimeValue) {
+            this.#showTimeRow();
+            this.#applyTimeInputs(start, end);
+
+            // Store for reapply
+            this.#lastPresetStart = new Date(start);
+            this.#lastPresetEnd = new Date(end);
+        }
+
         this.#submitPreset(value, start, end);
+    }
+
+    reapply() {
+        if (!this.showTimeValue) return;
+        if (!this.#lastPresetStart || !this.#lastPresetEnd) return;
+        const start = new Date(this.#lastPresetStart);
+        const end = new Date(this.#lastPresetEnd);
+        this.#applyTimeInputs(start, end);
+        this.#submitPreset('custom', start, end);
+    }
+
+    #applyTimeInputs(start, end) {
+        // Use timeRow targets for presets, not the picker ones
+        const startInput = this.hasStartTimePresetTarget
+            ? this.startTimePresetTarget
+            : this.hasStartTimeTarget
+              ? this.startTimeTarget
+              : null;
+
+        const endInput = this.hasEndTimePresetTarget
+            ? this.endTimePresetTarget
+            : this.hasEndTimeTarget
+              ? this.endTimeTarget
+              : null;
+
+        // Pick the visible one
+        if (startInput?.value) {
+            const [sh, sm] = startInput.value.split(':').map(Number);
+            start.setHours(sh, sm, 0, 0);
+        }
+        if (endInput?.value) {
+            const [eh, em] = endInput.value.split(':').map(Number);
+            end.setHours(eh, em, 59, 0);
+        }
+    }
+
+    #showTimeRow() {
+        if (this.hasTimeRowTarget) {
+            this.timeRowTarget.classList.remove('hidden');
+            this.timeRowTarget.classList.add('flex');
+        }
+    }
+
+    #hideTimeRow() {
+        if (this.hasTimeRowTarget) {
+            this.timeRowTarget.classList.add('hidden');
+            this.timeRowTarget.classList.remove('flex');
+        }
     }
 
     markActive(value) {
@@ -350,16 +416,35 @@ export default class extends Controller {
         this.#selecting = false;
         this.#hoverDay = null;
         this.#renderCalendars();
+
+        // Notify Live Component pages
+        this.dispatch('cleared', { bubbles: true });
     }
 
     applyCustomRange() {
         if (!this.#rangeStart || !this.#rangeEnd) return;
 
         const start = new Date(this.#rangeStart);
-        start.setHours(0, 0, 0, 0);
-
         const end = new Date(this.#rangeEnd);
-        end.setHours(23, 59, 0, 0);
+
+        if (this.showTimeValue) {
+            // Read time inputs if they exist
+            if (this.hasStartTimeTarget && this.startTimeTarget.value) {
+                const [sh, sm] = this.startTimeTarget.value.split(':').map(Number);
+                start.setHours(sh, sm, 0, 0);
+            } else {
+                start.setHours(0, 0, 0, 0);
+            }
+            if (this.hasEndTimeTarget && this.endTimeTarget.value) {
+                const [eh, em] = this.endTimeTarget.value.split(':').map(Number);
+                end.setHours(eh, em, 59, 0);
+            } else {
+                end.setHours(23, 59, 59, 0);
+            }
+        } else {
+            start.setHours(0, 0, 0, 0);
+            end.setHours(23, 59, 59, 0);
+        }
 
         this.#closePicker();
         this.#submitPreset('custom', start, end);
@@ -408,18 +493,39 @@ export default class extends Controller {
             d
                 ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
                 : '…';
+        const fmtTime = (d) => {
+            if (!d) return '';
+            const pad = (n) => String(n).padStart(2, '0');
+            return ` ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        };
 
         if (!this.#rangeStart) {
-            this.rangeLabelTarget.innerHTML = `<span class="text-gray-400">${this.t('pickRange')}</span>`; // ← translated
+            this.rangeLabelTarget.innerHTML = `<span class="text-gray-400">${this.t('pickRange')}</span>`;
             return;
         }
 
-        this.rangeLabelTarget.innerHTML = `<span class="text-gray-800 font-medium">${fmt(this.#rangeStart)}</span>
-             <span class="text-gray-400 mx-1">→</span>
-             <span class="text-gray-800 font-medium">${fmt(eff)}</span>`;
+        this.rangeLabelTarget.innerHTML = `
+        <span class="text-gray-800 font-medium">${fmt(this.#rangeStart)}${fmtTime(this.#rangeStart)}</span>
+        <span class="text-gray-400 mx-1">→</span>
+        <span class="text-gray-800 font-medium">${fmt(eff)}${fmtTime(eff)}</span>`;
     }
 
     #submitPreset(preset, start, end) {
+        // Dispatch a custom event so Live Component pages can intercept
+        this.dispatch('applied', {
+            detail: {
+                preset,
+                startDate: this.formatDate(start),
+                endDate: this.formatDate(end),
+            },
+            bubbles: true,
+        });
+
+        // Only do the form submit if NOT inside a live component
+        if (this.element.closest('[data-controller~="live"]')) {
+            return; // Live Component will handle it via the event above
+        }
+
         const form = document.createElement('form');
         form.method = 'get';
         form.action = window.location.pathname;
@@ -442,7 +548,7 @@ export default class extends Controller {
 
     formatDate(date) {
         const pad = (n) => String(n).padStart(2, '0');
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
     }
 
     #showWarning(msg) {

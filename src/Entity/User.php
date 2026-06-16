@@ -129,6 +129,8 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         $this->userRadiusProfiles = new ArrayCollection();
         $this->userExternalAuths = new ArrayCollection();
         $this->event = new ArrayCollection();
+        $this->oTPcodes = new ArrayCollection();
+        $this->notification = new ArrayCollection();
     }
 
     public function getTwoFAcodeIsActive(): ?bool

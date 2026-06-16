@@ -57,6 +57,9 @@ class ResetSMSSettingsCommand extends Command
             ['name' => SettingName::SMS_FROM->value, 'value' => 'OpenRoaming'],
             ['name' => SettingName::SMS_TIMER_RESEND->value, 'value' => '5'],
             ['name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value, 'value' => 'PT, US, GB'],
+            ['name' => SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS->value, 'value' => '60'],
+            ['name' => SettingName::SMS_TIME_INTERVAL_BETWEEN_REQUESTS->value, 'value' => '30'],
+            ['name' => SettingName::SMS_ATTEMPTS_NUMBER->value, 'value' => '5'],
         ];
 
         // Begin a database transaction to ensure data consistency

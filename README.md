@@ -521,6 +521,13 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
     this corresponds to the package name (e.g., com.example.app).
 78. `RETURN_APPS_ID_IOS`: Defines the application identifier used for mobile app association for iOS, this follows
     the TEAMID.bundleId format required for Apple App Site Association.
+79. `EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS`: Time window (in minutes) after which the email request attempts counter is reset
+80. `EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS`: Minimum cooldown (in seconds) between consecutive email requests
+81. `EMAIL_ATTEMPTS_NUMBER`: Maximum number of allowed requests within the defined time window
+82. `SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS`: Time window (in minutes) after which the SMS request attempts counter is reset
+83. `SMS_TIME_INTERVAL_BETWEEN_REQUESTS`: Minimum cooldown (in seconds) between consecutive SMS requests
+84. `SMS_ATTEMPTS_NUMBER`: Maximum number of allowed requests within the defined time window
+85. `BREAKING_GLASS_ADMIN_EMAIL`: Defines the email for the one time usage admin account.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

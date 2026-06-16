@@ -5,10 +5,13 @@ namespace App\EventListener;
 use App\Entity\User;
 use App\Enum\FirewallType;
 use App\Enum\SessionStatus;
+use App\Enum\SettingName;
 use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use App\Service\TwoFAService;
+use DateTime;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -24,6 +27,7 @@ readonly class SessionValidatorListener
         private UserRepository $userRepository,
         private GetSettings $getSettings,
         private TwoFAService $twoFAService,
+        private SettingRepository $settingRepository,
     ) {
     }
 
@@ -85,9 +89,22 @@ readonly class SessionValidatorListener
                 return;
             }
 
+            $breakingGlassAccount = $this->settingRepository->findOneBy(
+                ['name' => SettingName::BREAKING_GLASS_ADMIN_EMAIL->value]
+            )->getValue();
+            if (
+                $user->getEmail() === $breakingGlassAccount ||
+                $user->getUuid() === $breakingGlassAccount
+            ) {
+                $user->setDisabled(true);
+                $this->userRepository->save($user, true);
+                return;
+            }
+
             // Check if the 2FA process is completed
             if (
                 ($user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value)
+                && ($user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::BYPASS->value)
                 && !$session->has('2fa_verified_dashboard')
             ) {
                 if (
@@ -114,7 +131,8 @@ readonly class SessionValidatorListener
             }
             if (
                 !$this->twoFAService->hasValidOTPCodes($user) &&
-                $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value
+                $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
+                $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::BYPASS->value
             ) {
                 $url = $this->router->generate('app_otpCodes', ['context' => FirewallType::DASHBOARD->value]);
                 $event->setResponse(new RedirectResponse($url));
