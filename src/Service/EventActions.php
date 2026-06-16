@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Event;
 use App\Entity\User;
+use App\Enum\EventMetadataKeysType;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -26,7 +27,19 @@ readonly class EventActions
         $event->setUser($user);
         $event->setEventDatetime($dateTime);
         $event->setEventName($eventName);
-        $event->setEventMetadata($eventMetadata);
+        $metadata = [
+            EventMetadataKeysType::IP->value => $eventMetadata['ip'] ?? null,
+            EventMetadataKeysType::USER_AGENT->value => $eventMetadata['user_agent'] ?? null,
+            EventMetadataKeysType::UUID->value => $eventMetadata['uuid'] ?? null,
+        ];
+
+        foreach ($eventMetadata as $key => $value) {
+            if (!array_key_exists($key, $metadata)) {
+                $metadata[$key] = $value;
+            }
+        }
+
+        $event->setEventMetadata($metadata);
 
         $this->entityManager->persist($event);
         $this->entityManager->flush();

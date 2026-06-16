@@ -65,6 +65,11 @@
                 TOTP
             </span>
         {% endif %}
+        {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::BYPASS').value %}
+            <span class="pill-warning">
+                {{ 'byPass'|trans({}, '_user') }}
+            </span>
+        {% endif %}
     </td>
 
     {# Banned At #}
@@ -103,7 +108,7 @@
                     {{ stimulus_target('nav-submenu', 'container') }}>
                 <ul class="p-2 text-gray-700 gap-y-2">
                     <li>
-                        <a href="{{ path('admin_user_edit', {id: user.id}) }}"
+                        <a href="{{ path('admin_dashboard_user_edit', {id: user.id}) }}"
                            class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
                             <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3 fill-none stroke-current"/>
                             {{ 'edit'|trans({}, '_user') }}

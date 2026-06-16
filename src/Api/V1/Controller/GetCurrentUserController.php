@@ -5,6 +5,7 @@ namespace App\Api\V1\Controller;
 use App\Api\V1\BaseResponse;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
 use App\Service\UserStatusChecker;
@@ -70,9 +71,9 @@ class GetCurrentUserController extends AbstractController
 
             // Defines the Event to the table
             $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $currentUser->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
             ];
 
             $this->eventActions->saveEvent(

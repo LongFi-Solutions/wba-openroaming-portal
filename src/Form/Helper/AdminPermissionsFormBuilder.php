@@ -38,6 +38,7 @@ readonly class AdminPermissionsFormBuilder
             'smsConfig' => 'SMSConfiguration',
             'portalStatistics' => 'portalStatistics',
             'connectivityStatistics' => 'connectivityStatistics',
+            'activityLogs' => 'activityLogs',
         ];
 
         foreach ($permissions as $field => $translationKey) {

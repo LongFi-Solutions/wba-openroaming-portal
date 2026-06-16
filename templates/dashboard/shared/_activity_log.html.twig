@@ -1,0 +1,32 @@
+{# Clickable Row — triggers modal by ID #}
+<tr class="border-b hover:bg-veryLightGreen transition-all duration-100 cursor-pointer"
+        {{ stimulus_controller('modal-trigger', {modalId: 'event-modal-' ~ event.id}) }}
+    data-action="click->modal-trigger#open">
+
+    {% if showUser is not defined or showUser %}
+        <td class="px-6 py-4 font-medium">
+            {% if event.user is not null %}
+                {{ event.user.uuid }}
+            {% else %}
+                <span class="pill-error">{{ 'noInformation'|trans({}, '_user') }}</span>
+            {% endif %}
+        </td>
+    {% endif %}
+
+    <td class="p-4 font-medium">
+        {% set eventType = constant('App\\Enum\\AnalyticalEventType::' ~ event.eventName) is defined
+            ? constant('App\\Enum\\AnalyticalEventType::' ~ event.eventName)
+            : null %}
+        <span class="pill-info">
+            {{ eventType ? eventType.label : event.eventName }}
+        </span>
+    </td>
+
+    <td class="p-4 text-gray-500">
+        {{ event.eventMetadata.ip ?? '-' }}
+    </td>
+
+    <td class="px-6 py-4 font-medium">
+        {{ event.eventDatetime|date('d/m/Y H:i') }}
+    </td>
+</tr>

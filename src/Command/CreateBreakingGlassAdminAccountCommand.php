@@ -10,6 +10,7 @@ use App\Entity\UserExternalAuth;
 use App\Enum\AdminPermissionsType;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
@@ -182,8 +183,8 @@ class CreateBreakingGlassAdminAccountCommand extends Command
         $event->setEventDatetime(new DateTime());
         $event->setEventName(AnalyticalEventType::BREAKING_GLASS_ACCOUNT_GENERATION->value);
         $event->setEventMetadata([
-            'platform' => PlatformMode::CLI->value,
-            'ip' => $ip,
+            EventMetadataKeysType::PLATFORM->value => PlatformMode::CLI->value,
+            EventMetadataKeysType::IP->value => $ip,
         ]);
 
         $this->entityManager->persist($event);
