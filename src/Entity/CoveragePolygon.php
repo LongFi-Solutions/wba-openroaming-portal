@@ -21,8 +21,10 @@ class CoveragePolygon
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
+    /** @var array<int, array{float, float}> */
     #[ORM\Column(type: 'json')]
     private array $geometry = [];
+
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -57,11 +59,13 @@ class CoveragePolygon
         return $this;
     }
 
+    /** @return array<int, array{float, float}> */
     public function getGeometry(): array
     {
         return $this->geometry;
     }
 
+    /** @param array<int, array{float, float}> $geometry */
     public function setGeometry(array $geometry): static
     {
         $this->geometry = $geometry;
