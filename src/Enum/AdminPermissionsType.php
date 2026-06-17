@@ -48,15 +48,16 @@ enum AdminPermissionsType: string
     // SMS Configuration page
     case SMS_CONFIG_WRITE = 'SMS_CONFIG_WRITE';
     case SMS_CONFIG_READ = 'SMS_CONFIG_READ';
+    // Domains BlackList management page
+    case DOMAINS_BLACKLIST_WRITE = 'DOMAINS_BLACKLIST_WRITE';
+    case DOMAINS_BLACKLIST_READ = 'DOMAINS_BLACKLIST_READ';
     // Portal Statistics page
     case PORTAL_STATISTICS_READ = 'PORTAL_STATISTICS_READ';
     case PORTAL_STATISTICS_WRITE = 'PORTAL_STATISTICS_WRITE';
     // Connectivity Statistics page
     case CONNECTIVITY_STATISTICS_READ = 'CONNECTIVITY_STATISTICS_READ';
-    case CONNECTIVITY_STATISTICS_WRITE = 'CONNECTIVITY_STATISTICS_WRITE';
     // Activity Logs page
     case ACTIVITY_LOGS_READ = 'ACTIVITY_LOGS_READ';
-    case ACTIVITY_LOGS_WRITE = 'ACTIVITY_LOGS_WRITE';
 
     public function getLabel(): string
     {
@@ -75,9 +76,10 @@ enum AdminPermissionsType: string
             self::LDAP_SYNCHRONIZATION_WRITE, self::LDAP_SYNCHRONIZATION_READ => 'LDAPSynchronization',
             self::RADIUS_PROFILE_CONFIG_WRITE, self::RADIUS_PROFILE_CONFIG_READ => 'radiusProfileConfiguration',
             self::SMS_CONFIG_WRITE, self::SMS_CONFIG_READ => 'SMSConfiguration',
-            self::PORTAL_STATISTICS_READ, self::PORTAL_STATISTICS_WRITE => 'portalStatistics',
-            self::CONNECTIVITY_STATISTICS_READ, self::CONNECTIVITY_STATISTICS_WRITE => 'connectivityStatistics',
-            self::ACTIVITY_LOGS_WRITE, self::ACTIVITY_LOGS_READ => 'activityLogs',
+            self::DOMAINS_BLACKLIST_READ, self::DOMAINS_BLACKLIST_WRITE => 'domainsBlacklist',
+            self::PORTAL_STATISTICS_READ => 'portalStatistics',
+            self::CONNECTIVITY_STATISTICS_READ => 'connectivityStatistics',
+            self::ACTIVITY_LOGS_READ => 'activityLogs',
         };
     }
 
