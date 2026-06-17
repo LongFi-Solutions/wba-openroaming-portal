@@ -34,9 +34,14 @@ class Network
     #[ORM\OneToMany(targetEntity: AccessPoint::class, mappedBy: 'network', orphanRemoval: true)]
     private Collection $accessPoints;
 
+    /** @var Collection<int, CoveragePolygon> */
+    #[ORM\OneToMany(targetEntity: CoveragePolygon::class, mappedBy: 'network', orphanRemoval: true)]
+    private Collection $coveragePolygons;
+
     public function __construct()
     {
         $this->accessPoints = new ArrayCollection();
+        $this->coveragePolygons = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -118,6 +123,29 @@ class Network
     {
         if ($this->accessPoints->removeElement($accessPoint) && $accessPoint->getNetwork() === $this) {
             $accessPoint->setNetwork(null);
+        }
+        return $this;
+    }
+
+    /** @return Collection<int, CoveragePolygon> */
+    public function getCoveragePolygons(): Collection
+    {
+        return $this->coveragePolygons;
+    }
+
+    public function addCoveragePolygon(CoveragePolygon $polygon): static
+    {
+        if (!$this->coveragePolygons->contains($polygon)) {
+            $this->coveragePolygons->add($polygon);
+            $polygon->setNetwork($this);
+        }
+        return $this;
+    }
+
+    public function removeCoveragePolygon(CoveragePolygon $polygon): static
+    {
+        if ($this->coveragePolygons->removeElement($polygon) && $polygon->getNetwork() === $this) {
+            $polygon->setNetwork(null);
         }
         return $this;
     }
