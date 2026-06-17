@@ -25,6 +25,13 @@ class Network
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
+    /**
+     * GeoJSON FeatureCollection stored as JSON.
+     * @var array<string, mixed>|null
+     */
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $geometry = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -35,14 +42,9 @@ class Network
     #[ORM\OneToMany(targetEntity: AccessPoint::class, mappedBy: 'network', orphanRemoval: true)]
     private Collection $accessPoints;
 
-    /** @var Collection<int, CoveragePolygon> */
-    #[ORM\OneToMany(targetEntity: CoveragePolygon::class, mappedBy: 'network', orphanRemoval: true)]
-    private Collection $coveragePolygons;
-
     public function __construct()
     {
         $this->accessPoints = new ArrayCollection();
-        $this->coveragePolygons = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -80,6 +82,19 @@ class Network
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+        return $this;
+    }
+
+    /** @return array<string, mixed>|null */
+    public function getGeometry(): ?array
+    {
+        return $this->geometry;
+    }
+
+    /** @param array<string, mixed>|null $geometry */
+    public function setGeometry(?array $geometry): static
+    {
+        $this->geometry = $geometry;
         return $this;
     }
 
@@ -124,29 +139,6 @@ class Network
     {
         if ($this->accessPoints->removeElement($accessPoint) && $accessPoint->getNetwork() === $this) {
             $accessPoint->setNetwork(null);
-        }
-        return $this;
-    }
-
-    /** @return Collection<int, CoveragePolygon> */
-    public function getCoveragePolygons(): Collection
-    {
-        return $this->coveragePolygons;
-    }
-
-    public function addCoveragePolygon(CoveragePolygon $polygon): static
-    {
-        if (!$this->coveragePolygons->contains($polygon)) {
-            $this->coveragePolygons->add($polygon);
-            $polygon->setNetwork($this);
-        }
-        return $this;
-    }
-
-    public function removeCoveragePolygon(CoveragePolygon $polygon): static
-    {
-        if ($this->coveragePolygons->removeElement($polygon) && $polygon->getNetwork() === $this) {
-            $polygon->setNetwork(null);
         }
         return $this;
     }
