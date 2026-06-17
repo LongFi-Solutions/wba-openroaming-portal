@@ -11,7 +11,6 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
-use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -47,9 +46,6 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class UsersManagementController extends AbstractController
@@ -197,7 +193,7 @@ class UsersManagementController extends AbstractController
                 $sheet->setCellValue('B' . $row, $uuid);
             }
 
-            $sheet->setCellValue('C' . $row, $user->getEmail());
+            $sheet->setCellValueExplicit('C' . $row, $user->getEmail() ?? '', DataType::TYPE_STRING);
 
             // Phone number
             $phoneNumber = $user->getPhoneNumber();
@@ -207,8 +203,8 @@ class UsersManagementController extends AbstractController
                 $sheet->setCellValue('D' . $row, '');
             }
 
-            $sheet->setCellValue('E' . $row, $user->getFirstName());
-            $sheet->setCellValue('F' . $row, $user->getLastName());
+            $sheet->setCellValueExplicit('E' . $row, $user->getFirstName() ?? '', DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('F' . $row, $user->getLastName() ?? '', DataType::TYPE_STRING);
             $sheet->setCellValue('G' . $row, $user->isVerified() ? 'Verified' : 'Not Verified');
 
             // If SUPER ADMIN → add admin flag
@@ -245,7 +241,7 @@ class UsersManagementController extends AbstractController
             $sheet->setCellValue($bannedColumn . $row, $user->getBannedAt()?->format('Y-m-d H:i:s') ?? 'Not Banned');
 
             // Created At
-            $sheet->setCellValue($createdColumn . $row, $user->getCreatedAt());
+            $sheet->setCellValue($createdColumn . $row, $user->getCreatedAt()?->format('Y-m-d H:i:s') ?? '');
 
             $row++;
         }
