@@ -65,17 +65,18 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * @return User[]
+     * @return array<int, array{type: string|null, cnt: int}>
      */
-    public function findByDateRange(DateTime $start, DateTime $end): array
+    public function count2FAStatsByDateRange(DateTime $start, DateTime $end): array
     {
         return $this->createQueryBuilder('u')
-            ->andWhere('u.createdAt >= :start')
-            ->andWhere('u.createdAt <= :end')
+            ->select('u.twoFAtype AS type, COUNT(u.id) AS cnt')
+            ->where('u.createdAt BETWEEN :start AND :end')
             ->setParameter('start', $start)
             ->setParameter('end', $end)
+            ->groupBy('u.twoFAtype')
             ->getQuery()
-            ->getResult();
+            ->getArrayResult();
     }
 
     /**

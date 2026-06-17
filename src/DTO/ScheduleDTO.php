@@ -48,15 +48,6 @@ class ScheduleDTO
             new AcmeAssert\CronNotEmpty()
         ],
     )]
-    public ?ScheduleSettingDTO $freeradius_last_connection_cron = null;
-
-    #[Assert\Valid]
-    #[Assert\When(
-        expression: "this.use_advanced_mode != null and this.use_advanced_mode",
-        constraints: [
-            new AcmeAssert\CronNotEmpty()
-        ],
-    )]
     public ?ScheduleSettingDTO $domain_blacklist_import_cron = null;
 
     public function __construct(
@@ -88,12 +79,6 @@ class ScheduleDTO
             $cronExpressionHelperService
         );
 
-        $this->freeradius_last_connection_cron = new ScheduleSettingDTO(
-            SettingName::FREERADIUS_LAST_CONNECTION_CRON->value,
-            $settingRepository,
-            $cronExpressionHelperService
-        );
-
         $this->domain_blacklist_import_cron = new ScheduleSettingDTO(
             SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value,
             $settingRepository,
@@ -119,11 +104,6 @@ class ScheduleDTO
                 ),
             SettingName::LDAP_SYNC_CRON->value =>
                 $this->ldap_sync_cron->toCronExpression(
-                    $this->use_advanced_mode,
-                    $cronExpressionHelperService
-                ),
-            SettingName::FREERADIUS_LAST_CONNECTION_CRON->value =>
-                $this->freeradius_last_connection_cron->toCronExpression(
                     $this->use_advanced_mode,
                     $cronExpressionHelperService
                 ),
