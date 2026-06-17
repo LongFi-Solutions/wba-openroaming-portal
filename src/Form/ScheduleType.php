@@ -76,19 +76,6 @@ class ScheduleType extends AbstractType
                 }
             )
             ->addDependent(
-                'freeradius_last_connection_cron',
-                'use_advanced_mode',
-                function (DependentField $field, ?bool $use_advanced_mode): void {
-                    $field->add(ScheduleSettingType::class, [
-                        'label' => false,
-                        'required' => false,
-                        'use_advanced_mode' => $use_advanced_mode,
-                        'settingName' => SettingName::FREERADIUS_LAST_CONNECTION_CRON->value,
-                        'disabled' => $this->disabled,
-                    ]);
-                }
-            )
-            ->addDependent(
                 'domain_blacklist_import_cron',
                 'use_advanced_mode',
                 function (DependentField $field, ?bool $use_advanced_mode): void {
