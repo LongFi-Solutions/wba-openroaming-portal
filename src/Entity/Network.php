@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\NetworkRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: NetworkRepository::class)]
@@ -28,6 +30,15 @@ class Network
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    /** @var Collection<int, AccessPoint> */
+    #[ORM\OneToMany(targetEntity: AccessPoint::class, mappedBy: 'network', orphanRemoval: true)]
+    private Collection $accessPoints;
+
+    public function __construct()
+    {
+        $this->accessPoints = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -41,7 +52,6 @@ class Network
     public function setName(string $name): static
     {
         $this->name = $name;
-
         return $this;
     }
 
@@ -53,7 +63,6 @@ class Network
     public function setOperator(string $operator): static
     {
         $this->operator = $operator;
-
         return $this;
     }
 
@@ -65,7 +74,6 @@ class Network
     public function setDescription(?string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -77,7 +85,6 @@ class Network
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 
@@ -89,7 +96,29 @@ class Network
     public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+        return $this;
+    }
 
+    /** @return Collection<int, AccessPoint> */
+    public function getAccessPoints(): Collection
+    {
+        return $this->accessPoints;
+    }
+
+    public function addAccessPoint(AccessPoint $accessPoint): static
+    {
+        if (!$this->accessPoints->contains($accessPoint)) {
+            $this->accessPoints->add($accessPoint);
+            $accessPoint->setNetwork($this);
+        }
+        return $this;
+    }
+
+    public function removeAccessPoint(AccessPoint $accessPoint): static
+    {
+        if ($this->accessPoints->removeElement($accessPoint) && $accessPoint->getNetwork() === $this) {
+            $accessPoint->setNetwork(null);
+        }
         return $this;
     }
 }
