@@ -81,7 +81,6 @@ PROFILE_LIMIT_DATE_SMS: 'Tempo em dias para desativar perfis de utilizadores com
 DELETE_UNCONFIRMED_USERS_CRON: 'Define o agendamento para eliminar utilizadores não confirmados do portal'
 USERS_WHEN_PROFILE_EXPIRES_CRON: 'Define o agendamento para notificar os utilizadores quando o perfil estiver prestes a expirar'
 LDAP_SYNC_CRON: 'Define o agendamento para o comando automático de sincronização LDAP'
-FREERADIUS_LAST_CONNECTION_CRON: 'Define o agendamento para o servidor Freeradius e a última ligação do perfil do utilizador'
 DOMAIN_BLACKLIST_IMPORT_CRON: 'Define o agendamento (cron) para a execução da importação e sincronização dos domínios bloqueados.'
 CRON_ADVANCED_STATUS: 'Guarda o modo de estado anterior na página de configuração do cron (Simples/Avançado)'
 CLOUDFLARE_TOKEN: 'Token para renovação automática do certificado Cloudflare.'
