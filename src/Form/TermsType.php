@@ -54,7 +54,7 @@ class TermsType extends AbstractType
                     'required' => false,
                     'constraints' => [
                         new Assert\Url(
-                            message: $this->translator->trans('valueNotValid', [], 'CapportType'),
+                            message: $this->translator->trans('valueNotValid', [], 'TermsType'),
                             protocols: ['http', 'https'],
                             requireTld: true
                         ),
@@ -66,7 +66,7 @@ class TermsType extends AbstractType
                     'LINK' => 'LINK',
                     'TEXT_EDITOR' => 'TEXT_EDITOR',
                 ];
-                $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'CapportType');
+                $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'TermsType');
             }
             // Get the corresponding Setting entity and set its value
             foreach ($options['settings'] as $setting) {

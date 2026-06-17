@@ -5,12 +5,11 @@ namespace App\EventListener;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\OperationMode;
-use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Service\EventActions;
-use App\Service\GetSettings;
 use DateTime;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -36,29 +35,32 @@ readonly class LoginSuccessListener implements EventSubscriberInterface
     public function onLoginSuccess(InteractiveLoginEvent $event): void
     {
         $user = $event->getAuthenticationToken()->getUser();
-        /** @var Setting $platformModeStatus */
-        $platformModeStatus = $this->settingRepository->findOneBy([
-            'name' => SettingName::PLATFORM_MODE->value
-        ]);
+        $request = $event->getRequest();
         $session = $this->requestStack->getSession();
 
         if ($user instanceof User) {
+            /** @var Setting $loginUuidOnlySetting */
+            $loginUuidOnlySetting = $this->settingRepository->findOneBy(
+                ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value]
+            );
+
             if (
-                $this->settingRepository->findOneBy(
-                    ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value]
-                )->getValue() ===
-                OperationMode::OFF->value && $user->isVerified()
+                $loginUuidOnlySetting->getValue() === OperationMode::OFF->value
+                && $user->isVerified()
             ) {
                 $session->set('session_verified', true);
             }
 
             // Defines the Event to the table
             $eventMetadata = [
-                'platform' => $platformModeStatus,
-                'ip' => $_SERVER['REMOTE_ADDR'] ?? 'Unknown',
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
-                'uuid' => $user->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
+                EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
+                    ['name' => SettingName::PLATFORM_MODE->value]
+                )->getValue()
             ];
+
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value,

@@ -869,7 +869,7 @@ class TwoFAController extends AbstractController
         }
 
         // Handle access restrictions based on the context
-        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted(AdminRoleType::ROLE_ADMIN->value)) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAdminCanAccessThisPage', [], 'controllers')
