@@ -169,7 +169,7 @@ class UsersManagementController extends AbstractController
         $sheet->setCellValue('G1', 'Verification');
 
         // Show "Is Admin" only if the SUPER ADMIN requested this export
-        $includeAdminColumn = $this->isGranted('ROLE_SUPER_ADMIN');
+        $includeAdminColumn = $this->isGranted(AdminRoleType::ROLE_SUPER_ADMIN->value);
         if ($includeAdminColumn) {
             $sheet->setCellValue('H1', 'Roles');
             $columnOffset = 1;
