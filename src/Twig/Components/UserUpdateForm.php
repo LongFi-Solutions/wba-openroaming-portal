@@ -107,6 +107,7 @@ final class UserUpdateForm extends AbstractController
                 'smsConfig' => $this->userUpdateDTO->smsConfig,
                 'portalStatistics' => $this->userUpdateDTO->portalStatistics,
                 'connectivityStatistics' => $this->userUpdateDTO->connectivityStatistics,
+                'activityLogs' => $this->userUpdateDTO->activityLogs,
             ];
         }
 

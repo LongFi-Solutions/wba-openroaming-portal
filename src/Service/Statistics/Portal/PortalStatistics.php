@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Statistics\Portal;
 
+use App\Enum\EventMetadataKeysType;
 use App\Enum\OSType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -80,7 +81,7 @@ readonly class PortalStatistics
      */
     public function get2FAStats(DateTime $start, DateTime $end): array
     {
-        $users = $this->userRepository->findByDateRange($start, $end);
+        $rows = $this->userRepository->count2FAStatsByDateRange($start, $end);
 
         $result = [
             UserTwoFactorAuthenticationStatus::TOTP->value => 0,
@@ -89,10 +90,10 @@ readonly class PortalStatistics
             UserTwoFactorAuthenticationStatus::DISABLED->value => 0,
         ];
 
-        foreach ($users as $user) {
-            $type = $user->getTwoFAtype();
+        foreach ($rows as $row) {
+            $type = $row['type'];
             if (isset($result[$type])) {
-                $result[$type]++;
+                $result[$type] = (int)$row['cnt'];
             }
         }
 
@@ -129,10 +130,10 @@ readonly class PortalStatistics
 
         foreach ($events as $event) {
             $metadata = $event->getEventMetadata();
-            if (!isset($metadata['type'])) {
+            if (!isset($metadata[EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value])) {
                 continue;
             }
-            $type = $metadata['type'];
+            $type = $metadata[EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value];
             if (isset($result[$type])) {
                 $result[$type]++;
             }
@@ -145,30 +146,30 @@ readonly class PortalStatistics
      * Fetch data related to users created in platform mode - Live/Demo
      * @return array<string, mixed>
      * @throws \Doctrine\DBAL\Exception
+     * @throws \JsonException
      */
     public function getPlatformStatusStats(DateTime $startDate, DateTime $endDate): array
     {
-        $events = $this->eventRepository->findUserCreationEvents($startDate, $endDate);
+        $rows = $this->eventRepository->findUserCreationEvents($startDate, $endDate);
 
         $result = [
             PlatformMode::LIVE->value => 0,
             PlatformMode::DEMO->value => 0,
         ];
 
-        foreach ($events as $event) {
-            $metadata = $event->getEventMetadata();
-            if (!isset($metadata['platform'])) {
-                continue;
+        foreach ($rows as $row) {
+            $metadata = $row['event_metadata'];
+            if (is_string($metadata)) {
+                $metadata = json_decode($metadata, true, 512, JSON_THROW_ON_ERROR);
             }
-            $platform = $metadata['platform'];
-            if (isset($result[$platform])) {
+            $platform = $metadata['platform'] ?? null;
+            if ($platform && isset($result[$platform])) {
                 $result[$platform]++;
             }
         }
 
         return $this->buildChartData($result);
     }
-
 
     /**
      * Fetch data related to verified users

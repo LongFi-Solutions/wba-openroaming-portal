@@ -502,25 +502,28 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 64. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
 65. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
 66. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
-67. `TIME_STAMP_FREERADIUS_CRON`: Tracks the last run (UNIX epoch) of the backup:freeradiusLastConnection command.
-    Internal use only, not shown in UI.
-68. `DELETE_UNCONFIRMED_USERS_CRON`: Defines the schedule to delete unconfirmed users from the portal.
-69. `USERS_WHEN_PROFILE_EXPIRES_CRON`: Defines the schedule to notify the users when their profile to expire.
-70. `LDAP_SYNC_CRON`: Defines the schedule for LDAP synchronization automation command.
-71. `FREERADIUS_LAST_CONNECTION_CRON`: Defines the schedule for Freeradius server & the user profile
-    last connection.
-72. `CRON_ADVANCED_STATUS`:  Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)
-73. `DOMAIN_BLACKLIST_IMPORT_CRON`: Defines the schedule to import/refresh Blacklist of domains.
-74. `CLOUDFLARE_TOKEN` : Token for automatic Cloudflare certificate renewal.
-75. `ENABLE_RADIUS_TLS_RESET`: Saves the current state of the **RADIUS_TLS_NAME**, if this is set to false the reset
+67. `DELETE_UNCONFIRMED_USERS_CRON`: Defines the schedule to delete unconfirmed users from the portal.
+68. `USERS_WHEN_PROFILE_EXPIRES_CRON`: Defines the schedule to notify the users when their profile to expire.
+69. `LDAP_SYNC_CRON`: Defines the schedule for LDAP synchronization automation command.
+70. `CRON_ADVANCED_STATUS`:  Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)
+71. `DOMAIN_BLACKLIST_IMPORT_CRON`: Defines the schedule to import/refresh Blacklist of domains.
+72. `CLOUDFLARE_TOKEN` : Token for automatic Cloudflare certificate renewal.
+73. `ENABLE_RADIUS_TLS_RESET`: Saves the current state of the **RADIUS_TLS_NAME**, if this is set to false the reset
     certs widget will ask for a new radius_tls_name to be configured. **Careful when setting up this stage to be the
     actual RADIUS_TLS_NAME on the free-radius resolver. For more details consul this **
-76. `RETURN_APPS_ENABLED`: Enables or disables the return-to-apps configuration for mobile devices. If set to false, the
+74. `RETURN_APPS_ENABLED`: Enables or disables the return-to-apps configuration for mobile devices. If set to false, the
     asset association endpoints will not be exposed, preventing Android and iOS applications from linking to the portal.
-77. `RETURN_APPS_PACKAGE_NAME_ANDROID`: Defines the application identifier used for mobile app association for Android,
+75. `RETURN_APPS_PACKAGE_NAME_ANDROID`: Defines the application identifier used for mobile app association for Android,
     this corresponds to the package name (e.g., com.example.app).
-78. `RETURN_APPS_ID_IOS`: Defines the application identifier used for mobile app association for iOS, this follows
+76. `RETURN_APPS_ID_IOS`: Defines the application identifier used for mobile app association for iOS, this follows
     the TEAMID.bundleId format required for Apple App Site Association.
+77. `EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS`: Time window (in minutes) after which the email request attempts counter is reset
+78. `EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS`: Minimum cooldown (in seconds) between consecutive email requests
+79. `EMAIL_ATTEMPTS_NUMBER`: Maximum number of allowed requests within the defined time window
+80. `SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS`: Time window (in minutes) after which the SMS request attempts counter is reset
+81. `SMS_TIME_INTERVAL_BETWEEN_REQUESTS`: Minimum cooldown (in seconds) between consecutive SMS requests
+82. `SMS_ATTEMPTS_NUMBER`: Maximum number of allowed requests within the defined time window
+83. `BREAKING_GLASS_ADMIN_EMAIL`: Defines the email for the one time usage admin account.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

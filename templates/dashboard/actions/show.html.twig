@@ -1,0 +1,41 @@
+{% extends '/dashboard/base.html.twig' %}
+{% block title %}Admin Page WBA{% endblock %}
+
+{% block container %}
+
+    {# ── Header ──────────────────────────────────────────────────────────────── #}
+    {% set canEdit = userData.isAdmin
+        ? is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE'))
+        : is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
+
+    {{ include('dashboard/shared/_user_header.html.twig', {
+        user: userData.user,
+        user_profileStatus: true,
+        isAdmin: userData.isAdmin,
+        actions: canEdit
+        ? '<a href="' ~ path('admin_dashboard_user_edit', {id: userData.user.id}) ~ '" class="btn-primary text-sm">' ~ 'edit'|trans({}, 'edit') ~ '</a>'
+        : '',
+    }) }}
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {# ── Left column ──────────────────────────────────────────────────────────── #}
+        <div class="lg:col-span-1 flex flex-col gap-6">
+            {{ include('dashboard/shared/user_profile/_basic_info.html.twig', {userData: userData}) }}
+            {{ include('dashboard/shared/user_profile/_active_session.html.twig', {userData: userData}) }}
+            {{ include('dashboard/shared/user_profile/_auth_providers.html.twig', {userData: userData}) }}
+            {{ include('dashboard/shared/user_profile/_last_connection.html.twig', {userData: userData}) }}
+            {{ include('dashboard/shared/user_profile/_twoFA_operations.html.twig', {userData: userData, context: context, isAdmin: userData.isAdmin}) }}
+            {{ include('dashboard/shared/user_profile/_permissions.html.twig', {userData: userData}) }}
+        </div>
+
+        {# ── Right column ─────────────────────────────────────────────────────────── #}
+        <div class="lg:col-span-2 flex flex-col gap-6">
+            {{ include('dashboard/shared/user_profile/tables/_radius_profile.html.twig', {userData: userData}) }}
+            {{ include('dashboard/shared/user_profile/tables/_recent_radius_sessions.html.twig', {userData: userData}) }}
+            {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ACTIVITY_LOGS_READ')) %}
+                {{ include('dashboard/shared/user_profile/tables/_activity_logs.html.twig', {userData: userData}) }}
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

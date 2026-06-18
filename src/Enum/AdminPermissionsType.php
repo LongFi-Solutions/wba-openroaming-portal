@@ -53,6 +53,7 @@ enum AdminPermissionsType: string
     case DOMAINS_BLACKLIST_READ = 'DOMAINS_BLACKLIST_READ';
     // Portal Statistics page
     case PORTAL_STATISTICS_READ = 'PORTAL_STATISTICS_READ';
+    case PORTAL_STATISTICS_WRITE = 'PORTAL_STATISTICS_WRITE';
     // Connectivity Statistics page
     case CONNECTIVITY_STATISTICS_READ = 'CONNECTIVITY_STATISTICS_READ';
     // Activity Logs page

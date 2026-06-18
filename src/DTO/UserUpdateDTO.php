@@ -68,6 +68,7 @@ class UserUpdateDTO
     public PermissionLevel $domainsBlacklist = PermissionLevel::NONE;
     public PermissionLevel $portalStatistics = PermissionLevel::NONE;
     public PermissionLevel $connectivityStatistics = PermissionLevel::NONE;
+    public PermissionLevel $activityLogs = PermissionLevel::NONE;
 
     public function __construct(?User $user = null)
     {
@@ -175,5 +176,6 @@ class UserUpdateDTO
         'portalStatistics' => 'PORTAL_STATISTICS',
         'connectivityStatistics' => 'CONNECTIVITY_STATISTICS',
         'domainsBlacklist' => 'DOMAINS_BLACKLIST',
+        'activityLogs' => 'ACTIVITY_LOGS',
     ];
 }

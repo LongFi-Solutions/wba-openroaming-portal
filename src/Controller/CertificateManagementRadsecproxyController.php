@@ -14,6 +14,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Enum\CertificateTestResult;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\SessionStatus;
 use App\Enum\TrustedWBAFingerprints;
@@ -134,9 +135,9 @@ class CertificateManagementRadsecproxyController extends AbstractController
                 AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_RADSECPROXY_UPLOAD->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $user->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
                 ]
             );
 
@@ -235,9 +236,9 @@ class CertificateManagementRadsecproxyController extends AbstractController
                     AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_RADSECPROXY_CONFIG->value,
                     new DateTime(),
                     [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'by' => $user->getUuid(),
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
                     ]
                 );
 
@@ -518,9 +519,9 @@ class CertificateManagementRadsecproxyController extends AbstractController
                 AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_RADSECPROXY_TEST->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $user->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
                 ]
             );
 
