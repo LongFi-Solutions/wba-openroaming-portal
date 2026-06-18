@@ -57,6 +57,8 @@ enum AdminPermissionsType: string
     // Activity Logs page
     case ACTIVITY_LOGS_READ = 'ACTIVITY_LOGS_READ';
     case ACTIVITY_LOGS_WRITE = 'ACTIVITY_LOGS_WRITE';
+    case MAP_READ = 'MAP_READ';
+    case MAP_WRITE = 'MAP_WRITE';
 
     public function getLabel(): string
     {
@@ -78,6 +80,7 @@ enum AdminPermissionsType: string
             self::PORTAL_STATISTICS_READ, self::PORTAL_STATISTICS_WRITE => 'portalStatistics',
             self::CONNECTIVITY_STATISTICS_READ, self::CONNECTIVITY_STATISTICS_WRITE => 'connectivityStatistics',
             self::ACTIVITY_LOGS_WRITE, self::ACTIVITY_LOGS_READ => 'activityLogs',
+            self::MAP_WRITE, self::MAP_READ => 'map',
         };
     }
 

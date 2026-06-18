@@ -69,6 +69,8 @@ final class UserAuthenticationVoter extends Voter
     public const string USER_MANAGEMENT = 'USER_MANAGEMENT';
     public const string ACTIVITY_LOGS_READ = 'ACTIVITY_LOGS_READ';
     public const string ACTIVITY_LOGS_WRITE = 'ACTIVITY_LOGS_WRITE';
+    public const string MAP_READ = 'MAP_READ';
+    public const string MAP_WRITE = 'MAP_WRITE';
 
     #[Override]
     protected function supports(string $attribute, mixed $subject): bool
@@ -129,6 +131,9 @@ final class UserAuthenticationVoter extends Voter
 
                 self::ACTIVITY_LOGS_READ,
                 self::ACTIVITY_LOGS_WRITE,
+
+                self::MAP_READ,
+                self::MAP_WRITE,
             ]
         );
     }
@@ -261,6 +266,8 @@ final class UserAuthenticationVoter extends Voter
             self::ACTIVITY_LOGS_READ =>
                 $this->hasPermission($user, AdminPermissionsType::ACTIVITY_LOGS_READ)
                 || $this->hasPermission($user, AdminPermissionsType::ACTIVITY_LOGS_WRITE),
+            self::MAP_WRITE => $this->hasPermission($user, AdminPermissionsType::MAP_WRITE),
+            self::MAP_READ => $this->hasPermission($user, AdminPermissionsType::MAP_READ) || $this->hasPermission($user, AdminPermissionsType::MAP_WRITE),
 
             default => false,
         };
