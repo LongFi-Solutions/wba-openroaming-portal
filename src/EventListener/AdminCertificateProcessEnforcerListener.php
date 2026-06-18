@@ -127,10 +127,6 @@ readonly class AdminCertificateProcessEnforcerListener
      */
     private function enforceProcess(RequestEvent $event, SessionInterface $session): void
     {
-        if ($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess) {
-            $this->certificateProcessCheckerService->verifyCertificates();
-        }
-
         // Check installation progress
         $installation = $this->installationProgressRepository->findOneBy([
             'installationState' => ProcessStatusType::COMPLETED
