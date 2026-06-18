@@ -401,7 +401,7 @@ class InstallationController extends AbstractController
             }
 
             $lastInstallation->setUpdatedAt(new DateTime());
-            $lastInstallation->setTrustedProxies($settingsDTO->trustedProxies ?? '');
+            $lastInstallation->setTrustedProxies($settingsDTO->trustedProxies);
             $lastInstallation->setTurnstileKey($settingsDTO->turnstileKey ?? '');
             $lastInstallation->setTurnstileSecret($settingsDTO->turnstileSecret ?? '');
             if ($settingsDTO->jwtPassphraseEnable) {
