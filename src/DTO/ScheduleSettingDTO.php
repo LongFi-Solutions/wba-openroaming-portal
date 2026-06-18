@@ -2,6 +2,7 @@
 
 namespace App\DTO;
 
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Service\CronExpressionHelperService;
 use Cron\CronExpression;
@@ -11,6 +12,9 @@ use Exception;
 use InvalidArgumentException;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
+use Symfony\Component\Validator\Constraints\Length;
 
 class ScheduleSettingDTO
 {
@@ -29,6 +33,17 @@ class ScheduleSettingDTO
     public ?int $months_of_the_year_frequency = 1;
 
     public ?DateTimeImmutable $time = null;
+
+    #[Assert\NotBlank(message: 'timerValueRequired')]
+    #[Length(max: 3, maxMessage: 'fieldCannotBeLongerThan')]
+    #[GreaterThanOrEqual(value: 0, message: 'timerShouldNotBeLessThan')]
+    public ?int $userDeleteTime = null;
+
+    #[Assert\NotBlank(message: 'pleaseSetTimer')]
+    #[Length(max: 3, maxMessage: 'fieldCannotBeLongerThan')]
+    #[GreaterThanOrEqual(value: 1, message: 'timerShouldNotBeLessThanProfileNotification')]
+    public ?int $timeIntervalNotification = null;
+
 
     public function __construct(
         ?string $setting = null,
@@ -71,6 +86,20 @@ class ScheduleSettingDTO
 
             $this->months_of_the_year = $this->setDayValues($parts, "month");
             $this->months_of_the_year_frequency = $parts["month"]['frequency'] ?? 1;
+
+            if ($setting === SettingName::DELETE_UNCONFIRMED_USERS_CRON->value) {
+                $deleteUnconfirmedUsers = $settingRepository->findOneBy(['name' => SettingName::USER_DELETE_TIME->value]);
+                if ($deleteUnconfirmedUsers) {
+                    $this->userDeleteTime = $deleteUnconfirmedUsers->getValue();
+                }
+            }
+            if ($setting === SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value) {
+                $deleteUnconfirmedUsers = $settingRepository->findOneBy(['name' => SettingName::TIME_INTERVAL_NOTIFICATION->value]);
+                if ($deleteUnconfirmedUsers) {
+                    $this->timeIntervalNotification = (int)$deleteUnconfirmedUsers->getValue();
+                }
+            }
+
         }
     }
 
