@@ -203,8 +203,8 @@ class UsersManagementController extends AbstractController
                 $sheet->setCellValue('D' . $row, '');
             }
 
-            $sheet->setCellValueExplicit('E' . $row, $user->getFirstName() ?? '', DataType::TYPE_STRING);
-            $sheet->setCellValueExplicit('F' . $row, $user->getLastName() ?? '', DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('E' . $row, (string)$user->getFirstName(), DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('F' . $row, (string)$user->getLastName(), DataType::TYPE_STRING);
             $sheet->setCellValue('G' . $row, $user->isVerified() ? 'Verified' : 'Not Verified');
 
             // If SUPER ADMIN → add admin flag
