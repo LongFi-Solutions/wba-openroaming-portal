@@ -69,11 +69,11 @@
 
             {# Right Button #}
             {% if this.exportUsers == constant('App\\Enum\\OperationMode::ON').value %}
-                <div class="flex items-center space-x-6">
-                    <a href="{{ path('admin_dashboard_users_export') }}" class="btn-primary px-4 min-w-[150px]">
-                        {{ 'exportEverything'|trans({}, 'dashboard') }}
-                    </a>
-                </div>
+                <a href="{{ path('admin_dashboard_users_export') }}"
+                   class="btn-primary px-4 min-w-[150px]"
+                   data-download="true">
+                    {{ 'exportEverything'|trans({}, 'dashboard') }}
+                </a>
             {% endif %}
 
         </div>
