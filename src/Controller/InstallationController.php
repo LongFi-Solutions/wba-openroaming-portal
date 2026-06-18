@@ -111,7 +111,7 @@ class InstallationController extends AbstractController
         $dbDTO->dbOpenRoamingDbName = 'openroaming';
         $dbDTO->dbFreeradiusDbName = 'radius';
         $dbDTO->dbOpenRoamingPort = 3306;
-        $dbDTO->dbFreeradiusPort = 3307;
+        $dbDTO->dbFreeradiusPort = 3306;
 
         $form = $this->createForm(DbSetupType::class, $dbDTO);
         $form->handleRequest($request);
