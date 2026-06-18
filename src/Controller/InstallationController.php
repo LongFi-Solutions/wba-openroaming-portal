@@ -379,12 +379,6 @@ class InstallationController extends AbstractController
             if ($step === InstallationStep::DATABASE->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
             }
-            if ($step === InstallationStep::ADMIN->value) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
-            }
-            if ($step === InstallationStep::COMMAND->value) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
-            }
         } else {
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
         }
@@ -408,8 +402,8 @@ class InstallationController extends AbstractController
 
             $lastInstallation->setUpdatedAt(new DateTime());
             $lastInstallation->setTrustedProxies($settingsDTO->trustedProxies);
-            $lastInstallation->setTurnstileKey($settingsDTO->turnstileKey);
-            $lastInstallation->setTurnstileSecret($settingsDTO->turnstileSecret);
+            $lastInstallation->setTurnstileKey($settingsDTO->turnstileKey ?? '');
+            $lastInstallation->setTurnstileSecret($settingsDTO->turnstileSecret ?? '');
             if ($settingsDTO->jwtPassphraseEnable) {
                 $lastInstallation->setJwtPassphrase($settingsDTO->jwtPassphrase);
             }
@@ -417,31 +411,32 @@ class InstallationController extends AbstractController
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
+            if ($settingsDTO->trustedProxies) {
+                $trustedProxiesPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                    implode(',', $settingsDTO->trustedProxies),
+                    SettingsConfigType::TRUSTED_PROXIES->value
+                );
+            }
 
-            $trustedProxiesPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                implode(',', $settingsDTO->trustedProxies),
-                SettingsConfigType::TRUSTED_PROXIES->value
-            );
+            if ($settingsDTO->turnstileKey) {
+                $turnstileKeyPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                    $settingsDTO->turnstileKey,
+                    SettingsConfigType::TURNSTILE_KEY->value
+                );
+            }
 
-            $turnstileKeyPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $settingsDTO->turnstileKey,
-                SettingsConfigType::TURNSTILE_KEY->value
-            );
-
-            $turnstileSecretPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $settingsDTO->turnstileSecret,
-                SettingsConfigType::TURNSTILE_SECRET->value
-            );
+            if ($settingsDTO->turnstileSecret) {
+                $turnstileSecretPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                    $settingsDTO->turnstileSecret,
+                    SettingsConfigType::TURNSTILE_SECRET->value
+                );
+            }
 
             if ($settingsDTO->jwtPassphraseEnable) {
                 $this->databaseConnectionService->writeDatabaseUrlToEnv(
                     $settingsDTO->jwtPassphrase,
                     SettingsConfigType::JWT_PASSPHRASE->value
                 );
-            }
-
-            if (!$trustedProxiesPermissions || !$turnstileKeyPermissions || !$turnstileSecretPermissions) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
             }
 
             // JWT Verification
@@ -538,7 +533,12 @@ class InstallationController extends AbstractController
                 'data' => $data,
                 'form' => $form->createView(),
                 'formDTO' => $settingsDTO,
-                'stages' => $this->installationService->getStepperStatus($step)
+                'stages' => $this->installationService->getStepperStatus($step),
+                'message' => $this->translator->trans(
+                    'canSkipThisPage',
+                    [],
+                    'controllers'
+                )
             ]
         );
     }

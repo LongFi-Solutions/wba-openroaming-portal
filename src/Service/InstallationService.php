@@ -125,34 +125,28 @@ readonly class InstallationService
 
     public function getStep(InstallationProgress $installationProgress): string
     {
+
         if (
             $installationProgress->getDbOpenRoaming() &&
             $installationProgress->getDbFreeradius()
         ) {
             if (
-                $installationProgress->getTurnstileKey() &&
-                $installationProgress->getTurnstileSecret() &&
-                $installationProgress->getTrustedProxies()
+                $installationProgress->getEmailAdmin() &&
+                $installationProgress->getPasswordAdmin() &&
+                $installationProgress->getAdminConfirmation()
             ) {
                 if (
-                    $installationProgress->getEmailAdmin() &&
-                    $installationProgress->getPasswordAdmin() &&
-                    $installationProgress->getAdminConfirmation()
+                    $this->checkDatabaseSettings($installationProgress) &&
+                    $this->checkSettingsValues($installationProgress)
                 ) {
-                    if (
-                        $this->checkDatabaseSettings($installationProgress) &&
-                        $this->checkSettingsValues($installationProgress)
-                    ) {
-                        $installationProgress->setInstallationState(ProcessStatusType::COMPLETED);
-                        $this->entityManager->persist($installationProgress);
-                        $this->entityManager->flush();
-                        return InstallationStep::COMPLETED->value;
-                    }
-                    return InstallationStep::COMMAND->value;
+                    $installationProgress->setInstallationState(ProcessStatusType::COMPLETED);
+                    $this->entityManager->persist($installationProgress);
+                    $this->entityManager->flush();
+                    return InstallationStep::COMPLETED->value;
                 }
-                return InstallationStep::ADMIN->value;
+                return InstallationStep::COMMAND->value;
             }
-            return InstallationStep::SETTINGS->value;
+            return InstallationStep::ADMIN->value;
         }
         return InstallationStep::DATABASE->value;
     }
