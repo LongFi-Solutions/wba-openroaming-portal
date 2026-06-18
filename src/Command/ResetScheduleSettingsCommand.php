@@ -50,7 +50,9 @@ class ResetScheduleSettingsCommand extends Command
 
         $settings = [
             ['name' => SettingName::DELETE_UNCONFIRMED_USERS_CRON->value, 'value' => '0 0 * * *'],
+            ['name' => SettingName::USER_DELETE_TIME->value, 'value' => '5'],
             ['name' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value, 'value' => '0 1 * * *'],
+            ['name' => SettingName::TIME_INTERVAL_NOTIFICATION->value, 'value' => '7'],
             ['name' => SettingName::LDAP_SYNC_CRON->value, 'value' => '0 2 * * *'],
             ['name' => SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value, 'value' => '0 4 * * *'],
             ['name' => SettingName::CRON_ADVANCED_STATUS->value, 'value' => 'OFF'],

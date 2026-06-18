@@ -54,8 +54,6 @@ class ResetPlatformStatusSettingsCommand extends Command
             ['name' => SettingName::USER_VERIFICATION->value, 'value' => 'OFF'],
             ['name' => SettingName::TURNSTILE_CHECKER->value, 'value' => 'OFF'],
             ['name' => SettingName::API_STATUS->value, 'value' => 'OFF'],
-            ['name' => SettingName::USER_DELETE_TIME->value, 'value' => '5'],
-            ['name' => SettingName::TIME_INTERVAL_NOTIFICATION->value, 'value' => '7'],
             ['name' => SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value, 'value' => '60'],
             ['name' => SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value, 'value' => '30'],
             ['name' => SettingName::EMAIL_ATTEMPTS_NUMBER->value, 'value' => '5'],
