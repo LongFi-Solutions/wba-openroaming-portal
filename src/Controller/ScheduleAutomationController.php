@@ -52,7 +52,7 @@ class ScheduleAutomationController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
+        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
             $changeset = [];
             foreach (
                 $scheduleDTO->toCronExpressions(

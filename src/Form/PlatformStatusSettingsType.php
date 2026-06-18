@@ -55,14 +55,6 @@ class PlatformStatusSettingsType extends AbstractType
                 'required' => false,
                 'disabled' => $this->disabled,
             ])
-            ->add('userDeleteTime', IntegerType::class, [
-                'required' => false,
-                'disabled' => $this->disabled,
-            ])
-            ->add('timeIntervalNotification', IntegerType::class, [
-                'required' => false,
-                'disabled' => $this->disabled,
-            ])
             ->add('timeIntervalBetweenRequests', IntegerType::class, [
                 'required' => false,
                 'disabled' => $this->disabled,
