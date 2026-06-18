@@ -380,10 +380,11 @@ readonly class InstallationService
         $envPath = $this->parameterBag->get('kernel.project_dir') . '/.env';
         $envContent = file_get_contents($envPath);
 
-        $pattern = sprintf('/^%s="?(.*?)"?$/m', preg_quote($key, '/'));
+        // Match both quoted and unquoted values
+        $pattern = sprintf('/^%s=("?)(.+?)\1$/m', preg_quote($key, '/'));
 
         if (preg_match($pattern, (string)$envContent, $matches)) {
-            return trim($matches[1], "\"' \r\n") === $expectedValue;
+            return trim($matches[2]) === $expectedValue;
         }
 
         return false;
