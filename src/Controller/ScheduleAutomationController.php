@@ -81,7 +81,9 @@ class ScheduleAutomationController extends AbstractController
 
             $newNotificationTime = $scheduleDTO->users_when_profile_expires_cron->timeIntervalNotification;
 
-            $notificationTime = $this->settingRepository->findOneBy(['name' => SettingName::TIME_INTERVAL_NOTIFICATION->value]);
+            $notificationTime = $this->settingRepository->findOneBy([
+                'name' => SettingName::TIME_INTERVAL_NOTIFICATION->value
+            ]);
 
             if ($notificationTime) {
                 $notificationTime->setValue($newNotificationTime);
@@ -90,10 +92,14 @@ class ScheduleAutomationController extends AbstractController
 
             // Track enablement changes
             $enablementSettings = [
-                SettingName::DELETE_UNCONFIRMED_USERS_CRON_ENABLED->value => $scheduleDTO->delete_unconfirmed_users_enabled,
-                SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED->value => $scheduleDTO->users_when_profile_expires_enabled,
-                SettingName::LDAP_SYNC_CRON_ENABLED->value => $scheduleDTO->ldap_sync_enabled,
-                SettingName::DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED->value => $scheduleDTO->domain_blacklist_import_enabled,
+                SettingName::DELETE_UNCONFIRMED_USERS_CRON_ENABLED->value =>
+                    $scheduleDTO->delete_unconfirmed_users_enabled,
+                SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED->value =>
+                    $scheduleDTO->users_when_profile_expires_enabled,
+                SettingName::LDAP_SYNC_CRON_ENABLED->value =>
+                    $scheduleDTO->ldap_sync_enabled,
+                SettingName::DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED->value =>
+                    $scheduleDTO->domain_blacklist_import_enabled,
             ];
 
             foreach ($enablementSettings as $settingName => $newEnabledValue) {
