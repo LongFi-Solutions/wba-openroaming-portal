@@ -4,8 +4,8 @@ namespace App\Repository;
 
 use App\Entity\AccessPoint;
 use App\Entity\Network;
-use App\Enum\AccessPointType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -48,28 +48,26 @@ class AccessPointRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return AccessPoint[]
+     * @throws \JsonException
      */
-    public function findByType(AccessPointType $type): array
+    public function findWithinRadius(float $lat, float $lng, float $radiusKm): array
     {
-        return $this->createQueryBuilder('ap')
-            ->andWhere('ap.type = :type')
-            ->setParameter('type', $type)
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
-     * @return AccessPoint[]
-     */
-    public function findByNetworkAndType(Network $network, AccessPointType $type): array
-    {
-        return $this->createQueryBuilder('ap')
-            ->andWhere('ap.network = :network')
-            ->andWhere('ap.type = :type')
-            ->setParameter('network', $network)
-            ->setParameter('type', $type)
-            ->getQuery()
+        return $this->getEntityManager()->createNativeQuery(
+            'SELECT * FROM AccessPoint
+         WHERE ST_Distance_Sphere(
+             ST_GeomFromGeoJSON(location),
+             ST_GeomFromGeoJSON(:point)
+         ) <= :radius',
+            new ResultSetMapping()
+        )
+            ->setParameter(
+                'point',
+                json_encode([
+                    'type' => 'Point',
+                    'coordinates' => [$lng, $lat]
+                ], JSON_THROW_ON_ERROR)
+            )
+            ->setParameter('radius', $radiusKm * 1000)
             ->getResult();
     }
 }
