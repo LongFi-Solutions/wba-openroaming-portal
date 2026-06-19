@@ -17,6 +17,11 @@
 
     <div class="my-[25px] divider"></div>
 
+    {{ include('shared/_toast.html.twig', {
+        toast_type: 'toast-warning-dashboard',
+        message: message,
+    }) }}
+
     {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
 
     <div data-controller="toggle-visibility-card trusted-proxies" class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">

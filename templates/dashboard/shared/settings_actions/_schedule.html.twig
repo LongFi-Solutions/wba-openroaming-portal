@@ -36,24 +36,32 @@
                 label: 'deleteUnconfirmedAccount'|trans({}, 'schedule'),
                 description: 'deleteUnconfirmedAccountDescription'|trans({}, 'schedule'),
                 field: form.delete_unconfirmed_users_cron,
+                enabled_field: form.delete_unconfirmed_users_enabled,
+                field_name: 'delete_unconfirmed_users_enabled',
             }) }}
 
             {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
                 label: 'profileExpirationNotification'|trans({}, 'schedule'),
                 description: 'profileExpirationNotificationDescription'|trans({}, 'schedule'),
                 field: form.users_when_profile_expires_cron,
+                enabled_field: form.users_when_profile_expires_enabled,
+                field_name: 'users_when_profile_expires_enabled',
             }) }}
 
             {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
                 label: 'LDAPSynchronization'|trans({}, 'schedule'),
                 description: 'LDAPSynchronizationDescription'|trans({}, 'schedule'),
                 field: form.ldap_sync_cron,
+                enabled_field: form.ldap_sync_enabled,
+                field_name: 'ldap_sync_enabled',
             }) }}
 
             {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
                 label: 'domainBlacklistImport'|trans({}, 'schedule'),
                 description: 'domainBlacklistImportDescription'|trans({}, 'schedule'),
                 field: form.domain_blacklist_import_cron,
+                enabled_field: form.domain_blacklist_import_enabled,
+                field_name: 'domain_blacklist_import_enabled',
             }) }}
         </div>
 
