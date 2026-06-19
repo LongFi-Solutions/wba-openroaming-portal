@@ -13,7 +13,7 @@
                         activeClass: 'border-b-2 border-y-veryDarkButton',
                         hoverClass: 'hover:border-b-2 hover:border-y-veryDarkButton',
                         badgeActive: 'bg-veryDarkButton text-white',
-                        badgeHover: 'group-hover:bg-veryDarkButton group-hover:text-white',
+                        badgeInactive: 'bg-gray-100 text-gray-600 group-hover:bg-veryDarkButton group-hover:text-white',
                     },
                     Verified: {
                         label: 'verified',
@@ -21,15 +21,15 @@
                         activeClass: 'text-lightGreen border-b-2 border-y-lightGreen',
                         hoverClass: 'hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50',
                         badgeActive: 'bg-lightGreen text-white',
-                        badgeHover: 'group-hover:bg-lightGreen group-hover:text-white',
+                        badgeInactive: 'bg-green-50 text-lightGreen group-hover:bg-lightGreen group-hover:text-white',
                     },
                     Banned: {
                         label: 'banned',
                         count: this.userCounts.banned,
-                        activeClass: 'text-red-400 border-b-2 border-y-red-400',
-                        hoverClass: 'hover:text-red-400 hover:border-b-2 hover:border-y-red-400',
-                        badgeActive: 'bg-red-400 text-white',
-                        badgeHover: 'group-hover:bg-red-400 group-hover:text-white',
+                        activeClass: 'text-red-500 border-b-2 border-red-500',
+                        hoverClass: 'hover:text-red-500 hover:border-b-2 hover:border-red-500/50',
+                        badgeActive: 'bg-red-500 text-white',
+                        badgeInactive: 'bg-red-50 text-red-500 group-hover:bg-red-500 group-hover:text-white',
                     },
                 } %}
 
@@ -38,11 +38,11 @@
                             data-action="live#action"
                             data-live-action-param="changeFilter"
                             data-live-filter-param="{{ value }}"
-                            class="flex flex-row group transition-all duration-100 {{ tab.hoverClass }} {{ filter == value ? tab.activeClass : '' }}">
-                        <h1 class="px-2">{{ tab.label|trans({}, 'dashboard') }}</h1>
-                        <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen rounded-md text-center transition-all duration-100 {{ tab.badgeHover }} {{ filter == value ? tab.badgeActive : '' }}">
+                            class="flex items-center pb-2 group transition-all duration-150 gap-2 {{ tab.hoverClass }} {{ filter == value ? tab.activeClass : 'text-gray-500 border-b-2 border-transparent' }}">
+                        <span>{{ tab.label|trans({}, 'dashboard') }}</span>
+                        <span class="text-xs px-2 py-0.5 rounded-md min-w-[24px] text-center transition-all duration-150 {{ filter == value ? tab.badgeActive : tab.badgeInactive }}">
                             {{ tab.count }}
-                        </div>
+                        </span>
                     </button>
                 {% endfor %}
             </div>
