@@ -19,9 +19,6 @@ class Network
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $operator = null;
-
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
@@ -60,17 +57,6 @@ class Network
     public function setName(string $name): static
     {
         $this->name = $name;
-        return $this;
-    }
-
-    public function getOperator(): ?string
-    {
-        return $this->operator;
-    }
-
-    public function setOperator(string $operator): static
-    {
-        $this->operator = $operator;
         return $this;
     }
 
