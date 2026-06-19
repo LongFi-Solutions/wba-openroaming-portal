@@ -32,7 +32,6 @@ class FreeradiusController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly ParameterBagInterface $parameterBag,
         private readonly EventActions $eventActions,
-        private readonly TranslatorInterface $translator,
         private readonly FreeradiusConnectionService $freeradiusConnectionService,
         private readonly FreeradiusStatistics $statisticsFreeradius,
         private readonly DashboardFormatter $statisticsFreeradiusFormatter,
@@ -79,20 +78,6 @@ class FreeradiusController extends AbstractController
 
         $endDate = $endDateString ? new DateTime($endDateString) : new DateTime();
 
-        $interval = $startDate->diff($endDate);
-        if ($interval->days > 365) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'maximumDateRange1Year',
-                    [],
-                    'controllers'
-                )
-            );
-
-            return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
-        }
-
         // After computing $startDate and $endDate, detect which preset was used
         $activePreset = $request->query->get('preset', '');
         $activePreset = TimeRangePresetStatistics::fromInput($activePreset);
@@ -133,24 +118,6 @@ class FreeradiusController extends AbstractController
         // Current Authenticated Users
         $fetchChartCurrentAuthFreeradius = $this->statisticsFreeradius
             ->getCurrentAuthStats();
-
-        $memory_before = memory_get_usage();
-        $memory_after = memory_get_usage();
-        $memory_diff = $memory_after - $memory_before;
-
-        // Check that the memory usage does not exceed the PHP memory limit of 128M
-        if ($memory_diff > 134217728) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'maximumDateRange1Year',
-                    [],
-                    'controllers'
-                )
-            );
-
-            return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
-        }
 
         // Extract the connection attempts
         $authCounts = [

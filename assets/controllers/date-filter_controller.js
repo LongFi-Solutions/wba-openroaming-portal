@@ -283,20 +283,10 @@ export default class extends Controller {
             const isIn = this.#between(date, this.#rangeStart, eff);
             const isToday = this.#sameDay(date, today);
 
-            const isBlocked =
-                this.#selecting &&
-                this.#rangeStart &&
-                (() => {
-                    const diff = Math.round(Math.abs(date - this.#rangeStart) / 86400000) + 1;
-                    return diff > 365;
-                })();
-
             let cls =
                 'w-full aspect-square flex items-center justify-center text-[11px] transition-colors duration-75 ';
 
-            if (isBlocked) {
-                cls += 'text-gray-300 cursor-not-allowed ';
-            } else if (isStart && isEnd) {
+            if (isStart && isEnd) {
                 cls += 'bg-[#7DB928] text-white font-medium rounded-md cursor-pointer ';
             } else if (isStart) {
                 cls +=
@@ -313,8 +303,8 @@ export default class extends Controller {
             }
 
             html += `<button type="button" class="${cls}"
-             ${isBlocked ? 'disabled' : `data-action="click->date-filter#clickDay mouseenter->date-filter#hoverDay"`}
-             data-year="${year}" data-month="${month}" data-day="${d}">${d}</button>`;
+        data-action="click->date-filter#clickDay mouseenter->date-filter#hoverDay"
+        data-year="${year}" data-month="${month}" data-day="${d}">${d}</button>`;
         }
 
         html += `</div></div>`;
@@ -368,12 +358,6 @@ export default class extends Controller {
                 end = new Date(date);
             }
 
-            const days = Math.round(Math.abs(end - start) / 86400000) + 1;
-            if (days > 365) {
-                this.#showWarning(this.t('maxRangeError')); // ← translated
-                return;
-            }
-
             this.#rangeStart = start;
             this.#rangeEnd = end;
             this.#selecting = false;
@@ -393,15 +377,6 @@ export default class extends Controller {
 
         if (this.#hoverDay && this.#sameDay(newHover, this.#hoverDay)) return;
         this.#hoverDay = newHover;
-
-        if (this.#rangeStart) {
-            const days = Math.round(Math.abs(newHover - this.#rangeStart) / 86400000) + 1;
-            if (days > 365) {
-                this.#showWarning(this.t('maxRangeHint')); // ← translated
-            } else {
-                this.#clearWarning();
-            }
-        }
 
         clearTimeout(this.#hoverTimer);
         this.#hoverTimer = setTimeout(() => {
@@ -549,25 +524,6 @@ export default class extends Controller {
     formatDate(date) {
         const pad = (n) => String(n).padStart(2, '0');
         return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-    }
-
-    #showWarning(msg) {
-        let el = this.pickerDropdownTarget.querySelector('[data-range-warning]');
-        if (!el) {
-            el = document.createElement('div');
-            el.dataset.rangeWarning = '';
-            el.className =
-                'flex items-center gap-2 mt-2 px-3 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs';
-            el.innerHTML = `<svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3.5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4.5zm0 7a.875.875 0 1 1 0-1.75.875.875 0 0 1 0 1.75z"/>
-            </svg><span></span>`;
-            const footer = this.pickerDropdownTarget.querySelector(
-                '.flex.items-center.justify-between.border-t'
-            );
-            this.pickerDropdownTarget.insertBefore(el, footer);
-        }
-        el.querySelector('span').textContent = msg;
-        el.classList.remove('hidden');
     }
 
     #clearWarning() {
