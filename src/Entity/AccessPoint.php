@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Enum\AccessPointType;
 use App\Repository\AccessPointRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -25,14 +24,34 @@ class AccessPoint
     #[ORM\Column(length: 255)]
     private ?string $ssid = null;
 
-    #[ORM\Column(enumType: AccessPointType::class)]
-    private ?AccessPointType $type = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $macAddress = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $longitude = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $vendor = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $latitude = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $model = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $standard = null; // e.g. 802.11ax
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $serialNumber = null;
+
+    /**
+     * GeoJSON Point stored as JSON for spatial queries.
+     * Expected format: { "type": "Point", "coordinates": [longitude, latitude] }
+     * @var array<string, mixed>|null
+     */
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $location = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $altitudeMsl = null; // Altitude above Mean Sea Level (meters)
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $altitudeAgl = null; // Altitude above Ground Level (meters)
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -53,7 +72,6 @@ class AccessPoint
     public function setNetwork(?Network $network): static
     {
         $this->network = $network;
-
         return $this;
     }
 
@@ -65,7 +83,6 @@ class AccessPoint
     public function setName(?string $name): static
     {
         $this->name = $name;
-
         return $this;
     }
 
@@ -77,43 +94,96 @@ class AccessPoint
     public function setSsid(string $ssid): static
     {
         $this->ssid = $ssid;
-
         return $this;
     }
 
-    public function getType(): ?AccessPointType
+    public function getMacAddress(): ?string
     {
-        return $this->type;
+        return $this->macAddress;
     }
 
-    public function setType(AccessPointType $type): static
+    public function setMacAddress(?string $macAddress): static
     {
-        $this->type = $type;
-
+        $this->macAddress = $macAddress;
         return $this;
     }
 
-    public function getLongitude(): ?string
+    public function getVendor(): ?string
     {
-        return $this->longitude;
+        return $this->vendor;
     }
 
-    public function setLongitude(string $longitude): static
+    public function setVendor(?string $vendor): static
     {
-        $this->longitude = $longitude;
-
+        $this->vendor = $vendor;
         return $this;
     }
 
-    public function getLatitude(): ?string
+    public function getModel(): ?string
     {
-        return $this->latitude;
+        return $this->model;
     }
 
-    public function setLatitude(string $latitude): static
+    public function setModel(?string $model): static
     {
-        $this->latitude = $latitude;
+        $this->model = $model;
+        return $this;
+    }
 
+    public function getStandard(): ?string
+    {
+        return $this->standard;
+    }
+
+    public function setStandard(?string $standard): static
+    {
+        $this->standard = $standard;
+        return $this;
+    }
+
+    public function getSerialNumber(): ?string
+    {
+        return $this->serialNumber;
+    }
+
+    public function setSerialNumber(?string $serialNumber): static
+    {
+        $this->serialNumber = $serialNumber;
+        return $this;
+    }
+
+    /** @return array<string, mixed>|null */
+    public function getLocation(): ?array
+    {
+        return $this->location;
+    }
+
+    /** @param array<string, mixed>|null $location */
+    public function setLocation(?array $location): static
+    {
+        $this->location = $location;
+        return $this;
+    }
+
+    public function getAltitudeMsl(): ?float
+    {
+        return $this->altitudeMsl;
+    }
+
+    public function setAltitudeMsl(?float $altitudeMsl): static
+    {
+        $this->altitudeMsl = $altitudeMsl;
+        return $this;
+    }
+
+    public function getAltitudeAgl(): ?float
+    {
+        return $this->altitudeAgl;
+    }
+
+    public function setAltitudeAgl(?float $altitudeAgl): static
+    {
+        $this->altitudeAgl = $altitudeAgl;
         return $this;
     }
 
@@ -125,7 +195,6 @@ class AccessPoint
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 
@@ -137,7 +206,6 @@ class AccessPoint
     public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
-
         return $this;
     }
 }
