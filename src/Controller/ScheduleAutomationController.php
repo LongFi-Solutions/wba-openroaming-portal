@@ -70,6 +70,24 @@ class ScheduleAutomationController extends AbstractController
                 $this->saveSetting($settingName, $cronExpression, $scheduleDTO->use_advanced_mode);
             }
 
+            $newUserDeleteTime = $scheduleDTO->delete_unconfirmed_users_cron->userDeleteTime;
+
+            $userDeleteTime = $this->settingRepository->findOneBy(['name' => SettingName::USER_DELETE_TIME->value]);
+
+            if ($userDeleteTime) {
+                $userDeleteTime->setValue($newUserDeleteTime);
+                $this->entityManager->persist($userDeleteTime);
+            }
+
+            $newNotificationTime = $scheduleDTO->users_when_profile_expires_cron->timeIntervalNotification;
+
+            $notificationTime = $this->settingRepository->findOneBy(['name' => SettingName::TIME_INTERVAL_NOTIFICATION->value]);
+
+            if ($notificationTime) {
+                $notificationTime->setValue($newNotificationTime);
+                $this->entityManager->persist($notificationTime);
+            }
+
             // Track enablement changes
             $enablementSettings = [
                 SettingName::DELETE_UNCONFIRMED_USERS_CRON_ENABLED->value => $scheduleDTO->delete_unconfirmed_users_enabled,

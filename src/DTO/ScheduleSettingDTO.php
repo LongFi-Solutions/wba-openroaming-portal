@@ -34,12 +34,10 @@ class ScheduleSettingDTO
 
     public ?DateTimeImmutable $time = null;
 
-    #[Assert\NotBlank(message: 'timerValueRequired')]
     #[Length(max: 3, maxMessage: 'fieldCannotBeLongerThan')]
     #[GreaterThanOrEqual(value: 0, message: 'timerShouldNotBeLessThan')]
     public ?int $userDeleteTime = null;
 
-    #[Assert\NotBlank(message: 'pleaseSetTimer')]
     #[Length(max: 3, maxMessage: 'fieldCannotBeLongerThan')]
     #[GreaterThanOrEqual(value: 1, message: 'timerShouldNotBeLessThanProfileNotification')]
     public ?int $timeIntervalNotification = null;

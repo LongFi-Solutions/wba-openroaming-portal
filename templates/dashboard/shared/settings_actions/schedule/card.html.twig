@@ -84,45 +84,38 @@
     </div>
     {% if field_name === 'delete_unconfirmed_users_enabled' %}
         {# USER_DELETE_TIME #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'deleteUnverifiedAccounts'|trans({}, '_status') }}</h1>
-                </div>
-                <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
-                </label>
+        <div class="py-4">
+            <div class="form-group" {{ stimulus_controller('card') }}
+             id="TIME_INTERVAL_NOTIFICATION">
+            <div class="text-sm font-semibold text-gray-700 py-1">
+                {{ 'deleteUnverifiedAccounts'|trans({}, '_status') }}
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.USER_DELETE_TIME.description}) }}
-
-            <div class="flex items-center space-x-2 mt-5">
+            <div class="text-xs text-gray-500 mb-1 py-2">
+                {{ 'USER_DELETE_TIME'|trans({}, 'setting_descriptions') }}
+            </div>
+            <div class="form-group">
                 {{ form_widget(field.userDeleteTime, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
             </div>
             <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                 {{ form_errors(field.userDeleteTime) }}
             </div>
         </div>
+        </div>
     {% endif %}
 
     {% if field_name === 'users_when_profile_expires_enabled' %}
         {# TIME_INTERVAL_NOTIFICATION #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}
+        <div class="form-group" {{ stimulus_controller('card') }}
              id="TIME_INTERVAL_NOTIFICATION">
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'profileExpirationNotification'|trans({}, '_status') }}</h1>
-                </div>
-                <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
-                </label>
+            <div class="text-sm font-semibold text-gray-700 py-1">
+                {{ 'profileExpirationNotification'|trans({}, '_status') }}
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TIME_INTERVAL_NOTIFICATION.description}) }}
-
-            <div class="flex items-center space-x-2 mt-5">
+            <div class="text-xs text-gray-500 mb-1 py-2">
+                {{ 'TIME_INTERVAL_NOTIFICATION'|trans({}, 'setting_descriptions') }}
+            </div>
+            <div class="form-group">
                 {{ form_widget(field.timeIntervalNotification, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
             </div>
             <div class="mt-2 -mb-2 text-center text-red-500 text-base">
