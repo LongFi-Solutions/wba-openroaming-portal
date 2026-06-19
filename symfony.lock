@@ -485,7 +485,7 @@
         ]
     },
     "symfony/ux-leaflet-map": {
-        "version": "3.1",
+        "version": "3.2",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
@@ -506,7 +506,7 @@
         ]
     },
     "symfony/ux-map": {
-        "version": "3.1",
+        "version": "3.2",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",

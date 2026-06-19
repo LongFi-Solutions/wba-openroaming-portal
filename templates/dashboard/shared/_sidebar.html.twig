@@ -47,6 +47,9 @@
             'admin_dashboard_statistics',
             'admin_dashboard_statistics_freeradius',
         ] %}
+        {% set mapRoutes = [
+            'admin_dashboard_map',
+        ] %}
 
         {# User Management - Submenu #}
         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USER_MANAGEMENT')) %}
