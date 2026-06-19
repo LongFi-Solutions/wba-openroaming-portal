@@ -86,18 +86,21 @@ class ScheduleSettingDTO
             $this->months_of_the_year_frequency = $parts["month"]['frequency'] ?? 1;
 
             if ($setting === SettingName::DELETE_UNCONFIRMED_USERS_CRON->value) {
-                $deleteUnconfirmedUsers = $settingRepository->findOneBy(['name' => SettingName::USER_DELETE_TIME->value]);
+                $deleteUnconfirmedUsers = $settingRepository->findOneBy([
+                    'name' => SettingName::USER_DELETE_TIME->value
+                ]);
                 if ($deleteUnconfirmedUsers) {
                     $this->userDeleteTime = $deleteUnconfirmedUsers->getValue();
                 }
             }
             if ($setting === SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value) {
-                $deleteUnconfirmedUsers = $settingRepository->findOneBy(['name' => SettingName::TIME_INTERVAL_NOTIFICATION->value]);
+                $deleteUnconfirmedUsers = $settingRepository->findOneBy([
+                    'name' => SettingName::TIME_INTERVAL_NOTIFICATION->value
+                ]);
                 if ($deleteUnconfirmedUsers) {
                     $this->timeIntervalNotification = (int)$deleteUnconfirmedUsers->getValue();
                 }
             }
-
         }
     }
 

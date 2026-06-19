@@ -159,16 +159,16 @@ class ScheduleSettingType extends AbstractType
                     'class' => $useAdvancedMode === true ? 'hidden' : '',
                 ],
             ]);
-            if ($settingName === SettingName::DELETE_UNCONFIRMED_USERS_CRON->value) {
-                $builder->add('userDeleteTime', IntegerType::class, [
-                    'required' => true,
-                ]);
-            }
-            if ($settingName === SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value) {
-                $builder->add('timeIntervalNotification', IntegerType::class, [
-                    'required' => true,
-                ]);
-            }
+        if ($settingName === SettingName::DELETE_UNCONFIRMED_USERS_CRON->value) {
+            $builder->add('userDeleteTime', IntegerType::class, [
+                'required' => true,
+            ]);
+        }
+        if ($settingName === SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value) {
+            $builder->add('timeIntervalNotification', IntegerType::class, [
+                'required' => true,
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
