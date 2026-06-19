@@ -90,7 +90,7 @@ class ScheduleSettingDTO
                     'name' => SettingName::USER_DELETE_TIME->value
                 ]);
                 if ($deleteUnconfirmedUsers) {
-                    $this->userDeleteTime = $deleteUnconfirmedUsers->getValue();
+                    $this->userDeleteTime = (int)$deleteUnconfirmedUsers->getValue();
                 }
             }
             if ($setting === SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value) {

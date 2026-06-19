@@ -75,7 +75,7 @@ class ScheduleAutomationController extends AbstractController
             $userDeleteTime = $this->settingRepository->findOneBy(['name' => SettingName::USER_DELETE_TIME->value]);
 
             if ($userDeleteTime) {
-                $userDeleteTime->setValue($newUserDeleteTime);
+                $userDeleteTime->setValue((string)$newUserDeleteTime);
                 $this->entityManager->persist($userDeleteTime);
             }
 
@@ -86,7 +86,7 @@ class ScheduleAutomationController extends AbstractController
             ]);
 
             if ($notificationTime) {
-                $notificationTime->setValue($newNotificationTime);
+                $notificationTime->setValue((string)$newNotificationTime);
                 $this->entityManager->persist($notificationTime);
             }
 
