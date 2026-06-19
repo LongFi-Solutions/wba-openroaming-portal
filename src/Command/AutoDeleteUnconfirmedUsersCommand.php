@@ -38,45 +38,37 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
      */
     public function deleteUnconfirmedUsers(): array
     {
-        $users = $this->userRepository->findAll();
         $settingTime = $this->settingRepository->findBy(['name' => SettingName::USER_DELETE_TIME->value]);
 
         if (empty($settingTime)) {
             return [];
         }
 
-        $timeString = $settingTime[0]->getValue();
-        $time = (int)$timeString;
+        $time = (int)$settingTime[0]->getValue();
+
+        $cutoff = new DateTime("-{$time} hours");
+        $users = $this->userRepository->findUnverifiedUsersCreatedBefore($cutoff);
 
         $deletedUserUuids = [];
 
         foreach ($users as $user) {
-            $limitTime = clone $user->getCreatedAt(); // clone to avoid modifying original
-            /** @var \DateTime $limitTime */
-            $limitTime->modify("+{$time} hours");
-
-            $realTime = new DateTime();
-            if ($limitTime < $realTime && !($user->isVerified() && !$user->getDeletedAt() && !$user->isDisabled())) {
-                $uuid = $user->getUuid();
-                if (!(u($uuid)->containsAny('-DEMO-'))) {
-                    // Remove related external auths
-                    $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
-                    foreach ($userExternalAuths as $userExternalAuth) {
-                        $this->entityManager->remove($userExternalAuth);
-                    }
-
-                    // Remove related radius profiles
-                    $userRadiusProfiles = $this->userRadiusProfileRepository->findBy(['user' => $user]);
-                    foreach ($userRadiusProfiles as $userRadiusProfile) {
-                        $this->entityManager->remove($userRadiusProfile);
-                    }
-
-                    // Remove the user itself
-                    $this->entityManager->remove($user);
-
-                    // Save UUID of deleted user
-                    $deletedUserUuids[] = $uuid;
+            $uuid = $user->getUuid();
+            if (!(u($uuid)->containsAny('-DEMO-'))) {
+                $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
+                foreach ($userExternalAuths as $userExternalAuth) {
+                    $this->entityManager->remove($userExternalAuth);
                 }
+
+                $userRadiusProfiles = $this->userRadiusProfileRepository->findBy(['user' => $user]);
+                foreach ($userRadiusProfiles as $userRadiusProfile) {
+                    $this->entityManager->remove($userRadiusProfile);
+                }
+
+                // Remove the user itself
+                $this->entityManager->remove($user);
+
+                // Save UUID of deleted user
+                $deletedUserUuids[] = $uuid;
             }
         }
 

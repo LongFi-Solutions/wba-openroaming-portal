@@ -1,1 +1,2 @@
 useAdvancedMode: 'Use Advanced Mode (Manual CRON Expression)'
+enableCron: 'Enable this scheduled job'
