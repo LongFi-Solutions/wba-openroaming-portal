@@ -1,14 +1,30 @@
 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
-    {# Header with title and info icon #}
+    {# Header with title and info icon and enable toggle #}
     <div class="flex justify-between items-center">
         <h1 class="text-base md:text-lg font-medium break-words">
             {{ label }}
         </h1>
-        <img class="w-5 h-5 cursor-pointer"
-                {{ stimulus_target('card', 'button') }}
-                {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-             src="{{ asset('resources/logos/info_icon.svg') }}"
-             alt="info_icon"/>
+
+        <div class="flex items-center gap-3">
+            {# Enable toggle #}
+            {% if enabled_field is defined %}
+                <label class="inline-flex items-center cursor-pointer">
+                    {{ form_widget(enabled_field, {attr: {class: 'sr-only peer'}}) }}
+                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4
+                    peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full
+                    rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white
+                    after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white
+                    after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5
+                    after:transition-all peer-checked:bg-[#68D391]"></div>
+                </label>
+            {% endif %}
+
+            <img class="w-5 h-5 cursor-pointer"
+                    {{ stimulus_target('card', 'button') }}
+                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                 src="{{ asset('resources/logos/info_icon.svg') }}"
+                 alt="info_icon"/>
+        </div>
     </div>
 
     {# Description #}
@@ -66,4 +82,46 @@
             description: 'executionTimeDescription'|trans({}, 'schedule'),
         }) }}
     </div>
+    {% if field_name === 'delete_unconfirmed_users_enabled' %}
+        {# USER_DELETE_TIME #}
+        <div class="py-4">
+            <div class="form-group" {{ stimulus_controller('card') }}
+             id="TIME_INTERVAL_NOTIFICATION">
+            <div class="text-sm font-semibold text-gray-700 py-1">
+                {{ 'deleteUnverifiedAccounts'|trans({}, '_status') }}
+            </div>
+
+            <div class="text-xs text-gray-500 mb-1 py-2">
+                {{ 'USER_DELETE_TIME'|trans({}, 'setting_descriptions') }}
+            </div>
+            <div class="form-group">
+                {{ form_widget(field.userDeleteTime, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+            </div>
+            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                {{ form_errors(field.userDeleteTime) }}
+            </div>
+        </div>
+        </div>
+    {% endif %}
+
+    {% if field_name === 'users_when_profile_expires_enabled' %}
+        {# TIME_INTERVAL_NOTIFICATION #}
+        <div class="form-group" {{ stimulus_controller('card') }}
+             id="TIME_INTERVAL_NOTIFICATION">
+            <div class="text-sm font-semibold text-gray-700 py-1">
+                {{ 'profileExpirationNotification'|trans({}, '_status') }}
+            </div>
+
+            <div class="text-xs text-gray-500 mb-1 py-2">
+                {{ 'TIME_INTERVAL_NOTIFICATION'|trans({}, 'setting_descriptions') }}
+            </div>
+            <div class="form-group">
+                {{ form_widget(field.timeIntervalNotification, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+            </div>
+            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                {{ form_errors(field.timeIntervalNotification) }}
+            </div>
+        </div>
+    {% endif %}
+
 </div>

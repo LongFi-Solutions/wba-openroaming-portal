@@ -1,1 +1,2 @@
-useAdvancedMode: 'Utilize Modo Avançado (Expressão CRON Manual)'
+useAdvancedMode: 'Usar Modo Avançado (Expressão CRON Manual)'
+enableCron: 'Ativar esta tarefa agendada'

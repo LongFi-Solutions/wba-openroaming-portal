@@ -87,3 +87,7 @@ CLOUDFLARE_TOKEN: 'Token para renovação automática do certificado Cloudflare.
 RETURN_APPS_ENABLED: 'Ativa ou desativa o Return to Apps'
 RETURN_APPS_PACKAGE_NAME_ANDROID: 'Nome do pacote ou da aplicação associado a dispositivos Android'
 RETURN_APPS_ID_IOS: 'Nome do pacote ou da aplicação associado a dispositivos iOS'
+DELETE_UNCONFIRMED_USERS_CRON_ENABLED: 'Ativa ou desativa a tarefa agendada de eliminação automática de utilizadores não confirmados.'
+USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED: 'Ativa ou desativa a tarefa agendada de notificação automática de utilizadores cujo perfil está prestes a expirar.'
+LDAP_SYNC_CRON_ENABLED: 'Ativa ou desativa a tarefa agendada de sincronização automática com o LDAP.'
+DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED: 'Ativa ou desativa a tarefa agendada de importação e sincronização automática de domínios bloqueados.'
