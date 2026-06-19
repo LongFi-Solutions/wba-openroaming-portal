@@ -392,4 +392,18 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /**
+     * @return User[]
+     */
+    public function findUnverifiedUsersCreatedBefore(DateTime $before): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.isVerified = false')
+            ->andWhere('u.deletedAt IS NULL')
+            ->andWhere('u.createdAt < :before')
+            ->setParameter('before', $before)
+            ->getQuery()
+            ->getResult();
+    }
 }
