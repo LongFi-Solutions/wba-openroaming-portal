@@ -49,6 +49,7 @@ class AccessPointRepository extends ServiceEntityRepository
 
     /**
      * @throws \JsonException
+     * @return AccessPoint[]
      */
     public function findWithinRadius(float $lat, float $lng, float $radiusKm): array
     {

@@ -52,8 +52,10 @@ class ScheduleAutomationController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
+        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
             $changeset = [];
+
+            // Track cron expression changes
             foreach (
                 $scheduleDTO->toCronExpressions(
                     $this->cronExpressionHelperService
@@ -66,6 +68,53 @@ class ScheduleAutomationController extends AbstractController
                     ];
                 }
                 $this->saveSetting($settingName, $cronExpression, $scheduleDTO->use_advanced_mode);
+            }
+
+            $newUserDeleteTime = $scheduleDTO->delete_unconfirmed_users_cron->userDeleteTime;
+
+            $userDeleteTime = $this->settingRepository->findOneBy(['name' => SettingName::USER_DELETE_TIME->value]);
+
+            if ($userDeleteTime) {
+                $userDeleteTime->setValue((string)$newUserDeleteTime);
+                $this->entityManager->persist($userDeleteTime);
+            }
+
+            $newNotificationTime = $scheduleDTO->users_when_profile_expires_cron->timeIntervalNotification;
+
+            $notificationTime = $this->settingRepository->findOneBy([
+                'name' => SettingName::TIME_INTERVAL_NOTIFICATION->value
+            ]);
+
+            if ($notificationTime) {
+                $notificationTime->setValue((string)$newNotificationTime);
+                $this->entityManager->persist($notificationTime);
+            }
+
+            // Track enablement changes
+            $enablementSettings = [
+                SettingName::DELETE_UNCONFIRMED_USERS_CRON_ENABLED->value =>
+                    $scheduleDTO->delete_unconfirmed_users_enabled,
+                SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED->value =>
+                    $scheduleDTO->users_when_profile_expires_enabled,
+                SettingName::LDAP_SYNC_CRON_ENABLED->value =>
+                    $scheduleDTO->ldap_sync_enabled,
+                SettingName::DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED->value =>
+                    $scheduleDTO->domain_blacklist_import_enabled,
+            ];
+
+            foreach ($enablementSettings as $settingName => $newEnabledValue) {
+                $newValue = $newEnabledValue ? OperationMode::ON->value : OperationMode::OFF->value;
+                $oldValue = $this->settingRepository->findOneBy(['name' => $settingName])?->getValue()
+                    ?? OperationMode::ON->value; // fallback matches isEnabled() default
+
+                if ($oldValue !== $newValue) {
+                    $changeset[$settingName] = [
+                        'oldValue' => $oldValue,
+                        'newValue' => $newValue,
+                    ];
+                }
+
+                $this->saveSetting($settingName, $newValue, $scheduleDTO->use_advanced_mode);
             }
 
             // Analytics

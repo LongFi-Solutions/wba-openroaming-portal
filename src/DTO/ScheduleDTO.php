@@ -50,6 +50,10 @@ class ScheduleDTO
     )]
     public ?ScheduleSettingDTO $domain_blacklist_import_cron = null;
 
+    public ?bool $delete_unconfirmed_users_enabled = true;
+    public ?bool $users_when_profile_expires_enabled = true;
+    public ?bool $ldap_sync_enabled = true;
+    public ?bool $domain_blacklist_import_enabled = true;
     public function __construct(
         ?SettingRepository $settingRepository = null,
         ?CronExpressionHelperService $cronExpressionHelperService = null
@@ -84,6 +88,29 @@ class ScheduleDTO
             $settingRepository,
             $cronExpressionHelperService
         );
+
+        if (!is_null($settingRepository)) {
+            $cronAdvanceStatus = $settingRepository->findOneBy(["name" => SettingName::CRON_ADVANCED_STATUS->value]);
+            if (!is_null($cronAdvanceStatus)) {
+                $this->use_advanced_mode = $cronAdvanceStatus->getValue() === OperationMode::ON->value;
+            }
+
+            $this->delete_unconfirmed_users_enabled = $settingRepository
+                    ->findOneBy(['name' => SettingName::DELETE_UNCONFIRMED_USERS_CRON_ENABLED->value])
+                    ?->getValue() !== OperationMode::OFF->value;
+
+            $this->users_when_profile_expires_enabled = $settingRepository
+                    ->findOneBy(['name' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED->value])
+                    ?->getValue() !== OperationMode::OFF->value;
+
+            $this->ldap_sync_enabled = $settingRepository
+                    ->findOneBy(['name' => SettingName::LDAP_SYNC_CRON_ENABLED->value])
+                    ?->getValue() !== OperationMode::OFF->value;
+
+            $this->domain_blacklist_import_enabled = $settingRepository
+                    ->findOneBy(['name' => SettingName::DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED->value])
+                    ?->getValue() !== OperationMode::OFF->value;
+        }
     }
 
     /**

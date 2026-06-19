@@ -6,7 +6,6 @@ use App\Entity\User;
 use App\Enum\AdminPermissionsType;
 use App\Enum\AdminRoleType;
 use Override;
-use phpDocumentor\Reflection\Types\This;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -66,14 +65,12 @@ final class UserAuthenticationVoter extends Voter
     // Connectivity Statistics page
     public const string CONNECTIVITY_STATISTICS_READ = 'CONNECTIVITY_STATISTICS_READ';
 
-
     public const string PORTAL_SETTINGS = 'PORTAL_SETTINGS';
     public const string PORTAL_STATISTICS = 'PORTAL_STATISTICS';
 
     public const string USER_AUTHENTICATION = 'USER_AUTHENTICATION';
     public const string USER_MANAGEMENT = 'USER_MANAGEMENT';
     public const string ACTIVITY_LOGS_READ = 'ACTIVITY_LOGS_READ';
-    public const string ACTIVITY_LOGS_WRITE = 'ACTIVITY_LOGS_WRITE';
     public const string MAP_READ = 'MAP_READ';
     public const string MAP_WRITE = 'MAP_WRITE';
 
@@ -139,9 +136,6 @@ final class UserAuthenticationVoter extends Voter
 
                 self::ACTIVITY_LOGS_READ,
                 self::ACTIVITY_LOGS_WRITE,
-
-                self::MAP_READ,
-                self::MAP_WRITE,
             ]
         );
     }
@@ -268,19 +262,14 @@ final class UserAuthenticationVoter extends Voter
             self::CONNECTIVITY_STATISTICS_READ =>
             $this->hasPermission($user, AdminPermissionsType::CONNECTIVITY_STATISTICS_READ),
 
-
             self::PORTAL_SETTINGS => $this->hasPortalSettings($user),
             self::USER_AUTHENTICATION => $this->hasUserAuthentication($user),
             self::PORTAL_STATISTICS => $this->hasPortalStatistics($user),
             self::USER_MANAGEMENT => $this->hasUserManagement($user),
 
-            self::ACTIVITY_LOGS_WRITE =>
-            $this->hasPermission($user, AdminPermissionsType::ACTIVITY_LOGS_WRITE),
             self::ACTIVITY_LOGS_READ =>
                 $this->hasPermission($user, AdminPermissionsType::ACTIVITY_LOGS_READ)
                 || $this->hasPermission($user, AdminPermissionsType::ACTIVITY_LOGS_WRITE),
-            self::MAP_WRITE => $this->hasPermission($user, AdminPermissionsType::MAP_WRITE),
-            self::MAP_READ => $this->hasPermission($user, AdminPermissionsType::MAP_READ) || $this->hasPermission($user, AdminPermissionsType::MAP_WRITE),
 
             default => false,
         };

@@ -524,6 +524,12 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 81. `SMS_TIME_INTERVAL_BETWEEN_REQUESTS`: Minimum cooldown (in seconds) between consecutive SMS requests
 82. `SMS_ATTEMPTS_NUMBER`: Maximum number of allowed requests within the defined time window
 83. `BREAKING_GLASS_ADMIN_EMAIL`: Defines the email for the one time usage admin account.
+84. `DELETE_UNCONFIRMED_USERS_CRON_ENABLED`: Enables or disables the automatic deletion of unconfirmed users cron job.
+85. `USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED`: Enables or disables the automatic notification cron job for users whose
+    profile is about to expire.
+86. `LDAP_SYNC_CRON_ENABLED`: Enables or disables the automatic LDAP synchronization cron job.
+87. `DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED`: Enables or disables the automatic domain blacklist import and
+    synchronization cron job.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

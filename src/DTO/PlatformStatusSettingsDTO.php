@@ -33,16 +33,6 @@ class PlatformStatusSettingsDTO
     #[Assert\NotBlank(message: 'timerValueRequired')]
     #[Length(max: 3, maxMessage: 'fieldCannotBeLongerThan')]
     #[GreaterThanOrEqual(value: 0, message: 'timerShouldNotBeLessThan')]
-    public ?int $userDeleteTime = null;
-
-    #[Assert\NotBlank(message: 'pleaseSetTimer')]
-    #[Length(max: 3, maxMessage: 'fieldCannotBeLongerThan')]
-    #[GreaterThanOrEqual(value: 1, message: 'timerShouldNotBeLessThanProfileNotification')]
-    public ?int $timeIntervalNotification = null;
-
-    #[Assert\NotBlank(message: 'timerValueRequired')]
-    #[Length(max: 3, maxMessage: 'fieldCannotBeLongerThan')]
-    #[GreaterThanOrEqual(value: 0, message: 'timerShouldNotBeLessThan')]
     public ?int $timeIntervalBetweenRequests = null;
 
     #[Assert\NotBlank(message: 'timerValueRequired')]
@@ -66,12 +56,6 @@ class PlatformStatusSettingsDTO
         $this->platformMode = $data[SettingName::PLATFORM_MODE->value]['value'] ?? null;
         $this->turnstileChecker = $data[SettingName::TURNSTILE_CHECKER->value]['value'] ?? null;
         $this->apiStatus = $data[SettingName::API_STATUS->value]['value'] ?? null;
-        $this->userDeleteTime = isset($data[SettingName::USER_DELETE_TIME->value]['value'])
-            ? (int)$data[SettingName::USER_DELETE_TIME->value]['value']
-            : null;
-        $this->timeIntervalNotification = isset($data[SettingName::TIME_INTERVAL_NOTIFICATION->value]['value'])
-            ? (int)$data[SettingName::TIME_INTERVAL_NOTIFICATION->value]['value']
-            : null;
         $this->timeIntervalBetweenRequests =
             isset($data[SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value]['value'])
             ? (int)$data[SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value]['value']
@@ -97,9 +81,6 @@ class PlatformStatusSettingsDTO
             SettingName::PLATFORM_MODE->value => ['value' => $this->platformMode],
             SettingName::TURNSTILE_CHECKER->value => ['value' => $this->turnstileChecker],
             SettingName::API_STATUS->value => ['value' => $this->apiStatus],
-            SettingName::USER_DELETE_TIME->value => ['value' =>
-                $this->userDeleteTime],
-            SettingName::TIME_INTERVAL_NOTIFICATION->value => ['value' => $this->timeIntervalNotification],
             SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value => ['value' => $this->timeIntervalBetweenRequests],
             SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value =>
                 ['value' => $this->timeIntervalToResetAttempts],

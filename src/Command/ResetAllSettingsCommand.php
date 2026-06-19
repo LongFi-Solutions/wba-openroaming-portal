@@ -193,6 +193,10 @@ class ResetAllSettingsCommand extends Command
             ['name' => SettingName::SMS_TIME_INTERVAL_BETWEEN_REQUESTS->value, 'value' => '30'],
             ['name' => SettingName::SMS_ATTEMPTS_NUMBER->value, 'value' => '5'],
             ['name' => SettingName::BREAKING_GLASS_ADMIN_EMAIL->value, 'value' => ''],
+            ['name' => SettingName::DELETE_UNCONFIRMED_USERS_CRON_ENABLED->value, 'value' => 'ON'],
+            ['name' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED->value, 'value' => 'ON'],
+            ['name' => SettingName::LDAP_SYNC_CRON_ENABLED->value, 'value' => 'ON'],
+            ['name' => SettingName::DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED->value, 'value' => 'ON'],
         ];
 
         // phpcs:disable Generic.Files.LineLength.TooLong
