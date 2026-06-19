@@ -201,3 +201,6 @@ tooManyAttempts: "Demasiadas tentativas. Tente novamente em %seconds% segundos."
 redirectingToApp: 'Redirecionado para a aplicação.'
 certificateProcessBlocked: "Ocorreu um erro de configuração. Por favor contacte a nossa equipa de suporte."
 emailAliasesNotAllowed: 'Não é permitido o uso de aliases de email para o registo.'
+canSkipThisPage: 'A configuração do Turnstile é opcional. Para ignorar este passo, submeta o formulário sem preencher nenhum dos campos.'
+chmodDbScript: 'Concede as permissões de execução ao script de atualização da base de dados.'
+chmodSettingsScript: 'Concede as permissões de execução ao script de atualização das configurações.'

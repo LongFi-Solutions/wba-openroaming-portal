@@ -56,7 +56,7 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
             $limitTime->modify("+{$time} hours");
 
             $realTime = new DateTime();
-            if ($limitTime < $realTime && !($user->isVerified() && !$user->isDisabled()) & !$user->getDeletedAt()) {
+            if ($limitTime < $realTime && !($user->isVerified() && !$user->getDeletedAt() && !$user->isDisabled())) {
                 $uuid = $user->getUuid();
                 if (!(u($uuid)->containsAny('-DEMO-'))) {
                     // Remove related external auths
