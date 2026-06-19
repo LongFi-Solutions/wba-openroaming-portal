@@ -401,6 +401,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $this->createQueryBuilder('u')
             ->andWhere('u.isVerified = false')
             ->andWhere('u.deletedAt IS NULL')
+            ->andWhere('u.isDisabled = false')
             ->andWhere('u.createdAt < :before')
             ->setParameter('before', $before)
             ->getQuery()
