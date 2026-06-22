@@ -9,27 +9,11 @@
                 {% set tabs = {
                     all: {
                         label: 'all',
-                        count: this.userCounts.all,
+                        count: this.networkCounts.all,
                         activeClass: 'border-b-2 border-y-veryDarkButton',
                         hoverClass: 'hover:border-b-2 hover:border-y-veryDarkButton',
                         badgeActive: 'bg-veryDarkButton text-white',
                         badgeInactive: 'bg-gray-100 text-gray-600 group-hover:bg-veryDarkButton group-hover:text-white',
-                    },
-                    Verified: {
-                        label: 'verified',
-                        count: this.userCounts.verified,
-                        activeClass: 'text-lightGreen border-b-2 border-y-lightGreen',
-                        hoverClass: 'hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50',
-                        badgeActive: 'bg-lightGreen text-white',
-                        badgeInactive: 'bg-green-50 text-lightGreen group-hover:bg-lightGreen group-hover:text-white',
-                    },
-                    Banned: {
-                        label: 'banned',
-                        count: this.userCounts.banned,
-                        activeClass: 'text-red-500 border-b-2 border-red-500',
-                        hoverClass: 'hover:text-red-500 hover:border-b-2 hover:border-red-500/50',
-                        badgeActive: 'bg-red-500 text-white',
-                        badgeInactive: 'bg-red-50 text-red-500 group-hover:bg-red-500 group-hover:text-white',
                     },
                 } %}
 
@@ -68,13 +52,13 @@
             </div>
 
             {# Right Button #}
-            {% if this.exportUsers == constant('App\\Enum\\OperationMode::ON').value %}
-                <a href="{{ path('admin_dashboard_users_export') }}"
-                   class="btn-primary px-4 min-w-[150px]"
-                   data-download="true">
-                    {{ 'exportEverything'|trans({}, 'dashboard') }}
-                </a>
-            {% endif %}
+{#            {% if this.exportUsers == constant('App\\Enum\\OperationMode::ON').value %}#}
+{#                <a href="{{ path('admin_dashboard_users_export') }}"#}
+{#                   class="btn-primary px-4 min-w-[150px]"#}
+{#                   data-download="true">#}
+{#                    {{ 'exportEverything'|trans({}, 'dashboard') }}#}
+{#                </a>#}
+{#            {% endif %}#}
 
         </div>
     </div>
@@ -113,9 +97,9 @@
             </tr>
             </thead>
             <tbody>
-            {% for user in this.users %}
-                {{ include('dashboard/shared/_user.html.twig', {
-                    user: user,
+            {% for network in this.networks %}
+                {{ include('dashboard/shared/_network.html.twig', {
+                    network: network,
                     delete_users: this.deleteUsers,
                     formRevokeProfiles: this.formRevokeProfiles,
                 }) }}
