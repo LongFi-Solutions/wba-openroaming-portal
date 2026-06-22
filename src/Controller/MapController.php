@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Enum\AdminPermissionsType;
+use App\Repository\NetworkRepository;
 use App\Service\GetSettings;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,6 +20,7 @@ class MapController extends AbstractController
 
     public function __construct(
         private readonly GetSettings $getSettings,
+        private readonly NetworkRepository $networkRepository,
     ){}
     #[Route('/map', name: 'app_map')]
     public function index(Request $request): Response
@@ -61,14 +63,15 @@ class MapController extends AbstractController
 
         //$mapWithPoints = $this->accessPointService->addAccessPoints($map);
 
-        //$accessPoints = $this->accessPointRepository->findAll();
+        $networks = $this->networkRepository->findAll();
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'map' => $map,
             'data' => $data,
-            //'accessPoints' => $accessPoints,
-            //'allAccessPoints' => count($accessPoints),
-            //'allActiveAccessPoints' => count($accessPoints),
+            'networks' => $networks,
+            'allNetworks' => count($networks),
+            'allActiveNetworks' => count($networks),
+            'searchTerm' => null
 
         ]);
     }

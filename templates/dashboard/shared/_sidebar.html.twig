@@ -215,6 +215,33 @@
             </div>
         {% endif %}
 
+        {# Map - Submenu #}
+        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP')) %}
+            <div class="relative" {{ stimulus_controller('nav-submenu') }}>
+                <button type="button" class="w-full duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
+                {% if app.request.attributes.get('_route') in mapRoutes %}selected{% endif %}" {{ stimulus_action('nav-submenu', 'toggle') }}>
+                    <div class="flex items-center space-x-2">
+                        <twig:ux:icon name="wba:database" class="w-5 mr-2 fill-none stroke-current"/>
+                        {{ 'map'|trans({}, '_header_admin') }}
+                    </div>
+
+                    <twig:ux:icon name="wba:right"
+                                  class="w-4 fill-none stroke-current transition ease-in {{ (app.request.attributes.get('_route') in portalStatisticsRoutes) ? 'rotate-90' : '' }}"
+                                  data-nav-submenu-target="icon"/>
+                </button>
+                <div {{ stimulus_target('nav-submenu', 'container') }}
+                        class="py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in portalStatisticsRoutes) ? '' : 'hidden' }}">
+                    <ul class="mx-2">
+                        {# SideBar Button - Map - Button #}
+                        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP_READ')) %}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'map'|trans({}, '_header_admin'), routes: ['admin_dashboard_map'], icon: 'wba:piechart'}) }}
+                        {% endif %}
+
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+
         {# Options - Submenu (only shows on lower resolutions) #}
         <div class="absolute inset-x-0 bottom-0 block xl:hidden px-4" {{ stimulus_controller('nav-submenu') }}>
             <button type="button"
