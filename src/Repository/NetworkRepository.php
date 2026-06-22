@@ -96,11 +96,7 @@ class NetworkRepository extends ServiceEntityRepository
         if ($query !== null) {
             $qb->andWhere(
                 $qb->expr()->orX(
-                    $qb->expr()->like('n.email', ':query'),
-                    $qb->expr()->like('n.uuid', ':query'),
-                    $qb->expr()->like('n.first_name', ':query'),
-                    $qb->expr()->like('n.last_name', ':query'),
-                    $qb->expr()->like('n.phoneNumber', ':query'),
+                    $qb->expr()->like('n.name', ':query'),
                 )
             )->setParameter('query', '%' . $query . '%');
         }

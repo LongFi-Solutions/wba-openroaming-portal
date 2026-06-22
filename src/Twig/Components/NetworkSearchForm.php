@@ -93,4 +93,10 @@ class NetworkSearchForm
         return $this->cachedCounts;
     }
 
+    #[ExposeInTemplate]
+    public function getTotalPages(): int
+    {
+        return (int)ceil(count($this->getNetworks()) / $this->count);
+    }
+
 }

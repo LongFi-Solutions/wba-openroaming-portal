@@ -66,42 +66,44 @@
     {# Table #}
     <div class="overflow-x-auto max-w-full mt-3">
         <table class="w-full items-start">
-            <thead class="text-sm text-gray-700 bg-veryLightGreen">
+            <thead class="text-sm text-gray-700 bg-veryLightGreen border-b border-gray-200">
             <tr>
-                <th scope="col" class="flex items-center p-4 pl-8">
-                    <h1 class="mr-2">UUID</h1>
-                    <button type="button"
-                            data-action="live#action"
-                            data-live-action-param="changeSort"
-                            data-live-field-param="uuid"
-                            class="p-1 hover:shadow-md rounded-lg cursor-pointer">
-                        {{ sharedSort.sortArrow('uuid', sort, order) }}
-                    </button>
+                <th scope="col" class="px-6 py-4 font-semibold text-left">
+                    {{ 'name'|trans({}, 'dashboard') }}
                 </th>
-                <th scope="col" class="p-4">Email</th>
-                <th scope="col" class="px-6 py-3">{{ 'provider'|trans({}, 'dashboard') }}</th>
-                <th scope="col" class="px-6 py-3">{{ 'verification'|trans({}, 'dashboard') }}</th>
-                <th scope="col" class="px-6 py-3">{{ '2FAStatus'|trans({}, 'dashboard') }}</th>
-                <th scope="col" class="px-6 py-3">{{ 'bannedAt'|trans({}, 'dashboard') }}</th>
-                <th scope="col" class="flex items-center px-6 py-3">
-                    <h1 class="mr-2">{{ 'createdAt'|trans({}, 'dashboard') }}</h1>
-                    <button type="button"
-                            data-action="live#action"
-                            data-live-action-param="changeSort"
-                            data-live-field-param="createdAt"
-                            class="p-1 hover:shadow-md rounded-lg cursor-pointer">
-                        {{ sharedSort.sortArrow('createdAt', sort, order) }}
-                    </button>
+                <th scope="col" class="px-6 py-4 font-semibold text-left">
+                    <div class="flex items-center gap-2">
+                        <span>{{ 'createdAt'|trans({}, 'dashboard') }}</span>
+                        <button type="button"
+                                data-action="live#action"
+                                data-live-action-param="changeSort"
+                                data-live-field-param="createdAt"
+                                class="p-1 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors cursor-pointer focus:outline-none">
+                            {{ sharedSort.sortArrow('createdAt', sort, order) }}
+                        </button>
+                    </div>
                 </th>
-                <th scope="col" class="px-6 py-3"><span class="none"></span></th>
+                <th scope="col" class="px-6 py-4 font-semibold text-left">
+                    <div class="flex items-center gap-2">
+                        <span>{{ 'updatedAt'|trans({}, 'dashboard') }}</span>
+                        <button type="button"
+                                data-action="live#action"
+                                data-live-action-param="changeSort"
+                                data-live-field-param="updatedAt"
+                                class="p-1 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors cursor-pointer focus:outline-none">
+                            {{ sharedSort.sortArrow('updatedAt', sort, order) }}
+                        </button>
+                    </div>
+                </th>
+                <th scope="col" class="relative px-6 py-4">
+                    <span class="sr-only">Actions</span>
+                </th>
             </tr>
             </thead>
             <tbody>
             {% for network in this.networks %}
                 {{ include('dashboard/shared/_network.html.twig', {
                     network: network,
-                    delete_users: this.deleteUsers,
-                    formRevokeProfiles: this.formRevokeProfiles,
                 }) }}
             {% else %}
                 <tr>
@@ -131,7 +133,7 @@
         <hr class="w-full h-0.5 bg-gray-300/50 border-0 rounded">
         {{ include('dashboard/shared/pagination/_pagination_live.html.twig', {
             label: 'usersPerPage'|trans({}, 'dashboard'),
-            occurrencies: this.users|length,
+            occurrencies: this.networks|length,
             totalPages: this.totalPages,
             page: page,
             count: count,
