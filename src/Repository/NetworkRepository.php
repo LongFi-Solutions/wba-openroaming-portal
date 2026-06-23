@@ -74,14 +74,10 @@ class NetworkRepository extends ServiceEntityRepository
     }
 
     /**
-     * Searches for users based on provided filter and optional search term.
+     * Searches for Networks based on provided filter and optional search term.
      *
-     * Filters out admin/super admin roles.
-     * Applies verification / banned filters.
-     * Excludes soft-deleted users.
      */
     public function searchWithFilter(
-        string $filter,
         string $sort,
         string $order,
         ?string $query,

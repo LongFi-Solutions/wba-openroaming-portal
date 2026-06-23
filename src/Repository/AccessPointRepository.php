@@ -6,6 +6,7 @@ use App\Entity\AccessPoint;
 use App\Entity\Network;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\ResultSetMapping;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -70,5 +71,35 @@ class AccessPointRepository extends ServiceEntityRepository
             )
             ->setParameter('radius', $radiusKm * 1000)
             ->getResult();
+    }
+
+    /**
+     * Searches for Networks based on provided filter and optional search term.
+     *
+     */
+    public function searchWithFilter(
+        string $sort,
+        string $order,
+        ?string $query,
+        int $page,
+        int $count,
+        Network $network,
+    ): QueryBuilder {
+        $qb = $this->createQueryBuilder('n')
+            ->orderBy('n.' . $sort, $order)
+            ->Where('n.network = :network')
+            ->setParameter('network', $network)
+            ->setFirstResult(($page - 1) * $count)
+            ->setMaxResults($count);
+
+        if ($query !== null) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->like('n.name', ':query'),
+                )
+            )->setParameter('query', '%' . $query . '%');
+        }
+
+        return $qb;
     }
 }

@@ -1,0 +1,16 @@
+{% extends '/dashboard/base.html.twig' %}
+
+{% block title %}{{ 'adminPageWBA'|trans({}, '_header_admin') }}{% endblock %}
+
+{% block container %}
+
+<div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
+
+        {# TABLE #}
+        <div>
+            {{ component('NetworkSearchForm') }}
+        </div>
+
+</div>
+
+{% endblock %}

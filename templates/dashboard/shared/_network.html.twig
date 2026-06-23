@@ -25,36 +25,39 @@
     </td>
 
     {# Actions Buttons #}
-    <td class="p-4 pl-8 text-right">
-        <div class="flex justify-center gap-3">
+    <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>
+        <button type="button" class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
+                {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
+                {{ stimulus_target('nav-submenu', 'button') }}>
+            <twig:ux:icon name="wba:menu-dots" class="w-5 h-5 fill-current"/>
+        </button>
 
-            {# Edit #}
-{#                        <button#}
-{#                                type="button"#}
-{#                                class="flex items-center px-2 py-2 hover:text-primary"#}
-{#                                title="Edit"#}
-{#                                data-action="click->domain-blacklist#open"#}
-{#                                data-domain-blacklist-id-param="{{ domain.id }}"#}
-{#                        >#}
-{#                            <twig:ux:icon name="wba:pencil-edit" class="w-5 fill-none stroke-current"/>#}
-{#                        </button>#}
-
-{#                         Delete#}
-{#                        <form#}
-{#                                method="post"#}
-{#                                action="{{ path('admin_dashboard_blacklist_delete_domain', {id: domain.id}) }}"#}
-{#                        >#}
-{#                            <input type="hidden" name="_method" value="DELETE">#}
-{#                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ domain.id) }}">#}
-
-{#                            <button#}
-{#                                    type="submit"#}
-{#                                    class="flex items-center px-2 py-2 hover:text-red-500"#}
-{#                                    title="Delete"#}
-{#                            >#}
-{#                                <twig:ux:icon name="wba:trash" class="w-5 fill-none stroke-current"/>#}
-{#                            </button>#}
-{#                        </form>#}
+        {# Items List Dropdown #}
+        <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
+                {{ stimulus_target('nav-submenu', 'container') }}>
+            <ul class="p-2 text-gray-700 gap-y-2">
+                <li>
+                    <a href="{{ path('admin_dashboard_map_network_edit', {id: network.id}) }}"
+                       class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                        <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3 fill-none stroke-current" />
+                        {{ 'edit'|trans({}, '_network') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('admin_dashboard_map_network_accessPoints', {id: network.id}) }}"
+                       class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                        <twig:ux:icon name="wba:wifi" class="w-5 mr-3 fill-current stroke-none"/>
+                        {{ 'accessPoints'|trans({}, '_network') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('admin_dashboard_map_network_delete', {id: network.id}) }}"
+                       class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                        <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-current stroke-none"/>
+                        {{ 'delete'|trans({}, '_network') }}
+                    </a>
+                </li>
+            </ul>
         </div>
     </td>
 </tr>

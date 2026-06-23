@@ -9,7 +9,7 @@
                 {% set tabs = {
                     all: {
                         label: 'all',
-                        count: this.networkCounts.all,
+                        count: this.acessPointCounts.all,
                         activeClass: 'border-b-2 border-y-veryDarkButton',
                         hoverClass: 'hover:border-b-2 hover:border-y-veryDarkButton',
                         badgeActive: 'bg-veryDarkButton text-white',
@@ -44,7 +44,7 @@
                     <label class="w-full">
                         <input type="text"
                                class="form-widget w-full p-2 bg-transparent border-none outline-none"
-                               placeholder="{{ 'searchNetworks'|trans({}, '_network') }}"
+                               placeholder="{{ 'searchAcessPointss'|trans({}, '_acessPoint') }}"
                                data-model="debounce(300)|query"
                                autocomplete="off" />
                     </label>
@@ -52,8 +52,8 @@
             </div>
 
             <div class="flex items-center space-x-6">
-                <a href="{{ path('admin_dashboard_map_network_create') }}" class="btn-primary px-4 min-w-[150px]">
-                    {{ 'createNetwork'|trans({}, '_network') }}
+                <a href="{{ path('admin_dashboard_map_acessPoint_create') }}" class="btn-primary px-4 min-w-[150px]">
+                    {{ 'createAcessPoints'|trans({}, '_acessPoint') }}
                 </a>
             </div>
 
@@ -66,11 +66,11 @@
             <thead class="text-sm text-gray-700 bg-veryLightGreen border-b border-gray-200">
             <tr>
                 <th scope="col" class="px-6 py-4 font-semibold text-left">
-                    {{ 'name'|trans({}, '_network') }}
+                    {{ 'name'|trans({}, '_acessPoint') }}
                 </th>
                 <th scope="col" class="px-6 py-4 font-semibold text-left">
                     <div class="flex items-center gap-2">
-                        <span>{{ 'createdAt'|trans({}, '_network') }}</span>
+                        <span>{{ 'createdAt'|trans({}, '_acessPoint') }}</span>
                         <button type="button"
                                 data-action="live#action"
                                 data-live-action-param="changeSort"
@@ -82,7 +82,7 @@
                 </th>
                 <th scope="col" class="px-6 py-4 font-semibold text-left">
                     <div class="flex items-center gap-2">
-                        <span>{{ 'updatedAt'|trans({}, '_network') }}</span>
+                        <span>{{ 'updatedAt'|trans({}, '_acessPoint') }}</span>
                         <button type="button"
                                 data-action="live#action"
                                 data-live-action-param="changeSort"
@@ -98,9 +98,9 @@
             </tr>
             </thead>
             <tbody>
-            {% for network in this.networks %}
-                {{ include('dashboard/shared/_network.html.twig', {
-                    network: network,
+            {% for acessPoint in this.acessPoints %}
+                {{ include('dashboard/shared/_acessPoint.html.twig', {
+                    acessPoint: acessPoint,
                 }) }}
             {% else %}
                 <tr>
@@ -108,9 +108,9 @@
                         <div class="flex flex-row justify-center items-start mt-2 p-4">
                             <div class="pill-error">
                                 {% if query %}
-                                    {{ 'noNetworksFoundWith'|trans({}, '_network') }} "{{ query }}"
+                                    {{ 'noAcessPointssFoundWith'|trans({}, '_acessPoint') }} "{{ query }}"
                                 {% else %}
-                                    {{ 'noNetworks'|trans({}, '_network') }}
+                                    {{ 'noAcessPointss'|trans({}, '_acessPoint') }}
                                 {% endif %}
                             </div>
                         </div>
@@ -125,8 +125,8 @@
     <div class="m-8">
         <hr class="w-full h-0.5 bg-gray-300/50 border-0 rounded">
         {{ include('dashboard/shared/pagination/_pagination_live.html.twig', {
-            label: 'networksPerPage'|trans({}, '_network'),
-            occurrencies: this.networks|length,
+            label: 'acessPointsPerPage'|trans({}, '_acessPoint'),
+            occurrencies: this.acessPoints|length,
             totalPages: this.totalPages,
             page: page,
             count: count,

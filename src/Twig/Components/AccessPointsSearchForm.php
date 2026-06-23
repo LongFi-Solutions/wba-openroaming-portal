@@ -2,8 +2,10 @@
 
 namespace App\Twig\Components;
 
+use App\Entity\AccessPoint;
 use App\Entity\Network;
 use App\Entity\User;
+use App\Repository\AccessPointRepository;
 use App\Repository\NetworkRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -16,7 +18,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
 
 #[AsLiveComponent]
-class NetworkSearchForm
+class AccessPointsSearchForm
 {
 
     use DefaultActionTrait;
@@ -39,14 +41,16 @@ class NetworkSearchForm
     #[LiveProp(writable: true)]
     public string $order = 'desc';
 
-    /** @var Paginator<Network>|null */
-    private ?Paginator $cachedNetworks = null;
+    /** @var Paginator<AccessPoint>|null */
+    private ?Paginator $cachedAccessPoints = null;
 
     /** @var array<string, int>|null */
     private ?array $cachedCounts = null;
 
+    public Network $network;
+
     public function __construct(
-        private readonly NetworkRepository $networkRepository,
+        private readonly AccessPointRepository $accessPointRepository,
         private readonly FormFactoryInterface $formFactory,
         private readonly Security $security,
         private readonly ParameterBagInterface $parameterBag,
@@ -59,21 +63,22 @@ class NetworkSearchForm
     #[ExposeInTemplate]
     public function getNetworks(): Paginator
     {
-        if (!$this->cachedNetworks instanceof Paginator) {
-            $this->cachedNetworks = new Paginator($this->getQueryBuilder());
+        if (!$this->cachedAccessPoints instanceof Paginator) {
+            $this->cachedAccessPoints = new Paginator($this->getQueryBuilder());
         }
 
-        return $this->cachedNetworks;
+        return $this->cachedAccessPoints;
     }
 
     private function getQueryBuilder(): QueryBuilder
     {
-        return $this->networkRepository->searchWithFilter(
+        return $this->accessPointRepository->searchWithFilter(
             $this->sort,
             $this->order,
             $this->query ?: null,
             $this->page,
             $this->count,
+            $this->network
         );
     }
 
@@ -81,11 +86,11 @@ class NetworkSearchForm
      * @return array<string, int>
      */
     #[ExposeInTemplate]
-    public function getNetworkCounts(): array
+    public function getAccessPointCounts(): array
     {
         if ($this->cachedCounts === null) {
             $this->cachedCounts = [
-                'all' => count($this->networkRepository->findAll()),
+                'all' => count($this->accessPointRepository->findAll()),
             ];
         }
 

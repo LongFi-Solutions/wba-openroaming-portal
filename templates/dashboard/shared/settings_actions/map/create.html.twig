@@ -1,0 +1,54 @@
+{% extends '/dashboard/base.html.twig' %}
+
+{% block title %}Map Page - Create Network{% endblock %}
+
+{% block container %}
+
+        <div class="p-6 bg-white rounded-lg shadow-sm">
+
+        <div class="mb-6">
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
+                Criar Nova Rede
+            </h2>
+        </div>
+
+        {{ form_start(form) }}
+    {{ form_errors(form) }}
+
+        <div class="mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <div class="relative">
+        {{ form_label(form.name, 'Nome da Rede', {label_attr: {class: 'form-label'}}) }}
+    {{ form_widget(form.name, {attr: {class: 'form-widget', placeholder: 'Ex: Escritório Principal'}}) }}
+    <div class="text-red-500 m-2 text-sm">
+    {{ form_errors(form.name) }}
+    </div>
+    </div>
+
+    <div class="relative lg:col-span-2">
+    {{ form_label(form.description, 'Descrição', {label_attr: {class: 'form-label'}}) }}
+    {{ form_widget(form.description, {attr: {
+        class: 'form-widget min-h-[100px]',
+        rows: '4',
+        placeholder: 'Introduza uma breve descrição sobre a utilidade desta rede...'
+    }}) }}
+    <div class="text-red-500 m-2 text-sm">
+        {{ form_errors(form.description) }}
+    </div>
+    </div>
+
+    </div>
+
+    <div class="flex flex-row justify-end gap-4 md:w-full mt-8 pt-4 border-t border-gray-100">
+        <a href="{{ path('admin_dashboard_map') }}" class="btn-secondary flex items-center justify-center">
+            Return
+        </a>
+        <button type="submit" class="btn-primary">
+            Create
+        </button>
+    </div>
+
+    {{ form_rest(form) }}
+    {{ form_end(form) }}
+    </div>
+{% endblock %}
