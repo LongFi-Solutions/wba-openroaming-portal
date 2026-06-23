@@ -15,33 +15,46 @@
 
                     {# Left Search Filters #}
                     <div class="flex flex-col md:flex-row sm:items-center gap-4 sm:gap-6">
-                        <a href="{{ path('admin_dashboard_admins', {filter: 'all', u: app.request.query.get('u')}) }}"
-                           class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
-                            <h1 class="px-2">
-                                {{ 'all'|trans({}, 'dashboard') }}
-                            </h1>
-                            <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
-                                {{ allUsersCount }}
-                            </div>
-                        </a>
-                        <a href="{{ path('admin_dashboard_admins', {filter: constant('App\\Enum\\UserVerificationStatus::VERIFIED').value, u: app.request.query.get('u')}) }}"
-                           class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED').value %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
-                            <h1 class="px-2">
-                                {{ 'verified'|trans({}, 'dashboard') }}
-                            </h1>
-                            <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-lightGreen rounded-md group-hover:text-white text-center transition-all duration-100">
-                                {{ verifiedUsersCount }}
-                            </div>
-                        </a>
-                        <a href="{{ path('admin_dashboard_admins', {filter: constant('App\\Enum\\UserVerificationStatus::BANNED').value, u: app.request.query.get('u')}) }}"
-                           class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED').value %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
-                            <h1 class="px-2">
-                                {{ 'banned'|trans({}, 'dashboard') }}
-                            </h1>
-                            <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-red-400 rounded-md group-hover:text-white text-center transition-all duration-100">
-                                {{ bannedUsersCount }}
-                            </div>
-                        </a>
+                        {% set tabs = {
+                            all: {
+                                label: 'all',
+                                count: allUsersCount,
+                                filterValue: 'all',
+                                activeClass: 'border-b-2 border-y-veryDarkButton',
+                                hoverClass: 'hover:border-b-2 hover:border-y-veryDarkButton',
+                                badgeActive: 'bg-veryDarkButton text-white',
+                                badgeInactive: 'bg-veryLightGreen group-hover:bg-veryDarkButton group-hover:text-white',
+                            },
+                            Verified: {
+                                label: 'verified',
+                                count: verifiedUsersCount,
+                                filterValue: constant('App\\Enum\\UserVerificationStatus::VERIFIED').value,
+                                activeClass: 'text-lightGreen border-b-2 border-y-lightGreen',
+                                hoverClass: 'hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50',
+                                badgeActive: 'bg-lightGreen text-white',
+                                badgeInactive: 'bg-veryLightGreen group-hover:bg-lightGreen group-hover:text-white',
+                            },
+                            Banned: {
+                                label: 'banned',
+                                count: bannedUsersCount,
+                                filterValue: constant('App\\Enum\\UserVerificationStatus::BANNED').value,
+                                activeClass: 'text-red-400 border-b-2 border-red-400',
+                                hoverClass: 'hover:text-red-400 hover:border-b-2 hover:border-y-red-400',
+                                badgeActive: 'bg-red-400 text-white',
+                                badgeInactive: 'bg-veryLightGreen group-hover:bg-red-400 group-hover:text-white',
+                            },
+                        } %}
+
+                        {% for key, tab in tabs %}
+                            {% set isActive = (app.request.query.get('filter') == tab.filterValue) or (tab.filterValue == 'all' and app.request.query.get('filter') == null) %}
+                            <a href="{{ path('admin_dashboard_admins', {filter: tab.filterValue, u: app.request.query.get('u')}) }}"
+                               class="flex flex-row items-center group transition-all duration-100 {{ tab.hoverClass }} {{ isActive ? tab.activeClass : 'text-gray-500 border-b-2 border-transparent' }}">
+                                <h1 class="px-2">{{ tab.label|trans({}, 'dashboard') }}</h1>
+                                <div class="w-auto h-6 mb-1 px-2 rounded-md text-center transition-all duration-100 {{ isActive ? tab.badgeActive : tab.badgeInactive }}">
+                                    {{ tab.count }}
+                                </div>
+                            </a>
+                        {% endfor %}
                     </div>
 
                     {# Midle Search Bar #}
