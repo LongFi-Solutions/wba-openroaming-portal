@@ -94,17 +94,19 @@ readonly class AdminCertificateProcessEnforcerListener
             '#^/dashboard/settings/certificatesManagement/freeradius/selection#',
 
             // Freeradius steps
-                // Auto Generation Lets Encrypt
+
+            // Auto Generation Lets Encrypt
             '#^/dashboard/settings/certificatesManagement/freeradius/autoRenew$#',
             '#^/dashboard/settings/certificatesManagement/freeradius/autoRenewDomain#',
-                // Manual Upload
+            // Manual Upload
             '#^/dashboard/settings/certificatesManagement/freeradius/upload$#',
             '#^/dashboard/settings/certificatesManagement/freeradius/config$#',
             '#^/dashboard/settings/certificatesManagement/freeradius/test$#',
             '#^/dashboard/settings/certificatesManagement/freeradius/test/run$#',
 
-                // Cloudflare
-            '#^/dashboard/settings/certificatesManagement/freeradius/cloudflare/dnsChallenge$#'
+            // Cloudflare
+            '#^/dashboard/settings/certificatesManagement/freeradius/cloudflare/dnsChallenge$#',
+            '#^/dashboard/settings/certificatesManagement/freeradius/cloudflare/httpChallenge#'
         ];
         $allowed = array_any(
             $allowedPatterns,
@@ -125,10 +127,6 @@ readonly class AdminCertificateProcessEnforcerListener
      */
     private function enforceProcess(RequestEvent $event, SessionInterface $session): void
     {
-        if ($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess) {
-            $this->certificateProcessCheckerService->verifyCertificates();
-        }
-
         // Check installation progress
         $installation = $this->installationProgressRepository->findOneBy([
             'installationState' => ProcessStatusType::COMPLETED

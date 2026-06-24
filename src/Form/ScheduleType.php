@@ -3,15 +3,14 @@
 namespace App\Form;
 
 use App\DTO\ScheduleDTO;
-use App\Entity\Setting;
 use App\Enum\SettingName;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfonycasts\DynamicForms\DependentField;
 use Symfonycasts\DynamicForms\DynamicFormBuilder;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @extends AbstractType<ScheduleDTO>
@@ -49,6 +48,11 @@ class ScheduleType extends AbstractType
                     ]);
                 }
             )
+            ->add('delete_unconfirmed_users_enabled', CheckboxType::class, [
+                'required' => false,
+                'disabled' => $this->disabled,
+                'label' => $this->translator->trans('enableCron', [], 'ScheduleType'),
+            ])
             ->addDependent(
                 'users_when_profile_expires_cron',
                 'use_advanced_mode',
@@ -62,6 +66,11 @@ class ScheduleType extends AbstractType
                     ]);
                 }
             )
+            ->add('users_when_profile_expires_enabled', CheckboxType::class, [
+                'required' => false,
+                'disabled' => $this->disabled,
+                'label' => $this->translator->trans('enableCron', [], 'ScheduleType'),
+            ])
             ->addDependent(
                 'ldap_sync_cron',
                 'use_advanced_mode',
@@ -75,19 +84,11 @@ class ScheduleType extends AbstractType
                     ]);
                 }
             )
-            ->addDependent(
-                'freeradius_last_connection_cron',
-                'use_advanced_mode',
-                function (DependentField $field, ?bool $use_advanced_mode): void {
-                    $field->add(ScheduleSettingType::class, [
-                        'label' => false,
-                        'required' => false,
-                        'use_advanced_mode' => $use_advanced_mode,
-                        'settingName' => SettingName::FREERADIUS_LAST_CONNECTION_CRON->value,
-                        'disabled' => $this->disabled,
-                    ]);
-                }
-            )
+            ->add('ldap_sync_enabled', CheckboxType::class, [
+                'required' => false,
+                'disabled' => $this->disabled,
+                'label' => $this->translator->trans('enableCron', [], 'ScheduleType'),
+            ])
             ->addDependent(
                 'domain_blacklist_import_cron',
                 'use_advanced_mode',
@@ -99,7 +100,12 @@ class ScheduleType extends AbstractType
                         'settingName' => SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value,
                     ]);
                 }
-            );
+            )
+            ->add('domain_blacklist_import_enabled', CheckboxType::class, [
+                'required' => false,
+                'disabled' => $this->disabled,
+                'label' => $this->translator->trans('enableCron', [], 'ScheduleType'),
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

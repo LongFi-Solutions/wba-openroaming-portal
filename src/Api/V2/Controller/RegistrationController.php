@@ -7,6 +7,7 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
@@ -185,12 +186,17 @@ class RegistrationController extends AbstractController
 
         $this->emailGenerator->sendRegistrationEmail($user, $data['password'], true);
 
+        // Save user creation event
         $eventMetaData = [
-            'ip' => $request->getClientIp(),
-            'uuid' => $user->getEmail(),
-            'provider' => UserProvider::PORTAL_ACCOUNT->value,
-            'registrationType' => UserProvider::EMAIL->value,
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
+            EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::PLATFORM_MODE->value]
+            )->getValue(),
+            EventMetadataKeysType::REGISTRATION_TYPE->value => UserProvider::EMAIL->value
         ];
+
         $this->eventActions->saveEvent(
             $user,
             AnalyticalEventType::USER_CREATION->value,
@@ -326,9 +332,9 @@ class RegistrationController extends AbstractController
                         $latestEvent->setEventDatetime(new DateTime());
                         $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
                         $latestEventMetadata = [
-                            'platform' => PlatformMode::LIVE->value,
-                            'ip' => $request->getClientIp(),
-                            'uuid' => $user->getUuid(),
+                            EventMetadataKeysType::PLATFORM->value => PlatformMode::LIVE->value,
+                            EventMetadataKeysType::IP->value => $request->getClientIp(),
+                            EventMetadataKeysType::UUID->value => $user->getUuid(),
                         ];
                     }
 
@@ -372,9 +378,9 @@ class RegistrationController extends AbstractController
 
                     // Defines the Event to the table
                     $eventMetadata = [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'uuid' => $user->getUuid(),
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
                     ];
 
                     $this->eventActions->saveEvent(
@@ -526,10 +532,13 @@ class RegistrationController extends AbstractController
 
         // Save user creation event
         $eventMetaData = [
-            'uuid' => $user->getUuid(),
-            'provider' => UserProvider::PORTAL_ACCOUNT->value,
-            'registrationType' => UserProvider::PHONE_NUMBER->value,
-            'ip' => $request->getClientIp(),
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
+            EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::PLATFORM_MODE->value]
+            )->getValue(),
+            EventMetadataKeysType::REGISTRATION_TYPE->value => UserProvider::PHONE_NUMBER->value
         ];
 
         $this->eventActions->saveEvent(
@@ -724,11 +733,10 @@ class RegistrationController extends AbstractController
                     }
 
                     $eventMetadata = [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'uuid' => $user->getUuid(),
-                        'lastVerificationCodeTime' => $currentTime->format(DateTimeInterface::ATOM),
-                        'verificationAttempts' => $verificationAttempts,
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
+                        EventMetadataKeysType::VERIFICATION_ATTEMPTS->value => $verificationAttempts,
                     ];
                     $latestEvent->setEventMetadata($eventMetadata);
 
@@ -754,9 +762,9 @@ class RegistrationController extends AbstractController
 
                     // Defines the Event to the table
                     $eventMetadata = [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'uuid' => $user->getUuid(),
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
                     ];
 
                     $this->eventActions->saveEvent(

@@ -5,6 +5,7 @@ namespace App\Form;
 use App\DTO\ScheduleSettingDTO;
 use App\Enum\DaysOfWeek;
 use App\Enum\MonthsOfYear;
+use App\Enum\SettingName;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -16,6 +17,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfonycasts\DynamicForms\DependentField;
 use Symfonycasts\DynamicForms\DynamicFormBuilder;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 
 /**
  * @extends AbstractType<ScheduleSettingDTO>
@@ -157,6 +159,16 @@ class ScheduleSettingType extends AbstractType
                     'class' => $useAdvancedMode === true ? 'hidden' : '',
                 ],
             ]);
+        if ($settingName === SettingName::DELETE_UNCONFIRMED_USERS_CRON->value) {
+            $builder->add('userDeleteTime', IntegerType::class, [
+                'required' => true,
+            ]);
+        }
+        if ($settingName === SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value) {
+            $builder->add('timeIntervalNotification', IntegerType::class, [
+                'required' => true,
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void

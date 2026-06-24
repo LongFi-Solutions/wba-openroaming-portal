@@ -7,6 +7,7 @@ use App\Controller\GoogleController;
 use App\Controller\MicrosoftController;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\UserProvider;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
@@ -299,9 +300,9 @@ class UserAccountController extends AbstractController
 
             // Defines the Event to the table
             $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $userUUID,
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $userUUID,
             ];
 
             $this->eventActions->saveEvent(
