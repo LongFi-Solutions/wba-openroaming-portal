@@ -15,7 +15,7 @@ readonly class UserEventDataEncryptionService
     /**
      * Metadata keys that contain direct RGPD-sensitive values (strings).
      */
-    private const SENSITIVE_SCALAR_KEYS = [
+    private const array SENSITIVE_SCALAR_KEYS = [
         EventMetadataKeysType::UUID->value,
         EventMetadataKeysType::PERFORMED_ON_UUID->value,
     ];
@@ -24,7 +24,7 @@ readonly class UserEventDataEncryptionService
      * Metadata keys whose value is a nested associative array of sensitive fields
      * (e.g. "New data" => ["First Name" => ..., "Last Name" => ...]).
      */
-    private const SENSITIVE_NESTED_KEYS = [
+    private const array SENSITIVE_NESTED_KEYS = [
         EventMetadataKeysType::USER_OLD_DATA->value,
         EventMetadataKeysType::USER_NEW_DATA->value,
         EventMetadataKeysType::OLD_DATA->value,
