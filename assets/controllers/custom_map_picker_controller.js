@@ -4,7 +4,6 @@ export default class extends Controller {
     static targets = ["latitude", "longitude"]
 
     connect() {
-        // Mudamos para ux:map:connect para garantir que o mapa já está instanciado e pronto a ouvir cliques
         window.addEventListener('ux:map:connect', this._onConnect.bind(this));
     }
 
@@ -23,7 +22,6 @@ export default class extends Controller {
         this.map = map;
         this.L = L;
 
-        // 1. LER OS VALORES DIRETAMENTE DOS INPUTS HTML (Garante que lê as strings com 7 casas)
         let latRaw = this.latitudeTarget.value ? this.latitudeTarget.value.toString().replace(',', '.') : '';
         let lngRaw = this.longitudeTarget.value ? this.longitudeTarget.value.toString().replace(',', '.') : '';
 
@@ -36,23 +34,18 @@ export default class extends Controller {
 
         this.marker = null;
 
-        // 2. VERIFICAÇÃO RIGOROSA: Se existirem coordenadas válidas nos inputs, move o mapa para lá
         if (!isNaN(savedLat) && !isNaN(savedLng) && savedLat !== 0 && savedLng !== 0) {
             console.log("Modo Edição detetado. A posicionar o mapa em:", savedLat, savedLng);
 
-            // Criar o marcador no sítio exato guardado
             this.marker = this.L.marker([savedLat, savedLng]).addTo(this.map);
 
-            // Forçar o mapa a focar nas coordenadas guardadas com um zoom alto (ex: 17)
             this.map.setView([savedLat, savedLng], 17);
         }
 
-        // 3. Forçar o Leaflet a recalcular o tamanho para renderizar os blocos sem falhas cinzentas
         setTimeout(() => {
             this.map.invalidateSize();
         }, 200);
 
-        // 4. Teu ouvinte de cliques já existente...
         this.map.on('click', (e) => {
             const latString = e.latlng.lat.toFixed(7);
             const lngString = e.latlng.lng.toFixed(7);
@@ -69,7 +62,6 @@ export default class extends Controller {
         });
     }
 
-    // Sincronização se o utilizador digitar as coordenadas à mão
     syncMap() {
         const lat = parseFloat(this.latitudeTarget.value);
         const lng = parseFloat(this.longitudeTarget.value);
