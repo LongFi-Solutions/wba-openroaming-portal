@@ -140,7 +140,7 @@ readonly class UserEventDataEncryptionService
         if (!is_string($result) || $result === '') {
             throw new RuntimeException(
                 sprintf(
-                    'PGP encryption failed for metadata field "%s". The encryption service returned an unexpected result.',
+                    'PGP encryption failed for metadata field "%s". The service returned an unexpected result.',
                     $fieldContext
                 )
             );
