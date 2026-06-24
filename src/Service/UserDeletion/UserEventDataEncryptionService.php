@@ -27,6 +27,8 @@ readonly class UserEventDataEncryptionService
     private const SENSITIVE_NESTED_KEYS = [
         EventMetadataKeysType::USER_OLD_DATA->value,
         EventMetadataKeysType::USER_NEW_DATA->value,
+        EventMetadataKeysType::OLD_DATA->value,
+        EventMetadataKeysType::NEW_DATA->value,
     ];
 
     public function __construct(

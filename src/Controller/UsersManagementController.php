@@ -466,8 +466,8 @@ class UsersManagementController extends AbstractController
                 [$oldValue, $newValue] = $change;
 
                 $formattedChanges[$field] = [
-                    'newValue' => $newValue,
-                    'oldValue' => $oldValue,
+                    EventMetadataKeysType::OLD_DATA->value => $oldValue,
+                    EventMetadataKeysType::NEW_DATA->value => $newValue,
                 ];
             }
 

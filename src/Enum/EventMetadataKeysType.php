@@ -30,6 +30,8 @@ enum EventMetadataKeysType: string
     case VALIDATION_SUCCESS = 'validation-success';
     case IS_EV_CERTIFICATE = 'is_ev_certificate';
     case VALIDATION_ERRORS = 'validation_errors';
+    case OLD_DATA = 'old_data';
+    case NEW_DATA = 'new_data';
     case USER_OLD_DATA = 'user_old_data';
     case USER_NEW_DATA = 'user_new_data';
     case FIRST_NAME = 'first_name';
