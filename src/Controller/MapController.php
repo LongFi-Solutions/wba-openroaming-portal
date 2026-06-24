@@ -97,19 +97,28 @@ class MapController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $network = new Network();
-            $network->setName($networkDTO->name);
-            if ($networkDTO->description !== null) {
-                $network->setDescription($networkDTO->description);
-            }
+            $networkDTO->updateEntity($network);
             $network->setCreatedAt(new DateTimeImmutable());
             $network->setUpdatedAt(new DateTimeImmutable());
             $this->entityManager->persist($network);
             $this->entityManager->flush();
             return $this->redirectToRoute('admin_dashboard_map');
         }
+
+        $lat = $request->query->get('lat');
+        $lng = $request->query->get('lng');
+
+        $centerLat = $lat ?? 37.7412;
+        $centerLng = $lng ?? -25.6756;
+
+        $data = $this->getSettings->getSettings();
+        $map = new Map()
+            ->center(new Point((float)$centerLat, (float)$centerLng))
+            ->zoom(13);
         return $this->render('dashboard/shared/settings_actions/map/create.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
+            'map' => $map,
 
         ]);
 
@@ -134,21 +143,32 @@ class MapController extends AbstractController
         $networkDTO = new NetworkDTO();
         $networkDTO->name = $network->getName();
         $networkDTO->description = $network->getDescription();
+        if ($network->getGeometry() !== null) {
+            $networkDTO->geometryJson = json_encode($network->getGeometry());
+        }
         $form = $this->createForm(CreateNetworkType::class, $networkDTO);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $network->setName($networkDTO->name);
-            if ($networkDTO->description !== null) {
-                $network->setDescription($networkDTO->description);
-            }
+            $networkDTO->updateEntity($network);
             $network->setUpdatedAt(new DateTimeImmutable());
             $this->entityManager->persist($network);
             $this->entityManager->flush();
             return $this->redirectToRoute('admin_dashboard_map');
         }
+
+        $lat = $request->query->get('lat');
+        $lng = $request->query->get('lng');
+
+        $centerLat = $lat ?? 37.7412;
+        $centerLng = $lng ?? -25.6756;
+
+        $map = new Map()
+            ->center(new Point((float)$centerLat, (float)$centerLng))
+            ->zoom(13);
         return $this->render('dashboard/shared/settings_actions/map/edit.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
+            'map' => $map,
 
         ]);
 
