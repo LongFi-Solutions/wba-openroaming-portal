@@ -40,9 +40,8 @@ readonly class UserDeletionService
      */
     public function deleteUser(User $user, array $userExternalAuths, Request $request, User $admin): array
     {
-        $deletedUserUuid = $user->getUuid();
         $deletedUserById = $user->getId();
-        $adminUuid = $admin->getUuid();
+        $adminId = $admin->getId();
 
         $phoneNumber = null;
         if ($user->getPhoneNumber() instanceof PhoneNumber) {
@@ -142,7 +141,7 @@ readonly class UserDeletionService
         $eventMetadata = [
             EventMetadataKeysType::IP->value => $request->getClientIp(),
             EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-            EventMetadataKeysType::UUID->value => $adminUuid,
+            EventMetadataKeysType::ID->value => $adminId,
             EventMetadataKeysType::PERFORMED_ON_ID->value => $deletedUserById,
         ];
 

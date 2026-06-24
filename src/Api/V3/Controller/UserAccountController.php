@@ -80,7 +80,8 @@ class UserAccountController extends AbstractController
                 )->toResponse();
             }
 
-            $userUUID = $isAdminAccount->getUuid();
+            $userId = $isAdminAccount->getId();
+            $userUUID = $isAdminAccount->getUuid(); // success message
 
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($isAdminAccount);
             if ($statusCheckerResponse instanceof BaseResponse) {
@@ -305,7 +306,7 @@ class UserAccountController extends AbstractController
             $eventMetadata = [
                 EventMetadataKeysType::IP->value => $request->getClientIp(),
                 EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                EventMetadataKeysType::UUID->value => $userUUID,
+                EventMetadataKeysType::ID->value => $userId,
             ];
 
             $this->eventActions->saveEvent(

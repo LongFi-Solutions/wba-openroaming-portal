@@ -10,6 +10,7 @@ enum EventMetadataKeysType: string
     case USER_AGENT = 'user_agent';
     case PLATFORM = 'platform';
     case UUID = 'uuid';
+    case ID = 'id';
     case DOWNLOADED_PROFILE_TYPE  = 'type';
     case REGISTRATION_TYPE = 'registration_type';
     case VERIFICATION_ATTEMPTS = 'verification_attempts';

@@ -85,7 +85,8 @@ class UserAccountController extends AbstractController
                 return $statusCheckerResponse->toResponse();
             }
 
-            $userUUID = $isAdminAccount->getUuid();
+            $userId = $isAdminAccount->getId();
+            $userUUID = $isAdminAccount->getUuid(); // success message
 
             foreach ($isAdminAccount->getUserExternalAuths() as $externalAuth) {
                 if ($externalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
@@ -304,7 +305,7 @@ class UserAccountController extends AbstractController
             $eventMetadata = [
                 EventMetadataKeysType::IP->value => $request->getClientIp(),
                 EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                EventMetadataKeysType::UUID->value => $userUUID,
+                EventMetadataKeysType::ID->value => $userId,
             ];
 
             $this->eventActions->saveEvent(
