@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\DTO\AccessPointDTO;
 use App\DTO\NetworkDTO;
 use App\Entity\AccessPoint;
 use App\Entity\Network;
 use App\Enum\AdminPermissionsType;
+use App\Form\CreateAccessPointType;
 use App\Form\CreateNetworkType;
 use App\Repository\AccessPointRepository;
 use App\Repository\NetworkRepository;
@@ -21,6 +23,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\UX\Map\Map;
 use Symfony\UX\Map\Point;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 
 class MapController extends AbstractController
 {
@@ -156,7 +159,7 @@ class MapController extends AbstractController
     #[Route('dashboard/map/network/{id:network<\d+>}/accessPoints',
         name: 'admin_dashboard_map_network_accessPoints')]
     #[isGranted(AdminPermissionsType::MAP_READ->value)]
-    public function NetworkAccessPoints(Network $network, Request $request): Response
+    public function NetworkAccessPoints(Network $network): Response
     {
         $data = $this->getSettings->getSettings();
 
@@ -164,6 +167,87 @@ class MapController extends AbstractController
             'data' => $data,
             'network' => $network,
         ]);
+    }
+
+    #[Route('dashboard/map/network/{id:network<\d+>}/accessPoints/create',
+        name: 'admin_dashboard_map_accessPoint_create')]
+    #[isGranted(AdminPermissionsType::MAP_READ->value)]
+    public function NetworkAccessPointsCreate(Network $network, Request $request): Response
+    {
+        $data = $this->getSettings->getSettings();
+        $accessPointDTO = new AccessPointDTO();
+        $accessPointDTO->network = $network;
+        $form = $this->createForm(CreateAccessPointType::class, $accessPointDTO);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $accessPoint = new AccessPoint();
+            $accessPointDTO->updateEntity($accessPoint);
+            $accessPoint->setCreatedAt(new DateTimeImmutable());
+            $accessPoint->setUpdatedAt(new DateTimeImmutable());
+            $this->entityManager->persist($accessPoint);
+            $this->entityManager->flush();
+            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints' ,
+                [
+                    'id' => $network->getId(),
+                ]
+            );
+        }
+        return $this->render('dashboard/shared/settings_actions/map/access_point/create.html.twig', [
+            'form' => $form->createView(),
+            'data' => $data,
+
+        ]);
+    }
+
+    #[Route(
+        'dashboard/map/network/{network_id<\d+>}/accessPoints/{ap_id<\d+>}/edit',
+        name: 'admin_dashboard_map_accessPoint_edit'
+    )]
+    #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
+    public function NetworkAccessPointsEdit(
+        #[MapEntity(id: 'ap_id')] AccessPoint $accessPoint,
+        #[MapEntity(id: 'network_id')] Network $network,
+        Request $request
+    ): Response
+    {
+        $data = $this->getSettings->getSettings();
+        $accessPointDTO = AccessPointDTO::createFromEntity($accessPoint);
+        $form = $this->createForm(CreateAccessPointType::class, $accessPointDTO);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $accessPointDTO->updateEntity($accessPoint);
+            $accessPoint->setUpdatedAt(new DateTimeImmutable());
+            $this->entityManager->persist($accessPoint);
+            $this->entityManager->flush();
+            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints',
+                [
+                    'id' => $network->getId(),
+                ]
+            );
+        }
+        return $this->render('dashboard/shared/settings_actions/map/access_point/create.html.twig', [
+            'form' => $form->createView(),
+            'data' => $data,
+
+        ]);
+    }
+
+    #[Route(
+        'dashboard/map/network/{network_id<\d+>}/accessPoints/{ap_id<\d+>}/delete',
+        name: 'admin_dashboard_map_accessPoint_delete')]
+    #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
+    public function NetworkAccessPointsDelete(
+        #[MapEntity(id: 'ap_id')] AccessPoint $accessPoint,
+        #[MapEntity(id: 'network_id')] Network $network,
+    ): Response
+    {
+        $this->entityManager->remove($accessPoint);
+        $this->entityManager->flush();
+        return $this->redirectToRoute('admin_dashboard_map_network_accessPoints',
+            [
+                'id' => $network->getId(),
+            ]
+        );
     }
 
 }

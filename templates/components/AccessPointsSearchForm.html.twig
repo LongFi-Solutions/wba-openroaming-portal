@@ -9,7 +9,7 @@
                 {% set tabs = {
                     all: {
                         label: 'all',
-                        count: this.acessPointCounts.all,
+                        count: this.accessPointCounts.all,
                         activeClass: 'border-b-2 border-y-veryDarkButton',
                         hoverClass: 'hover:border-b-2 hover:border-y-veryDarkButton',
                         badgeActive: 'bg-veryDarkButton text-white',
@@ -52,7 +52,7 @@
             </div>
 
             <div class="flex items-center space-x-6">
-                <a href="{{ path('admin_dashboard_map_acessPoint_create') }}" class="btn-primary px-4 min-w-[150px]">
+                <a href="{{ path('admin_dashboard_map_accessPoint_create', { id: network.id }) }}" class="btn-primary px-4 min-w-[150px]">
                     {{ 'createAcessPoints'|trans({}, '_acessPoint') }}
                 </a>
             </div>
@@ -66,7 +66,19 @@
             <thead class="text-sm text-gray-700 bg-veryLightGreen border-b border-gray-200">
             <tr>
                 <th scope="col" class="px-6 py-4 font-semibold text-left">
-                    {{ 'name'|trans({}, '_acessPoint') }}
+                    <div class="flex items-center gap-2">
+                        <span>{{ 'ssid'|trans({}, '_acessPoint') }}</span>
+                        <button type="button"
+                                data-action="live#action"
+                                data-live-action-param="changeSort"
+                                data-live-field-param="ssid"
+                                class="p-1 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors cursor-pointer focus:outline-none">
+                            {{ sharedSort.sortArrow('ssid', sort, order) }}
+                        </button>
+                    </div>
+                </th>
+                <th scope="col" class="px-6 py-4 font-semibold text-left">
+                    {{ 'location'|trans({}, '_acessPoint') }}
                 </th>
                 <th scope="col" class="px-6 py-4 font-semibold text-left">
                     <div class="flex items-center gap-2">
@@ -98,9 +110,9 @@
             </tr>
             </thead>
             <tbody>
-            {% for acessPoint in this.acessPoints %}
-                {{ include('dashboard/shared/_acessPoint.html.twig', {
-                    acessPoint: acessPoint,
+            {% for accessPoint in this.accessPoints %}
+                {{ include('dashboard/shared/_accessPoint.html.twig', {
+                    accessPoint: accessPoint,
                 }) }}
             {% else %}
                 <tr>
@@ -126,7 +138,7 @@
         <hr class="w-full h-0.5 bg-gray-300/50 border-0 rounded">
         {{ include('dashboard/shared/pagination/_pagination_live.html.twig', {
             label: 'acessPointsPerPage'|trans({}, '_acessPoint'),
-            occurrencies: this.acessPoints|length,
+            occurrencies: this.accessPoints|length,
             totalPages: this.totalPages,
             page: page,
             count: count,

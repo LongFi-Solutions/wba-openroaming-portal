@@ -1,0 +1,156 @@
+{% extends '/dashboard/base.html.twig' %}
+
+{% block title %}Map Page - Create Access Point{% endblock %}
+
+{% block container %}
+
+    <div class="p-6 bg-white rounded-lg shadow-sm">
+
+        <div class="mb-6">
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
+                Create New Access Point
+            </h2>
+        </div>
+
+        {{ form_start(form) }}
+        {{ form_errors(form) }}
+
+        <div class="mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            {# BASIC INFO #}
+            <div class="lg:col-span-2 mt-2">
+                <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-100 pb-1">
+                    Basic Information
+                </h3>
+            </div>
+
+            {# SSID #}
+            <div class="relative">
+                {{ form_label(form.ssid, 'SSID (Wi-Fi Network Name)', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.ssid, {attr: {class: 'form-widget', placeholder: 'e.g., Company_Guest_WiFi'}}) }}
+                <div class="text-red-500 m-2 text-sm">
+                    {{ form_errors(form.ssid) }}
+                </div>
+            </div>
+
+            {# ACCESS POINT NAME #}
+            <div class="relative">
+                {{ form_label(form.name, 'Access Point Name (Optional)', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.name, {attr: {class: 'form-widget', placeholder: 'e.g., AP-Floor1-RoomA'}}) }}
+                <div class="text-red-500 m-2 text-sm">
+                    {{ form_errors(form.name) }}
+                </div>
+            </div>
+
+            {# MAC ADDRESS #}
+            <div class="relative">
+                {{ form_label(form.macAddress, 'MAC Address', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.macAddress, {attr: {class: 'form-widget', placeholder: 'e.g., AA:BB:CC:DD:EE:FF'}}) }}
+                <div class="text-red-500 m-2 text-sm">
+                    {{ form_errors(form.macAddress) }}
+                </div>
+            </div>
+
+            {# SERIAL NUMBER #}
+            <div class="relative">
+                {{ form_label(form.serialNumber, 'Serial Number', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.serialNumber, {attr: {class: 'form-widget', placeholder: 'e.g., SN1234567890'}}) }}
+                <div class="text-red-500 m-2 text-sm">
+                    {{ form_errors(form.serialNumber) }}
+                </div>
+            </div>
+
+            {# HARDWARE #}
+            <div class="lg:col-span-2 mt-4">
+                <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-100 pb-1">
+                    Hardware Specifications
+                </h3>
+            </div>
+
+            {# VENDOR #}
+            <div class="relative">
+                {{ form_label(form.vendor, 'Vendor / Brand', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.vendor, {attr: {class: 'form-widget', placeholder: 'e.g., Ubiquiti, Cisco'}}) }}
+                <div class="text-red-500 m-2 text-sm">
+                    {{ form_errors(form.vendor) }}
+                </div>
+            </div>
+
+            {# MODEL #}
+            <div class="relative">
+                {{ form_label(form.model, 'Model', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.model, {attr: {class: 'form-widget', placeholder: 'e.g., UniFi AP AC Pro'}}) }}
+                <div class="text-red-500 m-2 text-sm">
+                    {{ form_errors(form.model) }}
+                </div>
+            </div>
+
+            {# STANDARD #}
+            <div class="relative lg:col-span-2">
+                {{ form_label(form.standard, 'Wi-Fi Standard', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.standard, {attr: {class: 'form-widget', placeholder: 'e.g., 802.11ax (Wi-Fi 6)'}}) }}
+                <div class="text-red-500 m-2 text-sm">
+                    {{ form_errors(form.standard) }}
+                </div>
+            </div>
+
+            {# GEOLOCATION #}
+            <div class="lg:col-span-2 mt-4">
+                <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-100 pb-1">
+                    Geolocation and Altitude
+                </h3>
+            </div>
+
+            {# LATITUDE #}
+            <div class="relative">
+                {{ form_label(form.latitude, 'Latitude', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.latitude, {attr: {class: 'form-widget', placeholder: 'e.g., 41.149612'}}) }}
+                <div class="text-red-500 m-2 text-sm">
+                    {{ form_errors(form.latitude) }}
+                </div>
+            </div>
+
+            {# LONGITUDE #}
+            <div class="relative">
+                {{ form_label(form.longitude, 'Longitude', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.longitude, {attr: {class: 'form-widget', placeholder: 'e.g., -8.611014'}}) }}
+                <div class="text-red-500 m-2 text-sm">
+                    {{ form_errors(form.longitude) }}
+                </div>
+            </div>
+
+            {# ALTITUDE MSL #}
+            <div class="relative">
+                {{ form_label(form.altitudeMsl, 'Altitude MSL (Mean Sea Level - meters)', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.altitudeMsl, {attr: {class: 'form-widget', placeholder: 'e.g., 120.5'}}) }}
+                <div class="text-red-500 m-2 text-sm">
+                    {{ form_errors(form.altitudeMsl) }}
+                </div>
+            </div>
+
+            {# ALTITUDE AGL #}
+            <div class="relative">
+                {{ form_label(form.altitudeAgl, 'Altitude AGL (Above Ground Level - meters)', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.altitudeAgl, {attr: {class: 'form-widget', placeholder: 'e.g., 3.5'}}) }}
+                <div class="text-red-500 m-2 text-sm">
+                    {{ form_errors(form.altitudeAgl) }}
+                </div>
+            </div>
+
+        </div>
+
+        {# ACTION BUTTONS #}
+        <div class="flex flex-row justify-end gap-4 md:w-full mt-8 pt-4 border-t border-gray-100">
+            <a href="{{ path('admin_dashboard_map') }}" class="btn-secondary flex items-center justify-center">
+                Return
+            </a>
+            <button type="submit" class="btn-primary">
+                Create
+            </button>
+        </div>
+
+        {{ form_rest(form) }}
+        {{ form_end(form) }}
+    </div>
+
+{% endblock %}

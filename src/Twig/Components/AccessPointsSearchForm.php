@@ -47,6 +47,7 @@ class AccessPointsSearchForm
     /** @var array<string, int>|null */
     private ?array $cachedCounts = null;
 
+    #[LiveProp]
     public Network $network;
 
     public function __construct(
@@ -61,7 +62,7 @@ class AccessPointsSearchForm
      * @return Paginator<Network>
      */
     #[ExposeInTemplate]
-    public function getNetworks(): Paginator
+    public function getAccessPoints(): Paginator
     {
         if (!$this->cachedAccessPoints instanceof Paginator) {
             $this->cachedAccessPoints = new Paginator($this->getQueryBuilder());
@@ -100,7 +101,7 @@ class AccessPointsSearchForm
     #[ExposeInTemplate]
     public function getTotalPages(): int
     {
-        return (int)ceil(count($this->getNetworks()) / $this->count);
+        return (int)ceil(count($this->getAccessPoints()) / $this->count);
     }
 
 }
