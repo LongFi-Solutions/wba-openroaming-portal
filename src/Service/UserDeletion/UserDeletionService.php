@@ -41,6 +41,8 @@ readonly class UserDeletionService
     public function deleteUser(User $user, array $userExternalAuths, Request $request, User $admin): array
     {
         $deletedUserUuid = $user->getUuid();
+        $deletedUserById = $user->getId();
+        $adminUuid = $admin->getUuid();
 
         $phoneNumber = null;
         if ($user->getPhoneNumber() instanceof PhoneNumber) {
@@ -136,11 +138,12 @@ readonly class UserDeletionService
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
+        // Use pre-captured values — immune to entity mutation
         $eventMetadata = [
             EventMetadataKeysType::IP->value => $request->getClientIp(),
             EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-            EventMetadataKeysType::UUID->value => $admin->getUuid(),
-            EventMetadataKeysType::PERFORMED_ON_UUID->value => $deletedUserUuid
+            EventMetadataKeysType::UUID->value => $adminUuid,
+            EventMetadataKeysType::PERFORMED_ON_ID->value => $deletedUserById,
         ];
 
         $this->eventActions->saveEvent(
