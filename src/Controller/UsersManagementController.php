@@ -28,7 +28,7 @@ use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
 use App\Service\UserCreationService;
-use App\Service\UserDeletionService;
+use App\Service\UserDeletion\UserDeletionService;
 use App\Service\VerificationCodeEmailGenerator;
 use DateTime;
 use DateTimeInterface;

@@ -14,9 +14,10 @@ use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
 use App\Service\SamlResolverService;
-use App\Service\UserDeletionService;
+use App\Service\UserDeletion\UserDeletionService;
 use App\Service\UserStatusChecker;
 use DateTime;
+use Doctrine\ORM\Exception\ORMException;
 use JsonException;
 use OneLogin\Saml2\Auth;
 use OneLogin\Saml2\Error;
@@ -50,6 +51,7 @@ class UserAccountController extends AbstractController
      * @throws ValidationError
      * @throws Error
      * @throws JsonException
+     * @throws ORMException
      */
     #[Route('/userAccount/deletion', name: 'api_v1_user_account_deletion', methods: ['POST'])]
     public function userAccountDeletion(Request $request, Auth $samlAuth): JsonResponse
@@ -69,8 +71,7 @@ class UserAccountController extends AbstractController
                 )->toResponse();
             }
 
-            $userUUID = $currentUser->getUuid();
-            $isAdminAccount = $this->userRepository->findOneByUUIDExcludingAdmin($userUUID);
+            $isAdminAccount = $this->userRepository->findOneByUUIDExcludingAdmin($currentUser->getUuid());
             if (!$isAdminAccount instanceof User) {
                 return new BaseResponse(
                     404,
@@ -79,12 +80,14 @@ class UserAccountController extends AbstractController
                 )->toResponse();
             }
 
-            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($isAdminAccount);
             if ($statusCheckerResponse instanceof BaseResponse) {
                 return $statusCheckerResponse->toResponse();
             }
 
-            foreach ($currentUser->getUserExternalAuths() as $externalAuth) {
+            $userUUID = $isAdminAccount->getUuid();
+
+            foreach ($isAdminAccount->getUserExternalAuths() as $externalAuth) {
                 if ($externalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
                     try {
                         $data = json_decode(
@@ -114,7 +117,7 @@ class UserAccountController extends AbstractController
                     }
 
                     // Verify the password supplied matches the hashed password stored in the User entity
-                    if (!$this->passwordHasher->isPasswordValid($currentUser, $data['password'])) {
+                    if (!$this->passwordHasher->isPasswordValid($isAdminAccount, $data['password'])) {
                         return new BaseResponse(
                             401, // Unauthorized
                             null,
@@ -184,7 +187,7 @@ class UserAccountController extends AbstractController
                     }
 
                     // Compare the SAML email with the current user's email
-                    if ($email !== $currentUser->getEmail()) {
+                    if ($email !== $isAdminAccount->getEmail()) {
                         return new BaseResponse(
                             403,
                             null,
@@ -223,10 +226,10 @@ class UserAccountController extends AbstractController
                     }
 
                     // Authenticate the user using a custom Google authentication function already on the project
-                    $this->googleController->authenticateUserGoogle($currentUser);
+                    $this->googleController->authenticateUserGoogle($isAdminAccount);
 
                     // Generate JWT Token
-                    $token = $this->JWTTokenGenerator->generateToken($currentUser);
+                    $token = $this->JWTTokenGenerator->generateToken($isAdminAccount);
                     if (is_array($token) && $token['success'] === false) {
                         $errorMessage = $token['error'] ?? 'Unknown error';
                         $statusCode =
@@ -266,10 +269,10 @@ class UserAccountController extends AbstractController
                     }
 
                     // Authenticate the user using a custom Microsoft authentication function already on the project
-                    $this->microsoftController->authenticateUserMicrosoft($currentUser);
+                    $this->microsoftController->authenticateUserMicrosoft($isAdminAccount);
 
                     // Generate JWT Token
-                    $token = $this->JWTTokenGenerator->generateToken($currentUser);
+                    $token = $this->JWTTokenGenerator->generateToken($isAdminAccount);
                     if (is_array($token) && $token['success'] === false) {
                         $errorMessage = $token['error'] ?? 'Unknown error';
                         $statusCode =
@@ -281,12 +284,12 @@ class UserAccountController extends AbstractController
             }
 
             // Call the user deletion service
-            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser->getId()]);
+            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $isAdminAccount->getId()]);
             $result = $this->userDeletionService->deleteUser(
-                $currentUser,
+                $isAdminAccount,
                 $userExternalAuths,
                 $request,
-                $currentUser
+                $isAdminAccount
             );
 
             if (!$result['success']) {
@@ -305,7 +308,7 @@ class UserAccountController extends AbstractController
             ];
 
             $this->eventActions->saveEvent(
-                $currentUser,
+                $isAdminAccount,
                 AnalyticalEventType::USER_ACCOUNT_DELETION_API->value,
                 new DateTime(),
                 $eventMetadata
