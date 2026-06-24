@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\UserDeletion;
 
 use App\Entity\DeletedUserData;
 use App\Entity\User;
@@ -9,11 +9,14 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserVerificationStatus;
-use App\Repository\UserRepository;
+use App\Service\EventActions;
+use App\Service\PgpEncryptionService;
+use App\Service\ProfileManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use libphonenumber\PhoneNumber;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -25,6 +28,7 @@ readonly class UserDeletionService
         private EntityManagerInterface $entityManager,
         private PgpEncryptionService $encryptionService,
         private TranslatorInterface $translator,
+        private UserEventDataEncryptionService $userEventDataEncryptionService,
     ) {
     }
 
@@ -70,6 +74,16 @@ readonly class UserDeletionService
             'externalAuths' => $deletedUserExternalAuthData,
         ];
         $jsonDataCombined = json_encode($combinedData, JSON_THROW_ON_ERROR);
+
+        // Encrypt sensitive event metadata BEFORE the user entity
+        try {
+            $this->userEventDataEncryptionService->encryptUserEventsMetadata($user);
+        } catch (RuntimeException) {
+            return [
+                'success' => false,
+                'message' => $this->translator->trans('encryptionEventFailed', [], 'UserDeletionService'),
+            ];
+        }
 
         $pgpEncryptedData = $this->encryptionService->encrypt($jsonDataCombined);
 
