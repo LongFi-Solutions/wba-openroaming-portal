@@ -11,7 +11,6 @@ use App\Entity\Network;
 use App\Enum\AdminPermissionsType;
 use App\Form\CreateAccessPointType;
 use App\Form\CreateNetworkType;
-use App\Repository\AccessPointRepository;
 use App\Repository\NetworkRepository;
 use App\Service\GetSettings;
 use DateTimeImmutable;
@@ -32,7 +31,6 @@ class MapController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly NetworkRepository $networkRepository,
         private readonly EntityManagerInterface $entityManager,
-        private readonly AccessPointRepository $accessPointRepository,
     ){}
     #[Route('/map', name: 'app_map')]
     public function index(Request $request): Response
@@ -45,7 +43,7 @@ class MapController extends AbstractController
         $centerLng = $lng ?? -25.6756;
 
         $data = $this->getSettings->getSettings();
-        $map = (new Map())
+        $map = new Map()
             ->center(new Point((float)$centerLat, (float)$centerLng))
             ->zoom(13);
 
@@ -69,7 +67,7 @@ class MapController extends AbstractController
         $centerLng = $lng ?? -25.6756;
 
         $data = $this->getSettings->getSettings();
-        $map = (new Map())
+        $map = new Map()
             ->center(new Point((float)$centerLat, (float)$centerLng))
             ->zoom(13);
 
@@ -177,6 +175,19 @@ class MapController extends AbstractController
         $data = $this->getSettings->getSettings();
         $accessPointDTO = new AccessPointDTO();
         $accessPointDTO->network = $network;
+        if ($accessPointDTO->latitude !== null && $accessPointDTO->longitude !== null) {
+            $centerLat = $accessPointDTO->latitude;
+            $centerLng = $accessPointDTO->longitude;
+            $zoom = 16;
+        } else {
+            $centerLat = $request->query->get('lat') ?? 37.7412;
+            $centerLng = $request->query->get('lng') ?? -25.6756;
+            $zoom = 13;
+        }
+
+        $map = new Map()
+            ->center(new Point((float)$centerLat, (float)$centerLng))
+            ->zoom($zoom);
         $form = $this->createForm(CreateAccessPointType::class, $accessPointDTO);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -195,6 +206,7 @@ class MapController extends AbstractController
         return $this->render('dashboard/shared/settings_actions/map/access_point/create.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
+            'map' => $map,
 
         ]);
     }
@@ -212,11 +224,27 @@ class MapController extends AbstractController
     {
         $data = $this->getSettings->getSettings();
         $accessPointDTO = AccessPointDTO::createFromEntity($accessPoint);
+        if ($accessPointDTO->latitude !== null && $accessPointDTO->longitude !== null) {
+            $centerLat = $accessPointDTO->latitude;
+            $centerLng = $accessPointDTO->longitude;
+            $zoom = 16;
+        } else {
+            $centerLat = $request->query->get('lat') ?? 37.7412;
+            $centerLng = $request->query->get('lng') ?? -25.6756;
+            $zoom = 13;
+        }
+
+        $map = new Map()
+            ->center(new Point((float)$centerLat, (float)$centerLng))
+            ->zoom($zoom);
+
         $form = $this->createForm(CreateAccessPointType::class, $accessPointDTO);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            //dd($accessPointDTO);
             $accessPointDTO->updateEntity($accessPoint);
             $accessPoint->setUpdatedAt(new DateTimeImmutable());
+
             $this->entityManager->persist($accessPoint);
             $this->entityManager->flush();
             return $this->redirectToRoute('admin_dashboard_map_network_accessPoints',
@@ -228,6 +256,7 @@ class MapController extends AbstractController
         return $this->render('dashboard/shared/settings_actions/map/access_point/create.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
+            'map' => $map,
 
         ]);
     }

@@ -2,6 +2,18 @@
 
 {% block title %}Map Page - Create Access Point{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        .leaflet-container {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 350px !important;
+        }
+    </style>
+{% endblock %}
+
 {% block container %}
 
     <div class="p-6 bg-white rounded-lg shadow-sm">
@@ -101,22 +113,48 @@
                 </h3>
             </div>
 
-            {# LATITUDE #}
-            <div class="relative">
-                {{ form_label(form.latitude, 'Latitude', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.latitude, {attr: {class: 'form-widget', placeholder: 'e.g., 41.149612'}}) }}
-                <div class="text-red-500 m-2 text-sm">
-                    {{ form_errors(form.latitude) }}
-                </div>
-            </div>
+            <div class="lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6" data-controller="custom-map-picker map-geolocation">
 
-            {# LONGITUDE #}
-            <div class="relative">
-                {{ form_label(form.longitude, 'Longitude', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.longitude, {attr: {class: 'form-widget', placeholder: 'e.g., -8.611014'}}) }}
-                <div class="text-red-500 m-2 text-sm">
-                    {{ form_errors(form.longitude) }}
+                {# MAP CONTAINER #}
+                <div class="lg:col-span-2">
+                    <label class="form-label mb-2 block">Select Location on Map</label>
+
+                    <div class="w-full h-[350px] rounded-lg border border-gray-200 shadow-inner overflow-hidden z-10">
+                        {{ ux_map(map, {
+                            'data-action': 'ux:map:pre-connect->custom-map-picker#_onPreConnect'
+                        }) }}
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">Click anywhere on the map to automatically set the coordinates.</p>
                 </div>
+
+                {# LATITUDE #}
+                <div class="relative">
+                    {{ form_label(form.latitude, 'Latitude', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.latitude, {attr: {
+                        class: 'form-widget',
+                        'data-custom-map-picker-target': 'latitude',
+                        'data-action': 'change->custom-map-picker#syncMap',
+                        placeholder: 'Ex: 41.149612'
+                    }}) }}
+                    <div class="text-red-500 m-2 text-sm">
+                        {{ form_errors(form.latitude) }}
+                    </div>
+                </div>
+
+                {# LONGITUDE #}
+                <div class="relative">
+                    {{ form_label(form.longitude, 'Longitude', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.longitude, {attr: {
+                        class: 'form-widget',
+                        'data-custom-map-picker-target': 'longitude',
+                        'data-action': 'change->custom-map-picker#syncMap',
+                        placeholder: 'Ex: -8.611014'
+                    }}) }}
+                    <div class="text-red-500 m-2 text-sm">
+                        {{ form_errors(form.longitude) }}
+                    </div>
+                </div>
+
             </div>
 
             {# ALTITUDE MSL #}

@@ -33,12 +33,11 @@ class AccessPointDTO
     #[Assert\Length(max: 255, maxMessage: 'maxCharacters')]
     public ?string $serialNumber = null;
 
-
     #[Assert\Range(min: -90, max: 90, notInRangeMessage: 'cordinateDeegreBteween90')]
-    public ?float $latitude = null;
+    public ?string $latitude = null;
 
     #[Assert\Range(min: -180, max: 180, notInRangeMessage: 'cordinateDeegreBteween180')]
-    public ?float $longitude = null;
+    public ?string $longitude = null;
 
 
     #[Assert\Type(type: 'float', message: 'decimalNumber')]
@@ -85,9 +84,12 @@ class AccessPointDTO
         $accessPoint->setAltitudeAgl($this->altitudeAgl);
 
         if ($this->latitude !== null && $this->longitude !== null) {
+            $exactLng = (float) number_format((float)$this->longitude, 7, '.', '');
+            $exactLat = (float) number_format((float)$this->latitude, 7, '.', '');
+
             $accessPoint->setLocation([
                 'type' => 'Point',
-                'coordinates' => [$this->longitude, $this->latitude]
+                'coordinates' => [$exactLng, $exactLat]
             ]);
         } else {
             $accessPoint->setLocation(null);
