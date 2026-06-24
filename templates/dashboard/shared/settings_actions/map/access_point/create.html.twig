@@ -2,18 +2,6 @@
 
 {% block title %}Map Page - Create Access Point{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <style>
-        .leaflet-container {
-            width: 100% !important;
-            height: 100% !important;
-            min-height: 350px !important;
-        }
-    </style>
-{% endblock %}
-
 {% block container %}
 
     <div class="p-6 bg-white rounded-lg shadow-sm">
@@ -121,7 +109,8 @@
 
                     <div class="w-full h-[350px] rounded-lg border border-gray-200 shadow-inner overflow-hidden z-10">
                         {{ ux_map(map, {
-                            'data-action': 'ux:map:pre-connect->custom-map-picker#_onPreConnect'
+                            'class': 'w-full h-full min-h-[350px]',
+                            'data-action': 'ux:map:pre-connect->custom-map-picker#_onPreConnect ux:map:connect->map-geolocation#_onConnect ux:map:connect->custom-map-picker#_onConnect'
                         }) }}
                     </div>
                     <p class="text-xs text-gray-400 mt-1">Click anywhere on the map to automatically set the coordinates.</p>
