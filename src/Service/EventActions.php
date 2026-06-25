@@ -21,7 +21,8 @@ readonly class EventActions
         User $user,
         string $eventName,
         DateTime $dateTime,
-        array $eventMetadata
+        array $eventMetadata,
+        bool $containsEncryptedData = false,
     ): void {
         $event = new Event();
         $event->setUser($user);
@@ -40,7 +41,8 @@ readonly class EventActions
         }
 
         $event->setEventMetadata($metadata);
-
+        $event->setContainsEncryptedData($containsEncryptedData);
+        
         $this->entityManager->persist($event);
         $this->entityManager->flush();
     }

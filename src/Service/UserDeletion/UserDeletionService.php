@@ -158,7 +158,8 @@ readonly class UserDeletionService
             $admin,
             AnalyticalEventType::DELETED_USER_BY->value,
             new DateTime(),
-            $eventMetadata
+            $eventMetadata,
+            true
         );
 
         return [
