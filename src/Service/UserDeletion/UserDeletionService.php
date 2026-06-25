@@ -53,7 +53,7 @@ readonly class UserDeletionService
         try {
             if ($user->getEmail() !== null) {
                 $this->emailGenerator->sendAccountDeletionEmail($user);
-            } elseif ($user->getPhoneNumber() !== null) {
+            } elseif ($user->getPhoneNumber() instanceof PhoneNumber) {
                 $message = $this->translator->trans('sms_account_deletion', [], 'UserDeletionService');
                 $this->sendSMS->sendSmsNoValidation($user, $message);
             }
