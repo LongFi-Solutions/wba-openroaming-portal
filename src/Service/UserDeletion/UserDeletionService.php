@@ -9,6 +9,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserVerificationStatus;
+use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
@@ -18,6 +19,7 @@ use Doctrine\ORM\Exception\ORMException;
 use libphonenumber\PhoneNumber;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class UserDeletionService
@@ -29,6 +31,7 @@ readonly class UserDeletionService
         private PgpEncryptionService $encryptionService,
         private TranslatorInterface $translator,
         private UserEventDataEncryptionService $userEventDataEncryptionService,
+        private EmailGenerator $emailGenerator,
     ) {
     }
 
@@ -43,6 +46,12 @@ readonly class UserDeletionService
         // Capture IDs before any change
         $deletedUserById = $user->getId();
         $adminId = $admin->getId();
+
+        // Notify the user before their data is wiped
+        try {
+            $this->emailGenerator->sendAccountDeletionEmail($user);
+        } catch (TransportExceptionInterface) {
+        }
 
         // Build the user data
         $phoneNumber = null;

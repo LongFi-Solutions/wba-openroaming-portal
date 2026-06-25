@@ -298,4 +298,41 @@ readonly class EmailGenerator
             ->embedFromPath($logoPath, 'logo_cid');
         $this->mailer->send($email);
     }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function sendAccountDeletionEmail(User $user): void
+    {
+        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
+
+        $email = new TemplatedEmail()
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
+            ->to($user->getEmail())
+            ->subject(
+                $this->translator->trans(
+                    'subject_account_deletion_confirmation',
+                    [],
+                    'user_account_deletion_confirmation'
+                )
+            )
+            ->htmlTemplate('email/user_account_deletion_confirmation.html.twig')
+            ->context([
+                'uuid' => $user->getEmail(),
+                'supportTeam' => $supportTeam,
+                'contactEmail' => $contactEmail,
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
+
+        $this->mailer->send($email);
+    }
 }

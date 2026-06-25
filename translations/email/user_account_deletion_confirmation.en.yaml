@@ -1,0 +1,8 @@
+subject_account_deletion_confirmation: "Your account has been deleted"
+warning: "This action is permanent and cannot be undone."
+deletion_message: "We are writing to confirm that your account associated with <strong>%uuid%</strong> has been successfully deleted from our portal."
+deletion_info: "All your personal data has been removed in accordance with our privacy policy. If you did not request this deletion, please contact our support team immediately."
+footer:
+  support_team: "If you have any questions, please contact us at"
+  thank_you: "Thank you for using our service."
+  team: "The %supportTeam% Team"

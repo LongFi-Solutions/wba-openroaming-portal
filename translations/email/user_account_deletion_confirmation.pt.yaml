@@ -1,0 +1,8 @@
+subject_account_deletion_confirmation: "A sua conta foi eliminada"
+warning: "Esta ação é permanente e não pode ser revertida."
+deletion_message: "Escrevemos para confirmar que a sua conta associada a <strong>%uuid%</strong> foi eliminada com sucesso do nosso portal."
+deletion_info: "Todos os seus dados pessoais foram removidos de acordo com a nossa política de privacidade. Caso não tenha solicitado esta eliminação, contacte a nossa equipa de suporte de imediato."
+footer:
+  support_team: "Se tiver alguma questão, contacte-nos através de"
+  thank_you: "Obrigado por utilizar o nosso serviço."
+  team: "A equipa %supportTeam%"
