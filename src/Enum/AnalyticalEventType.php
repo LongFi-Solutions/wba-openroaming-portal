@@ -171,7 +171,7 @@ enum AnalyticalEventType: string
             self::ADMIN_REMOVED_PERMISSIONS => 'Permissions Removed',
             self::ADMIN_ADDED_NEW_USER => 'Admin Added New User',
             self::ADMIN_REVOKE_PROFILES => 'Admin Revoked Profiles',
-            self::DELETED_USER_BY => 'User Deleted by Admin',
+            self::DELETED_USER_BY => 'User Deleted',
             self::EXPORT_USERS_TABLE_REQUEST => 'Users Exported',
             self::EXPORT_FREERADIUS_STATISTICS_REQUEST => 'FreeRADIUS Stats Exported',
 

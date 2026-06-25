@@ -3,3 +3,4 @@ publicKeyEmpty: 'A chave pública está vazia. Por favor, forneça o conteúdo v
 userSuccessfullyDeleted: 'Os dados do utilizador foram eliminados e encriptados com sucesso.'
 encryptionFailed: 'A encriptação com a chave pública PGP falhou.'
 encryptionEventFailed: 'A encriptação com a chave pública PGP falhou durante os eventos associados ao utilizador.'
+sms_account_deletion: "A sua conta foi permanentemente eliminada do nosso portal. Se não solicitou esta ação, contacte o suporte de imediato."

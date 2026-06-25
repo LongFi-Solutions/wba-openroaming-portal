@@ -13,6 +13,7 @@ use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
+use App\Service\SendSMS;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -32,6 +33,7 @@ readonly class UserDeletionService
         private TranslatorInterface $translator,
         private UserEventDataEncryptionService $userEventDataEncryptionService,
         private EmailGenerator $emailGenerator,
+        private SendSMS $sendSMS,
     ) {
     }
 
@@ -49,8 +51,14 @@ readonly class UserDeletionService
 
         // Notify the user before their data is wiped
         try {
-            $this->emailGenerator->sendAccountDeletionEmail($user);
-        } catch (TransportExceptionInterface) {
+            if ($user->getEmail() !== null) {
+                $this->emailGenerator->sendAccountDeletionEmail($user);
+            } elseif ($user->getPhoneNumber() !== null) {
+                $message = $this->translator->trans('sms_account_deletion', [], 'UserDeletionService');
+                $this->sendSMS->sendSmsNoValidation($user, $message);
+            }
+        } catch (\Throwable) {
+            // non-fatal — deletion continues regardless
         }
 
         // Build the user data
