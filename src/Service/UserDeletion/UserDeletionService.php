@@ -33,16 +33,18 @@ readonly class UserDeletionService
     }
 
     /**
-     * @param UserExternalAuth[] $userExternalAuths Array of external auth objects
+     * @param UserExternalAuth[] $userExternalAuths
      * @return array<string, mixed>
      * @throws \JsonException
      * @throws ORMException
      */
     public function deleteUser(User $user, array $userExternalAuths, Request $request, User $admin): array
     {
+        // Capture IDs before any change
         $deletedUserById = $user->getId();
         $adminId = $admin->getId();
 
+        // Build the user data
         $phoneNumber = null;
         if ($user->getPhoneNumber() instanceof PhoneNumber) {
             $phoneNumber = "+" .
@@ -66,7 +68,7 @@ readonly class UserDeletionService
         foreach ($userExternalAuths as $externalAuth) {
             $deletedUserExternalAuthData[] = [
                 'provider' => $externalAuth->getProvider(),
-                'providerId' => $externalAuth->getProviderId()
+                'providerId' => $externalAuth->getProviderId(),
             ];
         }
 
@@ -76,20 +78,10 @@ readonly class UserDeletionService
         ];
         $jsonDataCombined = json_encode($combinedData, JSON_THROW_ON_ERROR);
 
-        // Encrypt sensitive event metadata BEFORE the user entity
-        try {
-            $this->userEventDataEncryptionService->encryptUserEventsMetadata($user);
-        } catch (RuntimeException) {
-            return [
-                'success' => false,
-                'message' => $this->translator->trans('encryptionEventFailed', [], 'UserDeletionService'),
-            ];
-        }
-
+        // Encrypt the user data
         $pgpEncryptedData = $this->encryptionService->encrypt($jsonDataCombined);
 
-        // Make sure encryption returned a string
-        if (!is_string($pgpEncryptedData) || ($pgpEncryptedData === '' || $pgpEncryptedData === '0')) {
+        if (!is_string($pgpEncryptedData) || $pgpEncryptedData === '' || $pgpEncryptedData === '0') {
             return [
                 'success' => false,
                 'message' => $this->translator->trans('encryptionFailed', [], 'UserDeletionService'),
@@ -103,7 +95,6 @@ readonly class UserDeletionService
                 'message' => $this->translator->trans('publicKeyMissing', [], 'UserDeletionService'),
             ];
         }
-
         if ($pgpEncryptedData === UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT->value) {
             return [
                 'success' => false,
@@ -111,6 +102,17 @@ readonly class UserDeletionService
             ];
         }
 
+        // Encrypt all existing events for this user BEFORE any entity change
+        try {
+            $this->userEventDataEncryptionService->encryptUserEventsMetadata($user);
+        } catch (RuntimeException) {
+            return [
+                'success' => false,
+                'message' => $this->translator->trans('encryptionEventFailed', [], 'UserDeletionService'),
+            ];
+        }
+
+        // Prepare the user entity
         $deletedUserDataEntity = new DeletedUserData();
         $deletedUserDataEntity->setPgpEncryptedJsonFile($pgpEncryptedData);
         $deletedUserDataEntity->setUser($user);
@@ -137,14 +139,21 @@ readonly class UserDeletionService
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        // Use pre-captured values — immune to entity mutation
+        // Build the deletion event metadata using pre-captured IDs
         $eventMetadata = [
             EventMetadataKeysType::IP->value => $request->getClientIp(),
             EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-            EventMetadataKeysType::ID->value => $adminId,
+            EventMetadataKeysType::UUID->value => (string)$adminId,
             EventMetadataKeysType::PERFORMED_ON_ID->value => $deletedUserById,
         ];
 
+        // Encrypt the sensitive fields of the deletion event inline,
+        $encryptedUuid = $this->encryptionService->encrypt((string)$adminId);
+        if (is_string($encryptedUuid) && $encryptedUuid !== '') {
+            $eventMetadata[EventMetadataKeysType::UUID->value] = $encryptedUuid;
+        }
+
+        // Save the deletion event — already encrypted
         $this->eventActions->saveEvent(
             $admin,
             AnalyticalEventType::DELETED_USER_BY->value,
@@ -154,7 +163,7 @@ readonly class UserDeletionService
 
         return [
             'success' => true,
-            'message' => $this->translator->trans('userSuccessfullyDeleted', [], 'UserDeletionService')
+            'message' => $this->translator->trans('userSuccessfullyDeleted', [], 'UserDeletionService'),
         ];
     }
 }
