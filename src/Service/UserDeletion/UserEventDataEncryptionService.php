@@ -18,6 +18,8 @@ readonly class UserEventDataEncryptionService
     private const array SENSITIVE_SCALAR_KEYS = [
         EventMetadataKeysType::UUID->value,
         EventMetadataKeysType::PERFORMED_ON_UUID->value,
+        EventMetadataKeysType::ID->value,
+        EventMetadataKeysType::PERFORMED_ON_ID->value
     ];
 
     /**
