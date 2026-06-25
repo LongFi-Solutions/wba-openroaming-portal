@@ -42,7 +42,7 @@ readonly class EventActions
 
         $event->setEventMetadata($metadata);
         $event->setContainsEncryptedData($containsEncryptedData);
-        
+
         $this->entityManager->persist($event);
         $this->entityManager->flush();
     }
