@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\UX\Map\Map;
+use Symfony\UX\Map\Marker;
 use Symfony\UX\Map\Point;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 
@@ -134,8 +135,7 @@ class MapController extends AbstractController
         return $this->redirectToRoute('admin_dashboard_map');
     }
 
-    #[Route('dashboard/map/network/edit/{id:network<\d+>}',
-        name: 'admin_dashboard_map_network_edit')]
+    #[Route('dashboard/map/network/edit/{id:network<\d+>}', name: 'admin_dashboard_map_network_edit')]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function editNetwork(Network $network, Request $request): Response
     {
@@ -150,6 +150,12 @@ class MapController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $networkDTO->updateEntity($network);
+            if (!empty($networkDTO->geometryJson)) {
+                $network->setGeometry(json_decode($networkDTO->geometryJson, true));
+            } else {
+                $network->setGeometry(null);
+            }
+
             $network->setUpdatedAt(new DateTimeImmutable());
             $this->entityManager->persist($network);
             $this->entityManager->flush();
@@ -158,20 +164,39 @@ class MapController extends AbstractController
 
         $lat = $request->query->get('lat');
         $lng = $request->query->get('lng');
-
         $centerLat = $lat ?? 37.7412;
         $centerLng = $lng ?? -25.6756;
 
         $map = new Map()
             ->center(new Point((float)$centerLat, (float)$centerLng))
             ->zoom(13);
+
+        $accessPoints = $this->entityManager->getRepository(AccessPoint::class)->findBy(['network' => $network]);
+
+        foreach ($accessPoints as $ap) {
+            $location = $ap->getLocation();
+
+            if ($location && isset($location['coordinates']) && is_array($location['coordinates'])) {
+
+                $lng = $location['coordinates'][0] ?? null;
+                $lat = $location['coordinates'][1] ?? null;
+
+                if ($lat !== null && $lng !== null) {
+                    $map->addMarker(new Marker(
+                        position: new Point((float)$lat, (float)$lng),
+                        title: $ap->getName() ?? 'Access Point'
+                    ));
+                }
+            }
+        }
+
         return $this->render('dashboard/shared/settings_actions/map/edit.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'map' => $map,
-
+            'networkDTO' => $networkDTO,
+            'network' => $network,
         ]);
-
     }
 
     #[Route('dashboard/map/network/{id:network<\d+>}/accessPoints',
