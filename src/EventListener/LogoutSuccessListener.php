@@ -7,6 +7,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Service\EventActions;
 use DateTime;
+use DateTimeInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
@@ -31,7 +32,7 @@ readonly class LogoutSuccessListener implements EventSubscriberInterface
         $request = $event->getRequest();
 
         if ($user instanceof User) {
-            $isDeleted = $user->getDeletedAt() !== null;
+            $isDeleted = $user->getDeletedAt() instanceof DateTimeInterface;
 
             $eventMetadata = [
                 EventMetadataKeysType::IP->value => $request->getClientIp(),
