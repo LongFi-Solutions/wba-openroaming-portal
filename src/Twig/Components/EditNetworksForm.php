@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormErrorIterator;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpFoundation\RequestStack; // <-- Importa o RequestStack
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
@@ -30,7 +30,7 @@ final class EditNetworksForm extends AbstractController
     use LiveCollectionTrait;
 
     private EntityManagerInterface $entityManager;
-    private RequestStack $requestStack; // <-- Declara o RequestStack
+    private RequestStack $requestStack;
 
     public function __construct(EntityManagerInterface $entityManager, RequestStack $requestStack)
     {
