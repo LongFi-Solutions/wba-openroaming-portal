@@ -11,6 +11,7 @@ use App\Entity\Network;
 use App\Enum\AdminPermissionsType;
 use App\Form\CreateAccessPointType;
 use App\Form\CreateNetworkType;
+use App\Repository\AccessPointRepository;
 use App\Repository\NetworkRepository;
 use App\Service\GetSettings;
 use DateTimeImmutable;
@@ -31,6 +32,7 @@ class MapController extends AbstractController
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly NetworkRepository $networkRepository,
+        private readonly AccessPointRepository $accessPointRepository,
         private readonly EntityManagerInterface $entityManager,
     ){}
     #[Route('/map', name: 'app_map')]
@@ -144,6 +146,8 @@ class MapController extends AbstractController
         $networkDTO = new NetworkDTO();
         $networkDTO->name = $network->getName();
         $networkDTO->description = $network->getDescription();
+
+        $networkDTO->accessPointsFromDatabase = $this->accessPointRepository->findBy(['network' => $network]);
         if ($network->getGeometry() !== null) {
             $networkDTO->geometryJson = json_encode($network->getGeometry());
         }
@@ -241,7 +245,9 @@ class MapController extends AbstractController
             $accessPointDTO->updateEntity($accessPoint);
             $accessPoint->setCreatedAt(new DateTimeImmutable());
             $accessPoint->setUpdatedAt(new DateTimeImmutable());
+            $network->addAccessPoint($accessPoint);
             $this->entityManager->persist($accessPoint);
+            $this->entityManager->persist($network);
             $this->entityManager->flush();
             return $this->redirectToRoute('admin_dashboard_map_network_accessPoints' ,
                 [
@@ -287,7 +293,6 @@ class MapController extends AbstractController
         $form = $this->createForm(CreateAccessPointType::class, $accessPointDTO);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            //dd($accessPointDTO);
             $accessPointDTO->updateEntity($accessPoint);
             $accessPoint->setUpdatedAt(new DateTimeImmutable());
 

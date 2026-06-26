@@ -5,14 +5,15 @@ namespace App\Twig\Components;
 use App\DTO\NetworkDTO;
 use App\Entity\AccessPoint;
 use App\Entity\Network;
-use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\CreateNetworkType;
 use App\Security\Voter\UserAuthenticationVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormErrorIterator;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RequestStack; // <-- Importa o RequestStack
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
-use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
@@ -29,13 +30,15 @@ final class EditNetworksForm extends AbstractController
     use LiveCollectionTrait;
 
     private EntityManagerInterface $entityManager;
+    private RequestStack $requestStack; // <-- Declara o RequestStack
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, RequestStack $requestStack)
     {
         $this->entityManager = $entityManager;
+        $this->requestStack = $requestStack;
     }
 
-    #[LiveProp]
+    #[LiveProp(writable: ['name', 'description', 'geometryJson'])]
     public NetworkDTO|null $networkDTO = null;
 
     /** @var array<string, array{value: ?string, description?: ?string}>|null */
@@ -53,22 +56,36 @@ final class EditNetworksForm extends AbstractController
     {
         $canWrite = $this->isGranted(UserAuthenticationVoter::MAP_WRITE);
 
-        return $this->createForm(CreateNetworkType::class, $this->networkDTO, ['disabled' => !$canWrite]);
+        if ($this->networkDTO && $this->network) {
+
+            $this->networkDTO->accessPointsFromDatabase = $this->entityManager
+                ->getRepository(AccessPoint::class)
+                ->findBy(['network' => $this->network]);
+        }
+
+        $form = $this->createForm(CreateNetworkType::class, $this->networkDTO, ['disabled' => !$canWrite]);
+
+        $currentRequest = $this->requestStack->getCurrentRequest();
+        $isLiveRequest = $currentRequest && $currentRequest->headers->has('X-Live-Component-Action');
+
+        if ($form->isSubmitted() === false && $isLiveRequest) {
+            $form->submit([], false);
+        }
+
+        foreach ($form->getErrors() as $error) {
+            if ($error->getCause() && $error->getCause()->getPropertyPath() === 'data.geometryJson') {
+                if ($form->has('geometryJson')) {
+                    $form->get('geometryJson')->addError(new FormError($error->getMessage()));
+                }
+            }
+        }
+
+        return $form;
     }
 
-    #[LiveAction]
-    public function validate(): void
+    public function getFormErrors(): FormErrorIterator
     {
-        $form = $this->createForm(CreateNetworkType::class, $this->networkDTO);
-
-        // Submit the current DTO values
-        $form->submit([
-            'name' => $this->networkDTO->name,
-            'description' => $this->networkDTO->description,
-            'geometryJson' => $this->networkDTO->geometryJson,
-        ], false);
-
-        $this->form = $form;
+        return $this->getForm()->getErrors(true);
     }
 
     public function getMap(): Map

@@ -36,6 +36,7 @@ class CreateNetworkType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => NetworkDTO::class,
+            'allow_extra_fields' => true,
         ]);
     }
 

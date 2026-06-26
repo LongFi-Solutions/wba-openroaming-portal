@@ -79,7 +79,15 @@
                     }) }}
                 </div>
                 <div class="text-red-500 m-2 text-sm">
-                    {{ form_errors(form) }}
+                    {{ form_errors(form.geometryJson) }}
+
+                    {% for error in form.vars.errors %}
+                        {% if error.cause is defined and error.cause is not null %}
+                            {% if error.cause.propertyPath is defined and error.cause.propertyPath == 'data.geometryJson' %}
+                                <p>{{ error.message }}</p>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </div>
 

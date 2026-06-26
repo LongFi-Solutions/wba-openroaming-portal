@@ -63,10 +63,9 @@ export default class extends Controller {
             this.map.invalidateSize();
             this.map.fitBounds(this.polygon.getBounds(), { padding: [40, 40], maxZoom: 16 });
 
-            console.log("Polígono existente carregado na edição com sucesso!");
 
         } catch (error) {
-            console.error("Erro ao ler a geometria na edição:", error);
+            console.error("Error", error);
         }
     }
 
@@ -110,7 +109,6 @@ export default class extends Controller {
         if (e) e.preventDefault();
 
         if (this.points.length < 3) {
-            alert("Precisa de marcar pelo menos 3 pontos no mapa para delimitar uma área!");
             return;
         }
 
@@ -147,7 +145,8 @@ export default class extends Controller {
         };
 
         this.geometryJsonTarget.value = JSON.stringify(geoJsonData);
-        console.log("GeoJSON gravado no formulário com sucesso:", this.geometryJsonTarget.value);
+
+        this.geometryJsonTarget.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     resetPolygon(e) {
@@ -163,5 +162,7 @@ export default class extends Controller {
         this.polygon = null;
 
         this.geometryJsonTarget.value = "";
+
+        this.geometryJsonTarget.dispatchEvent(new Event('change', { bubbles: true }));
     }
 }
