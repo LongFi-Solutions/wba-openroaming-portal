@@ -40,7 +40,12 @@
                     {% if showUser is not defined or showUser %}
                         {% if event.user is not null %}
                             <span class="px-3 py-1 bg-gray-50 border border-gray-200 rounded-full text-gray-700">
-                                <strong>UUID:</strong> {{ event.user.uuid }}
+                                {% if event.containsEncryptedData %}
+                                    <strong>UUID:</strong>  <span
+                                        class="text-gray-400 italic text-sm">Deleted User ID: {{ event.user.id }}</span>
+                                {% else %}
+                                    <strong>UUID:</strong> {{ event.user.uuid }}
+                                {% endif %}
                             </span>
                         {% endif %}
                     {% endif %}
