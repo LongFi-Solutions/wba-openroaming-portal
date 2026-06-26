@@ -9,6 +9,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserVerificationStatus;
+use App\Message\UserDeletion\EncryptUserEventsMessage;
 use App\Service\EventActions;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
@@ -16,8 +17,9 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use libphonenumber\PhoneNumber;
-use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class UserDeletionService
@@ -28,7 +30,7 @@ readonly class UserDeletionService
         private EntityManagerInterface $entityManager,
         private PgpEncryptionService $encryptionService,
         private TranslatorInterface $translator,
-        private UserEventDataEncryptionService $userEventDataEncryptionService,
+        private MessageBusInterface $messageBus,
     ) {
     }
 
@@ -37,6 +39,7 @@ readonly class UserDeletionService
      * @return array<string, mixed>
      * @throws \JsonException
      * @throws ORMException
+     * @throws ExceptionInterface
      */
     public function deleteUser(User $user, array $userExternalAuths, Request $request, User $admin): array
     {
@@ -102,16 +105,6 @@ readonly class UserDeletionService
             ];
         }
 
-        // Encrypt all existing events for this user BEFORE any entity change
-        try {
-            $this->userEventDataEncryptionService->encryptUserEventsMetadata($user);
-        } catch (RuntimeException) {
-            return [
-                'success' => false,
-                'message' => $this->translator->trans('encryptionEventFailed', [], 'UserDeletionService'),
-            ];
-        }
-
         // Prepare the user entity
         $deletedUserDataEntity = new DeletedUserData();
         $deletedUserDataEntity->setPgpEncryptedJsonFile($pgpEncryptedData);
@@ -138,6 +131,9 @@ readonly class UserDeletionService
         $this->entityManager->persist($deletedUserDataEntity);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
+
+        // Encrypt all existing events after so the worker can keep doing the rest of the stacked queries
+        $this->messageBus->dispatch(new EncryptUserEventsMessage($user->getId()));
 
         // Build the deletion event metadata using pre-captured IDs
         $eventMetadata = [
