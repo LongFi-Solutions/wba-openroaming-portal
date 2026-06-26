@@ -71,8 +71,8 @@ class UserAccountController extends AbstractController
                 )->toResponse();
             }
 
-            $isAdminAccount = $this->userRepository->findOneByUUIDExcludingAdmin($currentUser->getUuid());
-            if (!$isAdminAccount instanceof User) {
+            $user = $this->userRepository->findOneByUUIDExcludingAdmin($currentUser->getUuid());
+            if (!$user instanceof User) {
                 return new BaseResponse(
                     404,
                     null,
@@ -80,15 +80,15 @@ class UserAccountController extends AbstractController
                 )->toResponse();
             }
 
-            $userId = $isAdminAccount->getId();
-            $userUUID = $isAdminAccount->getUuid(); // success message
+            $userId = $user->getId(); // event log
+            $userUUID = $user->getUuid(); // success message
 
-            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($isAdminAccount);
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
             if ($statusCheckerResponse instanceof BaseResponse) {
                 return $statusCheckerResponse->toResponse();
             }
 
-            foreach ($isAdminAccount->getUserExternalAuths() as $externalAuth) {
+            foreach ($user->getUserExternalAuths() as $externalAuth) {
                 if ($externalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
                     try {
                         $data = json_decode(
@@ -118,7 +118,7 @@ class UserAccountController extends AbstractController
                     }
 
                     // Verify the password supplied matches the hashed password stored in the User entity
-                    if (!$this->passwordHasher->isPasswordValid($isAdminAccount, $data['password'])) {
+                    if (!$this->passwordHasher->isPasswordValid($user, $data['password'])) {
                         return new BaseResponse(
                             401, // Unauthorized
                             null,
@@ -189,7 +189,7 @@ class UserAccountController extends AbstractController
                     }
 
                     // Compare the SAML email with the current user's email
-                    if ($email !== $isAdminAccount->getEmail()) {
+                    if ($email !== $user->getEmail()) {
                         return new BaseResponse(
                             403,
                             null,
@@ -228,10 +228,10 @@ class UserAccountController extends AbstractController
                     }
 
                     // Authenticate the user using a custom Google authentication function already on the project
-                    $this->googleController->authenticateUserGoogle($isAdminAccount);
+                    $this->googleController->authenticateUserGoogle($user);
 
                     // Generate JWT Token
-                    $token = $this->JWTTokenGenerator->generateToken($isAdminAccount);
+                    $token = $this->JWTTokenGenerator->generateToken($user);
                     if (is_array($token) && $token['success'] === false) {
                         $errorMessage = $token['error'] ?? 'Unknown error';
                         $statusCode =
@@ -271,10 +271,10 @@ class UserAccountController extends AbstractController
                     }
 
                     // Authenticate the user using a custom Microsoft authentication function already on the project
-                    $this->microsoftController->authenticateUserMicrosoft($isAdminAccount);
+                    $this->microsoftController->authenticateUserMicrosoft($user);
 
                     // Generate JWT Token
-                    $token = $this->JWTTokenGenerator->generateToken($isAdminAccount);
+                    $token = $this->JWTTokenGenerator->generateToken($user);
                     if (is_array($token) && $token['success'] === false) {
                         $errorMessage = $token['error'] ?? 'Unknown error';
                         $statusCode =
@@ -286,12 +286,12 @@ class UserAccountController extends AbstractController
             }
 
             // Call the user deletion service
-            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $isAdminAccount->getId()]);
+            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user->getId()]);
             $result = $this->userDeletionService->deleteUser(
-                $isAdminAccount,
+                $user,
                 $userExternalAuths,
                 $request,
-                $isAdminAccount
+                $user
             );
 
             if (!$result['success']) {
@@ -310,7 +310,7 @@ class UserAccountController extends AbstractController
             ];
 
             $this->eventActions->saveEvent(
-                $isAdminAccount,
+                $user,
                 AnalyticalEventType::USER_ACCOUNT_DELETION_API->value,
                 new DateTime(),
                 $eventMetadata
