@@ -31,17 +31,21 @@ readonly class LogoutSuccessListener implements EventSubscriberInterface
         $request = $event->getRequest();
 
         if ($user instanceof User) {
+            $isDeleted = $user->getDeletedAt() !== null;
+
             $eventMetadata = [
                 EventMetadataKeysType::IP->value => $request->getClientIp(),
                 EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                EventMetadataKeysType::UUID->value => $user->getUuid(),
+                EventMetadataKeysType::UUID->value => $isDeleted ? null : $user->getUuid(),
+                EventMetadataKeysType::ID->value => $user->getId(),
             ];
 
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::LOGOUT_REQUEST->value,
                 new DateTime(),
-                $eventMetadata
+                $eventMetadata,
+                $isDeleted  // <-- pass containsEncryptedData = true when deleted
             );
         }
     }
