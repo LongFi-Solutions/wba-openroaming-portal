@@ -4,7 +4,13 @@
 
 {% block container %}
 
-    <div class="p-6 bg-white rounded-lg shadow-sm" data-controller="network-polygon map-geolocation">
+    <twig:EditNetworksForm
+            :networkDTO="networkDTO"
+            :data="data"
+            :form="form"
+            :network="network"
+    >
+        <div class="p-6 bg-white rounded-lg shadow-sm" data-controller="network-polygon map-geolocation">
 
         <div class="mb-6">
             <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
@@ -13,7 +19,6 @@
         </div>
 
         {{ form_start(form) }}
-        {{ form_errors(form) }}
 
         {{ form_widget(form.geometryJson, {'attr': {'data-network-polygon-target': 'geometryJson'}}) }}
 
@@ -68,10 +73,13 @@
                 </div>
 
                 <div class="w-full h-[450px] rounded-lg border border-gray-200 shadow-inner overflow-hidden z-10">
-                    {{ ux_map(map, {
+                    {{ ux_map(this.map, {
                         'class': 'w-full h-full min-h-[450px]',
                         'data-action': 'ux:map:connect->map-geolocation#_onConnect ux:map:connect->network-polygon#_onConnect'
                     }) }}
+                </div>
+                <div class="text-red-500 m-2 text-sm">
+                    {{ form_errors(form) }}
                 </div>
             </div>
 
@@ -90,5 +98,7 @@
         {{ form_rest(form) }}
         {{ form_end(form) }}
     </div>
+
+    </twig:EditNetworksForm>
 
 {% endblock %}

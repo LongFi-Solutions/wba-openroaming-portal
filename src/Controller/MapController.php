@@ -112,7 +112,6 @@ class MapController extends AbstractController
         $centerLat = $lat ?? 37.7412;
         $centerLng = $lng ?? -25.6756;
 
-        $data = $this->getSettings->getSettings();
         $map = new Map()
             ->center(new Point((float)$centerLat, (float)$centerLng))
             ->zoom(13);
@@ -120,6 +119,8 @@ class MapController extends AbstractController
             'form' => $form->createView(),
             'data' => $data,
             'map' => $map,
+            'networkDTO' => $networkDTO,
+            'network' => null,
 
         ]);
 

@@ -63,9 +63,9 @@ final class EditNetworksForm extends AbstractController
 
         // Submit the current DTO values
         $form->submit([
-            SettingName::CAPPORT_ENABLED->value => $this->networkDTO->name,
-            SettingName::CAPPORT_PORTAL_URL->value => $this->networkDTO->description,
-            SettingName::CAPPORT_VENUE_INFO_URL->value => $this->networkDTO->geometryJson,
+            'name' => $this->networkDTO->name,
+            'description' => $this->networkDTO->description,
+            'geometryJson' => $this->networkDTO->geometryJson,
         ], false);
 
         $this->form = $form;

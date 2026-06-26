@@ -10,7 +10,7 @@ class NetworkDTO
 {
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
-    public ?string $name;
+    public ?string $name = null;
     public ?string $description = null;
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     public ?string $geometryJson = null;
