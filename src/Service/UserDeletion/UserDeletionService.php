@@ -10,11 +10,9 @@ use App\Enum\EventMetadataKeysType;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserVerificationStatus;
 use App\Message\UserDeletion\EncryptUserEventsMessage;
-use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
-use App\Service\SendSMS;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -22,7 +20,6 @@ use libphonenumber\PhoneNumber;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class UserDeletionService
@@ -34,8 +31,6 @@ readonly class UserDeletionService
         private PgpEncryptionService $encryptionService,
         private TranslatorInterface $translator,
         private MessageBusInterface $messageBus,
-        private SendSMS $sendSMS,
-        private EmailGenerator $emailGenerator,
     ) {
     }
 
@@ -51,18 +46,6 @@ readonly class UserDeletionService
         // Capture IDs before any change
         $deletedUserById = $user->getId();
         $adminId = $admin->getId();
-
-        // Notify the user before their data is wiped
-        try {
-            if ($user->getEmail() !== null) {
-                $this->emailGenerator->sendAccountDeletionEmail($user);
-            } elseif ($user->getPhoneNumber() instanceof PhoneNumber) {
-                $message = $this->translator->trans('sms_account_deletion', [], 'UserDeletionService');
-                $this->sendSMS->sendSmsNoValidation($user, $message);
-            }
-        } catch (\Throwable) {
-            // non-fatal — deletion continues regardless
-        }
 
         // Build the user data
         $phoneNumber = null;
