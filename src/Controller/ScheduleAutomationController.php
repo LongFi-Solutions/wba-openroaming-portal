@@ -63,8 +63,8 @@ class ScheduleAutomationController extends AbstractController
             ) {
                 if ($data[$settingName]['value'] !== $cronExpression) {
                     $changeset[$settingName] = [
-                        'oldValue' => $data[$settingName]['value'],
-                        'newValue' => $cronExpression,
+                        EventMetadataKeysType::OLD_DATA->value => $data[$settingName]['value'],
+                        EventMetadataKeysType::NEW_DATA->value => $cronExpression,
                     ];
                 }
                 $this->saveSetting($settingName, $cronExpression, $scheduleDTO->use_advanced_mode);
@@ -109,8 +109,8 @@ class ScheduleAutomationController extends AbstractController
 
                 if ($oldValue !== $newValue) {
                     $changeset[$settingName] = [
-                        'oldValue' => $oldValue,
-                        'newValue' => $newValue,
+                        EventMetadataKeysType::OLD_DATA->value => $oldValue,
+                        EventMetadataKeysType::NEW_DATA->value => $newValue,
                     ];
                 }
 

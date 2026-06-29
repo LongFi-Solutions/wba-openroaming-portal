@@ -2,6 +2,7 @@
 
 namespace App\Api\V1\Controller;
 
+use App\Api\BaseResponseInterface;
 use App\Api\V1\BaseResponse;
 use App\Controller\GoogleController;
 use App\Controller\MicrosoftController;
@@ -131,7 +132,7 @@ class AuthController extends AbstractController
         }
 
         $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-        if ($statusCheckerResponse instanceof BaseResponse) {
+        if ($statusCheckerResponse instanceof BaseResponseInterface) {
             return $statusCheckerResponse->toResponse();
         }
 
@@ -316,7 +317,7 @@ class AuthController extends AbstractController
             }
 
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-            if ($statusCheckerResponse instanceof BaseResponse) {
+            if ($statusCheckerResponse instanceof BaseResponseInterface) {
                 return $statusCheckerResponse->toResponse();
             }
 
@@ -420,7 +421,7 @@ class AuthController extends AbstractController
             }
 
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-            if ($statusCheckerResponse instanceof BaseResponse) {
+            if ($statusCheckerResponse instanceof BaseResponseInterface) {
                 return $statusCheckerResponse->toResponse();
             }
 
@@ -530,7 +531,7 @@ class AuthController extends AbstractController
             }
 
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-            if ($statusCheckerResponse instanceof BaseResponse) {
+            if ($statusCheckerResponse instanceof BaseResponseInterface) {
                 return $statusCheckerResponse->toResponse();
             }
 

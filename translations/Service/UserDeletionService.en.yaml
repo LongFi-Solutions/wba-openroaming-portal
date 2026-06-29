@@ -2,3 +2,4 @@ publicKeyMissing: 'The public key is missing. Please add the "pgp_public_key/pub
 publicKeyEmpty: 'Public key is empty. Please provide valid key content.'
 userSuccessfullyDeleted: 'User data successfully deleted and encrypted.'
 encryptionFailed: 'PGP public key encryption has failed.'
+encryptionEventFailed: 'PGP public key encryption has failed for associated user events.'
