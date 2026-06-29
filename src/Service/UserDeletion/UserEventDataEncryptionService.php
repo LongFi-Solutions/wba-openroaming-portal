@@ -62,6 +62,7 @@ readonly class UserEventDataEncryptionService
             $metadata = $this->encryptNestedFields($metadata);
 
             $event->setEventMetadata($metadata);
+            $event->setContainsEncryptedData(true);
             $this->entityManager->persist($event);
         }
 
