@@ -344,7 +344,7 @@ class UserAccountDeletionController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        /** @var User $user */
+        /** @var User $currentUser */
         $currentUser = $this->userRepository->findOneBy(['id' => $currentLoggedUserID]);
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
         // Notify the user before their data is wiped
