@@ -30,9 +30,42 @@ class NetworkDTO
         }
 
         $geoJson = json_decode($this->geometryJson, true);
-        $polygonVertices = $geoJson['features'][0]['geometry']['coordinates'][0] ?? null;
+        $allPolygons = [];
 
-        if (!$polygonVertices || count($polygonVertices) < 3) {
+        if (isset($geoJson['type']) && $geoJson['type'] === 'FeatureCollection' && isset($geoJson['features'])) {
+
+            foreach ($geoJson['features'] as $feature) {
+                $geometry = $feature['geometry'] ?? null;
+                if (!$geometry) {
+                    continue;
+                }
+
+                $type = $geometry['type'] ?? 'Polygon';
+                $coordinates = $geometry['coordinates'] ?? [];
+
+                if ($type === 'Polygon' && isset($coordinates[0])) {
+                    $allPolygons[] = $coordinates[0];
+                } elseif ($type === 'MultiPolygon') {
+                    foreach ($coordinates as $polygonCoords) {
+                        if (isset($polygonCoords[0])) {
+                            $allPolygons[] = $polygonCoords[0];
+                        }
+                    }
+                }
+            }
+        } else {
+            $geometry = $geoJson['features'][0]['geometry'] ?? null;
+            if ($geometry) {
+                $type = $geometry['type'] ?? 'Polygon';
+                $coordinates = $geometry['coordinates'] ?? [];
+
+                if ($type === 'Polygon' && isset($coordinates[0])) {
+                    $allPolygons[] = $coordinates[0];
+                }
+            }
+        }
+
+        if (empty($allPolygons)) {
             return;
         }
 
@@ -44,7 +77,15 @@ class NetworkDTO
                 $apLng = (float)$location['coordinates'][0];
                 $apLat = (float)$location['coordinates'][1];
 
-                if (!$this->isPointInPolygon([$apLng, $apLat], $polygonVertices)) {
+                $isInsideAny = false;
+                foreach ($allPolygons as $vertices) {
+                    if ($this->isPointInPolygon([$apLng, $apLat], $vertices)) {
+                        $isInsideAny = true;
+                        break;
+                    }
+                }
+
+                if (!$isInsideAny) {
                     $pointsOutside[] = $ap->getSsid();
                 }
             }
