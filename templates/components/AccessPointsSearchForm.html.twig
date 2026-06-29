@@ -44,7 +44,7 @@
                     <label class="w-full">
                         <input type="text"
                                class="form-widget w-full p-2 bg-transparent border-none outline-none"
-                               placeholder="{{ 'searchAcessPointss'|trans({}, '_acessPoint') }}"
+                               placeholder="{{ 'searchAccessPoints'|trans({}, '_acessPoint') }}"
                                data-model="debounce(300)|query"
                                autocomplete="off" />
                     </label>
@@ -53,7 +53,7 @@
 
             <div class="flex items-center space-x-6">
                 <a href="{{ path('admin_dashboard_map_accessPoint_create', { id: network.id }) }}" class="btn-primary px-4 min-w-[150px]">
-                    {{ 'createAcessPoints'|trans({}, '_acessPoint') }}
+                    {{ 'createAccessPoints'|trans({}, '_acessPoint') }}
                 </a>
             </div>
 
@@ -120,9 +120,9 @@
                         <div class="flex flex-row justify-center items-start mt-2 p-4">
                             <div class="pill-error">
                                 {% if query %}
-                                    {{ 'noAcessPointssFoundWith'|trans({}, '_acessPoint') }} "{{ query }}"
+                                    {{ 'noAccessPointsFoundWith'|trans({}, '_acessPoint') }} "{{ query }}"
                                 {% else %}
-                                    {{ 'noAcessPointss'|trans({}, '_acessPoint') }}
+                                    {{ 'noAccessPoints'|trans({}, '_acessPoint') }}
                                 {% endif %}
                             </div>
                         </div>
@@ -137,7 +137,7 @@
     <div class="m-8">
         <hr class="w-full h-0.5 bg-gray-300/50 border-0 rounded">
         {{ include('dashboard/shared/pagination/_pagination_live.html.twig', {
-            label: 'acessPointsPerPage'|trans({}, '_acessPoint'),
+            label: 'accessPointsPerPage'|trans({}, '_acessPoint'),
             occurrencies: this.accessPoints|length,
             totalPages: this.totalPages,
             page: page,

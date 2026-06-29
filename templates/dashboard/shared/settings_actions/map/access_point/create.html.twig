@@ -4,11 +4,17 @@
 
 {% block container %}
 
-    <div class="p-6 bg-white rounded-lg shadow-sm">
+    <twig:CreateAccessPointsForm
+            :networkDTO="networkDTO"
+            :data="data"
+            :form="form"
+            :network="network"
+    >
+        <div class="p-6 bg-white rounded-lg shadow-sm">
 
         <div class="mb-6">
             <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
-                Create New Access Point
+                {{ 'createTitle'|trans({}, '_acessPoint') }}
             </h2>
         </div>
 
@@ -20,14 +26,14 @@
             {# BASIC INFO #}
             <div class="lg:col-span-2 mt-2">
                 <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-100 pb-1">
-                    Basic Information
+                    {{ 'basicInfo'|trans({}, '_acessPoint') }}
                 </h3>
             </div>
 
             {# SSID #}
             <div class="relative">
-                {{ form_label(form.ssid, 'SSID (Wi-Fi Network Name)', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.ssid, {attr: {class: 'form-widget', placeholder: 'e.g., Company_Guest_WiFi'}}) }}
+                {{ form_label(form.ssid, 'ssid'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.ssid, {attr: {class: 'form-widget', placeholder: 'ssidPh'|trans({}, '_acessPoint')}}) }}
                 <div class="text-red-500 m-2 text-sm">
                     {{ form_errors(form.ssid) }}
                 </div>
@@ -35,8 +41,8 @@
 
             {# ACCESS POINT NAME #}
             <div class="relative">
-                {{ form_label(form.name, 'Access Point Name (Optional)', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.name, {attr: {class: 'form-widget', placeholder: 'e.g., AP-Floor1-RoomA'}}) }}
+                {{ form_label(form.name, 'name'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.name, {attr: {class: 'form-widget', placeholder: 'namePh'|trans({}, '_acessPoint')}}) }}
                 <div class="text-red-500 m-2 text-sm">
                     {{ form_errors(form.name) }}
                 </div>
@@ -44,8 +50,8 @@
 
             {# MAC ADDRESS #}
             <div class="relative">
-                {{ form_label(form.macAddress, 'MAC Address', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.macAddress, {attr: {class: 'form-widget', placeholder: 'e.g., AA:BB:CC:DD:EE:FF'}}) }}
+                {{ form_label(form.macAddress, 'macAddress'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.macAddress, {attr: {class: 'form-widget', placeholder: 'macAddressPh'|trans({}, '_acessPoint')}}) }}
                 <div class="text-red-500 m-2 text-sm">
                     {{ form_errors(form.macAddress) }}
                 </div>
@@ -53,8 +59,8 @@
 
             {# SERIAL NUMBER #}
             <div class="relative">
-                {{ form_label(form.serialNumber, 'Serial Number', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.serialNumber, {attr: {class: 'form-widget', placeholder: 'e.g., SN1234567890'}}) }}
+                {{ form_label(form.serialNumber, 'serialNumber'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.serialNumber, {attr: {class: 'form-widget', placeholder: 'serialNumberPh'|trans({}, '_acessPoint')}}) }}
                 <div class="text-red-500 m-2 text-sm">
                     {{ form_errors(form.serialNumber) }}
                 </div>
@@ -63,14 +69,14 @@
             {# HARDWARE #}
             <div class="lg:col-span-2 mt-4">
                 <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-100 pb-1">
-                    Hardware Specifications
+                    {{ 'hardware'|trans({}, '_acessPoint') }}
                 </h3>
             </div>
 
             {# VENDOR #}
             <div class="relative">
-                {{ form_label(form.vendor, 'Vendor / Brand', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.vendor, {attr: {class: 'form-widget', placeholder: 'e.g., Ubiquiti, Cisco'}}) }}
+                {{ form_label(form.vendor, 'vendor'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.vendor, {attr: {class: 'form-widget', placeholder: 'vendorPh'|trans({}, '_acessPoint')}}) }}
                 <div class="text-red-500 m-2 text-sm">
                     {{ form_errors(form.vendor) }}
                 </div>
@@ -78,8 +84,8 @@
 
             {# MODEL #}
             <div class="relative">
-                {{ form_label(form.model, 'Model', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.model, {attr: {class: 'form-widget', placeholder: 'e.g., UniFi AP AC Pro'}}) }}
+                {{ form_label(form.model, 'model'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.model, {attr: {class: 'form-widget', placeholder: 'modelPh'|trans({}, '_acessPoint')}}) }}
                 <div class="text-red-500 m-2 text-sm">
                     {{ form_errors(form.model) }}
                 </div>
@@ -87,8 +93,8 @@
 
             {# STANDARD #}
             <div class="relative lg:col-span-2">
-                {{ form_label(form.standard, 'Wi-Fi Standard', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.standard, {attr: {class: 'form-widget', placeholder: 'e.g., 802.11ax (Wi-Fi 6)'}}) }}
+                {{ form_label(form.standard, 'wifiStandard'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.standard, {attr: {class: 'form-widget', placeholder: 'wifiStandardPh'|trans({}, '_acessPoint')}}) }}
                 <div class="text-red-500 m-2 text-sm">
                     {{ form_errors(form.standard) }}
                 </div>
@@ -97,15 +103,20 @@
             {# GEOLOCATION #}
             <div class="lg:col-span-2 mt-4">
                 <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-100 pb-1">
-                    Geolocation and Altitude
+                    {{ 'geolocation'|trans({}, '_acessPoint') }}
                 </h3>
             </div>
 
-            <div class="lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6" data-controller="custom-map-picker map-geolocation">
+            <div
+                    class="lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6"
+                    data-controller="custom-map-picker map-geolocation"
+                    data-custom-map-picker-network-geometry-value="{{ network.geometry|json_encode }}">            >
 
                 {# MAP CONTAINER #}
                 <div class="lg:col-span-2">
-                    <label class="form-label mb-2 block">Select Location on Map</label>
+                    <label class="form-label mb-2 block">
+                        {{ 'selectOnMap'|trans({}, '_acessPoint') }}
+                    </label>
 
                     <div class="w-full h-[350px] rounded-lg border border-gray-200 shadow-inner overflow-hidden z-10">
                         {{ ux_map(map, {
@@ -113,17 +124,19 @@
                             'data-action': 'ux:map:pre-connect->custom-map-picker#_onPreConnect ux:map:connect->map-geolocation#_onConnect ux:map:connect->custom-map-picker#_onConnect'
                         }) }}
                     </div>
-                    <p class="text-xs text-gray-400 mt-1">Click anywhere on the map to automatically set the coordinates.</p>
+                    <p class="text-xs text-gray-400 mt-1">
+                        {{ 'clickToSetCoordinates'|trans({}, '_acessPoint') }}
+                    </p>
                 </div>
 
                 {# LATITUDE #}
                 <div class="relative">
-                    {{ form_label(form.latitude, 'Latitude', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_label(form.latitude, 'latitude'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
                     {{ form_widget(form.latitude, {attr: {
                         class: 'form-widget',
                         'data-custom-map-picker-target': 'latitude',
                         'data-action': 'change->custom-map-picker#syncMap',
-                        placeholder: 'Ex: 41.149612'
+                        placeholder: 'latitudePh'|trans({}, '_acessPoint')
                     }}) }}
                     <div class="text-red-500 m-2 text-sm">
                         {{ form_errors(form.latitude) }}
@@ -132,12 +145,12 @@
 
                 {# LONGITUDE #}
                 <div class="relative">
-                    {{ form_label(form.longitude, 'Longitude', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_label(form.longitude, 'longitude'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
                     {{ form_widget(form.longitude, {attr: {
                         class: 'form-widget',
                         'data-custom-map-picker-target': 'longitude',
                         'data-action': 'change->custom-map-picker#syncMap',
-                        placeholder: 'Ex: -8.611014'
+                        placeholder: 'longitudePh'|trans({}, '_acessPoint')
                     }}) }}
                     <div class="text-red-500 m-2 text-sm">
                         {{ form_errors(form.longitude) }}
@@ -148,8 +161,8 @@
 
             {# ALTITUDE MSL #}
             <div class="relative">
-                {{ form_label(form.altitudeMsl, 'Altitude MSL (Mean Sea Level - meters)', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.altitudeMsl, {attr: {class: 'form-widget', placeholder: 'e.g., 120.5'}}) }}
+                {{ form_label(form.altitudeMsl, 'AltitudeMsl'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.altitudeMsl, {attr: {class: 'form-widget', placeholder: 'AltitudeMslPh'|trans({}, '_acessPoint')}}) }}
                 <div class="text-red-500 m-2 text-sm">
                     {{ form_errors(form.altitudeMsl) }}
                 </div>
@@ -157,8 +170,8 @@
 
             {# ALTITUDE AGL #}
             <div class="relative">
-                {{ form_label(form.altitudeAgl, 'Altitude AGL (Above Ground Level - meters)', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.altitudeAgl, {attr: {class: 'form-widget', placeholder: 'e.g., 3.5'}}) }}
+                {{ form_label(form.altitudeAgl, 'altitudeAgl'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.altitudeAgl, {attr: {class: 'form-widget', placeholder: 'altitudeAglPh'|trans({}, '_acessPoint')}}) }}
                 <div class="text-red-500 m-2 text-sm">
                     {{ form_errors(form.altitudeAgl) }}
                 </div>
@@ -169,15 +182,16 @@
         {# ACTION BUTTONS #}
         <div class="flex flex-row justify-end gap-4 md:w-full mt-8 pt-4 border-t border-gray-100">
             <a href="{{ path('admin_dashboard_map') }}" class="btn-secondary flex items-center justify-center">
-                Return
+                {{ 'return'|trans({}, '_acessPoint') }}
             </a>
             <button type="submit" class="btn-primary">
-                Create
+                {{ 'submit'|trans({}, '_acessPoint') }}
             </button>
         </div>
 
         {{ form_rest(form) }}
         {{ form_end(form) }}
     </div>
+    </twig:CreateAccessPointsForm>
 
 {% endblock %}

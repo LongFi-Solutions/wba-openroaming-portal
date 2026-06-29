@@ -259,6 +259,7 @@ class MapController extends AbstractController
             'form' => $form->createView(),
             'data' => $data,
             'map' => $map,
+            'network' => $network,
 
         ]);
     }

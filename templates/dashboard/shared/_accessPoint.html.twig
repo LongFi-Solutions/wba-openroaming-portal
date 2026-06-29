@@ -12,7 +12,7 @@
             <span class="text-gray-700 block">Lat: {{ accessPoint.location.coordinates[1]|number_format(6) }}</span>
             <span class="text-gray-400 block text-xs">Lng: {{ accessPoint.location.coordinates[0]|number_format(6) }}</span>
         {% else %}
-            <span class="text-gray-400 italic text-xs">No GPS data</span>
+            <span class="text-gray-400 italic text-xs">{{ 'noData'|trans({}, '_blacklist') }}</span>
         {% endif %}
     </td>
 
