@@ -1,6 +1,6 @@
 # Changelog
 
-# Release V1.11.2
+# Release V1.12.1
 
 - Eliminate external CDN dependency on `rsms.me``assets/fonts/inter/`
 - Remove unversioned external font CDN links without Subresource Integrity (SRI) from base twig template
