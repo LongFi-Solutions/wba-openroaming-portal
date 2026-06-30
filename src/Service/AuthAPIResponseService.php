@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Api\V2\BaseResponse;
 use App\Entity\User;
+use App\Enum\EventMetadataKeysType;
 use DateTime;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,9 +31,9 @@ readonly class AuthAPIResponseService
         $formattedUserData = $user->toApiResponse(['token' => $token]);
 
         $eventMetadata = [
-            'ip' => $request->getClientIp(),
-            'user_agent' => $request->headers->get('User-Agent'),
-            'uuid' => $user->getUuid(),
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
         ];
 
         $this->eventActions->saveEvent(

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\DTO\ScheduleDTO;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Form\ScheduleType;
@@ -42,6 +43,7 @@ class ScheduleAutomationController extends AbstractController
         $currentUser = $this->getUser();
         $canWrite = $this->isGranted(UserAuthenticationVoter::CRON_SCHEDULE_WRITE);
 
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         $scheduleDTO = new ScheduleDTO($this->settingRepository, $this->cronExpressionHelperService);
@@ -50,13 +52,69 @@ class ScheduleAutomationController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
+        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
+            $changeset = [];
+
+            // Track cron expression changes
             foreach (
                 $scheduleDTO->toCronExpressions(
                     $this->cronExpressionHelperService
                 ) as $settingName => $cronExpression
             ) {
+                if ($data[$settingName]['value'] !== $cronExpression) {
+                    $changeset[$settingName] = [
+                        EventMetadataKeysType::OLD_DATA->value => $data[$settingName]['value'],
+                        EventMetadataKeysType::NEW_DATA->value => $cronExpression,
+                    ];
+                }
                 $this->saveSetting($settingName, $cronExpression, $scheduleDTO->use_advanced_mode);
+            }
+
+            $newUserDeleteTime = $scheduleDTO->delete_unconfirmed_users_cron->userDeleteTime;
+
+            $userDeleteTime = $this->settingRepository->findOneBy(['name' => SettingName::USER_DELETE_TIME->value]);
+
+            if ($userDeleteTime) {
+                $userDeleteTime->setValue((string)$newUserDeleteTime);
+                $this->entityManager->persist($userDeleteTime);
+            }
+
+            $newNotificationTime = $scheduleDTO->users_when_profile_expires_cron->timeIntervalNotification;
+
+            $notificationTime = $this->settingRepository->findOneBy([
+                'name' => SettingName::TIME_INTERVAL_NOTIFICATION->value
+            ]);
+
+            if ($notificationTime) {
+                $notificationTime->setValue((string)$newNotificationTime);
+                $this->entityManager->persist($notificationTime);
+            }
+
+            // Track enablement changes
+            $enablementSettings = [
+                SettingName::DELETE_UNCONFIRMED_USERS_CRON_ENABLED->value =>
+                    $scheduleDTO->delete_unconfirmed_users_enabled,
+                SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED->value =>
+                    $scheduleDTO->users_when_profile_expires_enabled,
+                SettingName::LDAP_SYNC_CRON_ENABLED->value =>
+                    $scheduleDTO->ldap_sync_enabled,
+                SettingName::DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED->value =>
+                    $scheduleDTO->domain_blacklist_import_enabled,
+            ];
+
+            foreach ($enablementSettings as $settingName => $newEnabledValue) {
+                $newValue = $newEnabledValue ? OperationMode::ON->value : OperationMode::OFF->value;
+                $oldValue = $this->settingRepository->findOneBy(['name' => $settingName])?->getValue()
+                    ?? OperationMode::ON->value; // fallback matches isEnabled() default
+
+                if ($oldValue !== $newValue) {
+                    $changeset[$settingName] = [
+                        EventMetadataKeysType::OLD_DATA->value => $oldValue,
+                        EventMetadataKeysType::NEW_DATA->value => $newValue,
+                    ];
+                }
+
+                $this->saveSetting($settingName, $newValue, $scheduleDTO->use_advanced_mode);
             }
 
             // Analytics
@@ -65,9 +123,10 @@ class ScheduleAutomationController extends AbstractController
                 AnalyticalEventType::SETTING_SCHEDULE_CONF_REQUEST->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value => $changeset
                 ]
             );
 

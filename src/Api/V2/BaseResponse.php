@@ -2,9 +2,10 @@
 
 namespace App\Api\V2;
 
+use App\Api\BaseResponseInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-readonly class BaseResponse
+readonly class BaseResponse implements BaseResponseInterface
 {
     public function __construct(
         private int $statusCode,

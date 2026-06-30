@@ -24,7 +24,6 @@ class StatisticsController extends AbstractController
 {
     public function __construct(
         private readonly GetSettings $getSettings,
-        private readonly TranslatorInterface $translator,
         private readonly PortalStatistics $portalStatistics,
     ) {
     }
@@ -57,16 +56,6 @@ class StatisticsController extends AbstractController
 
         $endDate = $endDateString ? new DateTime($endDateString) : new DateTime();
 
-        $interval = $startDate->diff($endDate);
-
-        if ($interval->days > 366) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans('maximumDateRange1Year', [], 'controllers')
-            );
-            return $this->redirectToRoute('admin_dashboard_statistics');
-        }
-
         // After computing $startDate and $endDate, detect which preset was used
         $activePreset = $request->query->get('preset', '');
         $activePreset = TimeRangePresetStatistics::fromInput($activePreset);
@@ -82,19 +71,6 @@ class StatisticsController extends AbstractController
         $fetchChartPlatformStatus = $this->portalStatistics->getPlatformStatusStats($startDate, $endDate);
         $fetchChartUserVerified = $this->portalStatistics->getUserVerifiedStas($startDate, $endDate);
         $fetchChart2FA = $this->portalStatistics->get2FAStats($startDate, $endDate);
-
-        $memory_before = memory_get_usage();
-        $memory_after = memory_get_usage();
-        $memory_diff = $memory_after - $memory_before;
-
-        // Check that the memory usage does not exceed the PHP memory limit of 128M
-        if ($memory_diff > 134217728) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans('dataRequestedTooLarge', [], 'controllers')
-            );
-            return $this->redirectToRoute('admin_dashboard_statistics');
-        }
 
         return $this->render('dashboard/statistics/statistics.html.twig', [
             'user' => $currentUser,

@@ -2,6 +2,7 @@
 
 namespace App\Scheduler;
 
+use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use RuntimeException;
@@ -23,64 +24,67 @@ readonly class Schedule implements ScheduleProviderInterface
 
     public function getSchedule(): SymfonySchedule
     {
-        return new SymfonySchedule()
+        $schedule = new SymfonySchedule()
             ->stateful($this->cache)
-            ->processOnlyLastMissedRun(true)
+            ->processOnlyLastMissedRun(true);
 
-            // By default, daily at 00:00
-            ->add(
+        // By default, daily at 00:00
+        if ($this->isEnabled(SettingName::DELETE_UNCONFIRMED_USERS_CRON_ENABLED)) {
+            $schedule->add(
                 RecurringMessage::cron(
                     $this->getRequiredSetting(SettingName::DELETE_UNCONFIRMED_USERS_CRON->value),
                     new RunCommandMessage('clear:deleteUnconfirmedUsers')
                 )
-            )
+            );
+        }
 
-            // By default, daily at 01:00
-            ->add(
+        // By default, daily at 01:00
+        if ($this->isEnabled(SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED)) {
+            $schedule->add(
                 RecurringMessage::cron(
                     $this->getRequiredSetting(SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value),
                     new RunCommandMessage('notify:usersWhenProfileExpires')
                 )
-            )
+            );
+        }
 
-            // By default, daily at 02:00
-            ->add(
+        // By default, daily at 02:00
+        if ($this->isEnabled(SettingName::LDAP_SYNC_CRON_ENABLED)) {
+            $schedule->add(
                 RecurringMessage::cron(
                     $this->getRequiredSetting(SettingName::LDAP_SYNC_CRON->value),
                     new RunCommandMessage('ldap:sync')
                 )
-            )
+            );
+        }
 
-            // By default, daily at 03:00
-            ->add(
-                RecurringMessage::cron(
-                    $this->getRequiredSetting(SettingName::FREERADIUS_LAST_CONNECTION_CRON->value),
-                    new RunCommandMessage('backup:freeradiusLastConnection')
-                )
+        // Executes once a week on Sunday at 03:30
+        $schedule->add(
+            RecurringMessage::cron(
+                '30 3 * * 0',
+                new RunCommandMessage('clear:uploaded-certs')
             )
+        );
 
-            // Executes once a week on Sunday at 03:30
-            ->add(
-                RecurringMessage::cron(
-                    '30 3 * * 0',
-                    new RunCommandMessage('clear:uploaded-certs')
-                )
+        // Executes once a week on Sunday at 04:00
+        $schedule->add(
+            RecurringMessage::cron(
+                '0 4 * * *',
+                new RunCommandMessage('notify:superAdminWhenCertsExpires')
             )
-            // Executes once a week on Sunday at 04:00
-            ->add(
-                RecurringMessage::cron(
-                    '0 4 * * *',
-                    new RunCommandMessage('notify:superAdminWhenCertsExpires')
-                )
-            )
+        );
 
-            // By default, daily at 04:00
-            ->add(
+        // By default, daily at 04:00
+        if ($this->isEnabled(SettingName::DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED)) {
+            $schedule->add(
                 RecurringMessage::cron(
                     $this->getRequiredSetting(SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value),
                     new RunCommandMessage('import:temporary-domains')
                 )
             );
+        }
+
+        return $schedule;
     }
 
     private function getRequiredSetting(string $name): string
@@ -92,5 +96,13 @@ readonly class Schedule implements ScheduleProviderInterface
         }
 
         return $setting->getValue();
+    }
+
+    private function isEnabled(SettingName $settingName): bool
+    {
+        $setting = $this->settingRepository->findOneBy(['name' => $settingName->value]);
+
+        // Default to enabled, these are critical crons and should run unless they are explicitly disabled
+        return $setting?->getValue() !== OperationMode::OFF->value;
     }
 }
