@@ -56,14 +56,8 @@ final class CreateAccessPointsForm extends AbstractController
     {
         $canWrite = $this->isGranted(UserAuthenticationVoter::MAP_WRITE);
 
-        if ($this->networkDTO && $this->network) {
 
-            $this->networkDTO->accessPointsFromDatabase = $this->entityManager
-                ->getRepository(AccessPoint::class)
-                ->findBy(['network' => $this->network]);
-        }
-
-        $form = $this->createForm(CreateNetworkType::class, $this->networkDTO, ['disabled' => !$canWrite]);
+        $form = $this->createForm(CreateNetworkType::class, $this->accessPointDTO, ['disabled' => !$canWrite]);
 
         $currentRequest = $this->requestStack->getCurrentRequest();
         $isLiveRequest = $currentRequest && $currentRequest->headers->has('X-Live-Component-Action');
