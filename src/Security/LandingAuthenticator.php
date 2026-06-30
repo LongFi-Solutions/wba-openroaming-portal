@@ -67,7 +67,6 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         $password = (string) ($loginData['password'] ?? '');
 
         $request->getSession()->set('last_login_method', $loginMethod);
-
         if ($loginMethod === UserProvider::EMAIL->value) {
             $identifier = $formData['login']['email'];
 
