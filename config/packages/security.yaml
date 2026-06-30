@@ -70,7 +70,7 @@ security:
             logout:
                 path: app_dashboard_logout
                 target: /dashboard
-                invalidate_session: false
+                invalidate_session: true
 
         landing:
             pattern: ^/
@@ -104,7 +104,7 @@ security:
             logout:
                 path: app_logout
                 target: / # Redirect users to the homepage (or another path) after logout
-                invalidate_session: false
+                invalidate_session: true
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall
 
