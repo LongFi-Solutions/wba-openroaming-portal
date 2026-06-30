@@ -1,0 +1,8 @@
+subject_admin_account_deletion_confirmation: "User account deletion notice"
+deletion_message: "We are writing to inform you that the account associated with <strong>%uuid%</strong> has been permanently deleted from the portal."
+performed_by: "This action was performed by administrator <strong>%adminName%</strong> (%adminEmail%)."
+deletion_info: "In accordance with the General Data Protection Regulation (GDPR), all personal data associated with this account has been erased or anonymised where technically required."
+footer:
+  support_team: "If you have any questions regarding this deletion, you may reach us at"
+  thank_you: "Thank you for your attention."
+  team: "The %supportTeam% Team"

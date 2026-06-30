@@ -322,7 +322,7 @@ readonly class EmailGenerator
                 $this->translator->trans(
                     'subject_account_deletion_confirmation',
                     [],
-                    'user_account_deletion_confirmation'
+                    'account_deletion_confirmation_by_user'
                 )
             )
             ->htmlTemplate('email/account_deletion_confirmation_by_user.html.twig')
@@ -339,8 +339,11 @@ readonly class EmailGenerator
     /**
      * @throws TransportExceptionInterface
      */
-    public function sendAdminUserDeletionAccountConfirmationEmail(User $user): void
-    {
+    public function sendAdminUserDeletionAccountConfirmationEmail(
+        User $deletedUser,
+        User $adminRecipient,
+        User $performedBy
+    ): void {
         $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
         $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
@@ -354,17 +357,19 @@ readonly class EmailGenerator
                     $this->parameterBag->get('app.sender_name')
                 )
             )
-            ->to($user->getEmail())
+            ->to($adminRecipient->getEmail())
             ->subject(
                 $this->translator->trans(
-                    'subject_account_deletion_confirmation',
+                    'subject_admin_account_deletion_confirmation',
                     [],
-                    'user_account_deletion_confirmation'
+                    'account_deletion_confirmation_by_admins'
                 )
             )
-            ->htmlTemplate('email/account_deletion_confirmation_by_admin.html.twig')
+            ->htmlTemplate('email/account_deletion_confirmation_by_admins.html.twig')
             ->context([
-                'uuid' => $user->getEmail(),
+                'uuid' => $deletedUser->getUuid(),
+                'adminName' => trim($performedBy->getFirstName() . ' ' . $performedBy->getLastName()),
+                'adminEmail' => $performedBy->getEmail(),
                 'supportTeam' => $supportTeam,
                 'contactEmail' => $contactEmail,
             ])

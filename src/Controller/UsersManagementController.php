@@ -46,6 +46,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -322,6 +323,7 @@ class UsersManagementController extends AbstractController
     /**
      * @throws \JsonException
      * @throws ORMException
+     * @throws ExceptionInterface
      */
     #[Route('/dashboard/user/delete/{id:user<\d+>}', name: 'admin_dashboard_user_delete', methods: ['POST'])]
     #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE)]
@@ -361,9 +363,13 @@ class UsersManagementController extends AbstractController
                 $this->sendSMS->sendSmsNoValidation($user, $message);
             }
 
-            // Notify the admin who performed the deletion
-            if ($currentUser->getEmail() !== null) {
-                $this->emailGenerator->sendAdminUserDeletionAccountConfirmationEmail($currentUser);
+            // Notify all admins of the deletion
+            $admins = $this->userRepository->findAllAdmins();
+
+            foreach ($admins as $admin) {
+                if ($admin->getEmail() !== null) {
+                    $this->emailGenerator->sendAdminUserDeletionAccountConfirmationEmail($user, $admin, $currentUser);
+                }
             }
         } catch (Throwable) {
             // non-fatal — deletion continues regardless
