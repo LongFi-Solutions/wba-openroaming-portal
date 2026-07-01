@@ -4,6 +4,7 @@ namespace App\DTO;
 
 use App\Entity\AccessPoint;
 use App\Entity\Network;
+use DateTimeImmutable;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -20,6 +21,10 @@ class AccessPointDTO
     public ?string $ssid = null;
 
     #[Assert\Length(max: 255, maxMessage: 'maxCharacters')]
+    #[Assert\Regex(
+        pattern: '/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/',
+        message: 'invalidMacAddressFormat'
+    )]
     public ?string $macAddress = null;
 
     #[Assert\Length(max: 255, maxMessage: 'maxCharacters')]
@@ -32,19 +37,24 @@ class AccessPointDTO
     public ?string $standard = null;
 
     #[Assert\Length(max: 255, maxMessage: 'maxCharacters')]
+    #[Assert\Regex(pattern: '/^[a-zA-Z0-9\-_:]+$/', message: 'invalidSerialNumberFormat')]
     public ?string $serialNumber = null;
 
-    #[Assert\Range(min: -90, max: 90, notInRangeMessage: 'cordinateDeegreBteween90')]
+    #[Assert\Regex(pattern: '/^-?[0-9]+(\.[0-9]+)?$/', message: 'decimalNumber')]
+    #[Assert\Range(notInRangeMessage: 'cordinateDeegreBteween90', min: -90, max: 90)]
     public ?string $latitude = null;
 
-    #[Assert\Range(min: -180, max: 180, notInRangeMessage: 'cordinateDeegreBteween180')]
+    #[Assert\Regex(pattern: '/^-?[0-9]+(\.[0-9]+)?$/', message: 'decimalNumber')]
+    #[Assert\Range(notInRangeMessage: 'cordinateDeegreBteween180', min: -180, max: 180)]
     public ?string $longitude = null;
 
 
     #[Assert\Type(type: 'float', message: 'decimalNumber')]
+    #[Assert\Range(notInRangeMessage: 'invalidAltitudeMsl', min: -500, max: 9000)]
     public ?float $altitudeMsl = null;
 
     #[Assert\Type(type: 'float', message: 'decimalNumber')]
+    #[Assert\PositiveOrZero(message: 'altitudeAglCannotBeNegative')]
     public ?float $altitudeAgl = null;
 
 
@@ -96,7 +106,7 @@ class AccessPointDTO
             $accessPoint->setLocation(null);
         }
 
-        $accessPoint->setUpdatedAt(new \DateTimeImmutable());
+        $accessPoint->setUpdatedAt(new DateTimeImmutable());
 
         return $accessPoint;
     }
