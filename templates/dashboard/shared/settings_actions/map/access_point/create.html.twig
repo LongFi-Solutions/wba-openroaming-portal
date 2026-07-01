@@ -119,7 +119,7 @@
                     </label>
 
                     <div class="w-full h-[350px] rounded-lg border border-gray-200 shadow-inner overflow-hidden z-10">
-                        {{ ux_map(map, {
+                        {{ ux_map(this.map, {
                             'class': 'w-full h-full min-h-[350px]',
                             'data-action': 'ux:map:pre-connect->custom-map-picker#_onPreConnect ux:map:connect->map-geolocation#_onConnect ux:map:connect->custom-map-picker#_onConnect'
                         }) }}

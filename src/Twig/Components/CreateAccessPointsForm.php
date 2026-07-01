@@ -5,6 +5,7 @@ namespace App\Twig\Components;
 use App\DTO\AccessPointDTO;
 use App\Entity\AccessPoint;
 use App\Entity\Network;
+use App\Form\CreateAccessPointType;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\CreateNetworkType;
 use App\Security\Voter\UserAuthenticationVoter;
@@ -38,7 +39,7 @@ final class CreateAccessPointsForm extends AbstractController
         $this->requestStack = $requestStack;
     }
 
-    #[LiveProp(writable: ['name', 'description', 'geometryJson'])]
+    #[LiveProp]
     public AccessPointDTO|null $accessPointDTO = null;
 
     /** @var array<string, array{value: ?string, description?: ?string}>|null */
@@ -57,7 +58,7 @@ final class CreateAccessPointsForm extends AbstractController
         $canWrite = $this->isGranted(UserAuthenticationVoter::MAP_WRITE);
 
 
-        $form = $this->createForm(CreateNetworkType::class, $this->accessPointDTO, ['disabled' => !$canWrite]);
+        $form = $this->createForm(CreateAccessPointType::class, $this->accessPointDTO, ['disabled' => !$canWrite]);
 
         $currentRequest = $this->requestStack->getCurrentRequest();
         $isLiveRequest = $currentRequest && $currentRequest->headers->has('X-Live-Component-Action');

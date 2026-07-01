@@ -5,6 +5,7 @@ namespace App\DTO;
 use App\Entity\AccessPoint;
 use App\Entity\Network;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class AccessPointDTO
 {
@@ -98,5 +99,101 @@ class AccessPointDTO
         $accessPoint->setUpdatedAt(new \DateTimeImmutable());
 
         return $accessPoint;
+    }
+
+    #[Assert\Callback]
+    public function validatePointIsInsideNetworkGeometry(ExecutionContextInterface $context): void
+    {
+        if ($this->latitude === null || $this->longitude === null) {
+            return;
+        }
+
+        if (!$this->network) {
+            $context->buildViolation('fieldCannotBeBlank')
+                ->atPath('network')
+                ->addViolation();
+            return;
+        }
+
+        $geoJson = $this->network->getGeometry();
+
+        if (empty($geoJson)) {
+            $context->buildViolation('networkHasNoGeometry')
+                ->atPath('network')
+                ->addViolation();
+            return;
+        }
+
+        $allPolygons = [];
+        $features = [];
+
+        if (isset($geoJson['type'])) {
+            if ($geoJson['type'] === 'FeatureCollection' && isset($geoJson['features'])) {
+                $features = $geoJson['features'];
+            } elseif ($geoJson['type'] === 'Feature') {
+                $features = [$geoJson];
+            } else {
+                $features = [['geometry' => $geoJson]];
+            }
+        }
+
+        foreach ($features as $feature) {
+            $geometry = $feature['geometry'] ?? null;
+            if (!$geometry) {
+                continue;
+            }
+
+            $type = $geometry['type'] ?? '';
+            $coordinates = $geometry['coordinates'] ?? [];
+
+            if ($type === 'Polygon' && isset($coordinates[0])) {
+                $allPolygons[] = $coordinates[0];
+            } elseif ($type === 'MultiPolygon') {
+                foreach ($coordinates as $polygonCoords) {
+                    if (isset($polygonCoords[0])) {
+                        $allPolygons[] = $polygonCoords[0];
+                    }
+                }
+            }
+        }
+
+        if (empty($allPolygons)) {
+            return;
+        }
+
+        $isInsideAny = false;
+        foreach ($allPolygons as $vertices) {
+            if ($this->isPointInPolygon([$this->longitude, $this->latitude], $vertices)) {
+                $isInsideAny = true;
+                break;
+            }
+        }
+
+        if (!$isInsideAny) {
+            $context->buildViolation('pointOutsideNetworkPolygon')
+                ->atPath('latitude')
+                ->addViolation();
+        }
+    }
+
+    private function isPointInPolygon(array $point, array $polygonVertices): bool
+    {
+        $x = $point[0];
+        $y = $point[1];
+        $inside = false;
+        $count = count($polygonVertices);
+
+        for ($i = 0, $j = $count - 1; $i < $count; $j = $i++) {
+            $xi = $polygonVertices[$i][0]; $yi = $polygonVertices[$i][1];
+            $xj = $polygonVertices[$j][0]; $yj = $polygonVertices[$j][1];
+
+            if ((($yi > $y) != ($yj > $y))) {
+                if ($x < ($xj - $xi) * ($y - $yi) / ($yj - $yi) + $xi) {
+                    $inside = !$inside;
+                }
+            }
+        }
+
+        return $inside;
     }
 }

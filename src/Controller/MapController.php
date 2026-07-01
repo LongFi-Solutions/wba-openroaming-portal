@@ -260,6 +260,7 @@ class MapController extends AbstractController
             'data' => $data,
             'map' => $map,
             'network' => $network,
+            'accessPointDTO' => $accessPointDTO,
 
         ]);
     }
