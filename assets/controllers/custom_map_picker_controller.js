@@ -81,7 +81,7 @@ export default class extends Controller {
         });
     }
 
-        syncMap() {
+    syncMap() {
         if (!this.map || !this.L) return;
 
         let latRaw = this.latitudeTarget.value.toString().replace(',', '.');
@@ -101,6 +101,24 @@ export default class extends Controller {
             } else {
                 this.marker = this.L.marker(newLatLng).addTo(this.map);
             }
+        }
+    }
+
+    clearCoordinates(event) {
+        if (event) event.preventDefault();
+
+        if (this.hasLatitudeTarget) {
+            this.latitudeTarget.value = '';
+            this.latitudeTarget.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        if (this.hasLongitudeTarget) {
+            this.longitudeTarget.value = '';
+            this.longitudeTarget.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        if (this.map && this.marker) {
+            this.marker.remove();
+            this.marker = null;
         }
     }
 }

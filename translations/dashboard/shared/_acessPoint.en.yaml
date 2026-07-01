@@ -9,6 +9,7 @@ noAccessPoints: 'No access points available.'
 accessPointsPerPage: 'Access points per page'
 
 createTitle: 'Create New Access Point'
+editTitle: 'Edit Access Point'
 basicInfo: 'Basic Information'
 ssidField: 'SSID (Wi-Fi Network Name)'
 ssidPh: 'e.g., Company_Guest_WiFi'
@@ -38,5 +39,6 @@ altitudeAgl: 'Altitude AGL (Above Ground Level - meters)'
 altitudeAglPh: 'e.g., 3.5'
 return: 'Return'
 submit: 'Submit'
+clearCoordinates: 'Clear Coordinates'
 
 

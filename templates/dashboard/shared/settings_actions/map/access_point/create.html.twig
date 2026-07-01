@@ -12,11 +12,19 @@
     >
         <div class="p-6 bg-white rounded-lg shadow-sm">
 
-        <div class="mb-6">
-            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
-                {{ 'createTitle'|trans({}, '_acessPoint') }}
-            </h2>
-        </div>
+            {% if accessPoint %}
+                <div class="mb-6">
+                    <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
+                        {{ 'editTitle'|trans({}, '_acessPoint') }}
+                    </h2>
+                </div>
+            {% else %}
+                <div class="mb-6">
+                    <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
+                        {{ 'createTitle'|trans({}, '_acessPoint') }}
+                    </h2>
+                </div>
+            {% endif %}
 
         {{ form_start(form) }}
         {{ form_errors(form) }}
@@ -110,7 +118,18 @@
             <div
                     class="lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6"
                     data-controller="custom-map-picker map-geolocation"
-                    data-custom-map-picker-network-geometry-value="{{ network.geometry|json_encode }}">            >
+                    data-custom-map-picker-network-geometry-value="{{ network.geometry|json_encode }}">
+
+                <div class="lg:col-span-2 flex justify-start mt-2">
+                    <button type="button"
+                            class="px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors flex items-center gap-1"
+                            data-action="click->custom-map-picker#clearCoordinates">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        {{ 'clearCoordinates'|trans({}, '_acessPoint') }}
+                    </button>
+                </div>
 
                 {# MAP CONTAINER #}
                 <div class="lg:col-span-2">
@@ -181,7 +200,7 @@
 
         {# ACTION BUTTONS #}
         <div class="flex flex-row justify-end gap-4 md:w-full mt-8 pt-4 border-t border-gray-100">
-            <a href="{{ path('admin_dashboard_map') }}" class="btn-secondary flex items-center justify-center">
+            <a href="{{ path('admin_dashboard_map_network_accessPoints', { id: network.id }) }}" class="btn-secondary flex items-center justify-center">
                 {{ 'return'|trans({}, '_acessPoint') }}
             </a>
             <button type="submit" class="btn-primary">

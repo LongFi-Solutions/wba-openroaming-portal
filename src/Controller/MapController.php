@@ -261,6 +261,7 @@ class MapController extends AbstractController
             'map' => $map,
             'network' => $network,
             'accessPointDTO' => $accessPointDTO,
+            'accessPoint' => null,
 
         ]);
     }
@@ -312,6 +313,7 @@ class MapController extends AbstractController
             'map' => $map,
             'accessPointDTO' => $accessPointDTO,
             'network' => $network,
+            'accessPoint' => $accessPoint,
 
         ]);
     }
