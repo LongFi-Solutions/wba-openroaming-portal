@@ -195,7 +195,7 @@ class MapController extends AbstractController
             }
         }
 
-        return $this->render('dashboard/shared/settings_actions/map/edit.html.twig', [
+        return $this->render('dashboard/shared/settings_actions/map/create.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'map' => $map,
@@ -310,6 +310,8 @@ class MapController extends AbstractController
             'form' => $form->createView(),
             'data' => $data,
             'map' => $map,
+            'accessPointDTO' => $accessPointDTO,
+            'network' => $network,
 
         ]);
     }

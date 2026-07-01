@@ -15,9 +15,15 @@
              data-network-polygon-tooltip-value="{{ 'deletePolygonTooltip'|trans({}, '_map') }}">
 
         <div class="mb-6">
-            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
-                {{ 'newNetwork'|trans({}, '_map') }}
-            </h2>
+            {% if network %}
+                <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
+                    {{ 'editNetwork'|trans({}, '_map') }}
+                </h2>
+            {% else %}
+                <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
+                    {{ 'newNetwork'|trans({}, '_map') }}
+                </h2>
+            {% endif %}
         </div>
 
         {{ form_start(form) }}
@@ -101,7 +107,7 @@
                 {{ 'return'|trans({}, '_map') }}
             </a>
             <button type="submit" class="btn-primary">
-                {{ 'create'|trans({}, '_map') }}
+                {{ 'submit'|trans({}, '_map') }}
             </button>
         </div>
 
