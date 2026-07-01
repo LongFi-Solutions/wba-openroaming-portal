@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Setting;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\LanguageType;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
@@ -30,10 +31,10 @@ readonly class SettingsService
 
     /**
      * Update or create multiple settings from a generic array.
-     * Returns a changeset of [name => ['oldValue' => ..., 'newValue' => ...]] for changed fields.
+     * Returns a changeset of [name => ['old_data' => ..., 'new_data' => ...]] for changed fields.
      *
      * @param array<string, array{value: bool|float|int|string|null}> $settingsData
-     * @return array<string, array{oldValue: string|null, newValue: string|null}>
+     * @return array<string, array{old_data: string|null, new_data: string|null}>
      */
     public function updateSettingsFromArray(array $settingsData): array
     {
@@ -48,12 +49,18 @@ readonly class SettingsService
                 $oldValue = $setting->getValue();
 
                 if ($oldValue !== $valueToSet) {
-                    $changeset[$name] = ['oldValue' => $oldValue, 'newValue' => $valueToSet];
+                    $changeset[$name] = [
+                        EventMetadataKeysType::OLD_DATA->value => $oldValue,
+                        EventMetadataKeysType::NEW_DATA->value => $valueToSet
+                    ];
                 }
 
                 $setting->setValue($valueToSet);
             } else {
-                $changeset[$name] = ['oldValue' => null, 'newValue' => $valueToSet];
+                $changeset[$name] = [
+                    EventMetadataKeysType::OLD_DATA->value => null,
+                    EventMetadataKeysType::NEW_DATA->value => $valueToSet
+                ];
 
                 $setting = new Setting();
                 $setting->setName($name);
@@ -69,7 +76,7 @@ readonly class SettingsService
      * Update or create multiple settings from a generic array.
      *
      * @param array<string, array{value: int|string|null}> $settingsData
-     * @return array<string, array{oldValue: string|null, newValue: int|string|null}>
+     * @return array<string, array{old_data: string|null, new_data: int|string|null}>
      */
     public function updateAuthSettingsToTranslateFromArray(
         array $settingsData,
@@ -93,7 +100,7 @@ readonly class SettingsService
         $changeset = [];
 
         foreach ($settingsData as $name => $item) {
-            $value = $item['value'] ?? null;
+            $newValue = $item['value'] ?? null;
 
             // Try to fetch existing setting
             $setting = $this->settingRepository->findOneBy(['name' => $name]);
@@ -105,24 +112,36 @@ readonly class SettingsService
                     $settingTranslation = $this->settingTranslationRepository->findOneBy(
                         ['setting' => $setting, 'locale' => $locale]
                     );
-                    if ($value === null) {
-                        $changeset[$name] = ['oldValue' => $oldValue, 'newValue' => ''];
+                    if ($newValue === null) {
+                        $changeset[$name] = [
+                            EventMetadataKeysType::OLD_DATA->value => $oldValue,
+                            EventMetadataKeysType::NEW_DATA->value => null
+                        ];
                         $settingTranslation?->setTranslation('');
                     } else {
-                        $changeset[$name] = ['oldValue' => $oldValue, 'newValue' => $value];
-                        $settingTranslation?->setTranslation((string)$value);
+                        $changeset[$name] = [
+                            EventMetadataKeysType::OLD_DATA->value => $oldValue,
+                            EventMetadataKeysType::NEW_DATA->value => $newValue
+                        ];
+                        $settingTranslation?->setTranslation((string)$newValue);
                     }
                 } else {
-                    $setting->setValue((string)$value);
-                    $changeset[$name] = ['oldValue' => $oldValue, 'newValue' => $value];
+                    $setting->setValue((string)$newValue);
+                    $changeset[$name] = [
+                        EventMetadataKeysType::OLD_DATA->value => $oldValue,
+                        EventMetadataKeysType::NEW_DATA->value => $newValue
+                    ];
                 }
             } else {
                 // Create new setting if it doesn't exist
                 $setting = new Setting();
                 $setting->setName($name);
-                $setting->setValue((string)$value);
+                $setting->setValue((string)$newValue);
                 $this->entityManager->persist($setting);
-                $changeset[$name] = ['oldValue' => '', 'newValue' => $value];
+                $changeset[$name] = [
+                    EventMetadataKeysType::OLD_DATA->value => null,
+                    EventMetadataKeysType::NEW_DATA->value => $newValue
+                ];
             }
         }
 

@@ -31,10 +31,21 @@
 
                 {# Pills row #}
                 <div class="flex flex-wrap gap-2 text-sm">
+                    {% if event.containsEncryptedData %}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-amber-700 text-xs font-medium">
+                            <twig:ux:icon name="wba:lock-outline" class="w-3.5 h-3.5 shrink-0"/>
+                            {{ 'encryptedEvent'|trans({}, 'dashboard') }}
+                        </span>
+                    {% endif %}
                     {% if showUser is not defined or showUser %}
                         {% if event.user is not null %}
                             <span class="px-3 py-1 bg-gray-50 border border-gray-200 rounded-full text-gray-700">
-                                <strong>UUID:</strong> {{ event.user.uuid }}
+                                {% if event.containsEncryptedData %}
+                                    <strong>UUID:</strong>  <span
+                                        class="text-gray-400 italic text-sm">Deleted User ID: {{ event.user.id }}</span>
+                                {% else %}
+                                    <strong>UUID:</strong> {{ event.user.uuid }}
+                                {% endif %}
                             </span>
                         {% endif %}
                     {% endif %}
