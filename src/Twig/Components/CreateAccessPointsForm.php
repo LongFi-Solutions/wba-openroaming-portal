@@ -49,6 +49,9 @@ final class CreateAccessPointsForm extends AbstractController
     #[LiveProp]
     public Network|null $network = null;
 
+    #[LiveProp]
+    public AccessPoint|null $accessPoint = null;
+
     /**
      * @return FormInterface<mixed>
      */
@@ -92,6 +95,10 @@ final class CreateAccessPointsForm extends AbstractController
         $accessPoints = $this->entityManager->getRepository(AccessPoint::class)->findBy(['network' => $this->network]);
 
         foreach ($accessPoints as $ap) {
+            if ($this->accessPointDTO && $this->accessPointDTO->ssid === $ap->getSsid()) {
+                continue;
+            }
+
             $location = $ap->getLocation();
             if ($location && isset($location['coordinates'])) {
                 $lng = $location['coordinates'][0] ?? null;

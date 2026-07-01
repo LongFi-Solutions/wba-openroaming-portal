@@ -11,6 +11,15 @@ export default class extends Controller {
         this.marker = null;
     }
 
+    _applyColorFilter() {
+        if (!this.marker) return;
+
+        const iconElement = this.marker._icon;
+        if (iconElement) {
+            iconElement.style.filter = 'hue-rotate(140deg) saturate(140%)';
+        }
+    }
+
     _onConnect(event) {
         const map = event.detail.leafletMap || event.detail.map;
         const L = window.L || event.detail.L;
@@ -55,6 +64,7 @@ export default class extends Controller {
 
         if (!isNaN(savedLat) && !isNaN(savedLng) && savedLat !== 0 && savedLng !== 0) {
             this.marker = this.L.marker([savedLat, savedLng]).addTo(this.map);
+            this._applyColorFilter();
             this.map.setView([savedLat, savedLng], 17);
         }
 
@@ -78,6 +88,7 @@ export default class extends Controller {
             } else {
                 this.marker = this.L.marker(markerLatLng).addTo(this.map);
             }
+            this._applyColorFilter();
         });
     }
 
@@ -101,6 +112,7 @@ export default class extends Controller {
             } else {
                 this.marker = this.L.marker(newLatLng).addTo(this.map);
             }
+            this._applyColorFilter();
         }
     }
 
