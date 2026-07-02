@@ -66,7 +66,11 @@ final class CreateAccessPointsForm extends AbstractController
         }
 
         foreach ($form->getErrors() as $error) {
-            if ($error->getCause() && $error->getCause()->getPropertyPath() === 'data.geometryJson' && $form->has('geometryJson')) {
+            if (
+                $error->getCause() &&
+                $error->getCause()->getPropertyPath() === 'data.geometryJson' &&
+                $form->has('geometryJson')
+            ) {
                 $form->get('geometryJson')->addError(new FormError($error->getMessage()));
             }
         }

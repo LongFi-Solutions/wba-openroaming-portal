@@ -74,7 +74,8 @@ class NetworkDTO
             if ($location && isset($location['coordinates'])) {
                 $apLng = (float)$location['coordinates'][0];
                 $apLat = (float)$location['coordinates'][1];
-                $isInsideAny = array_any($allPolygons, fn($vertices) => $this->isPointInPolygon([$apLng, $apLat], $vertices));
+                $isInsideAny = array_any($allPolygons, fn($vertices) =>
+                $this->isPointInPolygon([$apLng, $apLat], $vertices));
 
                 if (!$isInsideAny) {
                     $pointsOutside[] = $ap->getSsid();
