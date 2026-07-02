@@ -158,7 +158,7 @@ class MapController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $networkDTO->updateEntity($network);
-            if (!empty($networkDTO->geometryJson)) {
+            if (!in_array($networkDTO->geometryJson, [null, '', '0'], true)) {
                 $network->setGeometry(json_decode($networkDTO->geometryJson, true));
             } else {
                 $network->setGeometry(null);

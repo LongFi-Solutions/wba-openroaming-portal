@@ -24,7 +24,7 @@ class NetworkDTO
     #[Assert\Callback]
     public function validateGeometryContainsPoints(ExecutionContextInterface $context): void
     {
-        if (!$this->geometryJson || empty($this->accessPointsFromDatabase)) {
+        if (!$this->geometryJson || $this->accessPointsFromDatabase === []) {
             return;
         }
 
@@ -63,7 +63,7 @@ class NetworkDTO
             }
         }
 
-        if (empty($allPolygons)) {
+        if ($allPolygons === []) {
             return;
         }
 
@@ -74,14 +74,7 @@ class NetworkDTO
             if ($location && isset($location['coordinates'])) {
                 $apLng = (float)$location['coordinates'][0];
                 $apLat = (float)$location['coordinates'][1];
-
-                $isInsideAny = false;
-                foreach ($allPolygons as $vertices) {
-                    if ($this->isPointInPolygon([$apLng, $apLat], $vertices)) {
-                        $isInsideAny = true;
-                        break;
-                    }
-                }
+                $isInsideAny = array_any($allPolygons, fn($vertices) => $this->isPointInPolygon([$apLng, $apLat], $vertices));
 
                 if (!$isInsideAny) {
                     $pointsOutside[] = $ap->getSsid();
@@ -114,7 +107,7 @@ class NetworkDTO
             $yi = $polygonVertices[$i][1];
             $xj = $polygonVertices[$j][0];
             $yj = $polygonVertices[$j][1];
-            $intersect = (($yi > $y) != ($yj > $y)) && ($x < ($xj - $xi) *
+            $intersect = ($yi > $y !== $yj > $y) && ($x < ($xj - $xi) *
                     ($y - $yi) / ($yj - $yi + 0.000000001) + $xi);
             if ($intersect) {
                 $inside = !$inside;

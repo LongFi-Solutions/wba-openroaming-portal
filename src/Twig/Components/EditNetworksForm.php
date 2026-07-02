@@ -29,13 +29,8 @@ final class EditNetworksForm extends AbstractController
     use DefaultActionTrait;
     use LiveCollectionTrait;
 
-    private EntityManagerInterface $entityManager;
-    private RequestStack $requestStack;
-
-    public function __construct(EntityManagerInterface $entityManager, RequestStack $requestStack)
+    public function __construct(private EntityManagerInterface $entityManager, private RequestStack $requestStack)
     {
-        $this->entityManager = $entityManager;
-        $this->requestStack = $requestStack;
     }
 
     #[LiveProp(writable: ['name', 'description', 'geometryJson'])]
@@ -72,10 +67,8 @@ final class EditNetworksForm extends AbstractController
         }
 
         foreach ($form->getErrors() as $error) {
-            if ($error->getCause() && $error->getCause()->getPropertyPath() === 'data.geometryJson') {
-                if ($form->has('geometryJson')) {
-                    $form->get('geometryJson')->addError(new FormError($error->getMessage()));
-                }
+            if ($error->getCause() && $error->getCause()->getPropertyPath() === 'data.geometryJson' && $form->has('geometryJson')) {
+                $form->get('geometryJson')->addError(new FormError($error->getMessage()));
             }
         }
 

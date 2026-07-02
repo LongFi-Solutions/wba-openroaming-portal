@@ -40,11 +40,11 @@ class AccessPointDTO
     #[Assert\Regex(pattern: '/^[a-zA-Z0-9\-_:]+$/', message: 'invalidSerialNumberFormat')]
     public ?string $serialNumber = null;
 
-    #[Assert\Regex(pattern: '/^-?[0-9]+(\.[0-9]+)?$/', message: 'decimalNumber')]
+    #[Assert\Regex(pattern: '/^-?\d+(\.\d+)?$/', message: 'decimalNumber')]
     #[Assert\Range(notInRangeMessage: 'cordinateDeegreBteween90', min: -90, max: 90)]
     public ?string $latitude = null;
 
-    #[Assert\Regex(pattern: '/^-?[0-9]+(\.[0-9]+)?$/', message: 'decimalNumber')]
+    #[Assert\Regex(pattern: '/^-?\d+(\.\d+)?$/', message: 'decimalNumber')]
     #[Assert\Range(notInRangeMessage: 'cordinateDeegreBteween180', min: -180, max: 180)]
     public ?string $longitude = null;
 
@@ -118,7 +118,7 @@ class AccessPointDTO
             return;
         }
 
-        if (!$this->network) {
+        if (!$this->network instanceof Network) {
             $context->buildViolation('fieldCannotBeBlank')
                 ->atPath('network')
                 ->addViolation();
@@ -127,7 +127,7 @@ class AccessPointDTO
 
         $geoJson = $this->network->getGeometry();
 
-        if (empty($geoJson)) {
+        if ($geoJson === null || $geoJson === []) {
             $context->buildViolation('networkHasNoGeometry')
                 ->atPath('network')
                 ->addViolation();
@@ -167,17 +167,10 @@ class AccessPointDTO
             }
         }
 
-        if (empty($allPolygons)) {
+        if ($allPolygons === []) {
             return;
         }
-
-        $isInsideAny = false;
-        foreach ($allPolygons as $vertices) {
-            if ($this->isPointInPolygon([$this->longitude, $this->latitude], $vertices)) {
-                $isInsideAny = true;
-                break;
-            }
-        }
+        $isInsideAny = array_any($allPolygons, fn($vertices) => $this->isPointInPolygon([$this->longitude, $this->latitude], $vertices));
 
         if (!$isInsideAny) {
             $context->buildViolation('pointOutsideNetworkPolygon')
@@ -199,10 +192,8 @@ class AccessPointDTO
             $xj = $polygonVertices[$j][0];
             $yj = $polygonVertices[$j][1];
 
-            if ((($yi > $y) != ($yj > $y))) {
-                if ($x < ($xj - $xi) * ($y - $yi) / ($yj - $yi) + $xi) {
-                    $inside = !$inside;
-                }
+            if (($yi > $y !== $yj > $y && $x < ($xj - $xi) * ($y - $yi) / ($yj - $yi) + $xi)) {
+                $inside = !$inside;
             }
         }
 
