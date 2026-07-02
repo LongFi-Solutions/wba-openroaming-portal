@@ -194,8 +194,10 @@ class AccessPointDTO
         $count = count($polygonVertices);
 
         for ($i = 0, $j = $count - 1; $i < $count; $j = $i++) {
-            $xi = $polygonVertices[$i][0]; $yi = $polygonVertices[$i][1];
-            $xj = $polygonVertices[$j][0]; $yj = $polygonVertices[$j][1];
+            $xi = $polygonVertices[$i][0];
+            $yi = $polygonVertices[$i][1];
+            $xj = $polygonVertices[$j][0];
+            $yj = $polygonVertices[$j][1];
 
             if ((($yi > $y) != ($yj > $y))) {
                 if ($x < ($xj - $xi) * ($y - $yi) / ($yj - $yi) + $xi) {

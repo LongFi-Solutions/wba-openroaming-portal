@@ -15,7 +15,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class CreateNetworkType extends AbstractType
 {
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
 
@@ -29,7 +28,6 @@ class CreateNetworkType extends AbstractType
             ->add('geometryJson', HiddenType::class, [
                 'required' => false,
             ]);
-
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -39,5 +37,4 @@ class CreateNetworkType extends AbstractType
             'allow_extra_fields' => true,
         ]);
     }
-
 }

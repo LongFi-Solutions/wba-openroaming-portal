@@ -28,13 +28,13 @@ use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 
 class MapController extends AbstractController
 {
-
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly NetworkRepository $networkRepository,
         private readonly AccessPointRepository $accessPointRepository,
         private readonly EntityManagerInterface $entityManager,
-    ){}
+    ) {
+    }
     #[Route('/map', name: 'app_map')]
     public function index(Request $request): Response
     {
@@ -89,8 +89,10 @@ class MapController extends AbstractController
         ]);
     }
 
-    #[Route('dashboard/map/network/create',
-        name: 'admin_dashboard_map_network_create')]
+    #[Route(
+        'dashboard/map/network/create',
+        name: 'admin_dashboard_map_network_create'
+    )]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function createNetwork(Request $request): ?Response
     {
@@ -125,11 +127,12 @@ class MapController extends AbstractController
             'network' => null,
 
         ]);
-
     }
 
-    #[Route('dashboard/map/network/delete/{id:network<\d+>}',
-        name: 'admin_dashboard_map_network_delete')]
+    #[Route(
+        'dashboard/map/network/delete/{id:network<\d+>}',
+        name: 'admin_dashboard_map_network_delete'
+    )]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function deleteNetwork(Network $network): Response
     {
@@ -182,7 +185,6 @@ class MapController extends AbstractController
             $location = $ap->getLocation();
 
             if ($location && isset($location['coordinates']) && is_array($location['coordinates'])) {
-
                 $lng = $location['coordinates'][0] ?? null;
                 $lat = $location['coordinates'][1] ?? null;
 
@@ -204,10 +206,12 @@ class MapController extends AbstractController
         ]);
     }
 
-    #[Route('dashboard/map/network/{id:network<\d+>}/accessPoints',
-        name: 'admin_dashboard_map_network_accessPoints')]
+    #[Route(
+        'dashboard/map/network/{id:network<\d+>}/accessPoints',
+        name: 'admin_dashboard_map_network_accessPoints'
+    )]
     #[isGranted(AdminPermissionsType::MAP_READ->value)]
-    public function NetworkAccessPoints(Network $network): Response
+    public function networkAccessPoints(Network $network): Response
     {
         $data = $this->getSettings->getSettings();
 
@@ -217,10 +221,12 @@ class MapController extends AbstractController
         ]);
     }
 
-    #[Route('dashboard/map/network/{id:network<\d+>}/accessPoints/create',
-        name: 'admin_dashboard_map_accessPoint_create')]
+    #[Route(
+        'dashboard/map/network/{id:network<\d+>}/accessPoints/create',
+        name: 'admin_dashboard_map_accessPoint_create'
+    )]
     #[isGranted(AdminPermissionsType::MAP_READ->value)]
-    public function NetworkAccessPointsCreate(Network $network, Request $request): Response
+    public function networkAccessPointsCreate(Network $network, Request $request): Response
     {
         $data = $this->getSettings->getSettings();
         $accessPointDTO = new AccessPointDTO();
@@ -249,7 +255,8 @@ class MapController extends AbstractController
             $this->entityManager->persist($accessPoint);
             $this->entityManager->persist($network);
             $this->entityManager->flush();
-            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints' ,
+            return $this->redirectToRoute(
+                'admin_dashboard_map_network_accessPoints',
                 [
                     'id' => $network->getId(),
                 ]
@@ -271,12 +278,11 @@ class MapController extends AbstractController
         name: 'admin_dashboard_map_accessPoint_edit'
     )]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
-    public function NetworkAccessPointsEdit(
+    public function networkAccessPointsEdit(
         #[MapEntity(id: 'ap_id')] AccessPoint $accessPoint,
         #[MapEntity(id: 'network_id')] Network $network,
         Request $request
-    ): Response
-    {
+    ): Response {
         $data = $this->getSettings->getSettings();
         $accessPointDTO = AccessPointDTO::createFromEntity($accessPoint);
         if ($accessPointDTO->latitude !== null && $accessPointDTO->longitude !== null) {
@@ -301,7 +307,8 @@ class MapController extends AbstractController
 
             $this->entityManager->persist($accessPoint);
             $this->entityManager->flush();
-            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints',
+            return $this->redirectToRoute(
+                'admin_dashboard_map_network_accessPoints',
                 [
                     'id' => $network->getId(),
                 ]
@@ -320,20 +327,20 @@ class MapController extends AbstractController
 
     #[Route(
         'dashboard/map/network/{network_id<\d+>}/accessPoints/{ap_id<\d+>}/delete',
-        name: 'admin_dashboard_map_accessPoint_delete')]
+        name: 'admin_dashboard_map_accessPoint_delete'
+    )]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
-    public function NetworkAccessPointsDelete(
+    public function networkAccessPointsDelete(
         #[MapEntity(id: 'ap_id')] AccessPoint $accessPoint,
         #[MapEntity(id: 'network_id')] Network $network,
-    ): Response
-    {
+    ): Response {
         $this->entityManager->remove($accessPoint);
         $this->entityManager->flush();
-        return $this->redirectToRoute('admin_dashboard_map_network_accessPoints',
+        return $this->redirectToRoute(
+            'admin_dashboard_map_network_accessPoints',
             [
                 'id' => $network->getId(),
             ]
         );
     }
-
 }

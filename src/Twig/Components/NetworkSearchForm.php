@@ -20,7 +20,6 @@ use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
 #[AsLiveComponent]
 class NetworkSearchForm
 {
-
     use DefaultActionTrait;
 
     #[LiveProp(writable: true)]

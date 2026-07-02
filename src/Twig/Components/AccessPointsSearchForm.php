@@ -22,7 +22,6 @@ use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
 #[AsLiveComponent]
 class AccessPointsSearchForm
 {
-
     use DefaultActionTrait;
 
     #[LiveProp(writable: true)]
@@ -116,5 +115,4 @@ class AccessPointsSearchForm
             $this->order = 'desc';
         }
     }
-
 }

@@ -11,7 +11,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class NetworkDTO
 {
-
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     public ?string $name = null;
     public ?string $description = null;
@@ -33,7 +32,6 @@ class NetworkDTO
         $allPolygons = [];
 
         if (isset($geoJson['type']) && $geoJson['type'] === 'FeatureCollection' && isset($geoJson['features'])) {
-
             foreach ($geoJson['features'] as $feature) {
                 $geometry = $feature['geometry'] ?? null;
                 if (!$geometry) {
@@ -107,13 +105,20 @@ class NetworkDTO
 
     private function isPointInPolygon(array $point, array $polygonVertices): bool
     {
-        $x = $point[0]; $y = $point[1]; $inside = false;
+        $x = $point[0];
+        $y = $point[1];
+        $inside = false;
         $count = count($polygonVertices);
         for ($i = 0, $j = $count - 1; $i < $count; $j = $i++) {
-            $xi = $polygonVertices[$i][0]; $yi = $polygonVertices[$i][1];
-            $xj = $polygonVertices[$j][0]; $yj = $polygonVertices[$j][1];
-            $intersect = (($yi > $y) != ($yj > $y)) && ($x < ($xj - $xi) * ($y - $yi) / ($yj - $yi + 0.000000001) + $xi);
-            if ($intersect) $inside = !$inside;
+            $xi = $polygonVertices[$i][0];
+            $yi = $polygonVertices[$i][1];
+            $xj = $polygonVertices[$j][0];
+            $yj = $polygonVertices[$j][1];
+            $intersect = (($yi > $y) != ($yj > $y)) && ($x < ($xj - $xi) *
+                    ($y - $yi) / ($yj - $yi + 0.000000001) + $xi);
+            if ($intersect) {
+                $inside = !$inside;
+            }
         }
         return $inside;
     }
