@@ -96,6 +96,10 @@ class NetworkDTO
         }
     }
 
+    /**
+     * @param array{float, float} $point
+     * @param array<int, array{float, float}> $polygonVertices
+     */
     private function isPointInPolygon(array $point, array $polygonVertices): bool
     {
         $x = $point[0];

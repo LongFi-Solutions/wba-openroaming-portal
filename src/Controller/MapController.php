@@ -152,7 +152,7 @@ class MapController extends AbstractController
 
         $networkDTO->accessPointsFromDatabase = $this->accessPointRepository->findBy(['network' => $network]);
         if ($network->getGeometry() !== null) {
-            $networkDTO->geometryJson = json_encode($network->getGeometry());
+            $networkDTO->geometryJson = json_encode($network->getGeometry(), JSON_THROW_ON_ERROR);
         }
         $form = $this->createForm(CreateNetworkType::class, $networkDTO);
         $form->handleRequest($request);

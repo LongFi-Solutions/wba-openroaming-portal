@@ -53,14 +53,11 @@ class AccessPointsSearchForm
 
     public function __construct(
         private readonly AccessPointRepository $accessPointRepository,
-        private readonly FormFactoryInterface $formFactory,
-        private readonly Security $security,
-        private readonly ParameterBagInterface $parameterBag,
     ) {
     }
 
     /**
-     * @return Paginator<Network>
+     * @return Paginator<AccessPoint>
      */
     #[ExposeInTemplate]
     public function getAccessPoints(): Paginator

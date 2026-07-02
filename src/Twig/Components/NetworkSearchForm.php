@@ -48,9 +48,6 @@ class NetworkSearchForm
 
     public function __construct(
         private readonly NetworkRepository $networkRepository,
-        private readonly FormFactoryInterface $formFactory,
-        private readonly Security $security,
-        private readonly ParameterBagInterface $parameterBag,
     ) {
     }
 

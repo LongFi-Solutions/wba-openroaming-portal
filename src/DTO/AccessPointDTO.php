@@ -170,7 +170,10 @@ class AccessPointDTO
         if ($allPolygons === []) {
             return;
         }
-        $isInsideAny = array_any($allPolygons, fn($vertices) => $this->isPointInPolygon([$this->longitude, $this->latitude], $vertices));
+        $isInsideAny = array_any($allPolygons, fn($vertices) => $this->isPointInPolygon(
+            [(float) $this->longitude, (float) $this->latitude],
+            $vertices
+        ));
 
         if (!$isInsideAny) {
             $context->buildViolation('pointOutsideNetworkPolygon')
@@ -179,6 +182,10 @@ class AccessPointDTO
         }
     }
 
+    /**
+     * @param array{float, float} $point
+     * @param array<int, array{float, float}> $polygonVertices
+     */
     private function isPointInPolygon(array $point, array $polygonVertices): bool
     {
         $x = $point[0];
