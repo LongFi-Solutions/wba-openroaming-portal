@@ -16,18 +16,21 @@ return [
         'path' => './assets/app.js',
         'entrypoint' => true,
     ],
+    '@symfony/stimulus-bundle' => [
+        'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
+    ],
+    '@symfony/ux-live-component' => [
+        'path' => './vendor/symfony/ux-live-component/assets/dist/live_controller.js',
+    ],
     '@hotwired/stimulus' => [
         'version' => '3.2.2',
     ],
     'tom-select/dist/css/tom-select.default.css' => [
-        'version' => '2.4.3',
+        'version' => '2.6.1',
         'type' => 'css',
     ],
-    '@symfony/stimulus-bundle' => [
-        'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
-    ],
     'tom-select' => [
-        'version' => '2.4.3',
+        'version' => '2.6.1',
     ],
     '@orchidjs/sifter' => [
         'version' => '1.1.0',
@@ -36,31 +39,28 @@ return [
         'version' => '1.1.2',
     ],
     'tom-select/dist/css/tom-select.default.min.css' => [
-        'version' => '2.4.3',
+        'version' => '2.6.1',
         'type' => 'css',
     ],
     'tom-select/dist/css/tom-select.bootstrap4.css' => [
-        'version' => '2.4.3',
+        'version' => '2.6.1',
         'type' => 'css',
     ],
     'tom-select/dist/css/tom-select.bootstrap5.css' => [
-        'version' => '2.4.3',
+        'version' => '2.6.1',
         'type' => 'css',
     ],
     'chart.js' => [
-        'version' => '3.9.1',
-    ],
-    '@symfony/ux-live-component' => [
-        'path' => './vendor/symfony/ux-live-component/assets/dist/live_controller.js',
+        'version' => '4.5.1',
     ],
     'lodash-es' => [
-        'version' => '4.17.21',
+        'version' => '4.18.1',
     ],
     'parchment' => [
         'version' => '3.0.0',
     ],
     'eventemitter3' => [
-        'version' => '5.0.1',
+        'version' => '5.0.4',
     ],
     'fast-diff' => [
         'version' => '1.3.0',
@@ -87,7 +87,7 @@ return [
         'type' => 'css',
     ],
     'quill' => [
-        'version' => '2.0.0-dev.4',
+        'version' => '2.0.3',
     ],
     'quill-delta' => [
         'version' => '5.1.0',
@@ -100,7 +100,7 @@ return [
         'type' => 'css',
     ],
     'axios' => [
-        'version' => '1.13.2',
+        'version' => '1.18.1',
     ],
     'quill2-emoji' => [
         'version' => '0.1.2',
@@ -117,5 +117,8 @@ return [
     ],
     'quill-html-edit-button' => [
         'version' => '3.0.0',
+    ],
+    '@kurkle/color' => [
+        'version' => '0.3.4',
     ],
 ];
