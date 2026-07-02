@@ -138,11 +138,12 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
 
         // Check if username attribute is specified and present in SAML data
         if (!empty($usernameAttribute) && isset($attributes[$usernameAttribute])) {
-            $samlAccountName = $this->getAttributeValue($attributes, $usernameAttribute);
-        }
-
-        // Fallback to old sAMAccountName if available
-        elseif (isset($attributes['sAMAccountName'][0])) {
+            $samlAccountName = $this->getAttributeValue(
+                $attributes,
+                $usernameAttribute
+            );
+        } elseif (isset($attributes['sAMAccountName'][0])) {
+            // Fallback to old sAMAccountName if available
             $samlAccountName = $attributes['sAMAccountName'][0];
         } else {
             // Use the email address for Google Suite
