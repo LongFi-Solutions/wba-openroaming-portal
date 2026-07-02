@@ -238,7 +238,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
                             $values[] = $valueNode->nodeValue;
                         }
 
-                        if (empty($values)) {
+                        if ($values === []) {
                             $valueNodes = $node->getElementsByTagName('AttributeValue');
                             foreach ($valueNodes as $valueNode) {
                                 $values[] = $valueNode->nodeValue;
