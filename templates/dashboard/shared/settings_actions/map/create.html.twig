@@ -66,17 +66,43 @@
                         </p>
                     </div>
 
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <button type="button"
-                                data-action="click->network-polygon#resetPolygon"
-                                class="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded border border-red-200 transition w-1/2 sm:w-auto">
-                            {{ 'clean'|trans({}, '_map') }}
-                        </button>
-                        <button type="button"
-                                data-action="click->network-polygon#finishPolygon"
-                                class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded shadow-sm transition w-1/2 sm:w-auto">
-                            {{ 'closePolygon'|trans({}, '_map') }}
-                        </button>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+                        <div>
+                            <label class="form-label block font-semibold text-gray-700">
+                                {{ 'drawShape'|trans({}, '_map') }}
+                            </label>
+                        </div>
+
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <button
+                                    type="button"
+                                    data-action="click->network-polygon#setMode"
+                                    data-network-polygon-mode-param="polygon"
+                                    class="px-3 py-1.5 text-xs font-medium bg-gray-200 hover:bg-gray-300 rounded border transition focus:ring-2"
+                            >
+                                {{ 'polygon'|trans({}, '_map') }}
+                            </button>
+                            <button
+                                    type="button"
+                                    data-action="click->network-polygon#setMode"
+                                    data-network-polygon-mode-param="square"
+                                    class="px-3 py-1.5 text-xs font-medium bg-gray-200 hover:bg-gray-300 rounded border transition focus:ring-2"
+                            >
+                                {{ 'rectangle'|trans({}, '_map') }}
+                            </button>
+                            <button
+                                    type="button"
+                                    data-action="click->network-polygon#setMode"
+                                    data-network-polygon-mode-param="circle"
+                                    class="px-3 py-1.5 text-xs font-medium bg-gray-200 hover:bg-gray-300 rounded border transition focus:ring-2"
+                            >
+                                {{ 'circle'|trans({}, '_map') }}
+                            </button>
+
+                            <button type="button" data-action="click->network-polygon#resetPolygon" class="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded border border-red-200 transition">
+                                {{ 'clean'|trans({}, '_map') }}
+                            </button>
+                        </div>
                     </div>
                 </div>
 
