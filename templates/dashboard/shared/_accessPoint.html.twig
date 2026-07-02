@@ -47,14 +47,14 @@
                 {{ stimulus_target('nav-submenu', 'container') }}>
             <ul class="p-2 text-gray-700 gap-y-2">
                 <li>
-                    <a href="{{ path('admin_dashboard_map_accessPoint_edit', { network_id: network.id, ap_id: accessPoint.id }) }}"
+                    <a href="{{ path('admin_dashboard_map_accessPoint_edit', {network_id: network.id, ap_id: accessPoint.id}) }}"
                        class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
                         <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3 fill-none stroke-current" />
                         {{ 'edit'|trans({}, '_network') }}
                     </a>
                 </li>
                 <li>
-                    <a href="{{ path('admin_dashboard_map_accessPoint_delete', { network_id: network.id, ap_id: accessPoint.id }) }}"
+                    <a href="{{ path('admin_dashboard_map_accessPoint_delete', {network_id: network.id, ap_id: accessPoint.id}) }}"
                        class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
                         <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-current stroke-none"/>
                         {{ 'delete'|trans({}, '_network') }}

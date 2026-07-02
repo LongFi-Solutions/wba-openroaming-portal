@@ -140,8 +140,8 @@
 
                     <div class="w-full h-[350px] rounded-lg border border-gray-200 shadow-inner overflow-hidden z-10">
                         {{ ux_map(this.map, {
-                            'class': 'w-full h-full min-h-[350px]',
-                            'data-action': 'ux:map:pre-connect->custom-map-picker#_onPreConnect ux:map:connect->map-geolocation#_onConnect ux:map:connect->custom-map-picker#_onConnect'
+                            class: 'w-full h-full min-h-[350px]',
+                            'data-action': 'ux:map:pre-connect->custom-map-picker#_onPreConnect ux:map:connect->map-geolocation#_onConnect ux:map:connect->custom-map-picker#_onConnect',
                         }) }}
                     </div>
                     <p class="text-xs text-gray-400 mt-1">
@@ -156,7 +156,7 @@
                         class: 'form-widget',
                         'data-custom-map-picker-target': 'latitude',
                         'data-action': 'change->custom-map-picker#syncMap',
-                        placeholder: 'latitudePh'|trans({}, '_acessPoint')
+                        placeholder: 'latitudePh'|trans({}, '_acessPoint'),
                     }}) }}
                     <div class="text-red-500 m-2 text-sm">
                         {{ form_errors(form.latitude) }}
@@ -170,7 +170,7 @@
                         class: 'form-widget',
                         'data-custom-map-picker-target': 'longitude',
                         'data-action': 'change->custom-map-picker#syncMap',
-                        placeholder: 'longitudePh'|trans({}, '_acessPoint')
+                        placeholder: 'longitudePh'|trans({}, '_acessPoint'),
                     }}) }}
                     <div class="text-red-500 m-2 text-sm">
                         {{ form_errors(form.longitude) }}
@@ -201,7 +201,7 @@
 
         {# ACTION BUTTONS #}
         <div class="flex flex-row justify-end gap-4 md:w-full mt-8 pt-4 border-t border-gray-100">
-            <a href="{{ path('admin_dashboard_map_network_accessPoints', { id: network.id }) }}" class="btn-secondary flex items-center justify-center">
+            <a href="{{ path('admin_dashboard_map_network_accessPoints', {id: network.id}) }}" class="btn-secondary flex items-center justify-center">
                 {{ 'return'|trans({}, '_acessPoint') }}
             </a>
             <button type="submit" class="btn-primary">

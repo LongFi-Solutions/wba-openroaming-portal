@@ -28,7 +28,7 @@
 
         {{ form_start(form) }}
 
-        {{ form_widget(form.geometryJson, {'attr': {'data-network-polygon-target': 'geometryJson'}}) }}
+        {{ form_widget(form.geometryJson, {attr: {'data-network-polygon-target': 'geometryJson'}}) }}
 
         <div class="mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
 
@@ -47,7 +47,7 @@
                 {{ form_widget(form.description, {attr: {
                     class: 'form-widget min-h-[100px]',
                     rows: '4',
-                    placeholder: 'networkDescriptionPlaceHolder'|trans({}, '_map')
+                    placeholder: 'networkDescriptionPlaceHolder'|trans({}, '_map'),
                 }}) }}
                 <div class="text-red-500 m-2 text-sm">
                     {{ form_errors(form.description) }}
@@ -108,8 +108,8 @@
 
                 <div class="w-full h-[450px] rounded-lg border border-gray-200 shadow-inner overflow-hidden z-10">
                     {{ ux_map(this.map, {
-                        'class': 'w-full h-full min-h-[450px]',
-                        'data-action': 'ux:map:connect->map-geolocation#_onConnect ux:map:connect->network-polygon#_onConnect'
+                        class: 'w-full h-full min-h-[450px]',
+                        'data-action': 'ux:map:connect->map-geolocation#_onConnect ux:map:connect->network-polygon#_onConnect',
                     }) }}
                 </div>
                 <div class="text-red-500 m-2 text-sm">
