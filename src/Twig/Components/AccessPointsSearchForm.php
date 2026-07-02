@@ -13,6 +13,8 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
+use Symfony\UX\LiveComponent\Attribute\LiveAction;
+use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
@@ -102,6 +104,17 @@ class AccessPointsSearchForm
     public function getTotalPages(): int
     {
         return (int)ceil(count($this->getAccessPoints()) / $this->count);
+    }
+
+    #[LiveAction]
+    public function changeSort(#[LiveArg] string $field): void
+    {
+        if ($this->sort === $field) {
+            $this->order = $this->order === 'desc' ? 'asc' : 'desc';
+        } else {
+            $this->sort = $field;
+            $this->order = 'desc';
+        }
     }
 
 }
