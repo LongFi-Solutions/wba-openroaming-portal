@@ -8,6 +8,7 @@ enum UserProvider: string
 {
     case SAML = 'SAML Account';
     case GOOGLE_ACCOUNT = 'Google Account';
+    case GOOGLE_GSUITE_SAML = 'Google G Suite Account';
     case MICROSOFT_ACCOUNT = 'Microsoft Account';
     case PORTAL_ACCOUNT = 'Portal Account';
     case EMAIL = 'Email';
