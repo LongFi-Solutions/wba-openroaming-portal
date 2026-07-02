@@ -149,24 +149,9 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
             $samlAccountName = $email;
         }
 
-        // Default provider type for new SAML accounts
-        $providerType = UserProvider::SAML->value;
-
-        // Check if the SAML Response belongs to Google
-        $request = $this->requestStack->getCurrentRequest();
-        if ($request) {
-            $xmlStr = base64_decode((string)$request->request->get('SAMLResponse', ''), true);
-
-            // Check if Google is explicitly the Issuer in the XML, or check by route name
-            if (($xmlStr && str_contains($xmlStr, 'google.com')) ||
-                in_array($request->attributes->get('_route'), ['saml_acs', 'dashboard_saml_acs'], true)) {
-                $providerType = UserProvider::GOOGLE_GSUITE_SAML->value;
-            }
-        }
-
         $userAuth = new UserExternalAuth();
         $userAuth->setUser($user)
-            ->setProvider($providerType)
+            ->setProvider(UserProvider::SAML->value)
             ->setProviderId($samlAccountName);
 
         $this->entityManager->persist($user);
