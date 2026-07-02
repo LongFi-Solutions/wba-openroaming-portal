@@ -6,6 +6,11 @@
         {{ network.name }}
     </td>
 
+    {# Access Points Count #}
+    <td class="p-4 pl-8">
+        {{ network.accessPoints|length }}
+    </td>
+
     {# Created At #}
     <td class="p-4 pl-8">
         {% if network.createdAt %}
