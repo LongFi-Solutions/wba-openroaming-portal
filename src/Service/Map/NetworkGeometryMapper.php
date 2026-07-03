@@ -31,7 +31,7 @@ readonly class NetworkGeometryMapper
         foreach ($geometry['features'] as $feature) {
             $polygon = $this->buildPolygonFromFeature($feature, $network);
 
-            if ($polygon !== null) {
+            if ($polygon instanceof Polygon) {
                 $polygons[] = $polygon;
             }
         }
