@@ -22,16 +22,19 @@ use App\Form\RevokeProfilesType;
 use App\Form\TOSType;
 use App\Repository\UserExternalAuthRepository;
 use App\Security\LandingAuthenticator;
+use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\OSDetectionService;
 use App\Service\ProfileManager;
+use App\Service\SendSMS;
 use App\Service\TwoFAService;
 use App\Service\UserDeletion\UserDeletionService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Exception;
+use libphonenumber\PhoneNumber;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -43,6 +46,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
 /**
  * @method getParameterBag()
@@ -62,6 +66,8 @@ class SiteController extends AbstractController
         private readonly UserPasswordHasherInterface $userPasswordEncoder,
         private readonly UserAuthenticatorInterface $userAuthenticator,
         private readonly LandingAuthenticator $authenticator,
+        private readonly EmailGenerator $emailGenerator,
+        private readonly SendSMS $sendSMS,
     ) {
     }
 
@@ -88,6 +94,18 @@ class SiteController extends AbstractController
             $previousLoggedID = (int)$request->cookies->get('previousLoggedID');
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
             if ($previousLoggedID && $previousLoggedID === $currentUser->getId()) {
+                // Notify the user before their data is wiped
+                try {
+                    if ($currentUser->getEmail() !== null) {
+                        $this->emailGenerator->sendUserAccountDeletionConfirmationEmail($currentUser);
+                    } elseif ($currentUser->getPhoneNumber() instanceof PhoneNumber) {
+                        $message = $this->translator->trans('sms_account_deletion', [], 'UserDeletionService');
+                        $this->sendSMS->sendSmsNoValidation($currentUser, $message);
+                    }
+                } catch (Throwable) {
+                    // non-fatal — deletion continues regardless
+                }
+
                 $result = $this->userDeletionService->deleteUser(
                     $currentUser,
                     $userExternalAuths,

@@ -298,4 +298,83 @@ readonly class EmailGenerator
             ->embedFromPath($logoPath, 'logo_cid');
         $this->mailer->send($email);
     }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function sendUserAccountDeletionConfirmationEmail(User $user): void
+    {
+        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
+
+        $email = new TemplatedEmail()
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
+            ->to($user->getEmail())
+            ->subject(
+                $this->translator->trans(
+                    'subject_account_deletion_confirmation',
+                    [],
+                    'account_deletion_confirmation_by_user'
+                )
+            )
+            ->htmlTemplate('email/account_deletion_confirmation_by_user.html.twig')
+            ->context([
+                'uuid' => $user->getEmail(),
+                'supportTeam' => $supportTeam,
+                'contactEmail' => $contactEmail,
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
+
+        $this->mailer->send($email);
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function sendAdminUserDeletionAccountConfirmationEmail(
+        User $deletedUser,
+        User $adminRecipient,
+        User $performedBy
+    ): void {
+        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
+
+        $email = new TemplatedEmail()
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
+            ->to($adminRecipient->getEmail())
+            ->subject(
+                $this->translator->trans(
+                    'subject_admin_account_deletion_confirmation',
+                    [],
+                    'account_deletion_confirmation_by_admins'
+                )
+            )
+            ->htmlTemplate('email/account_deletion_confirmation_by_admins.html.twig')
+            ->context([
+                'uuid' => $deletedUser->getUuid(),
+                'adminName' => trim($performedBy->getFirstName() . ' ' . $performedBy->getLastName()),
+                'adminEmail' => $performedBy->getEmail(),
+                'supportTeam' => $supportTeam,
+                'contactEmail' => $contactEmail,
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
+
+        $this->mailer->send($email);
+    }
 }
