@@ -41,13 +41,15 @@
         <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
                 {{ stimulus_target('nav-submenu', 'container') }}>
             <ul class="p-2 text-gray-700 gap-y-2">
-                <li>
+                {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP_WRITE')) %}
+                    <li>
                     <a href="{{ path('admin_dashboard_map_network_edit', {id: network.id}) }}"
                        class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
                         <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3 fill-none stroke-current" />
                         {{ 'edit'|trans({}, '_network') }}
                     </a>
                 </li>
+                {% endif %}
                 <li>
                     <a href="{{ path('admin_dashboard_map_network_accessPoints', {id: network.id}) }}"
                        class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
@@ -55,13 +57,15 @@
                         {{ 'accessPoints'|trans({}, '_network') }}
                     </a>
                 </li>
-                <li>
+                {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP_WRITE')) %}
+                    <li>
                     <a href="{{ path('admin_dashboard_map_network_delete', {id: network.id}) }}"
                        class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
                         <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-current stroke-none"/>
                         {{ 'delete'|trans({}, '_network') }}
                     </a>
                 </li>
+                {% endif %}
             </ul>
         </div>
     </td>

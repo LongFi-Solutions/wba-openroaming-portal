@@ -266,6 +266,9 @@ final class UserAuthenticationVoter extends Voter
             self::CONNECTIVITY_STATISTICS_READ =>
             $this->hasPermission($user, AdminPermissionsType::CONNECTIVITY_STATISTICS_READ),
 
+            self::MAP_WRITE => $this->hasPermission($user, AdminPermissionsType::MAP_WRITE),
+            self::MAP_READ => $this->hasPermission($user, AdminPermissionsType::MAP_READ) || $this->hasPermission($user, AdminPermissionsType::MAP_WRITE),
+
             self::PORTAL_SETTINGS => $this->hasPortalSettings($user),
             self::MAP => $this->hasMap($user),
             self::USER_AUTHENTICATION => $this->hasUserAuthentication($user),

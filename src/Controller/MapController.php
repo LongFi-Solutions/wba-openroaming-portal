@@ -225,7 +225,7 @@ class MapController extends AbstractController
         'dashboard/map/network/{id:network<\d+>}/accessPoints/create',
         name: 'admin_dashboard_map_accessPoint_create'
     )]
-    #[isGranted(AdminPermissionsType::MAP_READ->value)]
+    #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function networkAccessPointsCreate(Network $network, Request $request): Response
     {
         $data = $this->getSettings->getSettings();
