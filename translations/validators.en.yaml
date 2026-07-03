@@ -94,3 +94,10 @@ invalidIosTeamId: "Please enter a valid iOS TEAM identifier (e.g., ABC123DEF9)."
 invalidIosBundleId: "Please enter a valid iOS bundle identifier (e.g., com.example.app)."
 invalidSha256Fingerprint: "Please enter a valid SHA-256 fingerprint (format: XX:XX:...:XX)."
 atLeastOneFingerprint: "Please provide at least one fingerprint."
+polygonWarningMessage: 'The drawn area must enclose all existing access points (The point "%s" is outside the area!).'
+polygonWarningMessageMultiple: 'The drawn area must enclose all existing access points (The points "%s" are outside the area!).'
+invalidMacAddressFormat: "The entered MAC address is invalid. Please use the format AA:BB:CC:11:22:33 or AA-BB-CC-11-22-33."
+altitudeAglCannotBeNegative: "The altitude above ground level (AGL) cannot be less than 0 meters."
+invalidAltitudeMsl: "The entered MSL altitude is outside realistic geographical limits (-500m to 9000m)."
+networkHasNoGeometry: "The selected network does not have a defined geographical area (polygon)."
+pointOutsideNetworkPolygon: "The selected coordinates fall outside the permitted coverage area for this network."

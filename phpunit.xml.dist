@@ -57,6 +57,12 @@
         <!-- See https://symfony.com/doc/current/routing.html#generating-urls-in-commands -->
         <env name="DEFAULT_URI" value=""/>
         <!-- ###- symfony/routing ### -->
+
+        <!-- ###+ symfony/ux-leaflet-map ### -->
+        <!-- Options available at https://github.com/symfony/ux/blob/2.x/src/Map/src/Bridge/Leaflet/README.md -->
+        <!--  -->
+        <env name="UX_MAP_DSN" value="leaflet://default"/>
+        <!-- ###- symfony/ux-leaflet-map ### -->
     </php>
 
     <testsuites>
