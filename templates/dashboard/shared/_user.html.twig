@@ -89,6 +89,15 @@
                     </li>
                     {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
                         <li>
+                            <a href="{{ path('admin_dashboard_user_edit', {id: user.id}) }}"
+                               class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                                <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3 fill-none stroke-current" />
+                                {{ 'edit'|trans({}, '_user') }}
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
+                        <li>
                             <a href="{{ path('admin_dashboard_user_reset_password', {id: user.id}) }}"
                                class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
                                 <twig:ux:icon name="wba:lock-outline" class="w-5 mr-3 fill-current stroke-none"/>
