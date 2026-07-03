@@ -16,7 +16,7 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use App\Service\TwoFAService;
-use App\Service\UserDeletionService;
+use App\Service\UserDeletion\UserDeletionService;
 use DateTime;
 use Doctrine\ORM\Exception\ORMException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -163,6 +163,7 @@ class UserAccountDeletionController extends AbstractController
 
     /**
      * @throws \JsonException
+     * @throws ORMException
      */
     #[Route('/landing/userAccount/deletion/local/code', name: 'app_user_account_deletion_local_code')]
     #[IsGranted('ROLE_USER')]

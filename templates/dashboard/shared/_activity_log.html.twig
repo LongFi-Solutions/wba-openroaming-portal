@@ -3,23 +3,33 @@
         {{ stimulus_controller('modal-trigger', {modalId: 'event-modal-' ~ event.id}) }}
     data-action="click->modal-trigger#open">
 
-    {% if showUser is not defined or showUser %}
-        <td class="px-6 py-4 font-medium">
-            {% if event.user is not null %}
-                {{ event.user.uuid }}
+    <td class="px-6 py-4 font-medium">
+        {% if event.user is not null %}
+            {% if event.containsEncryptedData %}
+                <span class="text-gray-400 italic text-sm">Deleted User ID: {{ event.user.id }}</span>
             {% else %}
-                <span class="pill-error">{{ 'noInformation'|trans({}, '_user') }}</span>
+                {{ event.user.uuid }}
             {% endif %}
-        </td>
-    {% endif %}
+        {% else %}
+            <span class="pill-error">{{ 'noInformation'|trans({}, '_user') }}</span>
+        {% endif %}
+    </td>
 
     <td class="p-4 font-medium">
         {% set eventType = constant('App\\Enum\\AnalyticalEventType::' ~ event.eventName) is defined
             ? constant('App\\Enum\\AnalyticalEventType::' ~ event.eventName)
             : null %}
+        <div class="flex flex-wrap items-center gap-2">
         <span class="pill-info">
             {{ eventType ? eventType.label : event.eventName }}
         </span>
+            {% if event.containsEncryptedData %}
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 border border-amber-200 text-amber-700">
+                <twig:ux:icon name="wba:lock-outline" class="w-3 h-3 shrink-0"/>
+                {{ 'encryptedEvent'|trans({}, 'dashboard') }}
+            </span>
+            {% endif %}
+        </div>
     </td>
 
     <td class="p-4 text-gray-500">

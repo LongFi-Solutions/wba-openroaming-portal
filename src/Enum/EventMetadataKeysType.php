@@ -10,11 +10,13 @@ enum EventMetadataKeysType: string
     case USER_AGENT = 'user_agent';
     case PLATFORM = 'platform';
     case UUID = 'uuid';
+    case ID = 'id';
     case DOWNLOADED_PROFILE_TYPE  = 'type';
     case REGISTRATION_TYPE = 'registration_type';
     case VERIFICATION_ATTEMPTS = 'verification_attempts';
     case CHANGESET = 'changeset';
     case PERFORMED_ON_UUID = 'performed_on_uuid';
+    case PERFORMED_ON_ID = 'performed_on_id';
     case RESET_ATTEMPTS = 'reset_attempts';
     case LAST_RESET_ACCOUNT_PASSWORD_TIME = 'last_reset_account_password_time';
     case ADMIN_ACCOUNT_CREATED = 'admin_account_created';
@@ -30,4 +32,10 @@ enum EventMetadataKeysType: string
     case VALIDATION_SUCCESS = 'validation-success';
     case IS_EV_CERTIFICATE = 'is_ev_certificate';
     case VALIDATION_ERRORS = 'validation_errors';
+    case OLD_DATA = 'old_data';
+    case NEW_DATA = 'new_data';
+    case USER_OLD_DATA = 'user_old_data';
+    case USER_NEW_DATA = 'user_new_data';
+    case FIRST_NAME = 'first_name';
+    case LAST_NAME = 'last_name';
 }

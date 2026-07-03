@@ -568,8 +568,8 @@ class SettingsController extends AbstractController
             ) {
                 if ($data[$name]['value'] !== $value) {
                     $changeset[$name] = [
-                        'oldValue' => $data[$name]['value'],
-                        'newValue' => $value,
+                        EventMetadataKeysType::OLD_DATA->value => $data[$name]['value'],
+                        EventMetadataKeysType::NEW_DATA->value => $value,
                     ];
                 }
                 $this->settingsService->update($name, $value);
@@ -581,8 +581,10 @@ class SettingsController extends AbstractController
                 $form->get(TextEditorName::TOS_EDITOR->value)->getData()
             ) {
                 $changeset[TextEditorName::TOS_EDITOR->value] = [
-                    'oldValue' => $tosTextEditor->getContent(),
-                    'newValue' => $form->get(TextEditorName::TOS_EDITOR->value)->getData(),
+                    EventMetadataKeysType::OLD_DATA->value => $tosTextEditor->getContent(),
+                    EventMetadataKeysType::NEW_DATA->value => $form->get(
+                        TextEditorName::TOS_EDITOR->value
+                    )->getData(),
                 ];
             }
             // Update TextEditors
@@ -597,8 +599,10 @@ class SettingsController extends AbstractController
                 $form->get(TextEditorName::PRIVACY_POLICY_EDITOR->value)->getData()
             ) {
                 $changeset[TextEditorName::PRIVACY_POLICY_EDITOR->value] = [
-                    'oldValue' => $privacyPolicyTextEditor->getContent(),
-                    'newValue' => $form->get(TextEditorName::PRIVACY_POLICY_EDITOR->value)->getData(),
+                    EventMetadataKeysType::OLD_DATA->value => $privacyPolicyTextEditor->getContent(),
+                    EventMetadataKeysType::NEW_DATA->value => $form->get(
+                        TextEditorName::PRIVACY_POLICY_EDITOR->value
+                    )->getData(),
                 ];
             }
             $privacyPolicyTextEditor->setContent(

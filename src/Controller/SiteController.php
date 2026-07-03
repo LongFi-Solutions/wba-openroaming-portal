@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
-use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
@@ -28,14 +27,13 @@ use App\Service\GetSettings;
 use App\Service\OSDetectionService;
 use App\Service\ProfileManager;
 use App\Service\TwoFAService;
-use App\Service\UserDeletionService;
+use App\Service\UserDeletion\UserDeletionService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Exception;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -565,13 +563,13 @@ class SiteController extends AbstractController
                 EventMetadataKeysType::IP->value => $request->getClientIp(),
                 EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
                 EventMetadataKeysType::UUID->value => $user->getUuid(),
-                'Old data' => [
-                    'First Name' => $oldFirstName,
-                    'Last Name' => $oldLastName,
+                EventMetadataKeysType::USER_OLD_DATA->value => [
+                    EventMetadataKeysType::FIRST_NAME->value => $oldFirstName,
+                    EventMetadataKeysType::LAST_NAME->value => $oldLastName,
                 ],
-                'New data' => [
-                    'First Name' => $user->getFirstName(),
-                    'Last Name' => $user->getLastName(),
+                EventMetadataKeysType::USER_NEW_DATA->value => [
+                    EventMetadataKeysType::FIRST_NAME->value => $user->getFirstName(),
+                    EventMetadataKeysType::LAST_NAME->value => $user->getLastName(),
                 ],
             ];
             $this->eventActions->saveEvent(
