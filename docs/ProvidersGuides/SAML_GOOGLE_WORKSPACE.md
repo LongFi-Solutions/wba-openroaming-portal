@@ -98,6 +98,6 @@ SAML_ATTRIBUTE_MAPPING='{"uuid":"email","email":"email","first_name":"givenName"
 
 - The Ngrok URL changes on every new tunnel (on the free tier), so both Google Admin and `.env` must be updated whenever the tunnel restarts.
 - Bundle used in this project: `nbgrp/onelogin-saml-bundle`.
-- Currently open blockers:
-    - Enabling user access in Google Admin for the test app.
+- Currently possible blockers during dev:
+    - Enabling user access in Google Admin for the portal test.
     - Initiating the login flow from the Ngrok URL.
