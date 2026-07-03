@@ -32,7 +32,7 @@ readonly class GeoLocationResolver
             }
 
             return [$record->location->latitude, $record->location->longitude];
-        } catch (InvalidDatabaseException|Exception) {
+        } catch (InvalidDatabaseException | Exception) {
             return null;
         }
     }
