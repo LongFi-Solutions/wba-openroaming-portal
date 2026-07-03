@@ -88,24 +88,6 @@ readonly class NetworkGeometryMapper
             $html .= '<p class="coverage-map-popup-description">' . $this->escape($description) . '</p>';
         }
 
-        $createdAt = $network->getCreatedAt();
-        $updatedAt = $network->getUpdatedAt();
-
-        // Add timestamp metadata dates
-        if ($createdAt !== null || $updatedAt !== null) {
-            $html .= '<div class="coverage-map-popup-meta">';
-
-            if ($createdAt !== null) {
-                $html .= '<span class="coverage-map-popup-date"><strong>Created:</strong> ' . $createdAt->format('Y-m-d H:i') . '</span>';
-            }
-
-            if ($updatedAt !== null) {
-                $html .= '<span class="coverage-map-popup-date"><strong>Updated:</strong> ' . $updatedAt->format('Y-m-d H:i') . '</span>';
-            }
-
-            $html .= '</div>';
-        }
-
         return $html;
     }
 
