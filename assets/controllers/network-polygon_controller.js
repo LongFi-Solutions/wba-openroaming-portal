@@ -1,10 +1,10 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ["geometryJson"];
+    static targets = ['geometryJson'];
 
     static values = {
-        tooltip: { type: String, default: 'Click to remove this polygon' }
+        tooltip: { type: String, default: 'Click to remove this polygon' },
     };
 
     connect() {
@@ -44,22 +44,22 @@ export default class extends Controller {
         }
 
         const rawValue = this.geometryJsonTarget.value.trim();
-        if (rawValue === "" || rawValue === "[]" || rawValue === "null") {
+        if (rawValue === '' || rawValue === '[]' || rawValue === 'null') {
             return;
         }
 
         try {
             const geoJson = JSON.parse(rawValue);
 
-            if (geoJson.type === "FeatureCollection" && geoJson.features) {
-                geoJson.features.forEach(feature => {
-                    if (feature.geometry && feature.geometry.type === "Polygon") {
+            if (geoJson.type === 'FeatureCollection' && geoJson.features) {
+                geoJson.features.forEach((feature) => {
+                    if (feature.geometry && feature.geometry.type === 'Polygon') {
                         const coordinates = feature.geometry.coordinates[0];
                         if (coordinates && coordinates.length > 0) {
                             const savedPoints = coordinates.slice(0, -1);
                             this.allPolygons.push(savedPoints);
 
-                            const leafletCoords = coordinates.map(p => [p[1], p[0]]);
+                            const leafletCoords = coordinates.map((p) => [p[1], p[0]]);
                             this.drawSavedPolygonLayer(leafletCoords, savedPoints);
                         }
                     }
@@ -72,7 +72,7 @@ export default class extends Controller {
                 }
             }
         } catch (error) {
-            console.error("Error loading existing polygons", error);
+            console.error('Error loading existing polygons', error);
         }
     }
 
@@ -80,8 +80,10 @@ export default class extends Controller {
         this.drawMode = event.params.mode;
         this.cancelCurrentDrawing();
 
-        const buttons = event.currentTarget.parentElement.querySelectorAll('button[data-network-polygon-mode-param]');
-        buttons.forEach(btn => {
+        const buttons = event.currentTarget.parentElement.querySelectorAll(
+            'button[data-network-polygon-mode-param]'
+        );
+        buttons.forEach((btn) => {
             btn.classList.remove('bg-blue-600', 'text-white');
             btn.classList.add('bg-gray-200');
         });
@@ -91,7 +93,7 @@ export default class extends Controller {
 
     cancelCurrentDrawing() {
         if (this.currentPolyline) this.map.removeLayer(this.currentPolyline);
-        this.currentMarkers.forEach(m => this.map.removeLayer(m));
+        this.currentMarkers.forEach((m) => this.map.removeLayer(m));
         if (this.previewShapeLayer) this.map.removeLayer(this.previewShapeLayer);
 
         this.currentPoints = [];
@@ -114,7 +116,7 @@ export default class extends Controller {
             weight: 2,
             dashArray: '5, 10',
             fillOpacity: 0.15,
-            fillColor: '#3b82f6'
+            fillColor: '#3b82f6',
         };
 
         if (this.drawMode === 'square') {
@@ -122,7 +124,10 @@ export default class extends Controller {
             this.previewShapeLayer = this.L.rectangle(bounds, visualStyle).addTo(this.map);
         } else if (this.drawMode === 'circle') {
             const radius = this.map.distance(this.shapeStartPoint, e.latlng);
-            this.previewShapeLayer = this.L.circle(this.shapeStartPoint, { ...visualStyle, radius: radius }).addTo(this.map);
+            this.previewShapeLayer = this.L.circle(this.shapeStartPoint, {
+                ...visualStyle,
+                radius: radius,
+            }).addTo(this.map);
         }
     }
 
@@ -143,7 +148,7 @@ export default class extends Controller {
                         [lng1, lat1],
                         [lng2, lat1],
                         [lng2, lat2],
-                        [lng1, lat2]
+                        [lng1, lat2],
                     ];
                 } else if (this.drawMode === 'circle') {
                     const radiusMeters = this.map.distance(this.shapeStartPoint, e.latlng);
@@ -152,7 +157,7 @@ export default class extends Controller {
 
                 this.cancelCurrentDrawing();
 
-                const leafletCoords = polygonPoints.map(p => [p[1], p[0]]);
+                const leafletCoords = polygonPoints.map((p) => [p[1], p[0]]);
                 this.allPolygons.push([...polygonPoints]);
                 this.drawSavedPolygonLayer(leafletCoords, polygonPoints);
                 this.updateGeometryJsonValue();
@@ -184,7 +189,7 @@ export default class extends Controller {
             color: '#2563eb',
             fillColor: '#3b82f6',
             fillOpacity: 1,
-            weight: 2
+            weight: 2,
         };
 
         const marker = this.L.circleMarker([lat, lng], markerOptions).addTo(this.map);
@@ -194,7 +199,7 @@ export default class extends Controller {
             this.startMarker.setStyle({
                 radius: 8,
                 weight: 4,
-                color: '#1d4ed8'
+                color: '#1d4ed8',
             });
 
             this.startMarker.on('click', (event) => {
@@ -214,7 +219,7 @@ export default class extends Controller {
     }
 
     drawProgressLines() {
-        const leafletCoords = this.currentPoints.map(p => [p[1], p[0]]);
+        const leafletCoords = this.currentPoints.map((p) => [p[1], p[0]]);
 
         if (this.currentPolyline) {
             this.currentPolyline.setLatLngs(leafletCoords);
@@ -222,7 +227,7 @@ export default class extends Controller {
             this.currentPolyline = this.L.polyline(leafletCoords, {
                 color: '#3b82f6',
                 dashArray: '5, 10',
-                weight: 3
+                weight: 3,
             }).addTo(this.map);
         }
     }
@@ -231,10 +236,10 @@ export default class extends Controller {
         if (this.currentPoints.length < 3) return;
 
         const closedPoints = [...this.currentPoints, this.currentPoints[0]];
-        const leafletCoords = closedPoints.map(p => [p[1], p[0]]);
+        const leafletCoords = closedPoints.map((p) => [p[1], p[0]]);
 
         if (this.currentPolyline) this.map.removeLayer(this.currentPolyline);
-        this.currentMarkers.forEach(m => this.map.removeLayer(m));
+        this.currentMarkers.forEach((m) => this.map.removeLayer(m));
 
         this.currentMarkers = [];
         this.currentPolyline = null;
@@ -253,7 +258,7 @@ export default class extends Controller {
             color: '#2563eb',
             fillColor: '#3b82f6',
             fillOpacity: 0.35,
-            weight: 3
+            weight: 3,
         }).addTo(this.map);
 
         polygon.bindTooltip(this.tooltipValue, { sticky: true });
@@ -262,8 +267,8 @@ export default class extends Controller {
             this.L.DomEvent.stopPropagation(e);
 
             this.map.removeLayer(polygon);
-            this.polygonsLayers = this.polygonsLayers.filter(layer => layer !== polygon);
-            this.allPolygons = this.allPolygons.filter(points => points !== originalPoints);
+            this.polygonsLayers = this.polygonsLayers.filter((layer) => layer !== polygon);
+            this.allPolygons = this.allPolygons.filter((points) => points !== originalPoints);
 
             this.updateGeometryJsonValue();
         });
@@ -272,24 +277,24 @@ export default class extends Controller {
     }
 
     updateGeometryJsonValue() {
-        const features = this.allPolygons.map(polygonPoints => {
+        const features = this.allPolygons.map((polygonPoints) => {
             const closed = [...polygonPoints, polygonPoints[0]];
             return {
-                type: "Feature",
+                type: 'Feature',
                 properties: {},
                 geometry: {
-                    type: "Polygon",
-                    coordinates: [closed]
-                }
+                    type: 'Polygon',
+                    coordinates: [closed],
+                },
             };
         });
 
         const geoJsonData = {
-            type: "FeatureCollection",
-            features: features
+            type: 'FeatureCollection',
+            features: features,
         };
 
-        this.geometryJsonTarget.value = features.length > 0 ? JSON.stringify(geoJsonData) : "";
+        this.geometryJsonTarget.value = features.length > 0 ? JSON.stringify(geoJsonData) : '';
 
         this.geometryJsonTarget.dispatchEvent(new Event('change', { bubbles: true }));
     }
@@ -300,12 +305,12 @@ export default class extends Controller {
         const lng = centerLatLng.lng;
 
         const radiusLat = radiusMeters / 111320;
-        const radiusLng = radiusMeters / (40075000 * Math.cos(lat * Math.PI / 180) / 360);
+        const radiusLng = radiusMeters / ((40075000 * Math.cos((lat * Math.PI) / 180)) / 360);
 
         for (let i = 0; i < points; i++) {
             const theta = (i / points) * (2 * Math.PI);
-            const pLng = lng + (radiusLng * Math.cos(theta));
-            const pLat = lat + (radiusLat * Math.sin(theta));
+            const pLng = lng + radiusLng * Math.cos(theta);
+            const pLat = lat + radiusLat * Math.sin(theta);
             coords.push([parseFloat(pLng.toFixed(7)), parseFloat(pLat.toFixed(7))]);
         }
         return coords;
@@ -316,11 +321,11 @@ export default class extends Controller {
 
         this.cancelCurrentDrawing();
 
-        this.polygonsLayers.forEach(layer => this.map.removeLayer(layer));
+        this.polygonsLayers.forEach((layer) => this.map.removeLayer(layer));
         this.polygonsLayers = [];
         this.allPolygons = [];
 
-        this.geometryJsonTarget.value = "";
+        this.geometryJsonTarget.value = '';
         this.geometryJsonTarget.dispatchEvent(new Event('change', { bubbles: true }));
     }
 }

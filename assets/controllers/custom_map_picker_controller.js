@@ -1,10 +1,10 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ["latitude", "longitude"];
+    static targets = ['latitude', 'longitude'];
 
     static values = {
-        networkGeometry: { type: String, default: '' }
+        networkGeometry: { type: String, default: '' },
     };
 
     connect() {
@@ -33,31 +33,35 @@ export default class extends Controller {
             try {
                 const geoJson = JSON.parse(this.networkGeometryValue);
 
-                if (geoJson.type === "FeatureCollection" && geoJson.features) {
-                    geoJson.features.forEach(feature => {
-                        if (feature.geometry && feature.geometry.type === "Polygon") {
+                if (geoJson.type === 'FeatureCollection' && geoJson.features) {
+                    geoJson.features.forEach((feature) => {
+                        if (feature.geometry && feature.geometry.type === 'Polygon') {
                             const coordinates = feature.geometry.coordinates[0];
                             if (coordinates && coordinates.length > 0) {
-                                const leafletCoords = coordinates.map(p => [p[1], p[0]]);
+                                const leafletCoords = coordinates.map((p) => [p[1], p[0]]);
 
                                 this.L.polygon(leafletCoords, {
                                     color: '#2563eb',
                                     fillColor: '#3b82f6',
                                     fillOpacity: 0.35,
                                     weight: 3,
-                                    interactive: false
+                                    interactive: false,
                                 }).addTo(this.map);
                             }
                         }
                     });
                 }
             } catch (error) {
-                console.error("Error:", error);
+                console.error('Error:', error);
             }
         }
 
-        let latRaw = this.latitudeTarget.value ? this.latitudeTarget.value.toString().replace(',', '.') : '';
-        let lngRaw = this.longitudeTarget.value ? this.longitudeTarget.value.toString().replace(',', '.') : '';
+        let latRaw = this.latitudeTarget.value
+            ? this.latitudeTarget.value.toString().replace(',', '.')
+            : '';
+        let lngRaw = this.longitudeTarget.value
+            ? this.longitudeTarget.value.toString().replace(',', '.')
+            : '';
 
         const savedLat = parseFloat(latRaw);
         const savedLng = parseFloat(lngRaw);
