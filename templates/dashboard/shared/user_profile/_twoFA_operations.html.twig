@@ -45,9 +45,15 @@
                 {{ 'TwoFAOptions'|trans({}, 'edit') }}
             </h2>
             {% if userData.user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
+                {% set twoFALabels = {
+                    0: 'twoFALabel.disabled'|trans({}, 'show'),
+                    1: 'twoFALabel.totp'|trans({}, 'show'),
+                    2: 'twoFALabel.sms'|trans({}, 'show'),
+                    3: 'twoFALabel.email'|trans({}, 'show'),
+                } %}
                 <p class="text-xs text-gray-400 mb-4">
                     {{ 'currentMethod'|trans({}, 'show') }}: <span
-                            class="font-medium text-gray-600">{{ userData.user.twoFAtype }}</span>
+                            class="font-medium text-gray-600">{{ twoFALabels[userData.user.twoFAtype] ?? '—' }}</span>
                 </p>
                 <a href="{{ path('admin_dashboard_user_disable2FA', {id: userData.user.id}) }}"
                    class="btn-logout w-full text-center block"
