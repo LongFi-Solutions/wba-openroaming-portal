@@ -12,7 +12,15 @@
     <div class="min-h-screen bg-center bg-cover flex items-center justify-center px-4 sm:px-6 lg:px-8"
          style="background-image: url('{{ bgUrl }}');">
         <div class="landing-container">
-            cool map here
+            <div
+                    {% if hasLocationConsent and centerLat is null %}
+                        {{ stimulus_controller('geolocation') }}
+                    {% endif %}
+                    data-center-lat="{{ centerLat }}"
+                    data-center-lng="{{ centerLng }}"
+            >
+                {# map renders here, reading data-center-lat/lng, falling back to a default if both are empty #}
+            </div>
         </div>
     </div>
 {% endblock %}
