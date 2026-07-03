@@ -121,4 +121,11 @@ return [
     '@kurkle/color' => [
         'version' => '0.3.4',
     ],
+    'leaflet' => [
+        'version' => '1.9.4',
+    ],
+    'leaflet/dist/leaflet.min.css' => [
+        'version' => '1.9.4',
+        'type' => 'css',
+    ],
 ];
