@@ -372,9 +372,7 @@ class DomainBlacklistController extends AbstractController
         );
 
 
-        // Return to the last page where the user was (with searching filters)
-        $lastPage = $request->headers->get('referer', '/dashboard');
-        return $this->redirect($lastPage);
+        return $this->redirectToRoute('admin_dashboard_settings_domains');
     }
 
     #[Route(
@@ -424,9 +422,7 @@ class DomainBlacklistController extends AbstractController
             ]
         );
 
-        // Return to the last page where the user was (with searching filters)
-        $lastPage = $request->headers->get('referer', '/dashboard');
-        return $this->redirect($lastPage);
+        return $this->redirectToRoute('admin_dashboard_settings_domains');
     }
 
     #[Route(
@@ -552,9 +548,7 @@ class DomainBlacklistController extends AbstractController
             );
         }
 
-        // Return to the last page where the user was (with searching filters)
-        $lastPage = $request->headers->get('referer', '/dashboard');
-        return $this->redirect($lastPage);
+        return $this->redirectToRoute('admin_dashboard_settings_domains');
     }
 
     /**
@@ -585,9 +579,7 @@ class DomainBlacklistController extends AbstractController
                 $this->translator->trans('domainSourceInactive', [], 'controllers')
             );
 
-            // Return to the last page where the user was (with searching filters)
-            $lastPage = $request->headers->get('referer', '/dashboard');
-            return $this->redirect($lastPage);
+            return $this->redirectToRoute('admin_dashboard_settings_domains');
         }
 
         $application = new Application($kernel);
@@ -641,8 +633,6 @@ class DomainBlacklistController extends AbstractController
             );
         }
 
-        // Return to the last page where the user was (with searching filters)
-        $lastPage = $request->headers->get('referer', '/dashboard');
-        return $this->redirect($lastPage);
+        return $this->redirectToRoute('admin_dashboard_settings_domains');
     }
 }
