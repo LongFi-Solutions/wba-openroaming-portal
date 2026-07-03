@@ -101,3 +101,5 @@ altitudeAglCannotBeNegative: "The altitude above ground level (AGL) cannot be le
 invalidAltitudeMsl: "The entered MSL altitude is outside realistic geographical limits (-500m to 9000m)."
 networkHasNoGeometry: "The selected network does not have a defined geographical area (polygon)."
 pointOutsideNetworkPolygon: "The selected coordinates fall outside the permitted coverage area for this network."
+coordinateDegreeBetween90: 'The latitude must be a numerical value between -90 and 90 degrees.'
+coordinateDegreeBetween180: 'The longitude must be a numerical value between -180 and 180 degrees.'
