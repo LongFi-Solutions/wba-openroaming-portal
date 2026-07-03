@@ -41,11 +41,11 @@ class AccessPointDTO
     public ?string $serialNumber = null;
 
     #[Assert\Regex(pattern: '/^-?\d+(\.\d+)?$/', message: 'decimalNumber')]
-    #[Assert\Range(notInRangeMessage: 'cordinateDeegreBteween90', min: -90, max: 90)]
+    #[Assert\Range(notInRangeMessage: 'coordinateDegreeBetween90', min: -90, max: 90)]
     public ?string $latitude = null;
 
     #[Assert\Regex(pattern: '/^-?\d+(\.\d+)?$/', message: 'decimalNumber')]
-    #[Assert\Range(notInRangeMessage: 'cordinateDeegreBteween180', min: -180, max: 180)]
+    #[Assert\Range(notInRangeMessage: 'coordinateDegreeBetween180', min: -180, max: 180)]
     public ?string $longitude = null;
 
 
