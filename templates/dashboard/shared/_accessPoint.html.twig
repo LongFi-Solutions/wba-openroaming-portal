@@ -34,33 +34,35 @@
         {% endif %}
     </td>
 
-    {# Actions Buttons #}
-    <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>
-        <button type="button" class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
-                {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
-                {{ stimulus_target('nav-submenu', 'button') }}>
-            <twig:ux:icon name="wba:menu-dots" class="w-5 h-5 fill-current"/>
-        </button>
+    {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP_WRITE')) %}
+        {# Actions Buttons #}
+        <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>
+            <button type="button" class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
+                    {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
+                    {{ stimulus_target('nav-submenu', 'button') }}>
+                <twig:ux:icon name="wba:menu-dots" class="w-5 h-5 fill-current"/>
+            </button>
 
-        {# Items List Dropdown #}
-        <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
-                {{ stimulus_target('nav-submenu', 'container') }}>
-            <ul class="p-2 text-gray-700 gap-y-2">
-                <li>
-                    <a href="{{ path('admin_dashboard_map_accessPoint_edit', {network_id: network.id, ap_id: accessPoint.id}) }}"
-                       class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
-                        <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3 fill-none stroke-current" />
-                        {{ 'edit'|trans({}, '_network') }}
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ path('admin_dashboard_map_accessPoint_delete', {network_id: network.id, ap_id: accessPoint.id}) }}"
-                       class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
-                        <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-current stroke-none"/>
-                        {{ 'delete'|trans({}, '_network') }}
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </td>
+            {# Items List Dropdown #}
+            <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
+                    {{ stimulus_target('nav-submenu', 'container') }}>
+                <ul class="p-2 text-gray-700 gap-y-2">
+                    <li>
+                        <a href="{{ path('admin_dashboard_map_accessPoint_edit', {network_id: network.id, ap_id: accessPoint.id}) }}"
+                           class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                            <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3 fill-none stroke-current" />
+                            {{ 'edit'|trans({}, '_network') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ path('admin_dashboard_map_accessPoint_delete', {network_id: network.id, ap_id: accessPoint.id}) }}"
+                           class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                            <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-current stroke-none"/>
+                            {{ 'delete'|trans({}, '_network') }}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </td>
+    {% endif %}
 </tr>

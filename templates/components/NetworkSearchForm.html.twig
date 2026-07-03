@@ -51,11 +51,13 @@
                 </div>
             </div>
 
-            <div class="flex items-center space-x-6">
+            {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP_WRITE')) %}
+                <div class="flex items-center space-x-6">
                 <a href="{{ path('admin_dashboard_map_network_create') }}" class="btn-primary px-4 min-w-[150px]">
                     {{ 'createNetwork'|trans({}, '_network') }}
                 </a>
             </div>
+            {% endif %}
 
         </div>
     </div>
