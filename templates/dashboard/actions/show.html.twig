@@ -12,9 +12,14 @@
         user: userData.user,
         user_profileStatus: true,
         isAdmin: userData.isAdmin,
-        actions: canEdit
-        ? '<a href="' ~ path('admin_dashboard_user_edit', {id: userData.user.id}) ~ '" class="btn-primary text-sm">' ~ 'edit'|trans({}, 'edit') ~ '</a>'
-        : '',
+        actionsMenu: {
+            user: userData.user,
+            isAdmin: userData.isAdmin,
+            delete_users: delete_users,
+            formRevokeProfiles: formRevokeProfiles,
+            userExternalAuths: userData.user.userExternalAuths,
+            currentUser: app.user,
+        },
     }) }}
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">

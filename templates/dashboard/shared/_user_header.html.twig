@@ -26,6 +26,28 @@
             {% if actions is defined %}
                 {{ actions|raw }}
             {% endif %}
+
+            {% if actionsMenu is defined and actionsMenu %}
+                <div class="relative" {{ stimulus_controller('nav-submenu') }}>
+                    <button type="button"
+                            {{ stimulus_action('nav-submenu', 'toggle') }}
+                            class="p-2 rounded-full hover:bg-gray-100 cursor-pointer">
+                        <twig:ux:icon name="wba:menu-dots" class="w-5 h-5 fill-current" />
+                    </button>
+
+                    <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-0 mt-2 z-16"
+                            {{ stimulus_target('nav-submenu', 'container') }}>
+                        {{ include('dashboard/shared/_user_actions_dropdown.html.twig', {
+                            user: actionsMenu.user,
+                            isAdmin: actionsMenu.isAdmin,
+                            delete_users: actionsMenu.delete_users,
+                            formRevokeProfiles: actionsMenu.formRevokeProfiles,
+                            userExternalAuths: actionsMenu.userExternalAuths,
+                            currentUser: actionsMenu.currentUser ?? null,
+                        }) }}
+                    </div>
+                </div>
+            {% endif %}
         </div>
     {% endif %}
 </div>
