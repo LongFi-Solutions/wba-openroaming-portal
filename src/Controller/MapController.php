@@ -9,13 +9,13 @@ use App\DTO\NetworkDTO;
 use App\Entity\AccessPoint;
 use App\Entity\Network;
 use App\Enum\AdminPermissionsType;
-use App\Enum\SettingName;
 use App\Form\CreateAccessPointType;
 use App\Form\CreateNetworkType;
 use App\Repository\AccessPointRepository;
 use App\Repository\NetworkRepository;
 use App\Service\GeoLocationResolver;
 use App\Service\GetSettings;
+use App\Service\Map\NetworkGeometryMapper;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonException;
@@ -37,8 +37,10 @@ class MapController extends AbstractController
         private readonly AccessPointRepository $accessPointRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly GeoLocationResolver $geoLocationResolver,
+        private readonly NetworkGeometryMapper $networkGeometryMapper,
     ) {
     }
+
     #[Route('/map', name: 'app_map')]
     public function index(Request $request): Response
     {
@@ -72,8 +74,14 @@ class MapController extends AbstractController
             ))
             ->zoom($centerLat !== null ? 14 : 6);
 
-        // Only fall back to browser geolocation if we couldn't resolve a
-        // server-side center AND the user has consented to location lookups.
+        $networks = $this->networkRepository->findAll();
+
+        foreach ($networks as $network) {
+            foreach ($this->networkGeometryMapper->buildPolygons($network) as $polygon) {
+                $map->addPolygon($polygon);
+            }
+        }
+
         $needsBrowserGeolocation = $hasLocationConsent && $centerLat === null;
 
         return $this->render('landing/map/index.html.twig', [
