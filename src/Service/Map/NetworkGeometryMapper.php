@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace App\Service\Map;
 
 use App\Entity\Network;
+use Symfony\UX\Map\InfoWindow;
 use Symfony\UX\Map\Point;
 use Symfony\UX\Map\Polygon;
 
 readonly class NetworkGeometryMapper
 {
     /**
-     * Builds a Polygon from a Network's stored GeoJSON FeatureCollection geometry.
+     * Builds Polygons from a Network's stored GeoJSON FeatureCollection geometry,
+     * each with an InfoWindow showing the network's name and description.
      * Returns an empty array if the geometry is missing, malformed, or not a Polygon.
      *
      * @return list<Polygon>
@@ -27,7 +29,7 @@ readonly class NetworkGeometryMapper
         $polygons = [];
 
         foreach ($geometry['features'] as $feature) {
-            $polygon = $this->buildPolygonFromFeature($feature);
+            $polygon = $this->buildPolygonFromFeature($feature, $network);
 
             if ($polygon !== null) {
                 $polygons[] = $polygon;
@@ -40,7 +42,7 @@ readonly class NetworkGeometryMapper
     /**
      * @param array<string, mixed> $feature
      */
-    private function buildPolygonFromFeature(array $feature): ?Polygon
+    private function buildPolygonFromFeature(array $feature, Network $network): ?Polygon
     {
         $featureGeometry = $feature['geometry'] ?? null;
 
@@ -60,7 +62,13 @@ readonly class NetworkGeometryMapper
             return null;
         }
 
-        return new Polygon(points: $points);
+        return new Polygon(
+            points: $points,
+            infoWindow: new InfoWindow(
+                headerContent: $this->escape($network->getName() ?? 'Site'),
+                content: $this->escape($network->getDescription() ?? ''),
+            ),
+        );
     }
 
     /**
@@ -79,5 +87,10 @@ readonly class NetworkGeometryMapper
         }
 
         return $points;
+    }
+
+    private function escape(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
     }
 }

@@ -40,7 +40,12 @@
                     </div>
                 {% endblock %}
 
-                <p class="my-6">{{ 'coverageMap.description'|trans({}, 'landing') }}</p>
+                <div class="my-6">
+                    <p>{{ 'coverageMap.description'|trans({}, 'landing') }}</p>
+                    <p class="mt-2 text-sm text-[#707070]">
+                        {{ 'coverageMap.clickHint'|trans({}, 'landing') }}
+                    </p>
+                </div>
 
                 <div class="relative z-0 overflow-hidden w-full h-[500px] rounded-[1px] shadow-lg"
                         {% if needsBrowserGeolocation %}

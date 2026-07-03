@@ -62,5 +62,6 @@ continueOnWeb: 'Continue on the web portal'
 coverageMap:
     title: "OpenRoaming Coverage Map"
     description: "Explore public OpenRoaming access points near you."
+    clickHint: "Click on a coverage area to see more details about that site."
     backToPortal: "Back to Portal"
 viewCoverageMap: 'View Coverage Map'
