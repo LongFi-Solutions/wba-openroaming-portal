@@ -42,12 +42,7 @@ class MapController extends AbstractController
     #[Route('/map', name: 'app_map')]
     public function index(Request $request): Response
     {
-        $data = $this->getSettings->getSpecificSettings([
-            SettingName::PAGE_TITLE->value,
-            SettingName::CUSTOMER_LOGO_ENABLED->value,
-            SettingName::CUSTOMER_LOGO->value,
-            SettingName::WALLPAPER_IMAGE->value,
-        ]);
+        $data = $this->getSettings->getSettings();
 
         $hasLocationConsent = $this->hasLocationConsent($request);
 
@@ -66,11 +61,25 @@ class MapController extends AbstractController
             }
         }
 
+        // Default fallback center
+        $defaultLat = 37.7412;
+        $defaultLng = -25.6756;
+
+        $map = new Map()
+            ->center(new Point(
+                (float)($centerLat ?? $defaultLat),
+                (float)($centerLng ?? $defaultLng)
+            ))
+            ->zoom($centerLat !== null ? 14 : 6);
+
+        // Only fall back to browser geolocation if we couldn't resolve a
+        // server-side center AND the user has consented to location lookups.
+        $needsBrowserGeolocation = $hasLocationConsent && $centerLat === null;
+
         return $this->render('landing/map/index.html.twig', [
             'data' => $data,
-            'hasLocationConsent' => $hasLocationConsent,
-            'centerLat' => $centerLat,
-            'centerLng' => $centerLng,
+            'map' => $map,
+            'needsBrowserGeolocation' => $needsBrowserGeolocation,
         ]);
     }
 

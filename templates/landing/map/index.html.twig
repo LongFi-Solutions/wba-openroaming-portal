@@ -1,26 +1,28 @@
-{% extends 'base.html.twig' %}
+{% extends 'landing/base.html.twig' %}
 
 {% block title %}
     {{ data.PAGE_TITLE.value }}
 {% endblock %}
 
-{% set bgUrl = data.WALLPAPER_IMAGE.value != '/resources/images/wallpaper.png'
-    ? data.WALLPAPER_IMAGE.value
-    : '/resources/images/background.png' %}
+{% block second_col %}
+    <div class="leading-7 mb-6">
+        <p class="font-bold text-lg">{{ 'coverageMap.title'|trans({}, 'landing') }}</p>
+        <p class="mt-3">{{ 'coverageMap.description'|trans({}, 'landing') }}</p>
+    </div>
 
-{% block body %}
-    <div class="min-h-screen bg-center bg-cover flex items-center justify-center px-4 sm:px-6 lg:px-8"
-         style="background-image: url('{{ bgUrl }}');">
-        <div class="landing-container">
-            <div
-                    {% if hasLocationConsent and centerLat is null %}
-                        {{ stimulus_controller('geolocation') }}
-                    {% endif %}
-                    data-center-lat="{{ centerLat }}"
-                    data-center-lng="{{ centerLng }}"
-            >
-                {# map renders here, reading data-center-lat/lng, falling back to a default if both are empty #}
-            </div>
-        </div>
+    <div class="relative z-0 overflow-hidden w-full h-[500px] rounded-[1px] shadow-lg"
+            {% if needsBrowserGeolocation %}
+                {{ stimulus_controller('geolocation') }}
+            {% endif %}
+    >
+        {{ ux_map(map, {
+            style: 'height: 100%; width: 100%;',
+        }) }}
+    </div>
+
+    <div class="mt-6">
+        <a href="{{ path('app_landing') }}" class="btn-secondary inline-flex items-center gap-2">
+            {{ 'coverageMap.backToPortal'|trans({}, 'landing') }}
+        </a>
     </div>
 {% endblock %}
