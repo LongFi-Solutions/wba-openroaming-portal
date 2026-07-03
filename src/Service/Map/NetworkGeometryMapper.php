@@ -65,10 +65,48 @@ readonly class NetworkGeometryMapper
         return new Polygon(
             points: $points,
             infoWindow: new InfoWindow(
-                headerContent: $this->escape($network->getName() ?? 'Site'),
-                content: $this->escape($network->getDescription() ?? ''),
+                headerContent: $this->buildHeaderContent($network),
+                content: $this->buildInfoWindowContent($network),
             ),
         );
+    }
+
+    private function buildHeaderContent(Network $network): string
+    {
+        return '<strong class="coverage-map-popup-title">'
+            . $this->escape($network->getName() ?? 'Site')
+            . '</strong>';
+    }
+
+    private function buildInfoWindowContent(Network $network): string
+    {
+        $html = '';
+        $description = $network->getDescription();
+
+        // Add description if it exists
+        if ($description !== null && $description !== '') {
+            $html .= '<p class="coverage-map-popup-description">' . $this->escape($description) . '</p>';
+        }
+
+        $createdAt = $network->getCreatedAt();
+        $updatedAt = $network->getUpdatedAt();
+
+        // Add timestamp metadata dates
+        if ($createdAt !== null || $updatedAt !== null) {
+            $html .= '<div class="coverage-map-popup-meta">';
+
+            if ($createdAt !== null) {
+                $html .= '<span class="coverage-map-popup-date"><strong>Created:</strong> ' . $createdAt->format('Y-m-d H:i') . '</span>';
+            }
+
+            if ($updatedAt !== null) {
+                $html .= '<span class="coverage-map-popup-date"><strong>Updated:</strong> ' . $updatedAt->format('Y-m-d H:i') . '</span>';
+            }
+
+            $html .= '</div>';
+        }
+
+        return $html;
     }
 
     /**
