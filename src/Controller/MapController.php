@@ -9,6 +9,7 @@ use App\DTO\NetworkDTO;
 use App\Entity\AccessPoint;
 use App\Entity\Network;
 use App\Enum\AdminPermissionsType;
+use App\Enum\SettingName;
 use App\Form\CreateAccessPointType;
 use App\Form\CreateNetworkType;
 use App\Repository\AccessPointRepository;
@@ -38,22 +39,14 @@ class MapController extends AbstractController
     #[Route('/map', name: 'app_map')]
     public function index(Request $request): Response
     {
-
-        $lat = $request->query->get('lat');
-        $lng = $request->query->get('lng');
-
-        $centerLat = $lat ?? 37.7412;
-        $centerLng = $lng ?? -25.6756;
-
-        $data = $this->getSettings->getSettings();
-        $map = new Map()
-            ->center(new Point((float)$centerLat, (float)$centerLng))
-            ->zoom(13);
-
-        //$mapWithPoints = $this->accessPointService->addAccessPoints($map);
+        $data = $this->getSettings->getSpecificSettings([
+            SettingName::PAGE_TITLE->value,
+            SettingName::CUSTOMER_LOGO_ENABLED->value,
+            SettingName::CUSTOMER_LOGO->value,
+            SettingName::WALLPAPER_IMAGE->value
+        ]);
 
         return $this->render('landing/map/index.html.twig', [
-            'map' => $map,
             'data' => $data,
         ]);
     }

@@ -59,3 +59,4 @@ finishSetupExplanation: >
 finishSetupNote: 'Se a aplicação não abrir automaticamente, toque no botão abaixo.'
 openAppAndFinish: 'Abrir a aplicação para instalar o perfil OpenRoaming'
 continueOnWeb: 'Continuar no portal web'
+viewCoverageMap: 'Ver Mapa de Cobertura'

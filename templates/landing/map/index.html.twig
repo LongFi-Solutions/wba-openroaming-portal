@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ data.PAGE_TITLE.value }}
+{% endblock %}
+
+{% set bgUrl = data.WALLPAPER_IMAGE.value != '/resources/images/wallpaper.png'
+    ? data.WALLPAPER_IMAGE.value
+    : '/resources/images/background.png' %}
+
+{% block body %}
+    <div class="min-h-screen bg-center bg-cover flex items-center justify-center px-4 sm:px-6 lg:px-8"
+         style="background-image: url('{{ bgUrl }}');">
+        <div class="landing-container">
+            cool map here
+        </div>
+    </div>
+{% endblock %}

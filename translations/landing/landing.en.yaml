@@ -59,3 +59,4 @@ finishSetupExplanation: >
 finishSetupNote: 'If the app does not open automatically, tap the button below.'
 openAppAndFinish: 'Open App to Install OpenRoaming Wi-Fi Profile'
 continueOnWeb: 'Continue on the web portal'
+viewCoverageMap: 'View Coverage Map'
