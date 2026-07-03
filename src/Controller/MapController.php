@@ -21,6 +21,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\Map\Map;
 use Symfony\UX\Map\Marker;
 use Symfony\UX\Map\Point;
@@ -33,6 +34,7 @@ class MapController extends AbstractController
         private readonly NetworkRepository $networkRepository,
         private readonly AccessPointRepository $accessPointRepository,
         private readonly EntityManagerInterface $entityManager,
+        private readonly TranslatorInterface $translator,
     ) {
     }
     #[Route('/map', name: 'app_map')]
@@ -107,6 +109,14 @@ class MapController extends AbstractController
             $network->setUpdatedAt(new DateTimeImmutable());
             $this->entityManager->persist($network);
             $this->entityManager->flush();
+            $this->addFlash(
+                'success',
+                $this->translator->trans(
+                    'successNetworkCreate',
+                    ['%network%' => $network->getName()],
+                    'controllers'
+                )
+            );
             return $this->redirectToRoute('admin_dashboard_map');
         }
 
@@ -138,6 +148,14 @@ class MapController extends AbstractController
     {
         $this->entityManager->remove($network);
         $this->entityManager->flush();
+        $this->addFlash(
+            'success',
+            $this->translator->trans(
+                'successNetworkDelete',
+                ['%network%' => $network->getName()],
+                'controllers'
+            )
+        );
         return $this->redirectToRoute('admin_dashboard_map');
     }
 
@@ -167,6 +185,14 @@ class MapController extends AbstractController
             $network->setUpdatedAt(new DateTimeImmutable());
             $this->entityManager->persist($network);
             $this->entityManager->flush();
+            $this->addFlash(
+                'success',
+                $this->translator->trans(
+                    'successNetworkEdit',
+                    ['%network%' => $network->getName()],
+                    'controllers'
+                )
+            );
             return $this->redirectToRoute('admin_dashboard_map');
         }
 
@@ -255,6 +281,14 @@ class MapController extends AbstractController
             $this->entityManager->persist($accessPoint);
             $this->entityManager->persist($network);
             $this->entityManager->flush();
+            $this->addFlash(
+                'success',
+                $this->translator->trans(
+                    'successAccessPointCreate',
+                    ['%accessPoint%' => $accessPoint->getSsid()],
+                    'controllers'
+                )
+            );
             return $this->redirectToRoute(
                 'admin_dashboard_map_network_accessPoints',
                 [
@@ -307,6 +341,14 @@ class MapController extends AbstractController
 
             $this->entityManager->persist($accessPoint);
             $this->entityManager->flush();
+            $this->addFlash(
+                'success',
+                $this->translator->trans(
+                    'successAccessPointEdit',
+                    ['%accessPoint%' => $accessPoint->getSsid()],
+                    'controllers'
+                )
+            );
             return $this->redirectToRoute(
                 'admin_dashboard_map_network_accessPoints',
                 [
@@ -336,6 +378,14 @@ class MapController extends AbstractController
     ): Response {
         $this->entityManager->remove($accessPoint);
         $this->entityManager->flush();
+        $this->addFlash(
+            'success',
+            $this->translator->trans(
+                'successAccessPointDelete',
+                ['%accessPoint%' => $accessPoint->getSsid()],
+                'controllers'
+            )
+        );
         return $this->redirectToRoute(
             'admin_dashboard_map_network_accessPoints',
             [
