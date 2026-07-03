@@ -407,4 +407,24 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @return User[]
+     */
+    public function findAllAdmins(): array
+    {
+        $qb = $this->createQueryBuilder('u');
+
+        $qb->andWhere(
+            $qb->expr()->orX(
+                'u.roles LIKE :admin',
+                'u.roles LIKE :superAdmin'
+            )
+        )
+            ->setParameter('admin', '%ROLE_ADMIN%')
+            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%')
+            ->andWhere($qb->expr()->isNull('u.deletedAt'));
+
+        return $qb->getQuery()->getResult();
+    }
 }

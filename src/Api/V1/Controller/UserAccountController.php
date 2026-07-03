@@ -11,14 +11,17 @@ use App\Enum\EventMetadataKeysType;
 use App\Enum\UserProvider;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
+use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
 use App\Service\SamlResolverService;
+use App\Service\SendSMS;
 use App\Service\UserDeletion\UserDeletionService;
 use App\Service\UserStatusChecker;
 use DateTime;
 use Doctrine\ORM\Exception\ORMException;
 use JsonException;
+use libphonenumber\PhoneNumber;
 use OneLogin\Saml2\Auth;
 use OneLogin\Saml2\Error;
 use OneLogin\Saml2\ValidationError;
@@ -29,6 +32,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
 class UserAccountController extends AbstractController
 {
@@ -44,6 +49,9 @@ class UserAccountController extends AbstractController
         private readonly SamlResolverService $samlResolverService,
         private readonly GoogleController $googleController,
         private readonly MicrosoftController $microsoftController,
+        private readonly EmailGenerator $emailGenerator,
+        private readonly SendSMS $sendSMS,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -286,6 +294,19 @@ class UserAccountController extends AbstractController
 
             // Call the user deletion service
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user->getId()]);
+
+            // Notify the user before their data is wiped
+            try {
+                if ($user->getEmail() !== null) {
+                    $this->emailGenerator->sendUserAccountDeletionConfirmationEmail($user);
+                } elseif ($user->getPhoneNumber() instanceof PhoneNumber) {
+                    $message = $this->translator->trans('sms_account_deletion', [], 'UserDeletionService');
+                    $this->sendSMS->sendSmsNoValidation($user, $message);
+                }
+            } catch (Throwable) {
+                // non-fatal — deletion continues regardless
+            }
+
             $result = $this->userDeletionService->deleteUser(
                 $user,
                 $userExternalAuths,

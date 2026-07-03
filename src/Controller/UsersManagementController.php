@@ -20,6 +20,7 @@ use App\Form\UserUpdateType;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\UserAuthenticationVoter;
+use App\Service\EmailGenerator;
 use App\Service\EscapeSpreadSheet;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -34,6 +35,7 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
+use libphonenumber\PhoneNumber;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -44,9 +46,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
 class UsersManagementController extends AbstractController
 {
@@ -58,7 +62,6 @@ class UsersManagementController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly GetSettings $getSettings,
-        private readonly SendSMS $sendSMS,
         private readonly UserDeletionService $userDeletionService,
         private readonly TwoFAService $twoFAService,
         private readonly VerificationCodeEmailGenerator $verificationCodeEmailGenerator,
@@ -66,6 +69,8 @@ class UsersManagementController extends AbstractController
         private readonly MailerInterface $mailer,
         private readonly PasswordResetDashboardService $passwordResetDashboardService,
         private readonly UserCreationService $userCreationService,
+        private readonly EmailGenerator $emailGenerator,
+        private readonly SendSMS $sendSMS,
     ) {
     }
 
@@ -318,6 +323,7 @@ class UsersManagementController extends AbstractController
     /**
      * @throws \JsonException
      * @throws ORMException
+     * @throws ExceptionInterface
      */
     #[Route('/dashboard/user/delete/{id:user<\d+>}', name: 'admin_dashboard_user_delete', methods: ['POST'])]
     #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE)]
@@ -348,6 +354,27 @@ class UsersManagementController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
+        try {
+            // Notify the deleted user (via email or SMS)
+            if ($user->getEmail() !== null) {
+                $this->emailGenerator->sendUserAccountDeletionConfirmationEmail($user);
+            } elseif ($user->getPhoneNumber() instanceof PhoneNumber) {
+                $message = $this->translator->trans('sms_account_deletion', [], 'UserDeletionService');
+                $this->sendSMS->sendSmsNoValidation($user, $message);
+            }
+
+            // Notify all admins of the deletion
+            $admins = $this->userRepository->findAllAdmins();
+
+            foreach ($admins as $admin) {
+                if ($admin->getEmail() !== null) {
+                    $this->emailGenerator->sendAdminUserDeletionAccountConfirmationEmail($user, $admin, $currentUser);
+                }
+            }
+        } catch (Throwable) {
+            // non-fatal — deletion continues regardless
+        }
+
         $result = $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $currentUser);
         // Handle the success or failure response
         if (!$result['success']) {
@@ -366,9 +393,7 @@ class UsersManagementController extends AbstractController
             )
         );
 
-        // Return to the last page where the user was (with searching filters)
-        $lastPage = $request->headers->get('referer', '/dashboard');
-        return $this->redirect($lastPage);
+        return $this->redirectToRoute('admin_page');
     }
 
     /**
