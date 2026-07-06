@@ -1,5 +1,10 @@
 # Changelog
 
+# Release V1.11.3
+
+- Fix CI/CD pipeline crash by downloading and serving `tw-elements` JS and CSS assets locally, bypassing jsDelivr's broken automated ESM bundler (`+esm`). 
+- Fix application crash on the "add new admins" page by adding the missing `domainsBlacklisted` property/validation constraint to the DTO.
+
 # Release V1.11.2
 
 - Eliminate external CDN dependency on `rsms.me``assets/fonts/inter/`
