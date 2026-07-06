@@ -72,7 +72,7 @@ return [
         'version' => '4.5.0',
     ],
     'tw-elements' => [
-        'path' => './assets/vendor/tw-elements/tw-elements.index.js',
+        'version' => '2.0.0',
     ],
     'tw-elements/css/tw-elements.min.css' => [
         'version' => '2.0.0',
