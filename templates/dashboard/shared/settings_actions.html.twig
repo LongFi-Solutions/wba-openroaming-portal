@@ -29,5 +29,7 @@
         {{ include('dashboard/shared/settings_actions/_certificate_management.html.twig') }}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_return_apps' %}
         {{ include('dashboard/shared/settings_actions/_returnApps.html.twig') }}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_map' %}
+        {{ include('dashboard/shared/settings_actions/_map.html.twig') }}
     {% endif %}
 {% endblock %}

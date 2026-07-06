@@ -49,7 +49,7 @@ final class Version20260617115842 extends AbstractMigration
     ) DEFAULT CHARACTER SET utf8mb4');
 
         $this->addSql('ALTER TABLE AccessPoint ADD CONSTRAINT FK_5B0445EA34128B91 FOREIGN KEY (network_id) REFERENCES Network (id)');
-        $this->addSql('CREATE UNIQUE INDEX uniq_domain_pattern ON DomainBlacklist (pattern)');
+        $this->addSql('CREATE UNIQUE INDEX uniq_domain_pattern ON DomainBlacklist (pattern(191))');
     }
 
     public function down(Schema $schema): void

@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Network;
+use App\Enum\UserVerificationStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -69,5 +71,32 @@ class NetworkRepository extends ServiceEntityRepository
             ->orderBy('n.name', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Searches for Networks based on provided filter and optional search term.
+     *
+     */
+    public function searchWithFilter(
+        string $sort,
+        string $order,
+        ?string $query,
+        int $page,
+        int $count,
+    ): QueryBuilder {
+        $qb = $this->createQueryBuilder('n')
+            ->orderBy('n.' . $sort, $order)
+            ->setFirstResult(($page - 1) * $count)
+            ->setMaxResults($count);
+
+        if ($query !== null) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->like('n.name', ':query'),
+                )
+            )->setParameter('query', '%' . $query . '%');
+        }
+
+        return $qb;
     }
 }
