@@ -13,9 +13,12 @@ use App\Form\CreateAccessPointType;
 use App\Form\CreateNetworkType;
 use App\Repository\AccessPointRepository;
 use App\Repository\NetworkRepository;
+use App\Service\GeoLocationResolver;
 use App\Service\GetSettings;
+use App\Service\Map\NetworkGeometryMapper;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use JsonException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,28 +38,58 @@ class MapController extends AbstractController
         private readonly AccessPointRepository $accessPointRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly TranslatorInterface $translator,
+        private readonly GeoLocationResolver $geoLocationResolver,
+        private readonly NetworkGeometryMapper $networkGeometryMapper,
     ) {
     }
+
     #[Route('/map', name: 'app_map')]
     public function index(Request $request): Response
     {
-
-        $lat = $request->query->get('lat');
-        $lng = $request->query->get('lng');
-
-        $centerLat = $lat ?? 37.7412;
-        $centerLng = $lng ?? -25.6756;
-
         $data = $this->getSettings->getSettings();
-        $map = new Map()
-            ->center(new Point((float)$centerLat, (float)$centerLng))
-            ->zoom(13);
 
-        //$mapWithPoints = $this->accessPointService->addAccessPoints($map);
+        $hasLocationConsent = $this->hasLocationConsent($request);
+
+        $centerLat = null;
+        $centerLng = null;
+
+        if ($hasLocationConsent) {
+            $ip = $request->getClientIp();
+
+            if ($ip !== null) {
+                $coordinates = $this->geoLocationResolver->getCoordinatesFromIp($ip);
+
+                if ($coordinates !== null) {
+                    [$centerLat, $centerLng] = $coordinates;
+                }
+            }
+        }
+
+        // Default fallback center
+        $defaultLat = 37.7412;
+        $defaultLng = -25.6756;
+
+        $map = new Map()
+            ->center(new Point(
+                (float)($centerLat ?? $defaultLat),
+                (float)($centerLng ?? $defaultLng)
+            ))
+            ->zoom($centerLat !== null ? 14 : 6);
+
+        $networks = $this->networkRepository->findAll();
+
+        foreach ($networks as $network) {
+            foreach ($this->networkGeometryMapper->buildPolygons($network) as $polygon) {
+                $map->addPolygon($polygon);
+            }
+        }
+
+        $needsBrowserGeolocation = $hasLocationConsent && $centerLat === null;
 
         return $this->render('landing/map/index.html.twig', [
-            'map' => $map,
             'data' => $data,
+            'map' => $map,
+            'needsBrowserGeolocation' => $needsBrowserGeolocation,
         ]);
     }
 
@@ -64,7 +97,6 @@ class MapController extends AbstractController
     #[isGranted(AdminPermissionsType::MAP_READ->value)]
     public function mapManagement(Request $request): Response
     {
-
         $lat = $request->query->get('lat');
         $lng = $request->query->get('lng');
 
@@ -87,14 +119,10 @@ class MapController extends AbstractController
             'allNetworks' => count($networks),
             'allActiveNetworks' => count($networks),
             'searchTerm' => null
-
         ]);
     }
 
-    #[Route(
-        'dashboard/map/network/create',
-        name: 'admin_dashboard_map_network_create'
-    )]
+    #[Route('dashboard/map/network/create', name: 'admin_dashboard_map_network_create')]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function createNetwork(Request $request): ?Response
     {
@@ -392,5 +420,31 @@ class MapController extends AbstractController
                 'id' => $network->getId(),
             ]
         );
+    }
+
+    /**
+     * Location lookups (IP-based or browser-based) are only allowed once the user
+     * has accepted all cookies, or explicitly enabled the "rememberMe" scope
+     * in their saved cookie preferences.
+     */
+    private function hasLocationConsent(Request $request): bool
+    {
+        if ($request->cookies->get('cookies_accepted') === 'true') {
+            return true;
+        }
+
+        $preferencesCookie = $request->cookies->get('cookie_preferences');
+
+        if ($preferencesCookie === null) {
+            return false;
+        }
+
+        try {
+            $preferences = json_decode($preferencesCookie, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            return false;
+        }
+
+        return ($preferences['rememberMe'] ?? false) === true;
     }
 }
