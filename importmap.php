@@ -72,7 +72,7 @@ return [
         'version' => '4.5.0',
     ],
     'tw-elements' => [
-        'version' => '2.0.0',
+        'url' => 'https://esm.sh/tw-elements@2.0.0?bundle',
     ],
     'tw-elements/css/tw-elements.min.css' => [
         'version' => '2.0.0',
