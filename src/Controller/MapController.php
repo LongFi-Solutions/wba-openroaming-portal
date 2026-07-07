@@ -19,8 +19,9 @@ use App\Service\Map\NetworkGeometryMapper;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonException;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -28,7 +29,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\Map\Map;
 use Symfony\UX\Map\Marker;
 use Symfony\UX\Map\Point;
-use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 
 class MapController extends AbstractController
 {
@@ -76,13 +76,10 @@ class MapController extends AbstractController
             ))
             ->zoom($centerLat !== null ? 14 : 6);
 
-        $networks = $this->networkRepository->findAll();
-
-        foreach ($networks as $network) {
-            foreach ($this->networkGeometryMapper->buildPolygons($network) as $polygon) {
-                $map->addPolygon($polygon);
-            }
-        }
+        // Polygons are no longer loaded here. The initial viewport bounds
+        // don't exist server-side — they're only known once Leaflet mounts
+        // client-side. The Stimulus controller fetches them from
+        // /map/polygons on connect and on every `moveend`.
 
         $needsBrowserGeolocation = $hasLocationConsent && $centerLat === null;
 
@@ -91,6 +88,37 @@ class MapController extends AbstractController
             'map' => $map,
             'needsBrowserGeolocation' => $needsBrowserGeolocation,
         ]);
+    }
+
+    #[Route('/map/polygons', name: 'app_map_polygons', methods: ['GET'])]
+    public function polygons(Request $request): Response
+    {
+        $minLat = $request->query->get('minLat');
+        $minLng = $request->query->get('minLng');
+        $maxLat = $request->query->get('maxLat');
+        $maxLng = $request->query->get('maxLng');
+
+        if ($minLat === null || $minLng === null || $maxLat === null || $maxLng === null) {
+            return $this->json(['error' => 'Missing bbox parameters'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $networks = $this->networkRepository->findIntersectingBbox(
+            (float)$minLat,
+            (float)$minLng,
+            (float)$maxLat,
+            (float)$maxLng,
+        );
+
+        $features = array_map(
+            static fn(Network $network): array => [
+                'id' => $network->getId(),
+                'name' => $network->getName(),
+                'geometry' => $network->getGeometry(),
+            ],
+            $networks
+        );
+
+        return $this->json($features);
     }
 
     #[Route('dashboard/map', name: 'admin_dashboard_map')]
