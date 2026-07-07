@@ -27,8 +27,11 @@ class Event
     private ?array $event_metadata = null;
 
     #[ORM\ManyToOne(inversedBy: 'event')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $user = null;
+
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $containsEncryptedData = false;
 
     public function getId(): ?int
     {
@@ -86,6 +89,17 @@ class Event
     {
         $this->user = $user;
 
+        return $this;
+    }
+
+    public function isContainsEncryptedData(): bool
+    {
+        return $this->containsEncryptedData;
+    }
+
+    public function setContainsEncryptedData(bool $containsEncryptedData): static
+    {
+        $this->containsEncryptedData = $containsEncryptedData;
         return $this;
     }
 }

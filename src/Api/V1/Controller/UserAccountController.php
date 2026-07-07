@@ -7,16 +7,21 @@ use App\Controller\GoogleController;
 use App\Controller\MicrosoftController;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\UserProvider;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
+use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
 use App\Service\SamlResolverService;
-use App\Service\UserDeletionService;
+use App\Service\SendSMS;
+use App\Service\UserDeletion\UserDeletionService;
 use App\Service\UserStatusChecker;
 use DateTime;
+use Doctrine\ORM\Exception\ORMException;
 use JsonException;
+use libphonenumber\PhoneNumber;
 use OneLogin\Saml2\Auth;
 use OneLogin\Saml2\Error;
 use OneLogin\Saml2\ValidationError;
@@ -27,6 +32,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
 class UserAccountController extends AbstractController
 {
@@ -42,6 +49,9 @@ class UserAccountController extends AbstractController
         private readonly SamlResolverService $samlResolverService,
         private readonly GoogleController $googleController,
         private readonly MicrosoftController $microsoftController,
+        private readonly EmailGenerator $emailGenerator,
+        private readonly SendSMS $sendSMS,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -49,6 +59,7 @@ class UserAccountController extends AbstractController
      * @throws ValidationError
      * @throws Error
      * @throws JsonException
+     * @throws ORMException
      */
     #[Route('/userAccount/deletion', name: 'api_v1_user_account_deletion', methods: ['POST'])]
     public function userAccountDeletion(Request $request, Auth $samlAuth): JsonResponse
@@ -68,9 +79,8 @@ class UserAccountController extends AbstractController
                 )->toResponse();
             }
 
-            $userUUID = $currentUser->getUuid();
-            $isAdminAccount = $this->userRepository->findOneByUUIDExcludingAdmin($userUUID);
-            if (!$isAdminAccount instanceof User) {
+            $user = $this->userRepository->findOneByUUIDExcludingAdmin($currentUser->getUuid());
+            if (!$user instanceof User) {
                 return new BaseResponse(
                     404,
                     null,
@@ -78,12 +88,15 @@ class UserAccountController extends AbstractController
                 )->toResponse();
             }
 
-            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
             if ($statusCheckerResponse instanceof BaseResponse) {
                 return $statusCheckerResponse->toResponse();
             }
 
-            foreach ($currentUser->getUserExternalAuths() as $externalAuth) {
+            $userId = $user->getId(); // event log
+            $userUUID = $user->getUuid(); // success message
+
+            foreach ($user->getUserExternalAuths() as $externalAuth) {
                 if ($externalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
                     try {
                         $data = json_decode(
@@ -113,7 +126,7 @@ class UserAccountController extends AbstractController
                     }
 
                     // Verify the password supplied matches the hashed password stored in the User entity
-                    if (!$this->passwordHasher->isPasswordValid($currentUser, $data['password'])) {
+                    if (!$this->passwordHasher->isPasswordValid($user, $data['password'])) {
                         return new BaseResponse(
                             401, // Unauthorized
                             null,
@@ -183,7 +196,7 @@ class UserAccountController extends AbstractController
                     }
 
                     // Compare the SAML email with the current user's email
-                    if ($email !== $currentUser->getEmail()) {
+                    if ($email !== $user->getEmail()) {
                         return new BaseResponse(
                             403,
                             null,
@@ -222,10 +235,10 @@ class UserAccountController extends AbstractController
                     }
 
                     // Authenticate the user using a custom Google authentication function already on the project
-                    $this->googleController->authenticateUserGoogle($currentUser);
+                    $this->googleController->authenticateUserGoogle($user);
 
                     // Generate JWT Token
-                    $token = $this->JWTTokenGenerator->generateToken($currentUser);
+                    $token = $this->JWTTokenGenerator->generateToken($user);
                     if (is_array($token) && $token['success'] === false) {
                         $errorMessage = $token['error'] ?? 'Unknown error';
                         $statusCode =
@@ -265,10 +278,10 @@ class UserAccountController extends AbstractController
                     }
 
                     // Authenticate the user using a custom Microsoft authentication function already on the project
-                    $this->microsoftController->authenticateUserMicrosoft($currentUser);
+                    $this->microsoftController->authenticateUserMicrosoft($user);
 
                     // Generate JWT Token
-                    $token = $this->JWTTokenGenerator->generateToken($currentUser);
+                    $token = $this->JWTTokenGenerator->generateToken($user);
                     if (is_array($token) && $token['success'] === false) {
                         $errorMessage = $token['error'] ?? 'Unknown error';
                         $statusCode =
@@ -280,12 +293,25 @@ class UserAccountController extends AbstractController
             }
 
             // Call the user deletion service
-            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser->getId()]);
+            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user->getId()]);
+
+            // Notify the user before their data is wiped
+            try {
+                if ($user->getEmail() !== null) {
+                    $this->emailGenerator->sendUserAccountDeletionConfirmationEmail($user);
+                } elseif ($user->getPhoneNumber() instanceof PhoneNumber) {
+                    $message = $this->translator->trans('sms_account_deletion', [], 'UserDeletionService');
+                    $this->sendSMS->sendSmsNoValidation($user, $message);
+                }
+            } catch (Throwable) {
+                // non-fatal — deletion continues regardless
+            }
+
             $result = $this->userDeletionService->deleteUser(
-                $currentUser,
+                $user,
                 $userExternalAuths,
                 $request,
-                $currentUser
+                $user
             );
 
             if (!$result['success']) {
@@ -298,13 +324,13 @@ class UserAccountController extends AbstractController
 
             // Defines the Event to the table
             $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $userUUID,
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::ID->value => $userId,
             ];
 
             $this->eventActions->saveEvent(
-                $currentUser,
+                $user,
                 AnalyticalEventType::USER_ACCOUNT_DELETION_API->value,
                 new DateTime(),
                 $eventMetadata

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
@@ -403,17 +404,17 @@ class RegistrationController extends AbstractController
                 $session->set('session_verified', true);
 
                 // Defines the Event to the table
-                $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
+                $eventMetaData = [
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
+                    EventMetadataKeysType::PLATFORM->value => PlatformMode::LIVE->value,
                 ];
                 $this->eventActions->saveEvent(
                     $user,
                     AnalyticalEventType::USER_VERIFICATION->value,
                     new DateTime(),
-                    $eventMetadata
+                    $eventMetaData
                 );
 
                 $this->addFlash(

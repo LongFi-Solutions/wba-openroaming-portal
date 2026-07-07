@@ -33,12 +33,17 @@ class PlatformStatusSettingsDTO
     #[Assert\NotBlank(message: 'timerValueRequired')]
     #[Length(max: 3, maxMessage: 'fieldCannotBeLongerThan')]
     #[GreaterThanOrEqual(value: 0, message: 'timerShouldNotBeLessThan')]
-    public ?int $userDeleteTime = null;
+    public ?int $timeIntervalBetweenRequests = null;
 
-    #[Assert\NotBlank(message: 'pleaseSetTimer')]
+    #[Assert\NotBlank(message: 'timerValueRequired')]
     #[Length(max: 3, maxMessage: 'fieldCannotBeLongerThan')]
-    #[GreaterThanOrEqual(value: 1, message: 'timerShouldNotBeLessThanProfileNotification')]
-    public ?int $timeIntervalNotification = null;
+    #[GreaterThanOrEqual(value: 0, message: 'timerShouldNotBeLessThan')]
+    public ?int $timeIntervalToResetAttempts = null;
+
+    #[Assert\NotBlank(message: 'timerValueRequired')]
+    #[Length(max: 3, maxMessage: 'fieldCannotBeLongerThan')]
+    #[GreaterThanOrEqual(value: 0, message: 'timerShouldNotBeLessThan')]
+    public ?int $attemptsNumber = null;
 
     /**
      * Initialize DTO from settings array.
@@ -51,11 +56,16 @@ class PlatformStatusSettingsDTO
         $this->platformMode = $data[SettingName::PLATFORM_MODE->value]['value'] ?? null;
         $this->turnstileChecker = $data[SettingName::TURNSTILE_CHECKER->value]['value'] ?? null;
         $this->apiStatus = $data[SettingName::API_STATUS->value]['value'] ?? null;
-        $this->userDeleteTime = isset($data[SettingName::USER_DELETE_TIME->value]['value'])
-            ? (int)$data[SettingName::USER_DELETE_TIME->value]['value']
+        $this->timeIntervalBetweenRequests =
+            isset($data[SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value]['value'])
+            ? (int)$data[SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value]['value']
             : null;
-        $this->timeIntervalNotification = isset($data[SettingName::TIME_INTERVAL_NOTIFICATION->value]['value'])
-            ? (int)$data[SettingName::TIME_INTERVAL_NOTIFICATION->value]['value']
+        $this->timeIntervalToResetAttempts =
+            isset($data[SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'])
+            ? (int)$data[SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value']
+            : null;
+        $this->attemptsNumber = isset($data[SettingName::EMAIL_ATTEMPTS_NUMBER->value]['value'])
+            ? (int)$data[SettingName::EMAIL_ATTEMPTS_NUMBER->value]['value']
             : null;
     }
 
@@ -71,8 +81,10 @@ class PlatformStatusSettingsDTO
             SettingName::PLATFORM_MODE->value => ['value' => $this->platformMode],
             SettingName::TURNSTILE_CHECKER->value => ['value' => $this->turnstileChecker],
             SettingName::API_STATUS->value => ['value' => $this->apiStatus],
-            SettingName::USER_DELETE_TIME->value => ['value' => $this->userDeleteTime],
-            SettingName::TIME_INTERVAL_NOTIFICATION->value => ['value' => $this->timeIntervalNotification],
+            SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value => ['value' => $this->timeIntervalBetweenRequests],
+            SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value =>
+                ['value' => $this->timeIntervalToResetAttempts],
+            SettingName::EMAIL_ATTEMPTS_NUMBER->value => ['value' => $this->attemptsNumber],
         ];
     }
 }

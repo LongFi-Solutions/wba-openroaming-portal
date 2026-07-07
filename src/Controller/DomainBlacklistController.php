@@ -14,6 +14,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
 use App\Enum\DomainSourceStatus;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\OperationMode;
 use App\Form\DomainBlacklistAddType;
 use App\Form\DomainBlacklistEditType;
@@ -96,9 +97,10 @@ class DomainBlacklistController extends AbstractController
                 AnalyticalEventType::BLACKLIST_DOMAIN_ADDED->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::DOMAIN_ADDED->value => $object->getPattern(),
                 ]
             );
 
@@ -135,9 +137,10 @@ class DomainBlacklistController extends AbstractController
                 AnalyticalEventType::BLACKLIST_SOURCE_ADDED->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $currentUser->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::DOMAIN_SOURCE_ADDED->value => $source->getUrl(),
                 ]
             );
 
@@ -285,11 +288,11 @@ class DomainBlacklistController extends AbstractController
                 AnalyticalEventType::BLACKLIST_DOMAIN_EDITED->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $currentUser->getUuid(),
-                    'domain-edited-before' => $oldDomainData->getPattern(),
-                    'domain-edited-after' => $domain->getPattern(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::DOMAIN_EDITED_BEFORE->value => $oldDomainData->getPattern(),
+                    EventMetadataKeysType::DOMAIN_EDITED_AFTER->value => $domain->getPattern(),
                 ]
             );
 
@@ -361,22 +364,20 @@ class DomainBlacklistController extends AbstractController
             AnalyticalEventType::BLACKLIST_DOMAIN_REMOVED->value,
             new DateTime(),
             [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'by' => $currentUser->getUuid(),
-                'domain-removed' => $domain->getPattern(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::DOMAIN_REMOVED->value => $domain->getPattern(),
             ]
         );
 
 
-        // Return to the last page where the user was (with searching filters)
-        $lastPage = $request->headers->get('referer', '/dashboard');
-        return $this->redirect($lastPage);
+        return $this->redirectToRoute('admin_dashboard_settings_domains');
     }
 
     #[Route(
         '/dashboard/settings/domain-source/delete/{id<\d+>}',
-        name: 'admin_domain_source_delete',
+        name: 'admin_dashboard_domain_source_delete',
         methods: ['POST']
     )]
     #[IsGranted(AdminPermissionsType::DOMAINS_BLACKLIST_WRITE->value)]
@@ -392,7 +393,6 @@ class DomainBlacklistController extends AbstractController
             );
         }
 
-        $domainSourceData = $domainSource->getUrl();
         $this->entityManager->remove($domainSource);
         $this->entityManager->flush();
 
@@ -415,21 +415,19 @@ class DomainBlacklistController extends AbstractController
             AnalyticalEventType::BLACKLIST_SOURCE_REMOVED->value,
             new DateTime(),
             [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'by' => $currentUser->getUuid(),
-                'domain-source-removed' => $domainSourceData,
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::DOMAIN_SOURCE_REMOVED->value => $domainSource->getUrl(),
             ]
         );
 
-        // Return to the last page where the user was (with searching filters)
-        $lastPage = $request->headers->get('referer', '/dashboard');
-        return $this->redirect($lastPage);
+        return $this->redirectToRoute('admin_dashboard_settings_domains');
     }
 
     #[Route(
         '/dashboard/settings/domain-source/{id<\d+>}/toggle',
-        name: 'admin_domain_source_toggle',
+        name: 'admin_dashboard_domain_source_toggle',
         methods: ['POST']
     )]
     #[IsGranted(AdminPermissionsType::DOMAINS_BLACKLIST_WRITE->value)]
@@ -475,11 +473,11 @@ class DomainBlacklistController extends AbstractController
             $eventType->value,
             new DateTime(),
             [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'by' => $currentUser->getUuid(),
-                'domain_source_url' => $domainSource->getUrl(),
-                'active' => $isActive,
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::DOMAIN_SOURCE_URL->value => $domainSource->getUrl(),
+                EventMetadataKeysType::DOMAIN_SOURCE_RESULT_STATUS->value => $isActive,
             ]
         );
 
@@ -493,7 +491,7 @@ class DomainBlacklistController extends AbstractController
      */
     #[Route(
         '/dashboard/settings/domain-source/refresh',
-        name: 'admin_domain_source_refresh_all',
+        name: 'admin_dashboard_domain_source_refresh_all',
         methods: ['GET']
     )]
     #[IsGranted(AdminPermissionsType::DOMAINS_BLACKLIST_WRITE->value)]
@@ -538,9 +536,9 @@ class DomainBlacklistController extends AbstractController
             $user = $this->entityManager->getReference(User::class, $currentUser->getId());
 
             $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $currentUser->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
             ];
             $this->eventActions->saveEvent(
                 $user,
@@ -550,9 +548,7 @@ class DomainBlacklistController extends AbstractController
             );
         }
 
-        // Return to the last page where the user was (with searching filters)
-        $lastPage = $request->headers->get('referer', '/dashboard');
-        return $this->redirect($lastPage);
+        return $this->redirectToRoute('admin_dashboard_settings_domains');
     }
 
     /**
@@ -561,7 +557,7 @@ class DomainBlacklistController extends AbstractController
      */
     #[Route(
         '/dashboard/settings/domain-source/{id<\d+>}/refresh',
-        name: 'admin_domain_source_refresh',
+        name: 'admin_dashboard_domain_source_refresh',
         methods: ['POST']
     )]
     #[IsGranted(AdminPermissionsType::DOMAINS_BLACKLIST_WRITE->value)]
@@ -583,9 +579,7 @@ class DomainBlacklistController extends AbstractController
                 $this->translator->trans('domainSourceInactive', [], 'controllers')
             );
 
-            // Return to the last page where the user was (with searching filters)
-            $lastPage = $request->headers->get('referer', '/dashboard');
-            return $this->redirect($lastPage);
+            return $this->redirectToRoute('admin_dashboard_settings_domains');
         }
 
         $application = new Application($kernel);
@@ -626,10 +620,10 @@ class DomainBlacklistController extends AbstractController
             $user = $this->entityManager->getReference(User::class, $currentUser->getId());
 
             $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $currentUser->getUuid(),
-                'source' => $domainSource->getUrl(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
+                EventMetadataKeysType::DOMAIN_SOURCE_URL->value => $domainSource->getUrl(),
             ];
             $this->eventActions->saveEvent(
                 $user,
@@ -639,8 +633,6 @@ class DomainBlacklistController extends AbstractController
             );
         }
 
-        // Return to the last page where the user was (with searching filters)
-        $lastPage = $request->headers->get('referer', '/dashboard');
-        return $this->redirect($lastPage);
+        return $this->redirectToRoute('admin_dashboard_settings_domains');
     }
 }

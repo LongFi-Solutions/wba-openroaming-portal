@@ -11,9 +11,8 @@ use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DataBaseSetupType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\InstallationStep;
-use App\Enum\InstallationType;
-use App\Enum\PlatformMode;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
@@ -23,15 +22,11 @@ use App\Form\DbSetupType;
 use App\Form\SettingsType;
 use App\Form\SimpleSubmitFormType;
 use App\Form\TwoFACode;
-use App\Form\VerifyPasswordType;
 use App\Repository\EventRepository;
 use App\Repository\InstallationProgressRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
-use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\CaptchaValidator;
-use App\Service\CertificateFreeradiusInfoService;
-use App\Service\CertificateProcessCheckerService;
 use App\Service\DatabaseConnectionService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -41,8 +36,8 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Random\RandomException;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Form\Exception\LogicException;
@@ -56,8 +51,6 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
-
-use function Symfony\Component\Translation\t;
 
 #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
 class InstallationController extends AbstractController
@@ -110,7 +103,7 @@ class InstallationController extends AbstractController
         $dbDTO->dbOpenRoamingDbName = 'openroaming';
         $dbDTO->dbFreeradiusDbName = 'radius';
         $dbDTO->dbOpenRoamingPort = 3306;
-        $dbDTO->dbFreeradiusPort = 3307;
+        $dbDTO->dbFreeradiusPort = 3306;
 
         $form = $this->createForm(DbSetupType::class, $dbDTO);
         $form->handleRequest($request);
@@ -180,9 +173,9 @@ class InstallationController extends AbstractController
                     AnalyticalEventType::SYSTEM_RESET_REQUEST_IN_PROGRESS->value,
                     new DateTime(),
                     [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'by' => $user->getUuid(),
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
                     ]
                 );
             }
@@ -205,9 +198,9 @@ class InstallationController extends AbstractController
                 AnalyticalEventType::INSTALLATION_DATABASE_CONFIG->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $user->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
                 ]
             );
 
@@ -286,9 +279,9 @@ class InstallationController extends AbstractController
                 AnalyticalEventType::INSTALLATION_COMMAND_CONFIG->value,
                 new DateTime(),
                 [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $user->getUuid(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
                 ]
             );
 
@@ -304,6 +297,22 @@ class InstallationController extends AbstractController
         }
 
         $commands = [
+            [
+                'description' => $this->translator->trans(
+                    'chmodDbScript',
+                    [],
+                    'controllers'
+                ),
+                'command' => 'chmod +x /var/www/openroaming/scripts/update-db-env.sh',
+            ],
+            [
+                'description' => $this->translator->trans(
+                    'chmodSettingsScript',
+                    [],
+                    'controllers'
+                ),
+                'command' => 'chmod +x /var/www/openroaming/scripts/update-settings-env.sh',
+            ],
             [
                 'description' => $this->translator->trans(
                     'writeDbSettingsEnv',
@@ -370,12 +379,6 @@ class InstallationController extends AbstractController
             if ($step === InstallationStep::DATABASE->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
             }
-            if ($step === InstallationStep::ADMIN->value) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
-            }
-            if ($step === InstallationStep::COMMAND->value) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
-            }
         } else {
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
         }
@@ -399,8 +402,8 @@ class InstallationController extends AbstractController
 
             $lastInstallation->setUpdatedAt(new DateTime());
             $lastInstallation->setTrustedProxies($settingsDTO->trustedProxies);
-            $lastInstallation->setTurnstileKey($settingsDTO->turnstileKey);
-            $lastInstallation->setTurnstileSecret($settingsDTO->turnstileSecret);
+            $lastInstallation->setTurnstileKey($settingsDTO->turnstileKey ?? '');
+            $lastInstallation->setTurnstileSecret($settingsDTO->turnstileSecret ?? '');
             if ($settingsDTO->jwtPassphraseEnable) {
                 $lastInstallation->setJwtPassphrase($settingsDTO->jwtPassphrase);
             }
@@ -408,31 +411,32 @@ class InstallationController extends AbstractController
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
+            if ($settingsDTO->trustedProxies) {
+                $trustedProxiesPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                    implode(',', $settingsDTO->trustedProxies),
+                    SettingsConfigType::TRUSTED_PROXIES->value
+                );
+            }
 
-            $trustedProxiesPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                implode(',', $settingsDTO->trustedProxies),
-                SettingsConfigType::TRUSTED_PROXIES->value
-            );
+            if ($settingsDTO->turnstileKey) {
+                $turnstileKeyPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                    $settingsDTO->turnstileKey,
+                    SettingsConfigType::TURNSTILE_KEY->value
+                );
+            }
 
-            $turnstileKeyPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $settingsDTO->turnstileKey,
-                SettingsConfigType::TURNSTILE_KEY->value
-            );
-
-            $turnstileSecretPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $settingsDTO->turnstileSecret,
-                SettingsConfigType::TURNSTILE_SECRET->value
-            );
+            if ($settingsDTO->turnstileSecret) {
+                $turnstileSecretPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                    $settingsDTO->turnstileSecret,
+                    SettingsConfigType::TURNSTILE_SECRET->value
+                );
+            }
 
             if ($settingsDTO->jwtPassphraseEnable) {
                 $this->databaseConnectionService->writeDatabaseUrlToEnv(
                     $settingsDTO->jwtPassphrase,
                     SettingsConfigType::JWT_PASSPHRASE->value
                 );
-            }
-
-            if (!$trustedProxiesPermissions || !$turnstileKeyPermissions || !$turnstileSecretPermissions) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
             }
 
             // JWT Verification
@@ -495,9 +499,9 @@ class InstallationController extends AbstractController
                     AnalyticalEventType::INSTALLATION_SETTINGS_CONFIG->value,
                     new DateTime(),
                     [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'by' => $user->getUuid(),
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
                     ]
                 );
 
@@ -529,7 +533,12 @@ class InstallationController extends AbstractController
                 'data' => $data,
                 'form' => $form->createView(),
                 'formDTO' => $settingsDTO,
-                'stages' => $this->installationService->getStepperStatus($step)
+                'stages' => $this->installationService->getStepperStatus($step),
+                'message' => $this->translator->trans(
+                    'canSkipThisPage',
+                    [],
+                    'controllers'
+                )
             ]
         );
     }
@@ -598,6 +607,10 @@ class InstallationController extends AbstractController
         );
     }
 
+    /**
+     * @throws TransportExceptionInterface
+     * @throws RandomException
+     */
     #[Route(
         '/dashboard/settings/certificatesManagement/installation/admin/sendCode',
         name: 'admin_dashboard_settings_certs_installation_admin_sendCode'
@@ -624,10 +637,9 @@ class InstallationController extends AbstractController
                 ) {
                     $this->installationService->sendAdminConfirmationCode($lastInstallation);
                     $eventMetaData = [
-                        'platform' => PlatformMode::LIVE->value,
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'uuid' => $admin->getUuid(),
-                        'ip' => $request->getClientIp(),
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $admin->getUuid(),
                     ];
                     $this->eventActions->saveEvent(
                         $admin,
@@ -722,9 +734,9 @@ class InstallationController extends AbstractController
                     AnalyticalEventType::INSTALLATION_ADMIN_CONFIG->value,
                     new DateTime(),
                     [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'by' => $user->getUuid(),
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
                     ]
                 );
 
@@ -844,9 +856,9 @@ class InstallationController extends AbstractController
             AnalyticalEventType::INSTALLATION_CONFIG_ABORTED->value,
             new DateTime(),
             [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'by' => $user->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
             ]
         );
 
@@ -906,10 +918,9 @@ class InstallationController extends AbstractController
             if ($lastInstallation instanceof InstallationProgress) {
                 $this->installationService->sendAdminConfirmationCode($lastInstallation);
                 $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $user,

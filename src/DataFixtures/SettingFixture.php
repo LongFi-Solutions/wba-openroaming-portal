@@ -146,9 +146,7 @@ class SettingFixture extends Fixture
             ['name' => SettingName::PROFILE_LIMIT_DATE_SAML->value, 'value' => '5'],
             ['name' => SettingName::PROFILE_LIMIT_DATE_EMAIL->value, 'value' => '5'],
             ['name' => SettingName::PROFILE_LIMIT_DATE_SMS->value, 'value' => '5'],
-            ['name' => SettingName::TIME_STAMP_FREERADIUS_CRON->value, 'value' => '0'],
             ['name' => SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value, 'value' => '0 4 * * *'],
-            ['name' => SettingName::FREERADIUS_LAST_CONNECTION_CRON->value, 'value' => '0 3 * * *'],
             ['name' => SettingName::DELETE_UNCONFIRMED_USERS_CRON->value, 'value' => '0 0 * * *'],
             ['name' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value, 'value' => '0 1 * * *'],
             ['name' => SettingName::LDAP_SYNC_CRON->value, 'value' => '0 2 * * *'],
@@ -158,6 +156,13 @@ class SettingFixture extends Fixture
             ['name' => SettingName::RETURN_APPS_ENABLED->value, 'value' => 'OFF'],
             ['name' => SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value, 'value' => 'EditMe'],
             ['name' => SettingName::RETURN_APPS_ID_IOS->value, 'value' => 'EditMe.EditMe'],
+            ['name' => SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value, 'value' => '60'],
+            ['name' => SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value, 'value' => '30'],
+            ['name' => SettingName::EMAIL_ATTEMPTS_NUMBER->value, 'value' => '5'],
+            ['name' => SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS->value, 'value' => '60'],
+            ['name' => SettingName::SMS_TIME_INTERVAL_BETWEEN_REQUESTS->value, 'value' => '30'],
+            ['name' => SettingName::SMS_ATTEMPTS_NUMBER->value, 'value' => '5'],
+            ['name' => SettingName::BREAKING_GLASS_ADMIN_EMAIL->value, 'value' => ''],
         ];
 
         foreach ($settings as $settingData) {

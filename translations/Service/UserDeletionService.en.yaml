@@ -2,3 +2,5 @@ publicKeyMissing: 'The public key is missing. Please add the "pgp_public_key/pub
 publicKeyEmpty: 'Public key is empty. Please provide valid key content.'
 userSuccessfullyDeleted: 'User data successfully deleted and encrypted.'
 encryptionFailed: 'PGP public key encryption has failed.'
+encryptionEventFailed: 'PGP public key encryption has failed for associated user events.'
+sms_account_deletion: "Your account has been permanently deleted from our portal. If you did not request this, please contact support immediately."
