@@ -66,6 +66,7 @@ class UserAddDTO
     public PermissionLevel $ldapSynchronization = PermissionLevel::NONE;
     public PermissionLevel $radiusProfileConfig = PermissionLevel::NONE;
     public PermissionLevel $smsConfig = PermissionLevel::NONE;
+    public PermissionLevel $domainsBlacklist = PermissionLevel::NONE;
     public PermissionLevel $portalStatistics = PermissionLevel::NONE;
     public PermissionLevel $connectivityStatistics = PermissionLevel::NONE;
 
@@ -91,6 +92,7 @@ class UserAddDTO
             'radiusProfileConfig' => 'RADIUS_PROFILE_CONFIG',
             'smsConfig' => 'SMS_CONFIG',
             'portalStatistics' => 'PORTAL_STATISTICS',
+            'domainsBlacklist' => 'DOMAINS_BLACKLIST',
             'connectivityStatistics' => 'CONNECTIVITY_STATISTICS',
         ];
 
