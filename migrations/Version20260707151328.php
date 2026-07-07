@@ -22,12 +22,13 @@ final class Version20260707151328 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $this->addSql('ALTER TABLE Network
-            ADD min_lat DOUBLE PRECISION DEFAULT NULL,
-            ADD min_lng DOUBLE PRECISION DEFAULT NULL,
-            ADD max_lat DOUBLE PRECISION DEFAULT NULL,
-            ADD max_lng DOUBLE PRECISION DEFAULT NULL');
+            ADD minLat DOUBLE PRECISION DEFAULT NULL,
+            ADD minLng DOUBLE PRECISION DEFAULT NULL,
+            ADD maxLat DOUBLE PRECISION DEFAULT NULL,
+            ADD maxLng DOUBLE PRECISION DEFAULT NULL'
+        );
 
-        $this->addSql('CREATE INDEX idx_network_bbox ON Network (min_lat, max_lat, min_lng, max_lng)');
+        $this->addSql('CREATE INDEX idx_network_bbox ON Network (minLat, maxLat, minLng, maxLng)');
 
         // Backfill existing rows from their GeoJSON geometry
         $this->backfillBoundingBoxes();
@@ -37,10 +38,11 @@ final class Version20260707151328 extends AbstractMigration
     {
         $this->addSql('DROP INDEX idx_network_bbox ON Network');
         $this->addSql('ALTER TABLE Network
-            DROP min_lat,
-            DROP min_lng,
-            DROP max_lat,
-            DROP max_lng');
+            DROP minLat,
+            DROP minLng,
+            DROP maxLat,
+            DROP maxLng'
+        );
     }
 
     /**
@@ -60,7 +62,7 @@ final class Version20260707151328 extends AbstractMigration
             }
 
             $this->connection->executeStatement(
-                'UPDATE Network SET min_lat = ?, min_lng = ?, max_lat = ?, max_lng = ? WHERE id = ?',
+                'UPDATE Network SET minLat = ?, minLng = ?, maxLat = ?, maxLng = ? WHERE id = ?',
                 [$bbox['minLat'], $bbox['minLng'], $bbox['maxLat'], $bbox['maxLng'], $row['id']]
             );
         }
