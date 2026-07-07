@@ -4,6 +4,8 @@ namespace App\Validator\Constraints;
 
 use App\DTO\NetworkDTO;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
+use JsonException;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -11,9 +13,13 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 class ValidNetworkGeometryValidator extends ConstraintValidator
 {
     public function __construct(
-        private Connection $connection
+        private readonly Connection $connection
     ) {}
 
+    /**
+     * @throws JsonException
+     * @throws Exception
+     */
     public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof ValidNetworkGeometry) {
@@ -28,19 +34,59 @@ class ValidNetworkGeometryValidator extends ConstraintValidator
             return;
         }
 
+        $geoJsonArr = json_decode($value->geometryJson, true, 512, JSON_THROW_ON_ERROR);
+        if (!is_array($geoJsonArr)) {
+            return;
+        }
+
+        $polygons = [];
+
+        if (isset($geoJsonArr['type'], $geoJsonArr['features']) && $geoJsonArr['type'] === 'FeatureCollection') {
+            foreach ($geoJsonArr['features'] as $feature) {
+                $geometry = $feature['geometry'] ?? null;
+                if (!$geometry) {
+                    continue;
+                }
+
+                if ($geometry['type'] === 'Polygon') {
+                    $polygons[] = $geometry['coordinates'];
+                } elseif ($geometry['type'] === 'MultiPolygon') {
+                    foreach ($geometry['coordinates'] as $coords) {
+                        $polygons[] = $coords;
+                    }
+                }
+            }
+        } elseif (isset($geoJsonArr['type']) && $geoJsonArr['type'] === 'Polygon') {
+            $polygons[] = $geoJsonArr['coordinates'];
+        } elseif (isset($geoJsonArr['type']) && $geoJsonArr['type'] === 'MultiPolygon') {
+            $polygons = $geoJsonArr['coordinates'];
+        }
+
+        if ($polygons === []) {
+            return;
+        }
+
+        $cleanGeometryJson = json_encode([
+            'type' => 'MultiPolygon',
+            'coordinates' => $polygons
+        ], JSON_THROW_ON_ERROR);
+
         $sql = '
             SELECT ssid 
-            FROM access_point 
+            FROM AccessPoint 
             WHERE network_id = :network_id 
-              AND ST_Contains(ST_GeomFromGeoJSON(:new_geometry), location) = 0
+              AND ST_Contains(
+                  ST_GeomFromGeoJSON(:new_geometry), 
+                  ST_GeomFromGeoJSON(location)
+              ) = 0
         ';
 
         try {
             $pointsOutside = $this->connection->fetchFirstColumn($sql, [
                 'network_id' => $value->networkId,
-                'new_geometry' => $value->geometryJson,
+                'new_geometry' => $cleanGeometryJson,
             ]);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             $this->context->buildViolation('invalidGeometryFormat')
                 ->atPath('geometryJson')
                 ->addViolation();

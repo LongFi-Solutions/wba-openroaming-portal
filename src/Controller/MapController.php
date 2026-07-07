@@ -165,10 +165,10 @@ class MapController extends AbstractController
     {
         $data = $this->getSettings->getSettings();
         $networkDTO = new NetworkDTO();
+        $networkDTO->networkId = $network->getId();
         $networkDTO->name = $network->getName();
         $networkDTO->description = $network->getDescription();
 
-        $networkDTO->accessPointsFromDatabase = $this->accessPointRepository->findBy(['network' => $network]);
         if ($network->getGeometry() !== null) {
             $networkDTO->geometryJson = json_encode($network->getGeometry(), JSON_THROW_ON_ERROR);
         }
