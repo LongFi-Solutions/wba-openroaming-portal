@@ -15,9 +15,6 @@ use Throwable;
 
 class MapExportController extends AbstractController
 {
-    public function __construct()
-    {
-    }
     #[Route(
         'dashboard/map/export',
         name: 'admin_dashboard_map_export'
@@ -29,7 +26,7 @@ class MapExportController extends AbstractController
             $request->getSession()->save();
         }
 
-        $response = new StreamedResponse(function () use ($networkRepository) {
+        $response = new StreamedResponse(function () use ($networkRepository): void {
             $handle = fopen('php://output', 'wb+');
 
             fwrite($handle, "\xEF\xBB\xBF");
@@ -40,7 +37,8 @@ class MapExportController extends AbstractController
                     'ap_name', 'ap_ssid', 'ap_mac_address', 'ap_vendor',
                     'ap_model', 'ap_standard', 'ap_serial_number',
                     'ap_longitude', 'ap_latitude', 'ap_altitude_msl', 'ap_altitude_agl'
-                ]);
+                ],
+                escape: '\\');
 
                 $networks = $networkRepository->createQueryBuilder('n')
                     ->leftJoin('n.accessPoints', 'ap')
@@ -64,7 +62,8 @@ class MapExportController extends AbstractController
                         fputcsv($handle, [
                             $netName, $netDesc, $netGeo,
                             '', '', '', '', '', '', '', '', '', '', ''
-                        ]);
+                        ],
+                        escape: '\\');
                         continue;
                     }
 
@@ -93,7 +92,8 @@ class MapExportController extends AbstractController
                             $lat !== '' ? number_format((float)$lat, 6, '.', '') : '',
                             $ap->getAltitudeMsl(),
                             $ap->getAltitudeAgl()
-                        ]);
+                        ],
+                        escape: '\\');
                     }
                 }
             } catch (Throwable $e) {
@@ -102,14 +102,15 @@ class MapExportController extends AbstractController
                     $e->getMessage(),
                     'LINE: ' . $e->getLine(),
                     'FILE: ' . $e->getFile()
-                ]);
+                ],
+                escape: '\\');
             }
 
             fclose($handle);
         });
 
         $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
-        $response->headers->set('Content-Disposition', 'attachment; filename="export_openroaming_acores.csv"');
+        $response->headers->set('Content-Disposition', 'attachment; filename="export_openroaming_networks.csv"');
 
         return $response;
     }
