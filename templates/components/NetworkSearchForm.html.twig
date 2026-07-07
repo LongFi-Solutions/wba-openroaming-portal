@@ -2,63 +2,66 @@
 <div {{ attributes }}>
 
     <div class="sm:w-auto px-5 py-4">
-        <div class="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0 sm:space-x-4">
+        <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
 
-            {# Left Filter Tabs #}
-            <div class="flex flex-col md:flex-row sm:items-center gap-4 sm:gap-6">
-                {% set tabs = {
-                    all: {
-                        label: 'all',
-                        count: this.networkCounts.all,
-                        activeClass: 'border-b-2 border-y-veryDarkButton',
-                        hoverClass: 'hover:border-b-2 hover:border-y-veryDarkButton',
-                        badgeActive: 'bg-veryDarkButton text-white',
-                        badgeInactive: 'bg-gray-100 text-gray-600 group-hover:bg-veryDarkButton group-hover:text-white',
-                    },
-                } %}
+            {# Right: Search Bar & Action Buttons #}
+            <div class="flex flex-col lg:flex-row items-center gap-4 w-full xl:w-auto xl:justify-end grow">
 
-                {% for value, tab in tabs %}
-                    <button type="button"
-                            data-action="live#action"
-                            data-live-action-param="changeFilter"
-                            data-live-filter-param="{{ value }}"
-                            class="flex items-center pb-2 group transition-all duration-150 gap-2 {{ tab.hoverClass }} {{ filter == value ? tab.activeClass : 'text-gray-500 border-b-2 border-transparent' }}">
-                        <span>{{ tab.label|trans({}, 'dashboard') }}</span>
-                        <span class="text-xs px-2 py-0.5 rounded-md min-w-[24px] text-center transition-all duration-150 {{ filter == value ? tab.badgeActive : tab.badgeInactive }}">
-                            {{ tab.count }}
-                        </span>
-                    </button>
-                {% endfor %}
-            </div>
-
-            {# Middle Search Bar #}
-            <div class="w-full md:w-3/6">
-                <div class="flex flex-row items-center border rounded-md">
-                    <button type="button">
-                        <svg class="w-5 mx-3 text-gray-400" fill="none" stroke="currentColor"
-                             stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                        </svg>
-                    </button>
-                    <label class="w-full">
-                        <input type="text"
-                               class="form-widget w-full p-2 bg-transparent border-none outline-none"
-                               placeholder="{{ 'searchNetworks'|trans({}, '_network') }}"
-                               data-model="debounce(300)|query"
-                               autocomplete="off" />
-                    </label>
+                {# Search Bar #}
+                <div class="w-full lg:max-w-md xl:max-w-sm grow">
+                    <div class="flex flex-row items-center border rounded-md bg-white">
+                        <button type="button">
+                            <svg class="w-5 mx-3 text-gray-400" fill="none" stroke="currentColor"
+                                 stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
+                        </button>
+                        <label class="w-full">
+                            <input type="text"
+                                   class="form-widget w-full p-2 bg-transparent border-none outline-none focus:ring-0"
+                                   placeholder="{{ 'searchNetworks'|trans({}, '_network') }}"
+                                   data-model="debounce(300)|query"
+                                   autocomplete="off" />
+                        </label>
+                    </div>
                 </div>
-            </div>
 
-            {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP_WRITE')) %}
-                <div class="flex items-center space-x-6">
-                <a href="{{ path('admin_dashboard_map_network_create') }}" class="btn-primary px-4 min-w-[150px]">
-                    {{ 'createNetwork'|trans({}, '_network') }}
-                </a>
-            </div>
-            {% endif %}
+                {# Action Buttons #}
+                <div class="flex flex-wrap items-center justify-start lg:justify-end gap-3 w-full lg:w-auto shrink-0">
 
+                        {# Export CSV #}
+                        <a href="{{ path('admin_dashboard_map_export') }}"
+                           class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none transition-colors shadow-sm">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                            </svg>
+                            {{ 'export'|trans({}, '_network') }}
+                        </a>
+
+                        {# Import CSV #}
+                        <button type="button"
+                                id="btn-open-import"
+                                class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none transition-colors shadow-sm cursor-pointer">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            {{ 'import'|trans({}, '_network')|default('Importar') }}
+                        </button>
+                        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP_WRITE')) %}
+
+                            {# Create Network #}
+                            <a href="{{ path('admin_dashboard_map_network_create') }}"
+                               class="btn-primary px-4 min-w-[150px] flex items-center justify-center gap-2 shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                {{ 'createNetwork'|trans({}, '_network') }}
+                            </a>
+                        {% endif %}
+                    </div>
+
+            </div>
         </div>
     </div>
 
@@ -137,4 +140,6 @@
             count: count,
         }) }}
     </div>
+
+    {{ include('dashboard/shared/settings_actions/map/networks/_import_modal.html.twig') }}
 </div>

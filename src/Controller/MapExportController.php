@@ -12,6 +12,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Entity\Network;
+use App\Entity\AccessPoint;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 class MapExportController extends AbstractController
@@ -130,5 +135,151 @@ class MapExportController extends AbstractController
         $response->headers->set('Content-Disposition', 'attachment; filename="export_openroaming_networks.csv"');
 
         return $response;
+    }
+
+    #[Route(
+        'dashboard/map/import',
+        name: 'admin_dashboard_map_import'
+    )]
+    #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
+    public function importCsv(Request $request, EntityManagerInterface $em, NetworkRepository $networkRepository): Response
+    {
+        /** @var UploadedFile|null $file */
+        $file = $request->files->get('import_file');
+
+        if (!$file) {
+            $this->addFlash('error', 'No file was uploaded.');
+            return $this->redirectToRoute('admin_dashboard_map_network_list');
+        }
+
+        if ($file->getClientOriginalExtension() !== 'csv') {
+            $this->addFlash('error', 'Invalid file format. Please upload a valid CSV file.');
+            return $this->redirectToRoute('admin_dashboard_map_network_list');
+        }
+
+        $realPath = $file->getRealPath();
+        if ($realPath === false || !is_readable($realPath)) {
+            $this->addFlash('error', 'The uploaded file is not readable.');
+            return $this->redirectToRoute('admin_dashboard_map_network_list');
+        }
+
+        $handle = fopen($realPath, 'r');
+        if ($handle === false) {
+            $this->addFlash('error', 'Could not open the uploaded CSV file.');
+            return $this->redirectToRoute('admin_dashboard_map_network_list');
+        }
+
+        $bom = fread($handle, 3);
+        if ($bom !== "\xEF\xBB\xBF") {
+            rewind($handle);
+        }
+
+        $headers = fgetcsv($handle, 0, ',');
+
+        if (!$headers || !in_array('network_name', $headers, true)) {
+            fclose($handle);
+            $this->addFlash('error', 'Invalid CSV structure. The column "network_name" is mandatory.');
+            return $this->redirectToRoute('admin_dashboard_map_network_list');
+        }
+
+        $networksCreatedOrUpdated = [];
+        $apsImportedCount = 0;
+        $rowCount = 0;
+
+        try {
+            while (($row = fgetcsv($handle, 0, ',')) !== false) {
+                $rowCount++;
+
+                $netName        = trim($row[0] ?? '');
+                $netDesc        = trim($row[1] ?? '');
+                $netGeoRaw      = trim($row[2] ?? '');
+
+                $apName         = trim($row[3] ?? '');
+                $apSsid         = trim($row[4] ?? '');
+                $apMac          = trim($row[5] ?? '');
+                $apVendor       = trim($row[6] ?? '');
+                $apModel        = trim($row[7] ?? '');
+                $apStandard     = trim($row[8] ?? '');
+                $apSerial       = trim($row[9] ?? '');
+                $apLng          = trim($row[10] ?? '');
+                $apLat          = trim($row[11] ?? '');
+                $apAltMsl       = trim($row[12] ?? '');
+                $apAltAgl       = trim($row[13] ?? '');
+
+                if (empty($netName)) {
+                    continue;
+                }
+
+                if (!isset($networksCreatedOrUpdated[$netName])) {
+                    $network = $networkRepository->findOneBy(['name' => $netName]);
+
+                    if (!$network) {
+                        $network = new Network();
+                        $network->setName($netName);
+                    }
+
+                    if (!empty($netDesc)) {
+                        $network->setDescription($netDesc);
+                    }
+
+                    if (!empty($netGeoRaw)) {
+                        $geoArray = json_decode($netGeoRaw, true);
+                        if (json_last_error() === JSON_ERROR_NONE) {
+                            $network->setGeometry($geoArray);
+                        }
+                    }
+
+                    $em->persist($network);
+                    $networksCreatedOrUpdated[$netName] = $network;
+                } else {
+                    $network = $networksCreatedOrUpdated[$netName];
+                }
+
+                if (!empty($apName)) {
+                    $ap = new AccessPoint();
+                    $ap->setName($apName);
+                    $ap->setSsid(!empty($apSsid) ? $apSsid : 'OpenRoaming');
+                    $ap->setMacAddress($apMac);
+                    $ap->setVendor($apVendor);
+                    $ap->setModel($apModel);
+                    $ap->setStandard($apStandard);
+                    $ap->setSerialNumber($apSerial);
+
+                    if ($apLng !== '' && $apLat !== '') {
+                        $ap->setLocation([
+                            'type' => 'Point',
+                            'coordinates' => [
+                                (float)$apLng,
+                                (float)$apLat
+                            ]
+                        ]);
+                    }
+
+                    $ap->setAltitudeMsl($apAltMsl !== '' ? (float)$apAltMsl : null);
+                    $ap->setAltitudeAgl($apAltAgl !== '' ? (float)$apAltAgl : null);
+
+                    $ap->setNetwork($network);
+                    $em->persist($ap);
+
+                    $apsImportedCount++;
+                }
+            }
+
+            $em->flush();
+
+            fclose($handle);
+
+            $this->addFlash('success', sprintf(
+                'Import successful! Processed %d networks and imported %d Access Points.',
+                count($networksCreatedOrUpdated),
+                $apsImportedCount
+            ));
+
+        } catch (\Throwable $e) {
+            fclose($handle);
+            $this->addFlash('error', 'An error occurred during import: ' . $e->getMessage());
+        }
+
+        return $this->redirectToRoute('admin_dashboard_map');
     }
 }
