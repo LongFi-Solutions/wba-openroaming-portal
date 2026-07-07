@@ -42,7 +42,8 @@ class MapExportController extends AbstractController
                     'ap_name', 'ap_ssid', 'ap_mac_address', 'ap_vendor',
                     'ap_model', 'ap_standard', 'ap_serial_number',
                     'ap_longitude', 'ap_latitude', 'ap_altitude_msl', 'ap_altitude_agl'
-                ]);
+                ],
+                escape: '\\');
 
                 $networks = $networkRepository->createQueryBuilder('n')
                     ->leftJoin('n.accessPoints', 'ap')
@@ -66,7 +67,8 @@ class MapExportController extends AbstractController
                         fputcsv($handle, [
                             $netName, $netDesc, $netGeo,
                             '', '', '', '', '', '', '', '', '', '', ''
-                        ]);
+                        ],
+                        escape: '\\');
                         continue;
                     }
 
@@ -95,7 +97,8 @@ class MapExportController extends AbstractController
                             $lat !== '' ? number_format((float)$lat, 6, '.', '') : '',
                             $ap->getAltitudeMsl(),
                             $ap->getAltitudeAgl()
-                        ]);
+                        ],
+                        escape: '\\');
                     }
                 }
             } catch (Throwable $e) {
@@ -104,7 +107,8 @@ class MapExportController extends AbstractController
                     $e->getMessage(),
                     'LINE: ' . $e->getLine(),
                     'FILE: ' . $e->getFile()
-                ]);
+                ],
+                escape: '\\');
             }
 
             fclose($handle);
