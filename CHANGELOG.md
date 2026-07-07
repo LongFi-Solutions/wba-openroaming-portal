@@ -11,6 +11,9 @@
 - New setting to track the cron job enablement and execution for each one
 - New UserProfile details page with information about the profiles downloaded per user, connectivity status, event logs and other important information
 - Minor rework on some pages (Reset password per user on the dashboard is now a dedicated page and the edit has also been modified to comply with these changes)
+- User deletion now encrypts all existing event metadata (uuid, performed_on_uuid, user_old_data, user_new_data) before updating the user entity; the deletion event itself is encrypted inline at save time
+- Users are notified before their data is wiped — by email or by SMS
+- Activity logs: new encrypted data badge (amber, lock icon) displayed on the action column of the activity log table and inside the event detail modal, indicating that the event metadata has been encrypted following a user deletion
 
 Please make sure to execute the new migration to update and use the new required configuration settings
 - Run the migrations with:
@@ -22,7 +25,9 @@ Please make sure to execute the new migration to update and use the new required
 
 - Eliminate external CDN dependency on `rsms.me``assets/fonts/inter/`
 - Remove unversioned external font CDN links without Subresource Integrity (SRI) from base twig template
-    
+- Fix CI/CD pipeline crash by downloading and serving `tw-elements` JS and CSS assets locally, bypassing jsDelivr's broken automated ESM bundler (`+esm`).
+- Fix application crash on the "add new admins" page by adding the missing `domainsBlacklisted` property/validation constraint to the DTO.
+
 # Release V1.11.1
 
 - Fix certificate chain validation to support multi-certificate PEM bundles
