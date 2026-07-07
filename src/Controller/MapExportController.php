@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Enum\AdminPermissionsType;
 use App\Repository\NetworkRepository;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -29,6 +30,10 @@ class MapExportController extends AbstractController
         $response = new StreamedResponse(function () use ($networkRepository): void {
             $handle = fopen('php://output', 'wb+');
 
+            if ($handle === false) {
+                throw new RuntimeException('Could not open the output stream for the CSV.');
+            }
+
             fwrite($handle, "\xEF\xBB\xBF");
 
             try {
@@ -37,8 +42,7 @@ class MapExportController extends AbstractController
                     'ap_name', 'ap_ssid', 'ap_mac_address', 'ap_vendor',
                     'ap_model', 'ap_standard', 'ap_serial_number',
                     'ap_longitude', 'ap_latitude', 'ap_altitude_msl', 'ap_altitude_agl'
-                ],
-                escape: '\\');
+                ]);
 
                 $networks = $networkRepository->createQueryBuilder('n')
                     ->leftJoin('n.accessPoints', 'ap')
@@ -62,8 +66,7 @@ class MapExportController extends AbstractController
                         fputcsv($handle, [
                             $netName, $netDesc, $netGeo,
                             '', '', '', '', '', '', '', '', '', '', ''
-                        ],
-                        escape: '\\');
+                        ]);
                         continue;
                     }
 
@@ -92,8 +95,7 @@ class MapExportController extends AbstractController
                             $lat !== '' ? number_format((float)$lat, 6, '.', '') : '',
                             $ap->getAltitudeMsl(),
                             $ap->getAltitudeAgl()
-                        ],
-                        escape: '\\');
+                        ]);
                     }
                 }
             } catch (Throwable $e) {
@@ -102,8 +104,7 @@ class MapExportController extends AbstractController
                     $e->getMessage(),
                     'LINE: ' . $e->getLine(),
                     'FILE: ' . $e->getFile()
-                ],
-                escape: '\\');
+                ]);
             }
 
             fclose($handle);
