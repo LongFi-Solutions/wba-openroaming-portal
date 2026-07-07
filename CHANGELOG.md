@@ -14,6 +14,7 @@
 - User deletion now encrypts all existing event metadata (uuid, performed_on_uuid, user_old_data, user_new_data) before updating the user entity; the deletion event itself is encrypted inline at save time
 - Users are notified before their data is wiped — by email or by SMS
 - Activity logs: new encrypted data badge (amber, lock icon) displayed on the action column of the activity log table and inside the event detail modal, indicating that the event metadata has been encrypted following a user deletion
+- Fix SAML authenticator to manually extract standard attributes from the SAMLResponse when complex URI schemas fail to map automatically.
 
 Please make sure to execute the new migration to update and use the new required configuration settings
 - Run the migrations with:
