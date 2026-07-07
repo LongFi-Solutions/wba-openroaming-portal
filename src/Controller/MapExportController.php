@@ -37,13 +37,16 @@ class MapExportController extends AbstractController
             fwrite($handle, "\xEF\xBB\xBF");
 
             try {
-                fputcsv($handle, [
+                fputcsv(
+                    $handle,
+                    [
                     'network_name', 'network_description', 'network_geometry',
                     'ap_name', 'ap_ssid', 'ap_mac_address', 'ap_vendor',
                     'ap_model', 'ap_standard', 'ap_serial_number',
                     'ap_longitude', 'ap_latitude', 'ap_altitude_msl', 'ap_altitude_agl'
-                ],
-                escape: '\\');
+                    ],
+                    escape: '\\'
+                );
 
                 $networks = $networkRepository->createQueryBuilder('n')
                     ->leftJoin('n.accessPoints', 'ap')
@@ -64,11 +67,14 @@ class MapExportController extends AbstractController
                     $aps = $network->getAccessPoints();
 
                     if ($aps->isEmpty()) {
-                        fputcsv($handle, [
+                        fputcsv(
+                            $handle,
+                            [
                             $netName, $netDesc, $netGeo,
                             '', '', '', '', '', '', '', '', '', '', ''
-                        ],
-                        escape: '\\');
+                            ],
+                            escape: '\\'
+                        );
                         continue;
                     }
 
@@ -82,7 +88,9 @@ class MapExportController extends AbstractController
                             $lat = $location['coordinates'][1] ?? '';
                         }
 
-                        fputcsv($handle, [
+                        fputcsv(
+                            $handle,
+                            [
                             $netName,
                             $netDesc,
                             $netGeo,
@@ -97,18 +105,22 @@ class MapExportController extends AbstractController
                             $lat !== '' ? number_format((float)$lat, 6, '.', '') : '',
                             $ap->getAltitudeMsl(),
                             $ap->getAltitudeAgl()
-                        ],
-                        escape: '\\');
+                            ],
+                            escape: '\\'
+                        );
                     }
                 }
             } catch (Throwable $e) {
-                fputcsv($handle, [
+                fputcsv(
+                    $handle,
+                    [
                     'FATAL ERROR:',
                     $e->getMessage(),
                     'LINE: ' . $e->getLine(),
                     'FILE: ' . $e->getFile()
-                ],
-                escape: '\\');
+                    ],
+                    escape: '\\'
+                );
             }
 
             fclose($handle);
