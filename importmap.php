@@ -4,10 +4,10 @@
  * Returns the importmap for this application.
  *
  * - "path" is a path inside the asset mapper system. Use the
- *     "debug:asset-map" command to see the full list of paths.
+ * "debug:asset-map" command to see the full list of paths.
  *
  * - "entrypoint" (JavaScript only) set to true for any module that will
- *     be used as an "entrypoint" (and passed to the importmap() Twig function).
+ * be used as an "entrypoint" (and passed to the importmap() Twig function).
  *
  * The "importmap:require" command can be used to add new entries to this file.
  */
@@ -72,10 +72,10 @@ return [
         'version' => '4.5.0',
     ],
     'tw-elements' => [
-        'version' => '2.0.0',
+        'path' => './assets/lib/tw-elements.umd.min.js',
     ],
     'tw-elements/css/tw-elements.min.css' => [
-        'version' => '2.0.0',
+        'path' => './assets/lib/tw-elements.min.css',
         'type' => 'css',
     ],
     'quill/dist/quill.snow.css' => [
