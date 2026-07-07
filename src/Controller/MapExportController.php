@@ -15,9 +15,8 @@ use Throwable;
 
 class MapExportController extends AbstractController
 {
-
-    public function __construct(
-    ) {
+    public function __construct()
+    {
     }
     #[Route(
         'dashboard/map/export',
@@ -54,7 +53,10 @@ class MapExportController extends AbstractController
                     $netDesc = $network->getDescription();
 
                     $geo = $network->getGeometry();
-                    $netGeo = is_array($geo) ? json_encode($geo, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) : (string)$geo;
+                    $netGeo = is_array($geo) ? json_encode(
+                        $geo,
+                        JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE
+                    ) : (string)$geo;
 
                     $aps = $network->getAccessPoints();
 
