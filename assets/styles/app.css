@@ -420,6 +420,11 @@
 
 /* Leaflet Coverage Map Overrides */
 @layer components {
+    .coverage-map-public .leaflet-marker-icon,
+    .coverage-map-public .leaflet-marker-shadow {
+        @apply !hidden;
+    }
+
     .leaflet-popup-content-wrapper {
         @apply rounded-xl shadow-xl p-1;
     }
