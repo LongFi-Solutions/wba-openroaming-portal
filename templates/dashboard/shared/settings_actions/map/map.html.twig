@@ -1,5 +1,6 @@
 <div class="relative z-0 overflow-hidden"
-     data-controller="map-geolocation"
+     data-controller="map-geolocation network-map-polygons"
+     data-network-map-polygons-polygons-url-value="{{ path('admin_dashboard_map_polygons') }}"
 >
     {{ ux_map(map, {
         style: 'height: 750px; width: 100%;',

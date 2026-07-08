@@ -125,7 +125,6 @@ class MapController extends AbstractController
     #[isGranted(AdminPermissionsType::MAP_READ->value)]
     public function mapManagement(Request $request): Response
     {
-
         $lat = $request->query->get('lat');
         $lng = $request->query->get('lng');
 
@@ -137,19 +136,43 @@ class MapController extends AbstractController
             ->center(new Point((float)$centerLat, (float)$centerLng))
             ->zoom(13);
 
-        //$mapWithPoints = $this->accessPointService->addAccessPoints($map);
-
-        $networks = $this->networkRepository->findAll();
-
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'map' => $map,
             'data' => $data,
-            'networks' => $networks,
-            'allNetworks' => count($networks),
-            'allActiveNetworks' => count($networks),
-            'searchTerm' => null
-
+            'searchTerm' => null,
         ]);
+    }
+
+    #[Route('dashboard/map/polygons', name: 'admin_dashboard_map_polygons', methods: ['GET'])]
+    #[isGranted(AdminPermissionsType::MAP_READ->value)]
+    public function dashboardPolygons(Request $request): Response
+    {
+        $minLat = $request->query->get('minLat');
+        $minLng = $request->query->get('minLng');
+        $maxLat = $request->query->get('maxLat');
+        $maxLng = $request->query->get('maxLng');
+
+        if ($minLat === null || $minLng === null || $maxLat === null || $maxLng === null) {
+            return $this->json(['error' => 'Missing bbox parameters'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $networks = $this->networkRepository->findIntersectingBbox(
+            (float)$minLat,
+            (float)$minLng,
+            (float)$maxLat,
+            (float)$maxLng,
+        );
+
+        $features = array_map(
+            static fn(Network $network): array => [
+                'id' => $network->getId(),
+                'name' => $network->getName(),
+                'geometry' => $network->getGeometry(),
+            ],
+            $networks
+        );
+
+        return $this->json($features);
     }
 
     /**
