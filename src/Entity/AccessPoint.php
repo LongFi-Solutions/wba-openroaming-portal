@@ -39,13 +39,8 @@ class AccessPoint
     #[ORM\Column(name: 'serial_number', length: 255, nullable: true)]
     private ?string $serialNumber = null;
 
-    /**
-     * GeoJSON Point stored as JSON for spatial queries.
-     * Expected format: { "type": "Point", "coordinates": [longitude, latitude] }
-     * @var array<string, mixed>|null
-     */
-    #[ORM\Column(type: 'json', nullable: true)]
-    private ?array $location = null;
+    #[ORM\Column(type: 'point', nullable: true, options: ['srid' => 4326])]
+    private mixed $location = null;
 
     #[ORM\Column(name: 'altitude_msl', type: 'float', nullable: true)]
     private ?float $altitudeMsl = null; // Altitude above Mean Sea Level (meters)
@@ -152,16 +147,42 @@ class AccessPoint
         return $this;
     }
 
-    /** @return array<string, mixed>|null */
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getLocation(): ?array
     {
-        return $this->location;
+        if ($this->location === null) {
+            return null;
+        }
+
+        if (is_string($this->location) && preg_match('/POINT\(([^ ]+) ([^ ]+)\)/', $this->location, $matches)) {
+            return [
+                'type' => 'Point',
+                'coordinates' => [(float)$matches[1], (float)$matches[2]]
+            ];
+        }
+
+        if (is_array($this->location)) {
+            return $this->location;
+        }
+
+        return null;
     }
 
-    /** @param array<string, mixed>|null $location */
+    /**
+     * @param array<string, mixed>|null $location
+     */
     public function setLocation(?array $location): static
     {
-        $this->location = $location;
+        if ($location && isset($location['coordinates'])) {
+            $lng = $location['coordinates'][0];
+            $lat = $location['coordinates'][1];
+            $this->location = sprintf('POINT(%f %f)', $lng, $lat);
+        } else {
+            $this->location = null;
+        }
+
         return $this;
     }
 
@@ -179,6 +200,12 @@ class AccessPoint
     public function getAltitudeAgl(): ?float
     {
         return $this->altitudeAgl;
+    }
+
+    public function setLocationAgl(?float $altitudeAgl): static
+    {
+        $this->altitudeAgl = $altitudeAgl;
+        return $this;
     }
 
     public function setAltitudeAgl(?float $altitudeAgl): static

@@ -1,9 +1,16 @@
 doctrine:
     dbal:
+        types:
+            geometry_spatial: App\Doctrine\Type\GeometryType
+            point:
+                class: App\Doctrine\Type\PointType
         connections:
             default:
                 url: '%env(resolve:DATABASE_URL)%'
                 server_version: '8.0.44'
+                mapping_types:
+                    geometry: string
+                    point: string
             freeradius:
                 url: '%env(resolve:DATABASE_FREERADIUS_URL)%'
                 server_version: '8.0.44'
