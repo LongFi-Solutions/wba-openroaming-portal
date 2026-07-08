@@ -22,8 +22,8 @@ class Network
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(type: 'string', nullable: false, columnDefinition: 'GEOMETRY SRID 4326')]
-    private string $geometry;
+    #[ORM\Column(type: 'revisor_geometry', nullable: false, columnDefinition: 'GEOMETRY SRID 4326')]
+    private ?string $geometry = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -68,35 +68,27 @@ class Network
     }
 
     /**
-     * 💡 Se a tua app tentar ler o WKT bruto do banco, este método garante
-     * que se adapta caso precises de fazer o parse inverso mais tarde.
      * @return array<string, mixed>|null
      */
     public function getGeometry(): ?array
     {
-        if (!isset($this->geometry)) {
+        if ($this->geometry === null) {
             return null;
         }
 
-        // Se o banco devolver o formato WKT bruto (ex: POLYGON((...)))
+        // Retorna identificador WKT estruturado
         return ['type' => 'WKT', 'value' => $this->geometry];
     }
 
-    /**
-     * @param array<string, mixed>|null $geometry
-     */
     public function setGeometry(?array $geometry): static
     {
         if ($geometry === null || !isset($geometry['type'])) {
             throw new \InvalidArgumentException('A geometria da rede não pode ser nula.');
         }
 
+        // Desembrulhar FeatureCollection se necessário
         if (strtoupper($geometry['type']) === 'FEATURECOLLECTION' && !empty($geometry['features'])) {
             $geometry = $geometry['features'][0]['geometry'] ?? null;
-
-            if ($geometry === null || !isset($geometry['type']) || !isset($geometry['coordinates'])) {
-                throw new \InvalidArgumentException('Nenhuma geometria válida encontrada dentro da FeatureCollection.');
-            }
         }
 
         $type = strtoupper($geometry['type']);
@@ -107,13 +99,11 @@ class Network
             foreach ($coords as $ring) {
                 $points = [];
                 foreach ($ring as $point) {
-                    // 💡 INVERSÃO DE EIXOS PARA O SRID 4326 DO MYSQL 8:
-                    // GeoJSON dá [lng, lat]. O MySQL 8 SRID 4326 exige POINT(lat lng)
+                    // 💡 Ordem estrita do MySQL 8 SRID 4326: Latitude Longitude
                     $points[] = sprintf('%f %f', $point[1], $point[0]);
                 }
                 $rings[] = '(' . implode(', ', $points) . ')';
             }
-            // Criamos o WKT com a ordem correta para o planeta Terra
             $this->geometry = sprintf('POLYGON(%s)', implode(', ', $rings));
         } elseif ($type === 'MULTIPOLYGON') {
             $polygons = [];
@@ -129,8 +119,6 @@ class Network
                 $polygons[] = '(' . implode(', ', $rings) . ')';
             }
             $this->geometry = sprintf('MULTIPOLYGON(%s)', implode(', ', $polygons));
-        } else {
-            throw new \InvalidArgumentException('Tipo de geometria não suportado: ' . $type);
         }
 
         return $this;
