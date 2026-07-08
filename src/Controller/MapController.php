@@ -16,8 +16,9 @@ use App\Repository\NetworkRepository;
 use App\Service\GetSettings;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -25,7 +26,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\Map\Map;
 use Symfony\UX\Map\Marker;
 use Symfony\UX\Map\Point;
-use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 
 class MapController extends AbstractController
 {
@@ -159,6 +159,9 @@ class MapController extends AbstractController
         return $this->redirectToRoute('admin_dashboard_map');
     }
 
+    /**
+     * @throws \JsonException
+     */
     #[Route('dashboard/map/network/edit/{id:network<\d+>}', name: 'admin_dashboard_map_network_edit')]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function editNetwork(Network $network, Request $request): Response
@@ -168,20 +171,12 @@ class MapController extends AbstractController
         $networkDTO->networkId = $network->getId();
         $networkDTO->name = $network->getName();
         $networkDTO->description = $network->getDescription();
+        $networkDTO->geometryJson = $network->getGeometry();
 
-        if ($network->getGeometry() !== null) {
-            $networkDTO->geometryJson = json_encode($network->getGeometry(), JSON_THROW_ON_ERROR);
-        }
         $form = $this->createForm(CreateNetworkType::class, $networkDTO);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $networkDTO->updateEntity($network);
-            if (!in_array($networkDTO->geometryJson, [null, '', '0'], true)) {
-                $network->setGeometry(json_decode($networkDTO->geometryJson, true));
-            } else {
-                $network->setGeometry(null);
-            }
-
             $network->setUpdatedAt(new DateTimeImmutable());
             $this->entityManager->persist($network);
             $this->entityManager->flush();

@@ -76,8 +76,8 @@ class ValidNetworkGeometryValidator extends ConstraintValidator
             FROM AccessPoint 
             WHERE network_id = :network_id 
               AND ST_Contains(
-                  ST_GeomFromGeoJSON(:new_geometry), 
-                  ST_GeomFromGeoJSON(location)
+                  ST_GeomFromGeoJSON(:new_geometry, 1, 4326), 
+                  location
               ) = 0
         ';
 

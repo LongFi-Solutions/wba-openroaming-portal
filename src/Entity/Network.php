@@ -22,7 +22,7 @@ class Network
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(type: 'revisor_geometry', nullable: false, columnDefinition: 'GEOMETRY SRID 4326')]
+    #[ORM\Column(type: 'revisor_geometry', nullable: false)]
     private ?string $geometry = null;
 
     #[ORM\Column]
@@ -70,57 +70,14 @@ class Network
     /**
      * @return array<string, mixed>|null
      */
-    public function getGeometry(): ?array
+    public function getGeometry(): ?string
     {
-        if ($this->geometry === null) {
-            return null;
-        }
-
-        // Retorna identificador WKT estruturado
-        return ['type' => 'WKT', 'value' => $this->geometry];
+        return $this->geometry;
     }
 
-    public function setGeometry(?array $geometry): static
+    public function setGeometry(?string $geometry): static
     {
-        if ($geometry === null || !isset($geometry['type'])) {
-            throw new \InvalidArgumentException('A geometria da rede não pode ser nula.');
-        }
-
-        // Desembrulhar FeatureCollection se necessário
-        if (strtoupper($geometry['type']) === 'FEATURECOLLECTION' && !empty($geometry['features'])) {
-            $geometry = $geometry['features'][0]['geometry'] ?? null;
-        }
-
-        $type = strtoupper($geometry['type']);
-        $coords = $geometry['coordinates'];
-
-        if ($type === 'POLYGON') {
-            $rings = [];
-            foreach ($coords as $ring) {
-                $points = [];
-                foreach ($ring as $point) {
-                    // 💡 Ordem estrita do MySQL 8 SRID 4326: Latitude Longitude
-                    $points[] = sprintf('%f %f', $point[1], $point[0]);
-                }
-                $rings[] = '(' . implode(', ', $points) . ')';
-            }
-            $this->geometry = sprintf('POLYGON(%s)', implode(', ', $rings));
-        } elseif ($type === 'MULTIPOLYGON') {
-            $polygons = [];
-            foreach ($coords as $polygon) {
-                $rings = [];
-                foreach ($polygon as $ring) {
-                    $points = [];
-                    foreach ($ring as $point) {
-                        $points[] = sprintf('%f %f', $point[1], $point[0]);
-                    }
-                    $rings[] = '(' . implode(', ', $points) . ')';
-                }
-                $polygons[] = '(' . implode(', ', $rings) . ')';
-            }
-            $this->geometry = sprintf('MULTIPOLYGON(%s)', implode(', ', $polygons));
-        }
-
+        $this->geometry = $geometry;
         return $this;
     }
 

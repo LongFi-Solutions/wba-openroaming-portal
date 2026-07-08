@@ -29,14 +29,13 @@ class MySQLGeometryType extends Type
         return self::REVISOR_GEOMETRY;
     }
 
-    public function canRequireSQLConversion(): bool
-    {
-        return true;
-    }
-
-
     public function convertToDatabaseValueSQL($sqlExpr, AbstractPlatform $platform): string
     {
-        return sprintf('ST_GeomFromText(%s, 4326)', $sqlExpr);
+        return sprintf('ST_GeomFromGeoJSON(%s, 1, 4326)', $sqlExpr);
+    }
+
+    public function convertToPHPValueSQL($sqlExpr, $platform): string
+    {
+        return sprintf('ST_AsGeoJSON(%s)', $sqlExpr);
     }
 }

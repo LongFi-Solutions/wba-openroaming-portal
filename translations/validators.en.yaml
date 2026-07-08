@@ -103,3 +103,4 @@ networkHasNoGeometry: "The selected network does not have a defined geographical
 pointOutsideNetworkPolygon: "The selected coordinates fall outside the permitted coverage area for this network."
 coordinateDegreeBetween90: 'The latitude must be a numerical value between -90 and 90 degrees.'
 coordinateDegreeBetween180: 'The longitude must be a numerical value between -180 and 180 degrees.'
+invalidGeometryFormat: 'Invalid geometry format.'
