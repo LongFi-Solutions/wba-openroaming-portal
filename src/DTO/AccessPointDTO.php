@@ -4,9 +4,9 @@ namespace App\DTO;
 
 use App\Entity\AccessPoint;
 use App\Entity\Network;
+use App\Validator\Constraints as AppAssert;
 use DateTimeImmutable;
 use Symfony\Component\Validator\Constraints as Assert;
-use App\Validator\Constraints as AppAssert;
 
 #[AppAssert\ValidAccessPointLocation]
 class AccessPointDTO
@@ -57,6 +57,9 @@ class AccessPointDTO
     #[Assert\PositiveOrZero(message: 'altitudeAglCannotBeNegative')]
     public ?float $altitudeAgl = null;
 
+    /**
+     * @throws \JsonException
+     */
     public static function createFromEntity(AccessPoint $accessPoint): self
     {
         $dto = new self();
@@ -71,15 +74,26 @@ class AccessPointDTO
         $dto->altitudeMsl = $accessPoint->getAltitudeMsl();
         $dto->altitudeAgl = $accessPoint->getAltitudeAgl();
 
-        $location = $accessPoint->getLocation();
-        if ($location && isset($location['coordinates']) && is_array($location['coordinates'])) {
-            $dto->longitude = (string) $location['coordinates'][0];
-            $dto->latitude = (string) $location['coordinates'][1];
+        $locationJson = $accessPoint->getLocation();
+        if ($locationJson !== null) {
+            $location = json_decode(
+                $locationJson,
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
+            if (isset($location['coordinates']) && is_array($location['coordinates'])) {
+                $dto->longitude = (string)$location['coordinates'][0];
+                $dto->latitude = (string)$location['coordinates'][1];
+            }
         }
 
         return $dto;
     }
 
+    /**
+     * @throws \JsonException
+     */
     public function updateEntity(AccessPoint $accessPoint): AccessPoint
     {
         $accessPoint->setNetwork($this->network);
@@ -97,10 +111,10 @@ class AccessPointDTO
             $exactLng = (float) number_format((float)$this->longitude, 7, '.', '');
             $exactLat = (float) number_format((float)$this->latitude, 7, '.', '');
 
-            $accessPoint->setLocation([
+            $accessPoint->setLocation(json_encode([
                 'type' => 'Point',
-                'coordinates' => [$exactLng, $exactLat]
-            ]);
+                'coordinates' => [$exactLng, $exactLat],
+            ], JSON_THROW_ON_ERROR));
         } else {
             $accessPoint->setLocation(null);
         }

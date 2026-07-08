@@ -22,12 +22,8 @@ class Network
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
-    /**
-     * GeoJSON FeatureCollection stored as JSON.
-     * @var array<string, mixed>|null
-     */
-    #[ORM\Column(type: 'json', nullable: true)]
-    private ?array $geometry = null;
+    #[ORM\Column(type: 'revisor_geometry', nullable: false)]
+    private ?string $geometry = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -71,14 +67,15 @@ class Network
         return $this;
     }
 
-    /** @return array<string, mixed>|null */
-    public function getGeometry(): ?array
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function getGeometry(): ?string
     {
         return $this->geometry;
     }
 
-    /** @param array<string, mixed>|null $geometry */
-    public function setGeometry(?array $geometry): static
+    public function setGeometry(?string $geometry): static
     {
         $this->geometry = $geometry;
         return $this;

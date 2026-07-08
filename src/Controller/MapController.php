@@ -11,13 +11,13 @@ use App\Entity\Network;
 use App\Enum\AdminPermissionsType;
 use App\Form\CreateAccessPointType;
 use App\Form\CreateNetworkType;
-use App\Repository\AccessPointRepository;
 use App\Repository\NetworkRepository;
 use App\Service\GetSettings;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -25,18 +25,17 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\Map\Map;
 use Symfony\UX\Map\Marker;
 use Symfony\UX\Map\Point;
-use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 
 class MapController extends AbstractController
 {
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly NetworkRepository $networkRepository,
-        private readonly AccessPointRepository $accessPointRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly TranslatorInterface $translator,
     ) {
     }
+
     #[Route('/map', name: 'app_map')]
     public function index(Request $request): Response
     {
@@ -60,11 +59,13 @@ class MapController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws \JsonException
+     */
     #[Route('dashboard/map', name: 'admin_dashboard_map')]
     #[isGranted(AdminPermissionsType::MAP_READ->value)]
     public function mapManagement(Request $request): Response
     {
-
         $lat = $request->query->get('lat');
         $lng = $request->query->get('lng');
 
@@ -76,18 +77,38 @@ class MapController extends AbstractController
             ->center(new Point((float)$centerLat, (float)$centerLng))
             ->zoom(13);
 
-        //$mapWithPoints = $this->accessPointService->addAccessPoints($map);
+        $networks = $this->networkRepository->findAllWithAccessPoints();
 
-        $networks = $this->networkRepository->findAll();
+        $mapData = array_map(static function (Network $network) {
+            $geometry = $network->getGeometry();
+            return [
+                'id' => $network->getId(),
+                'name' => $network->getName(),
+                'geometry' => $geometry !== null ? json_decode(
+                    $geometry,
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR
+                ) : null,
+                'accessPoints' => array_map(static function (AccessPoint $ap) {
+                    $location = $ap->getLocationData(); // ['lat' => ..., 'lng' => ...] ou null
+                    return [
+                        'name' => $ap->getName() ?? $ap->getSsid(),
+                        'lat' => $location['lat'] ?? null,
+                        'lng' => $location['lng'] ?? null,
+                    ];
+                }, $network->getAccessPoints()->toArray()),
+            ];
+        }, $networks);
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'map' => $map,
             'data' => $data,
             'networks' => $networks,
+            'mapData' => json_encode($mapData, JSON_THROW_ON_ERROR),
             'allNetworks' => count($networks),
             'allActiveNetworks' => count($networks),
-            'searchTerm' => null
-
+            'searchTerm' => null,
         ]);
     }
 
@@ -159,6 +180,9 @@ class MapController extends AbstractController
         return $this->redirectToRoute('admin_dashboard_map');
     }
 
+    /**
+     * @throws \JsonException
+     */
     #[Route('dashboard/map/network/edit/{id:network<\d+>}', name: 'admin_dashboard_map_network_edit')]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function editNetwork(Network $network, Request $request): Response
@@ -168,20 +192,12 @@ class MapController extends AbstractController
         $networkDTO->networkId = $network->getId();
         $networkDTO->name = $network->getName();
         $networkDTO->description = $network->getDescription();
+        $networkDTO->geometryJson = $network->getGeometry();
 
-        if ($network->getGeometry() !== null) {
-            $networkDTO->geometryJson = json_encode($network->getGeometry(), JSON_THROW_ON_ERROR);
-        }
         $form = $this->createForm(CreateNetworkType::class, $networkDTO);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $networkDTO->updateEntity($network);
-            if (!in_array($networkDTO->geometryJson, [null, '', '0'], true)) {
-                $network->setGeometry(json_decode($networkDTO->geometryJson, true));
-            } else {
-                $network->setGeometry(null);
-            }
-
             $network->setUpdatedAt(new DateTimeImmutable());
             $this->entityManager->persist($network);
             $this->entityManager->flush();
@@ -208,17 +224,21 @@ class MapController extends AbstractController
         $accessPoints = $this->entityManager->getRepository(AccessPoint::class)->findBy(['network' => $network]);
 
         foreach ($accessPoints as $ap) {
-            $location = $ap->getLocation();
+            $locationJson = $ap->getLocation();
 
-            if ($location && isset($location['coordinates']) && is_array($location['coordinates'])) {
-                $lng = $location['coordinates'][0] ?? null;
-                $lat = $location['coordinates'][1] ?? null;
+            if ($locationJson !== null) {
+                $location = json_decode($locationJson, true, 512, JSON_THROW_ON_ERROR);
 
-                if ($lat !== null && $lng !== null) {
-                    $map->addMarker(new Marker(
-                        position: new Point((float)$lat, (float)$lng),
-                        title: $ap->getName() ?? 'Access Point'
-                    ));
+                if (isset($location['coordinates']) && is_array($location['coordinates'])) {
+                    $lng = $location['coordinates'][0] ?? null;
+                    $lat = $location['coordinates'][1] ?? null;
+
+                    if ($lat !== null && $lng !== null) {
+                        $map->addMarker(new Marker(
+                            position: new Point((float)$lat, (float)$lng),
+                            title: $ap->getName() ?? 'Access Point'
+                        ));
+                    }
                 }
             }
         }
@@ -247,6 +267,9 @@ class MapController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws \JsonException
+     */
     #[Route(
         'dashboard/map/network/{id:network<\d+>}/accessPoints/create',
         name: 'admin_dashboard_map_accessPoint_create'
@@ -296,11 +319,13 @@ class MapController extends AbstractController
                 ]
             );
         }
+
         return $this->render('dashboard/shared/settings_actions/map/access_point/create.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'map' => $map,
             'network' => $network,
+            'networkGeometry' => $network->getGeometry(),
             'accessPointDTO' => $accessPointDTO,
             'accessPoint' => null,
 

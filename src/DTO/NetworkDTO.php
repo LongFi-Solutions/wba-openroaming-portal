@@ -22,13 +22,7 @@ class NetworkDTO
     {
         $network->setName($this->name);
         $network->setDescription($this->description);
-
-        if ($this->geometryJson) {
-            $network->setGeometry(json_decode($this->geometryJson, true));
-        } else {
-            $network->setGeometry(null);
-        }
-
+        $network->setGeometry($this->geometryJson);
         $network->setUpdatedAt(new DateTimeImmutable());
 
         return $network;
