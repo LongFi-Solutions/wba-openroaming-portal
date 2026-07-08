@@ -9,10 +9,9 @@ export default class extends Controller {
         this.polygonLayers = [];
         this.debounceTimer = null;
 
-        // ux-map dispatches this on its own wrapper element, nested inside
-        // ours — it bubbles, so listening here on the outer element works.
-        this.element.addEventListener('ux:map:leaflet:connect', (event) => {
+        this.element.addEventListener('ux:map:connect', (event) => {
             this.leafletMap = event.detail.map;
+            this.L = event.detail.L;
             this.leafletMap.on('moveend', () => this.debouncedLoad());
             this.loadPolygons();
         });
@@ -51,8 +50,8 @@ export default class extends Controller {
         this.polygonLayers = [];
 
         features.forEach((feature) => {
-            const layer = window.L.geoJSON(feature.geometry, {
-                style: { color: '#2e7d32', weight: 1, fillOpacity: 0.3 },
+            const layer = this.L.geoJSON(feature.geometry, {
+                style: { color: '#8AB742', weight: 1, fillColor: '#8AB742', fillOpacity: 0.3 },
             }).bindPopup(feature.name);
 
             layer.addTo(this.leafletMap);

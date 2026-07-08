@@ -152,6 +152,9 @@ class MapController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws JsonException
+     */
     #[Route(
         'dashboard/map/network/create',
         name: 'admin_dashboard_map_network_create'
@@ -166,6 +169,7 @@ class MapController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $network = new Network();
             $networkDTO->updateEntity($network);
+            $this->applyBoundingBox($network);
             $network->setCreatedAt(new DateTimeImmutable());
             $network->setUpdatedAt(new DateTimeImmutable());
             $this->entityManager->persist($network);
@@ -220,6 +224,9 @@ class MapController extends AbstractController
         return $this->redirectToRoute('admin_dashboard_map');
     }
 
+    /**
+     * @throws JsonException
+     */
     #[Route('dashboard/map/network/edit/{id:network<\d+>}', name: 'admin_dashboard_map_network_edit')]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function editNetwork(Network $network, Request $request): Response
@@ -238,10 +245,11 @@ class MapController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $networkDTO->updateEntity($network);
             if (!in_array($networkDTO->geometryJson, [null, '', '0'], true)) {
-                $network->setGeometry(json_decode($networkDTO->geometryJson, true));
+                $network->setGeometry(json_decode($networkDTO->geometryJson, true, 512, JSON_THROW_ON_ERROR));
             } else {
                 $network->setGeometry(null);
             }
+            $this->applyBoundingBox($network);
 
             $network->setUpdatedAt(new DateTimeImmutable());
             $this->entityManager->persist($network);
@@ -479,5 +487,15 @@ class MapController extends AbstractController
         }
 
         return ($preferences['rememberMe'] ?? false) === true;
+    }
+
+    private function applyBoundingBox(Network $network): void
+    {
+        $bbox = $this->networkGeometryMapper->extractBoundingBox($network->getGeometry());
+
+        $network->setMinLat($bbox['minLat'] ?? null);
+        $network->setMinLng($bbox['minLng'] ?? null);
+        $network->setMaxLat($bbox['maxLat'] ?? null);
+        $network->setMaxLng($bbox['maxLng'] ?? null);
     }
 }
