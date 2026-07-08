@@ -12,7 +12,8 @@ class ValidNetworkGeometryValidator extends ConstraintValidator
 {
     public function __construct(
         private Connection $connection
-    ) {}
+    ) {
+    }
 
     public function validate(mixed $value, Constraint $constraint): void
     {
