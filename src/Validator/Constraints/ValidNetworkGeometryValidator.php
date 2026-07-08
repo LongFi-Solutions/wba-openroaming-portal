@@ -6,8 +6,6 @@ namespace App\Validator\Constraints;
 
 use App\DTO\NetworkDTO;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception;
-use JsonException;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -19,10 +17,6 @@ class ValidNetworkGeometryValidator extends ConstraintValidator
     ) {
     }
 
-    /**
-     * @throws JsonException
-     * @throws Exception
-     */
     public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof ValidNetworkGeometry) {
@@ -37,8 +31,19 @@ class ValidNetworkGeometryValidator extends ConstraintValidator
             return;
         }
 
-        $geoJsonArr = json_decode($value->geometryJson, true, 512, JSON_THROW_ON_ERROR);
+        try {
+            $geoJsonArr = json_decode($value->geometryJson, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            $this->context->buildViolation('invalidGeometryFormat')
+                ->atPath('geometryJson')
+                ->addViolation();
+            return;
+        }
+
         if (!is_array($geoJsonArr)) {
+            $this->context->buildViolation('invalidGeometryFormat')
+                ->atPath('geometryJson')
+                ->addViolation();
             return;
         }
 
@@ -47,25 +52,51 @@ class ValidNetworkGeometryValidator extends ConstraintValidator
         if (isset($geoJsonArr['type'], $geoJsonArr['features']) && $geoJsonArr['type'] === 'FeatureCollection') {
             foreach ($geoJsonArr['features'] as $feature) {
                 $geometry = $feature['geometry'] ?? null;
-                if (!$geometry) {
+                if (!is_array($geometry)) {
                     continue;
                 }
 
-                if ($geometry['type'] === 'Polygon') {
-                    $polygons[] = $geometry['coordinates'];
-                } elseif ($geometry['type'] === 'MultiPolygon') {
-                    foreach ($geometry['coordinates'] as $coords) {
-                        $polygons[] = $coords;
+                $type = $geometry['type'] ?? '';
+                $coordinates = $geometry['coordinates'] ?? null;
+
+                if (!is_array($coordinates)) {
+                    continue;
+                }
+
+                if ($type === 'Polygon') {
+                    $polygons[] = $coordinates;
+                } elseif ($type === 'MultiPolygon') {
+                    foreach ($coordinates as $coords) {
+                        if (is_array($coords)) {
+                            $polygons[] = $coords;
+                        }
                     }
                 }
             }
-        } elseif (isset($geoJsonArr['type']) && $geoJsonArr['type'] === 'Polygon') {
-            $polygons[] = $geoJsonArr['coordinates'];
-        } elseif (isset($geoJsonArr['type']) && $geoJsonArr['type'] === 'MultiPolygon') {
-            $polygons = $geoJsonArr['coordinates'];
+        } else {
+            $type = $geoJsonArr['type'] ?? '';
+            $coordinates = $geoJsonArr['coordinates'] ?? null;
+
+            if (is_array($coordinates)) {
+                if ($type === 'Polygon') {
+                    $polygons[] = $coordinates;
+                } elseif ($type === 'MultiPolygon') {
+                    $polygons = $coordinates;
+                }
+            }
         }
 
-        if ($polygons === []) {
+        if ($polygons === [] || !is_array($polygons)) {
+            $this->context->buildViolation('invalidGeometryFormat')
+                ->atPath('geometryJson')
+                ->addViolation();
+            return;
+        }
+
+        if (!$this->validateCoordinatesBounds($polygons)) {
+            $this->context->buildViolation('invalidCoordinateBounds')
+            ->atPath('geometryJson')
+                ->addViolation();
             return;
         }
 
@@ -108,5 +139,34 @@ class ValidNetworkGeometryValidator extends ConstraintValidator
                 ->atPath('geometryJson')
                 ->addViolation();
         }
+    }
+
+    private function validateCoordinatesBounds(array $coordinates): bool
+    {
+        foreach ($coordinates as $item) {
+            if (!is_array($item)) {
+                return false;
+            }
+
+            if (isset($item[0], $item[1]) && !is_array($item[0]) && !is_array($item[1])) {
+                $lng = $item[0];
+                $lat = $item[1];
+
+                if (!is_numeric($lng) || !is_numeric($lat)) {
+                    return false;
+                }
+
+                if ($lng < -180 || $lng > 180 || $lat < -90 || $lat > 90) {
+                    return false;
+                }
+                continue;
+            }
+
+            if (!$this->validateCoordinatesBounds($item)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
