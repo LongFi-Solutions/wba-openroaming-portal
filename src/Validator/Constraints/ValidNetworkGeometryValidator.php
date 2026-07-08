@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Validator\Constraints;
 
 use App\DTO\NetworkDTO;
@@ -14,7 +16,8 @@ class ValidNetworkGeometryValidator extends ConstraintValidator
 {
     public function __construct(
         private readonly Connection $connection
-    ) {}
+    ) {
+    }
 
     /**
      * @throws JsonException

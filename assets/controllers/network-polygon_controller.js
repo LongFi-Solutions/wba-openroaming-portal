@@ -291,9 +291,10 @@ export default class extends Controller {
             return [closed]; // GeoJSON Polygon coordinates = array of rings
         });
 
-        const geometry = closedRings.length === 1
-          ? { type: 'Polygon', coordinates: closedRings[0] }
-          : { type: 'MultiPolygon', coordinates: closedRings };
+        const geometry =
+            closedRings.length === 1
+                ? { type: 'Polygon', coordinates: closedRings[0] }
+                : { type: 'MultiPolygon', coordinates: closedRings };
 
         this.geometryJsonTarget.value = JSON.stringify(geometry);
         this.geometryJsonTarget.dispatchEvent(new Event('change', { bubbles: true }));

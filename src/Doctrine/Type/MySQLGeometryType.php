@@ -14,11 +14,13 @@ class MySQLGeometryType extends Type
         return 'GEOMETRY';
     }
 
+    #[\Override]
     public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
     {
         return $value;
     }
 
+    #[\Override]
     public function convertToPHPValue($value, AbstractPlatform $platform): mixed
     {
         return $value;
@@ -29,11 +31,13 @@ class MySQLGeometryType extends Type
         return self::REVISOR_GEOMETRY;
     }
 
+    #[\Override]
     public function convertToDatabaseValueSQL($sqlExpr, AbstractPlatform $platform): string
     {
         return sprintf('ST_GeomFromGeoJSON(%s, 1, 4326)', $sqlExpr);
     }
 
+    #[\Override]
     public function convertToPHPValueSQL($sqlExpr, $platform): string
     {
         return sprintf('ST_AsGeoJSON(%s)', $sqlExpr);
