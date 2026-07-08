@@ -4,8 +4,8 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
-use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\OSType;
@@ -22,19 +22,21 @@ use App\Form\RevokeProfilesType;
 use App\Form\TOSType;
 use App\Repository\UserExternalAuthRepository;
 use App\Security\LandingAuthenticator;
+use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\OSDetectionService;
 use App\Service\ProfileManager;
+use App\Service\SendSMS;
 use App\Service\TwoFAService;
-use App\Service\UserDeletionService;
+use App\Service\UserDeletion\UserDeletionService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Exception;
+use libphonenumber\PhoneNumber;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -44,6 +46,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
 /**
  * @method getParameterBag()
@@ -63,6 +66,8 @@ class SiteController extends AbstractController
         private readonly UserPasswordHasherInterface $userPasswordEncoder,
         private readonly UserAuthenticatorInterface $userAuthenticator,
         private readonly LandingAuthenticator $authenticator,
+        private readonly EmailGenerator $emailGenerator,
+        private readonly SendSMS $sendSMS,
     ) {
     }
 
@@ -89,6 +94,18 @@ class SiteController extends AbstractController
             $previousLoggedID = (int)$request->cookies->get('previousLoggedID');
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
             if ($previousLoggedID && $previousLoggedID === $currentUser->getId()) {
+                // Notify the user before their data is wiped
+                try {
+                    if ($currentUser->getEmail() !== null) {
+                        $this->emailGenerator->sendUserAccountDeletionConfirmationEmail($currentUser);
+                    } elseif ($currentUser->getPhoneNumber() instanceof PhoneNumber) {
+                        $message = $this->translator->trans('sms_account_deletion', [], 'UserDeletionService');
+                        $this->sendSMS->sendSmsNoValidation($currentUser, $message);
+                    }
+                } catch (Throwable) {
+                    // non-fatal — deletion continues regardless
+                }
+
                 $result = $this->userDeletionService->deleteUser(
                     $currentUser,
                     $userExternalAuths,
@@ -284,11 +301,11 @@ class SiteController extends AbstractController
                     $entityManager->persist($userAuths);
                     // Defines the Event to the table
                     $eventMetadata = [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'platform' => PlatformMode::DEMO->value,
-                        'uuid' => $user->getUuid(),
-                        'registrationType' => UserProvider::EMAIL->value,
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
+                        EventMetadataKeysType::PLATFORM->value => PlatformMode::DEMO->value,
+                        EventMetadataKeysType::REGISTRATION_TYPE->value => UserProvider::EMAIL->value,
                     ];
                     $this->eventActions->saveEvent(
                         $user,
@@ -538,10 +555,9 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_landing');
             }
             $eventMetaData = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'platform' => PlatformMode::LIVE->value,
-                'uuid' => $user->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
             ];
             $this->eventActions->saveEvent(
                 $user,
@@ -562,17 +578,16 @@ class SiteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $eventMetaData = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'platform' => PlatformMode::LIVE->value,
-                'uuid' => $user->getUuid(),
-                'Old data' => [
-                    'First Name' => $oldFirstName,
-                    'Last Name' => $oldLastName,
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
+                EventMetadataKeysType::USER_OLD_DATA->value => [
+                    EventMetadataKeysType::FIRST_NAME->value => $oldFirstName,
+                    EventMetadataKeysType::LAST_NAME->value => $oldLastName,
                 ],
-                'New data' => [
-                    'First Name' => $user->getFirstName(),
-                    'Last Name' => $user->getLastName(),
+                EventMetadataKeysType::USER_NEW_DATA->value => [
+                    EventMetadataKeysType::FIRST_NAME->value => $user->getFirstName(),
+                    EventMetadataKeysType::LAST_NAME->value => $user->getLastName(),
                 ],
             ];
             $this->eventActions->saveEvent(
@@ -635,10 +650,9 @@ class SiteController extends AbstractController
             $this->entityManager->flush();
 
             $eventMetaData = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'platform' => PlatformMode::LIVE->value,
-                'uuid' => $user->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
             ];
             $this->eventActions->saveEvent(
                 $user,

@@ -58,10 +58,6 @@ final class PlatformStatusSettingsForm extends AbstractController
                 $this->platformStatusSettingsDTO->turnstileChecker,
             SettingName::API_STATUS->value =>
                 $this->platformStatusSettingsDTO->apiStatus,
-            SettingName::USER_DELETE_TIME->value =>
-                $this->platformStatusSettingsDTO->userDeleteTime,
-            SettingName::TIME_INTERVAL_NOTIFICATION->value =>
-                $this->platformStatusSettingsDTO->timeIntervalNotification,
         ], false);
 
         $this->form = $form;

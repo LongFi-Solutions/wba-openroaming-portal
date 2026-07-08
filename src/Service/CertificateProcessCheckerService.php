@@ -13,6 +13,7 @@ use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -143,9 +144,14 @@ readonly class CertificateProcessCheckerService
      */
     public function verifyCertificates(): ?CertificateSetupProcess
     {
-        $certPemLimitDate = $this->certificateService->certificateLimitDate('/signing-keys/cert.pem');
-        $chainPemLimitDate = $this->certificateService->certificateLimitDate('/signing-keys/chain.pem');
-        $fullchainPemLimitDate = $this->certificateService->certificateLimitDate('/signing-keys/fullchain.pem');
+        try {
+            $certPemLimitDate = $this->certificateService->certificateLimitDate('/signing-keys/cert.pem');
+            $chainPemLimitDate = $this->certificateService->certificateLimitDate('/signing-keys/chain.pem');
+            $fullchainPemLimitDate = $this->certificateService->certificateLimitDate('/signing-keys/fullchain.pem');
+        } catch (RuntimeException) {
+            // Cert files don't exist on disk yet — nothing to verify
+            return null;
+        }
 
         if (
             $certPemLimitDate > 0 &&

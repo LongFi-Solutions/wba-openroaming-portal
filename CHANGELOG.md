@@ -1,10 +1,34 @@
 # Changelog
 
+# Release V1.12.0
+
+- New settings to configure the number of retry attempts for email & SMS at a specific timeframe, with customization available on the dashboard.
+- New settings for number of tries for email & sms on a specific time stamp also customizable on the platform
+- New command for breaking glass cases that generate a new pair of credentials for the dashboard access (one time use
+  per generation). It also has white-flag to skip 2FA validation and when it logs in this account is immediately
+  disabled.
+- New Activity logs only of the portal (Users interaction and settings management)
+- New setting to track the cron job enablement and execution for each one
+- New UserProfile details page with information about the profiles downloaded per user, connectivity status, event logs and other important information
+- Minor rework on some pages (Reset password per user on the dashboard is now a dedicated page and the edit has also been modified to comply with these changes)
+- User deletion now encrypts all existing event metadata (uuid, performed_on_uuid, user_old_data, user_new_data) before updating the user entity; the deletion event itself is encrypted inline at save time
+- Users are notified before their data is wiped — by email or by SMS
+- Activity logs: new encrypted data badge (amber, lock icon) displayed on the action column of the activity log table and inside the event detail modal, indicating that the event metadata has been encrypted following a user deletion
+- Fix SAML authenticator to manually extract standard attributes from the SAMLResponse when complex URI schemas fail to map automatically. This also lets the SAML factory able to generated account from Google Workspace (old G Suite)
+
+Please make sure to execute the new migration to update and use the new required configuration settings
+- Run the migrations with:
+  ```bash
+  php bin/console doctrine:migrations:migrate
+  ```
+  
 # Release V1.11.2
 
 - Eliminate external CDN dependency on `rsms.me``assets/fonts/inter/`
 - Remove unversioned external font CDN links without Subresource Integrity (SRI) from base twig template
-    
+- Fix CI/CD pipeline crash by downloading and serving `tw-elements` JS and CSS assets locally, bypassing jsDelivr's broken automated ESM bundler (`+esm`).
+- Fix application crash on the "add new admins" page by adding the missing `domainsBlacklisted` property/validation constraint to the DTO.
+
 # Release V1.11.1
 
 - Fix certificate chain validation to support multi-certificate PEM bundles
@@ -72,7 +96,7 @@ No migrations are needed for this release
 - Added a new validator for each authentication method or registration to block blacklisted domains
 - New loading screen for long time requests (example, refresh domains)
 - Add new `SAML_IDENTIFIER_ATTRIBUTE` environment variable to support configurable SAML user identifier mapping (
-  sAMAccountName, email, uid, or username).
+  sAMAccountName, email, uuid, or username).
 - Added `SAML_ATTRIBUTE_MAPPING` configuration to allow fully customizable SAML attribute mappings (uuid, email,
   first_name, last_name) per Identity Provider.
 - It's required to run the new migrations this will set up the new entities for the new domains, sources page (

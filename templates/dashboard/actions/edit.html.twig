@@ -4,7 +4,24 @@
 
 {% block container %}
     {# Content - Edit Users #}
-    <h1 class="text-3xl font-bold text-gray-800 mb-8 border-b-2 border-gray-300 pb-2">{{ user.uuid }}</h1>
+    {# ── Header ──────────────────────────────────────────────────────────────── #}
+    {% set isAdmin = isEditingSelf ? false : (
+        'ROLE_ADMIN' in user.roles or 'ROLE_SUPER_ADMIN' in user.roles
+        ) %}
+
+    {% set canEdit = isAdmin
+        ? is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE'))
+        : is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
+
+    {{ include('dashboard/shared/_user_header.html.twig', {
+        user: user,
+        showStatus: false,
+        backUrl: path('admin_dashboard_user_show', {id: user.id}),
+        actions: canEdit
+        ? '<a href="' ~ path('admin_dashboard_user_edit', {id: user.id}) ~ '" class="btn-primary text-sm">' ~ 'edit'|trans({}, 'edit') ~ '</a>'
+        : '',
+    }) }}
+
     <twig:UserUpdateForm
             :userUpdateDTO="userUpdateDTO"
             :form="form"
@@ -16,28 +33,19 @@
 
         <div class="p-6 bg-white">
             <div class="mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="relative">
-                    <div class="flex items-center justify-between relative" data-controller="card">
+                <div class="relative" data-controller="card">
+                    <div class="flex items-center justify-between">
                         {{ form_label(form.uuid, 'uniqueIdentifier'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
-
                         {{ form_widget(form.uuid, {attr: {class: 'form-widget'}}) }}
-
-                        <div class="">
-                            <img class="w-6 h-6 cursor-pointer ml-4"
-                                    {{ stimulus_target('card', 'button') }}
-                                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                                 src="{{ asset('resources/logos/info_icon.svg') }}"
-                                 alt="Info icon"/>
-
-                            {# Description #}
-                            <div class="absolute w-2/3 left-1/2 top-full transform -translate-x-1/2 -mt-11
-                        bg-indigo-400 rounded-lg p-2 text-white text-center hidden z-10"
-                                 data-card-target="info">
-                                {{ 'UUID'|trans({}, 'edit') }}
-                            </div>
-                        </div>
+                        <img class="w-6 h-6 cursor-pointer ml-4"
+                                {{ stimulus_target('card', 'button') }}
+                                {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                             src="{{ asset('resources/logos/info_icon.svg') }}"
+                             alt="Info icon"/>
                     </div>
-
+                    {{ include('dashboard/shared/settings_actions/_description.html.twig', {
+                        description: 'UUIDDescription'|trans({}, 'edit'),
+                    }) }}
                     <div class="text-red-500 mt-1">
                         {{ form_errors(form.uuid) }}
                     </div>
@@ -164,85 +172,4 @@
         {{ form_rest(form) }}
         {{ form_end(form) }}
     </twig:UserUpdateForm>
-
-    {# Content - Reset Password Users/Admin #}
-    {# Check if the authenticated user is not the same as the user being edited (admin) #}
-    {% if app.user.id != user.id and is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
-        <h1 class="text-2xl font-semibold mt-6 mb-6">{{ 'resetPassword'|trans({}, 'edit') }}</h1>
-        {{ form_start(formReset) }}
-        {{ form_errors(formReset) }}
-        <div class="p-6 bg-white">
-            <div class="mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="relative">
-                    {{ form_label(formReset.password, 'password'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
-                    {{ form_widget(formReset.password, {attr: {class: 'form-widget'}}) }}
-                    <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                        {{ form_errors(formReset.password) }}
-                    </div>
-                </div>
-                <div class="relative">
-                    {{ form_label(formReset.confirmPassword, 'confirmNewPassword'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
-                    {{ form_widget(formReset.confirmPassword, {attr: {class: 'form-widget'}}) }}
-                    <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                        {{ form_errors(formReset.confirmPassword) }}
-                    </div>
-                </div>
-            </div>
-            <div class="flex justify-end">
-                <button type="submit"
-                        class="btn-primary mt-6"
-                        onclick="return confirm('{{ 'resetPasswordMessage'|trans({}, 'edit')|e('js') }}')">
-                    {{ 'resetPassword'|trans({}, 'edit') }}
-                </button>
-            </div>
-        </div>
-        {{ form_rest(formReset) }}
-        {{ form_end(formReset) }}
-    {% endif %}
-
-    {# Content - Two-Factor Options - both for admin && user account #}
-
-    {% if app.user and user.id == app.user.id %}
-        <h1 class="text-2xl font-semibold mt-6 mb-6">{{ 'TwoFAOptions'|trans({}, 'edit') }}</h1>
-        <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 lg:w-1/2 w-full bg-white justify-start gap-6">
-            <a href="{{ path('app_configure2FA', {context: context}) }}"
-               class="btn-secondary w-full text-center break-words whitespace-normal">
-                {{ 'configureTwoFactorAuthentication'|trans({}, 'edit') }}
-            </a>
-
-            {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                <a href="{{ path('app_disable2FA', {context: context}) }}"
-                   class="btn-logout">{{ 'disable'|trans({}, 'edit') }}</a>
-            {% endif %}
-        </div>
-    {% else %}
-        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
-            {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                <h1 class="text-2xl font-semibold mt-6 mb-6">{{ 'TwoFAOptions'|trans({}, 'edit') }}</h1>
-                <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 lg:w-1/2 w-full bg-white justify-start gap-6">
-                    <a
-                            href="{{ path('app_disable2FA_admin', {id: user.id}) }}"
-                            class="btn-logout"
-                            data-confirm="{{ 'disable2FAMessage'|trans({}, 'edit')|e('html_attr') }}">
-                        {{ 'disable'|trans({}, 'edit') }}
-                    </a>
-                </div>
-            {% endif %}
-        {% endif %}
-    {% endif %}
-
-    {# Content - Profile Connection Status #}
-    {% if lastStartConnection is not null or lastStopConnection is not null %}
-        <h1 class="text-2xl font-semibold mt-6 mb-6">{{ 'profileConnectionStatus'|trans({}, 'edit') }}</h1>
-        <div class="bg-white p-6 rounded-xl shadow-sm w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-                <p class="text-gray-600 font-medium mb-1">{{ 'lastStartConnection'|trans({}, 'edit') }}</p>
-                <p class="text-gray-900 font-semibold">{{ lastStartConnection|date('d/m/Y H:i') }} UTC</p>
-            </div>
-            <div>
-                <p class="text-gray-600 font-medium mb-1">{{ 'lastStopConnection'|trans({}, 'edit') }}</p>
-                <p class="text-gray-900 font-semibold">{{ lastStopConnection|date('d/m/Y H:i') }} UTC</p>
-            </div>
-        </div>
-    {% endif %}
 {% endblock %}
