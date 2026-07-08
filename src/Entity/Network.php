@@ -68,7 +68,7 @@ class Network
     }
 
     /**
-     * @return array<string, mixed>|null
+     * @return string|null
      */
     public function getGeometry(): ?string
     {

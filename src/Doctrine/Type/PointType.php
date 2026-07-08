@@ -9,17 +9,28 @@ class PointType extends Type
 {
     public const NAME = 'point';
 
+    /**
+     * @param array<string, mixed> $column
+     */
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         return 'POINT';
     }
 
+    /**
+     * @param mixed $value
+     * @return mixed
+     */
     #[\Override]
     public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
     {
         return $value;
     }
 
+    /**
+     * @param mixed $value
+     * @return mixed
+     */
     #[\Override]
     public function convertToPHPValue($value, AbstractPlatform $platform): mixed
     {
@@ -31,14 +42,20 @@ class PointType extends Type
         return self::NAME;
     }
 
+    /**
+     * @param string $sqlExpr
+     */
     #[\Override]
     public function convertToDatabaseValueSQL($sqlExpr, AbstractPlatform $platform): string
     {
         return sprintf('ST_GeomFromGeoJSON(%s, 1, 4326)', $sqlExpr);
     }
 
+    /**
+     * @param string $sqlExpr
+     */
     #[\Override]
-    public function convertToPHPValueSQL($sqlExpr, $platform): string
+    public function convertToPHPValueSQL($sqlExpr, AbstractPlatform $platform): string
     {
         return sprintf('ST_AsGeoJSON(%s)', $sqlExpr);
     }
