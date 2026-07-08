@@ -172,7 +172,34 @@ class MapController extends AbstractController
             $networks
         );
 
-        return $this->json($features);
+        $accessPoints = $this->accessPointRepository->findIntersectingBbox(
+            (float)$minLat,
+            (float)$minLng,
+            (float)$maxLat,
+            (float)$maxLng,
+        );
+
+        $apFeatures = array_map(
+            static function (AccessPoint $ap): ?array {
+                $location = $ap->getLocation();
+                if (!isset($location['coordinates'][0], $location['coordinates'][1])) {
+                    return null;
+                }
+                return [
+                    'id' => $ap->getId(),
+                    'name' => $ap->getName(),
+                    'ssid' => $ap->getSsid(),
+                    'lat' => $location['coordinates'][1],
+                    'lng' => $location['coordinates'][0],
+                ];
+            },
+            $accessPoints
+        );
+
+        return $this->json([
+            'networks' => $features,
+            'accessPoints' => array_values(array_filter($apFeatures)),
+        ]);
     }
 
     /**

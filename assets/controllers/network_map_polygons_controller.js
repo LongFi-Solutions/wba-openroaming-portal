@@ -3,10 +3,11 @@ import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
     static values = {
         polygonsUrl: String,
+        showAccessPoints: { type: Boolean, default: false },
     };
 
     connect() {
-        this.polygonLayers = [];
+        this.layers = [];
         this.debounceTimer = null;
 
         this.element.addEventListener('ux:map:connect', (event) => {
@@ -35,27 +36,36 @@ export default class extends Controller {
             maxLng: bounds.getEast(),
         });
 
-        let features;
+        let data;
         try {
             const response = await fetch(`${this.polygonsUrlValue}?${params}`);
             if (!response.ok) {
                 return;
             }
-            features = await response.json();
+            data = await response.json();
         } catch {
             return;
         }
 
-        this.polygonLayers.forEach((layer) => this.leafletMap.removeLayer(layer));
-        this.polygonLayers = [];
+        this.layers.forEach((layer) => this.leafletMap.removeLayer(layer));
+        this.layers = [];
 
-        features.forEach((feature) => {
+        const networks = this.showAccessPointsValue ? data.networks : data;
+
+        networks.forEach((feature) => {
             const layer = this.L.geoJSON(feature.geometry, {
                 style: { color: '#8AB742', weight: 1, fillColor: '#8AB742', fillOpacity: 0.3 },
             }).bindPopup(feature.name);
-
             layer.addTo(this.leafletMap);
-            this.polygonLayers.push(layer);
+            this.layers.push(layer);
         });
+
+        if (this.showAccessPointsValue) {
+            data.accessPoints.forEach((ap) => {
+                const marker = this.L.marker([ap.lat, ap.lng]).bindPopup(ap.ssid ?? ap.name);
+                marker.addTo(this.leafletMap);
+                this.layers.push(marker);
+            });
+        }
     }
 }
