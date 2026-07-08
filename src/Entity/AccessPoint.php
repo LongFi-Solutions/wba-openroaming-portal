@@ -207,4 +207,37 @@ class AccessPoint
         $this->updatedAt = $updatedAt;
         return $this;
     }
+
+    /**
+     *
+     * @return array{lat: float, lng: float}|null
+     */
+    public function getLocationData(): ?array
+    {
+        if (!$this->location) {
+            return null;
+        }
+
+        if (str_starts_with($this->location, '{')) {
+            try {
+                $data = json_decode($this->location, true, 512, JSON_THROW_ON_ERROR);
+                if (isset($data['coordinates'][0], $data['coordinates'][1])) {
+                    return [
+                        'lng' => (float) $data['coordinates'][0],
+                        'lat' => (float) $data['coordinates'][1],
+                    ];
+                }
+            } catch (\JsonException) {
+            }
+        }
+
+        if (preg_match('/POINT\s*\(\s*([-\d.]+)\s+([-\d.]+)\s*\)/i', $this->location, $matches)) {
+            return [
+                'lng' => (float) $matches[1],
+                'lat' => (float) $matches[2],
+            ];
+        }
+
+        return null;
+    }
 }
