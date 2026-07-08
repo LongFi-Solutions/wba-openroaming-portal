@@ -14,6 +14,7 @@ class PointType extends Type
         return 'POINT SRID 4326';
     }
 
+    #[\Override]
     public function convertToPHPValue($value, AbstractPlatform $platform): ?array
     {
         if ($value === null) {
@@ -23,16 +24,19 @@ class PointType extends Type
         return is_array($decoded) ? $decoded : null;
     }
 
+    #[\Override]
     public function convertToDatabaseValue($value, AbstractPlatform $platform): ?string
     {
         return $value === null ? null : json_encode($value, JSON_THROW_ON_ERROR);
     }
 
+    #[\Override]
     public function convertToPHPValueSQL($sqlExpr, $platform): string
     {
         return sprintf('ST_AsGeoJSON(%s)', $sqlExpr);
     }
 
+    #[\Override]
     public function convertToDatabaseValueSQL($sqlExpr, AbstractPlatform $platform): string
     {
         // options=1 + srid=4326 tells MySQL to interpret GeoJSON's [lng,lat]
