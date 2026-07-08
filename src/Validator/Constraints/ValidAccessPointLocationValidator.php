@@ -4,6 +4,7 @@ namespace App\Validator\Constraints;
 
 use App\DTO\AccessPointDTO;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -11,9 +12,13 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 class ValidAccessPointLocationValidator extends ConstraintValidator
 {
     public function __construct(
-        private Connection $connection
+        private readonly Connection $connection
     ) {}
 
+    /**
+     * @throws \JsonException
+     * @throws Exception
+     */
     public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof ValidAccessPointLocation) {
@@ -28,63 +33,31 @@ class ValidAccessPointLocationValidator extends ConstraintValidator
             return;
         }
 
-        $geoJson = $value->network->getGeometry();
-        if ($geoJson === null || $geoJson === []) {
+        $networkGeometry = $value->network->getGeometry();
+        if ($networkGeometry === null) {
             $this->context->buildViolation($constraint->noGeometryMessage)
                 ->atPath('network')
                 ->addViolation();
             return;
         }
 
-        $polygons = [];
-        $features = [];
-
-        if (isset($geoJson['type'])) {
-            if ($geoJson['type'] === 'FeatureCollection' && isset($geoJson['features'])) {
-                $features = $geoJson['features'];
-            } elseif ($geoJson['type'] === 'Feature') {
-                $features = [$geoJson];
-            } else {
-                $features = [['geometry' => $geoJson]];
-            }
-        }
-
-        foreach ($features as $feature) {
-            $geometry = $feature['geometry'] ?? null;
-            if (!$geometry) {
-                continue;
-            }
-
-            if ($geometry['type'] === 'Polygon') {
-                $polygons[] = $geometry['coordinates'];
-            } elseif ($geometry['type'] === 'MultiPolygon') {
-                foreach ($geometry['coordinates'] as $coords) {
-                    $polygons[] = $coords;
-                }
-            }
-        }
-
-        if ($polygons === []) {
-            return;
-        }
-
-        $networkGeometryJson = json_encode([
-            'type' => 'MultiPolygon',
-            'coordinates' => $polygons
-        ]);
-
         $pointJson = json_encode([
             'type' => 'Point',
-            'coordinates' => [(float)$value->longitude, (float)$value->latitude]
-        ]);
+            'coordinates' => [(float)$value->longitude, (float)$value->latitude],
+        ], JSON_THROW_ON_ERROR);
 
-        $sql = '
-        SELECT ST_Contains(ST_GeomFromGeoJSON(:network_geo), 
-        ST_GeomFromGeoJSON(:point_geo))';
+        $sql = "
+                SELECT ST_Contains(
+                    geometry,
+                    ST_GeomFromGeoJSON(:point_geo, 1, 4326)
+                )
+                FROM Network
+                WHERE id = :network_id
+            ";
 
         try {
             $isInside = (bool) $this->connection->fetchOne($sql, [
-                'network_geo' => $networkGeometryJson,
+                'network_id' => $value->network->getId(),
                 'point_geo' => $pointJson,
             ]);
 
@@ -93,7 +66,7 @@ class ValidAccessPointLocationValidator extends ConstraintValidator
                     ->atPath('latitude')
                     ->addViolation();
             }
-        } catch (\Exception $e) {
+        } catch (Exception) {
             $this->context->buildViolation('invalidGeometryFormat')
                 ->atPath('latitude')
                 ->addViolation();

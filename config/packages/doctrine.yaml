@@ -2,8 +2,7 @@ doctrine:
     dbal:
         types:
             revisor_geometry: App\Doctrine\Type\MySQLGeometryType
-            point:
-                class: App\Doctrine\Type\PointType
+            point: App\Doctrine\Type\PointType
         connections:
             default:
                 url: '%env(resolve:DATABASE_URL)%'

@@ -39,8 +39,8 @@ class AccessPoint
     #[ORM\Column(name: 'serial_number', length: 255, nullable: true)]
     private ?string $serialNumber = null;
 
-    #[ORM\Column(type: 'point', nullable: true, options: ['srid' => 4326])]
-    private mixed $location = null;
+    #[ORM\Column(type: 'point', nullable: true)]
+    private ?string $location = null;
 
     #[ORM\Column(name: 'altitude_msl', type: 'float', nullable: true)]
     private ?float $altitudeMsl = null; // Altitude above Mean Sea Level (meters)
@@ -147,42 +147,14 @@ class AccessPoint
         return $this;
     }
 
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getLocation(): ?array
+    public function getLocation(): ?string
     {
-        if ($this->location === null) {
-            return null;
-        }
-
-        if (is_string($this->location) && preg_match('/POINT\(([^ ]+) ([^ ]+)\)/', $this->location, $matches)) {
-            return [
-                'type' => 'Point',
-                'coordinates' => [(float)$matches[1], (float)$matches[2]]
-            ];
-        }
-
-        if (is_array($this->location)) {
-            return $this->location;
-        }
-
-        return null;
+        return $this->location;
     }
 
-    /**
-     * @param array<string, mixed>|null $location
-     */
-    public function setLocation(?array $location): static
+    public function setLocation(?string $location): static
     {
-        if ($location && isset($location['coordinates'])) {
-            $lng = $location['coordinates'][0];
-            $lat = $location['coordinates'][1];
-            $this->location = sprintf('POINT(%f %f)', $lng, $lat);
-        } else {
-            $this->location = null;
-        }
-
+        $this->location = $location;
         return $this;
     }
 

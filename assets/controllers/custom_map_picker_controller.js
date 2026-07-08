@@ -32,24 +32,33 @@ export default class extends Controller {
         if (this.hasNetworkGeometryValue && this.networkGeometryValue) {
             try {
                 const geoJson = JSON.parse(this.networkGeometryValue);
+                let polygonCoordsList = [];
 
-                if (geoJson.type === 'FeatureCollection' && geoJson.features) {
-                    geoJson.features.forEach((feature) => {
-                        if (feature.geometry && feature.geometry.type === 'Polygon') {
-                            const coordinates = feature.geometry.coordinates[0];
-                            if (coordinates && coordinates.length > 0) {
-                                const leafletCoords = coordinates.map((p) => [p[1], p[0]]);
+                if (geoJson.type === 'Polygon') {
+                    polygonCoordsList = [geoJson.coordinates];
+                } else if (geoJson.type === 'MultiPolygon') {
+                    polygonCoordsList = geoJson.coordinates;
+                }
 
-                                this.L.polygon(leafletCoords, {
-                                    color: '#2563eb',
-                                    fillColor: '#3b82f6',
-                                    fillOpacity: 0.35,
-                                    weight: 3,
-                                    interactive: false,
-                                }).addTo(this.map);
-                            }
-                        }
-                    });
+                const layers = [];
+                polygonCoordsList.forEach((polygonCoords) => {
+                    const coordinates = polygonCoords[0]; // outer ring
+                    if (coordinates && coordinates.length > 0) {
+                        const leafletCoords = coordinates.map((p) => [p[1], p[0]]);
+                        const layer = this.L.polygon(leafletCoords, {
+                            color: '#2563eb',
+                            fillColor: '#3b82f6',
+                            fillOpacity: 0.35,
+                            weight: 3,
+                            interactive: false,
+                        }).addTo(this.map);
+                        layers.push(layer);
+                    }
+                });
+
+                if (layers.length > 0) {
+                    const group = new this.L.FeatureGroup(layers);
+                    this.map.fitBounds(group.getBounds(), { padding: [40, 40] });
                 }
             } catch (error) {
                 console.error('Error:', error);

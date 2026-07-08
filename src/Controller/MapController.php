@@ -203,17 +203,21 @@ class MapController extends AbstractController
         $accessPoints = $this->entityManager->getRepository(AccessPoint::class)->findBy(['network' => $network]);
 
         foreach ($accessPoints as $ap) {
-            $location = $ap->getLocation();
+            $locationJson = $ap->getLocation();
 
-            if ($location && isset($location['coordinates']) && is_array($location['coordinates'])) {
-                $lng = $location['coordinates'][0] ?? null;
-                $lat = $location['coordinates'][1] ?? null;
+            if ($locationJson !== null) {
+                $location = json_decode($locationJson, true, 512, JSON_THROW_ON_ERROR);
 
-                if ($lat !== null && $lng !== null) {
-                    $map->addMarker(new Marker(
-                        position: new Point((float)$lat, (float)$lng),
-                        title: $ap->getName() ?? 'Access Point'
-                    ));
+                if (isset($location['coordinates']) && is_array($location['coordinates'])) {
+                    $lng = $location['coordinates'][0] ?? null;
+                    $lat = $location['coordinates'][1] ?? null;
+
+                    if ($lat !== null && $lng !== null) {
+                        $map->addMarker(new Marker(
+                            position: new Point((float)$lat, (float)$lng),
+                            title: $ap->getName() ?? 'Access Point'
+                        ));
+                    }
                 }
             }
         }
@@ -296,6 +300,7 @@ class MapController extends AbstractController
             'data' => $data,
             'map' => $map,
             'network' => $network,
+            'networkGeometry' => $network->getGeometry(),
             'accessPointDTO' => $accessPointDTO,
             'accessPoint' => null,
 
