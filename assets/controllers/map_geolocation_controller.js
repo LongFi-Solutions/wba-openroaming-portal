@@ -38,7 +38,7 @@ export default class extends Controller {
         this.mapDataValue.forEach((network) => {
             if (network.geometry?.type === 'Polygon') {
                 const rings = network.geometry.coordinates.map((ring) =>
-                  ring.map(([lng, lat]) => [lat, lng])
+                    ring.map(([lng, lat]) => [lat, lng])
                 );
 
                 L.polygon(rings, {
@@ -47,8 +47,8 @@ export default class extends Controller {
                     fillColor: '#22c55e',
                     fillOpacity: 0.18,
                 })
-                  .addTo(leafletMap)
-                  .bindPopup(network.name);
+                    .addTo(leafletMap)
+                    .bindPopup(network.name);
             }
 
             network.accessPoints.forEach((ap) => {
@@ -56,9 +56,7 @@ export default class extends Controller {
                     return;
                 }
 
-                L.marker([ap.lat, ap.lng])
-                  .addTo(leafletMap)
-                  .bindPopup(ap.name);
+                L.marker([ap.lat, ap.lng]).addTo(leafletMap).bindPopup(ap.name);
             });
         });
     };
