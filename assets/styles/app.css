@@ -488,6 +488,23 @@
     }
 }
 
+/* Shape Number Labels */
+.network-polygon-shape-label {
+    @apply pointer-events-none;
+}
+
+.network-polygon-shape-label span {
+    @apply flex items-center justify-center
+    w-7 h-7
+    rounded-full
+    bg-white
+    border-2 border-primary
+    text-primary
+    text-xs font-bold
+    shadow-md
+    select-none;
+}
+
 /* Smooth Animations */
 @keyframes fade-in-test-run {
     from {
