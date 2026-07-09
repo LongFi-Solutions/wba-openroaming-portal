@@ -46,12 +46,12 @@ export default class extends Controller {
                     fillColor: '#22c55e',
                     fillOpacity: 0.18,
                 })
-                  .addTo(leafletMap)
-                  .bindPopup(network.name);
+                    .addTo(leafletMap)
+                    .bindPopup(network.name);
             } else if (geometry?.type === 'MultiPolygon') {
                 // coordinates: Polygon[]  where each Polygon is Ring[]
                 const latlngs = geometry.coordinates.map((polygonRings) =>
-                  polygonRings.map(toLatLngRing)
+                    polygonRings.map(toLatLngRing)
                 );
 
                 L.polygon(latlngs, {
@@ -60,8 +60,8 @@ export default class extends Controller {
                     fillColor: '#22c55e',
                     fillOpacity: 0.18,
                 })
-                  .addTo(leafletMap)
-                  .bindPopup(network.name);
+                    .addTo(leafletMap)
+                    .bindPopup(network.name);
             }
 
             network.accessPoints.forEach((ap) => {
