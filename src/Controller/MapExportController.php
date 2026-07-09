@@ -45,10 +45,10 @@ class MapExportController extends AbstractController
                 fputcsv(
                     $handle,
                     [
-                    'network_name', 'network_description', 'network_geometry',
-                    'ap_name', 'ap_ssid', 'ap_mac_address', 'ap_vendor',
-                    'ap_model', 'ap_standard', 'ap_serial_number',
-                    'ap_longitude', 'ap_latitude', 'ap_altitude_msl', 'ap_altitude_agl'
+                        'network_name', 'network_description', 'network_geometry',
+                        'ap_name', 'ap_ssid', 'ap_mac_address', 'ap_vendor',
+                        'ap_model', 'ap_standard', 'ap_serial_number',
+                        'ap_longitude', 'ap_latitude', 'ap_altitude_msl', 'ap_altitude_agl'
                     ],
                     escape: '\\'
                 );
@@ -75,8 +75,8 @@ class MapExportController extends AbstractController
                         fputcsv(
                             $handle,
                             [
-                            $netName, $netDesc, $netGeo,
-                            '', '', '', '', '', '', '', '', '', '', ''
+                                $netName, $netDesc, $netGeo,
+                                '', '', '', '', '', '', '', '', '', '', ''
                             ],
                             escape: '\\'
                         );
@@ -84,32 +84,33 @@ class MapExportController extends AbstractController
                     }
 
                     foreach ($aps as $ap) {
-                        $location = $ap->getLocation();
+                        $locationData = $ap->getLocationData();
 
                         $lng = '';
                         $lat = '';
-                        if (is_array($location) && isset($location['coordinates'])) {
-                            $lng = $location['coordinates'][0] ?? '';
-                            $lat = $location['coordinates'][1] ?? '';
+
+                        if ($locationData !== null) {
+                            $lng = $locationData['lng'];
+                            $lat = $locationData['lat'];
                         }
 
                         fputcsv(
                             $handle,
                             [
-                            $netName,
-                            $netDesc,
-                            $netGeo,
-                            $ap->getName(),
-                            $ap->getSsid(),
-                            $ap->getMacAddress(),
-                            $ap->getVendor(),
-                            $ap->getModel(),
-                            $ap->getStandard(),
-                            $ap->getSerialNumber(),
-                            $lng !== '' ? number_format((float)$lng, 6, '.', '') : '',
-                            $lat !== '' ? number_format((float)$lat, 6, '.', '') : '',
-                            $ap->getAltitudeMsl(),
-                            $ap->getAltitudeAgl()
+                                $netName,
+                                $netDesc,
+                                $netGeo,
+                                $ap->getName(),
+                                $ap->getSsid(),
+                                $ap->getMacAddress(),
+                                $ap->getVendor(),
+                                $ap->getModel(),
+                                $ap->getStandard(),
+                                $ap->getSerialNumber(),
+                                $lng !== '' ? number_format((float)$lng, 6, '.', '') : '',
+                                $lat !== '' ? number_format((float)$lat, 6, '.', '') : '',
+                                $ap->getAltitudeMsl(),
+                                $ap->getAltitudeAgl()
                             ],
                             escape: '\\'
                         );
@@ -119,10 +120,10 @@ class MapExportController extends AbstractController
                 fputcsv(
                     $handle,
                     [
-                    'FATAL ERROR:',
-                    $e->getMessage(),
-                    'LINE: ' . $e->getLine(),
-                    'FILE: ' . $e->getFile()
+                        'FATAL ERROR:',
+                        $e->getMessage(),
+                        'LINE: ' . $e->getLine(),
+                        'FILE: ' . $e->getFile()
                     ],
                     escape: '\\'
                 );
@@ -181,7 +182,6 @@ class MapExportController extends AbstractController
         }
 
         $networksCreatedOrUpdated = [];
-        $bboxTracking = [];
         $apsImportedCount = 0;
         $now = new \DateTimeImmutable();
 
@@ -227,15 +227,11 @@ class MapExportController extends AbstractController
                     if (!empty($netGeoRaw)) {
                         $network->setGeometry($netGeoRaw);
                     } elseif ($isNew) {
-                        $network->setGeometry('GEOMETRYCOLLECTION EMPTY');
+                        $network->setGeometry(json_encode([
+                            'type' => 'GeometryCollection',
+                            'geometries' => []
+                        ], JSON_THROW_ON_ERROR));
                     }
-
-                    $bboxTracking[$netName] = [
-                        'minLat' => $network->getMinLat(),
-                        'minLng' => $network->getMinLng(),
-                        'maxLat' => $network->getMaxLat(),
-                        'maxLng' => $network->getMaxLng(),
-                    ];
 
                     $em->persist($network);
                     $networksCreatedOrUpdated[$netName] = $network;
@@ -277,12 +273,10 @@ class MapExportController extends AbstractController
                         $latFloat = (float)$apLat;
                         $lngFloat = (float)$apLng;
 
-                        $ap->setLocation(sprintf('POINT(%f %f)', $lngFloat, $latFloat));
-
-                        if ($bboxTracking[$netName]['minLat'] === null || $latFloat < $bboxTracking[$netName]['minLat']) $bboxTracking[$netName]['minLat'] = $latFloat;
-                        if ($bboxTracking[$netName]['maxLat'] === null || $latFloat > $bboxTracking[$netName]['maxLat']) $bboxTracking[$netName]['maxLat'] = $latFloat;
-                        if ($bboxTracking[$netName]['minLng'] === null || $lngFloat < $bboxTracking[$netName]['minLng']) $bboxTracking[$netName]['minLng'] = $lngFloat;
-                        if ($bboxTracking[$netName]['maxLng'] === null || $lngFloat > $bboxTracking[$netName]['maxLng']) $bboxTracking[$netName]['maxLng'] = $lngFloat;
+                        $ap->setLocation(json_encode([
+                            'type' => 'Point',
+                            'coordinates' => [$lngFloat, $latFloat]
+                        ], JSON_THROW_ON_ERROR));
                     }
 
                     $ap->setAltitudeMsl($apAltMsl !== '' ? (float)$apAltMsl : null);
@@ -293,15 +287,6 @@ class MapExportController extends AbstractController
                     if (!$existingAp) {
                         $apsImportedCount++;
                     }
-                }
-            }
-
-            foreach ($networksCreatedOrUpdated as $name => $network) {
-                if (isset($bboxTracking[$name])) {
-                    $network->setMinLat($bboxTracking[$name]['minLat']);
-                    $network->setMaxLat($bboxTracking[$name]['maxLat']);
-                    $network->setMinLng($bboxTracking[$name]['minLng']);
-                    $network->setMaxLng($bboxTracking[$name]['maxLng']);
                 }
             }
 
