@@ -12,7 +12,14 @@
         <div class="p-6 bg-white rounded-lg shadow-sm"
              data-controller="network-polygon map-geolocation"
              data-network-polygon-tooltip-value="{{ 'deletePolygonTooltip'|trans({}, '_map') }}"
-             data-network-polygon-empty-label-value="{{ 'coverageOverviewEmpty'|trans({}, '_map') }}">
+             data-network-polygon-empty-label-value="{{ 'coverageOverviewEmpty'|trans({}, '_map') }}"
+             data-network-polygon-type-labels-value="{{ {
+                 polygon: 'polygon'|trans({}, '_map'),
+                 square: 'rectangle'|trans({}, '_map'),
+                 circle: 'circle'|trans({}, '_map'),
+                 area: 'genericArea'|trans({}, '_map'),
+             }|json_encode }}"
+             data-network-polygon-area-item-label-value="{{ 'coverageAreaItemLabel'|trans({}, '_map') }}">
 
             {{ form_start(form) }}
 

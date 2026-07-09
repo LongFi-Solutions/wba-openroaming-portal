@@ -27,3 +27,5 @@ coverageOverviewEmpty: 'Selecione o tipo de área e desenhe no mapa para começa
 cancel: 'Cancelar'
 createNetwork: 'Criar Rede'
 saveChanges: 'Guardar Alterações'
+genericArea: 'Área'
+coverageAreaItemLabel: 'Área'

@@ -4,12 +4,13 @@ export default class extends Controller {
     static targets = ['geometryJson', 'coverageList', 'emptyState'];
 
     static values = {
-        tooltip: { type: String, default: 'Click to remove this polygon' },
         emptyLabel: { type: String, default: 'No coverage areas yet.' },
+        typeLabels: { type: Object, default: {} },
+        areaItemLabel: { type: String, default: 'Area' },
     };
 
     connect() {
-        // Each shape: { id, type: 'polygon'|'square'|'circle'|'area', points, areaM2, layer, radius? }
+        // Each shape: { id, type: 'polygon'|'square'|'circle'|'area', points, areaM2, layer, labelMarker, radius? }
         this.shapes = [];
         this.nextShapeId = 1;
 
@@ -285,7 +286,15 @@ export default class extends Controller {
 
         shape.layer = this.drawShapeLayer(leafletCoords, shape);
 
+        // Create number label
+        shape.labelMarker = this.createShapeLabel(
+          shape.layer.getBounds().getCenter()
+        );
+
         this.shapes.push(shape);
+
+        this.renumberShapeLabels();
+
         return shape;
     }
 
@@ -297,14 +306,33 @@ export default class extends Controller {
             weight: 3,
         }).addTo(this.map);
 
-        polygon.bindTooltip(this.tooltipValue, { sticky: true });
+        return polygon;
+    }
 
-        polygon.on('click', (e) => {
-            this.L.DomEvent.stopPropagation(e);
-            this.removeShapeById(shape.id);
+    createShapeLabel(centerLatLng) {
+        const icon = this.L.divIcon({
+            className: 'coverage-network-marker network-polygon-shape-label',
+            html: '<span></span>',
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
         });
 
-        return polygon;
+        return this.L.marker(centerLatLng, {
+            icon,
+            interactive: false,
+        }).addTo(this.map);
+    }
+
+    renumberShapeLabels() {
+        this.shapes.forEach((shape, index) => {
+            const span = shape.labelMarker
+              ?.getElement()
+              ?.querySelector('span');
+
+            if (span) {
+                span.textContent = index + 1;
+            }
+        });
     }
 
     // Triggered by the trash icon on a Coverage Overview row
@@ -318,8 +346,11 @@ export default class extends Controller {
         if (!shape) return;
 
         this.map.removeLayer(shape.layer);
+        if (shape.labelMarker) this.map.removeLayer(shape.labelMarker);
+
         this.shapes = this.shapes.filter((s) => s.id !== id);
 
+        this.renumberShapeLabels();
         this.updateGeometryJsonValue();
         this.renderCoverageList();
     }
@@ -329,7 +360,10 @@ export default class extends Controller {
 
         this.cancelCurrentDrawing();
 
-        this.shapes.forEach((shape) => this.map.removeLayer(shape.layer));
+        this.shapes.forEach((shape) => {
+            this.map.removeLayer(shape.layer);
+            if (shape.labelMarker) this.map.removeLayer(shape.labelMarker);
+        });
         this.shapes = [];
 
         this.geometryJsonTarget.value = '';
@@ -375,15 +409,14 @@ export default class extends Controller {
         }
 
         // Render rows
-        const typeLabels = { polygon: 'Polígono', square: 'Retângulo', circle: 'Círculo', area: 'Área' };
-
         const rows = this.shapes
           .map((shape, index) => {
-              const typeLabel = typeLabels[shape.type] || 'Area';
+              const typeLabel =
+                this.typeLabelsValue[shape.type] || this.typeLabelsValue.area || shape.type;
               return `
                     <div class="flex items-center justify-between gap-3 px-4 py-3 bg-white rounded-lg border border-gray-100">
                         <div class="flex items-center gap-3">
-                            <span class="text-sm font-medium text-gray-700">Área ${index + 1}</span>
+                            <span class="text-sm font-medium text-gray-700">${this.areaItemLabelValue} ${index + 1}</span>
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-600">${typeLabel}</span>
                         </div>
                         <div class="flex items-center gap-4">
@@ -424,7 +457,7 @@ export default class extends Controller {
                 const p1 = latlngs[i];
                 const p2 = latlngs[(i + 1) % len];
                 area +=
-                  ((p2[1] - p1[1]) * Math.PI) / 180 *
+                  (((p2[1] - p1[1]) * Math.PI) / 180) *
                   (2 + Math.sin((p1[0] * Math.PI) / 180) + Math.sin((p2[0] * Math.PI) / 180));
             }
             area = (area * R * R) / 2;
