@@ -7,8 +7,6 @@ export default class extends Controller {
     };
 
     connect() {
-        console.log('map-geolocation connected', this.mapDataValue);
-
         this.element.addEventListener('ux:map:connect', this.onMapConnect);
 
         const url = new URL(window.location.href);
@@ -30,25 +28,40 @@ export default class extends Controller {
     }
 
     onMapConnect = (event) => {
-        console.log('ux map connected', event.detail);
-        console.log('drawing mapData', this.mapDataValue);
-
         const leafletMap = event.detail.map;
 
-        this.mapDataValue.forEach((network) => {
-            if (network.geometry?.type === 'Polygon') {
-                const rings = network.geometry.coordinates.map((ring) =>
-                    ring.map(([lng, lat]) => [lat, lng])
-                );
+        // Converts a GeoJSON ring [[lng, lat], ...] into Leaflet's [lat, lng] order
+        const toLatLngRing = (ring) => ring.map(([lng, lat]) => [lat, lng]);
 
-                L.polygon(rings, {
+        this.mapDataValue.forEach((network) => {
+            const geometry = network.geometry;
+
+            if (geometry?.type === 'Polygon') {
+                // coordinates: Ring[]  (first ring = outer boundary, rest = holes)
+                const latlngs = geometry.coordinates.map(toLatLngRing);
+
+                L.polygon(latlngs, {
                     color: '#16a34a',
                     weight: 3,
                     fillColor: '#22c55e',
                     fillOpacity: 0.18,
                 })
-                    .addTo(leafletMap)
-                    .bindPopup(network.name);
+                  .addTo(leafletMap)
+                  .bindPopup(network.name);
+            } else if (geometry?.type === 'MultiPolygon') {
+                // coordinates: Polygon[]  where each Polygon is Ring[]
+                const latlngs = geometry.coordinates.map((polygonRings) =>
+                  polygonRings.map(toLatLngRing)
+                );
+
+                L.polygon(latlngs, {
+                    color: '#16a34a',
+                    weight: 3,
+                    fillColor: '#22c55e',
+                    fillOpacity: 0.18,
+                })
+                  .addTo(leafletMap)
+                  .bindPopup(network.name);
             }
 
             network.accessPoints.forEach((ap) => {
