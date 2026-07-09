@@ -13,7 +13,6 @@ use App\Form\CreateAccessPointType;
 use App\Form\CreateNetworkType;
 use App\Repository\AccessPointRepository;
 use App\Repository\NetworkRepository;
-use App\Service\GeoLocationResolver;
 use App\Service\GetSettings;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -189,7 +188,7 @@ class MapController extends AbstractController
         $map = new Map()
             ->center(new Point((float)$centerLat, (float)$centerLng))
             ->zoom(13);
-        return $this->render('dashboard/shared/settings_actions/map/create.html.twig', [
+        return $this->render('dashboard/shared/settings_actions/map/manage_network.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'map' => $map,
@@ -270,7 +269,7 @@ class MapController extends AbstractController
             }
         }
 
-        return $this->render('dashboard/shared/settings_actions/map/create.html.twig', [
+        return $this->render('dashboard/shared/settings_actions/map/manage_network.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'map' => $map,
@@ -333,7 +332,7 @@ class MapController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
         }
 
-        return $this->render('dashboard/shared/settings_actions/map/access_point/create.html.twig', [
+        return $this->render('dashboard/shared/settings_actions/map/access_point/manage_access_points.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'map' => $map,
@@ -385,7 +384,7 @@ class MapController extends AbstractController
             );
             return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
         }
-        return $this->render('dashboard/shared/settings_actions/map/access_point/create.html.twig', [
+        return $this->render('dashboard/shared/settings_actions/map/access_point/manage_access_points.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'map' => $map,

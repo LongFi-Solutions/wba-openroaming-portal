@@ -2,9 +2,10 @@
 
 namespace App\Twig\Components;
 
-use App\DTO\NetworkDTO;
+use App\DTO\AccessPointDTO;
 use App\Entity\AccessPoint;
 use App\Entity\Network;
+use App\Form\CreateAccessPointType;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\CreateNetworkType;
 use App\Security\Voter\UserAuthenticationVoter;
@@ -23,7 +24,7 @@ use Symfony\UX\Map\Marker;
 use Symfony\UX\Map\Point;
 
 #[AsLiveComponent]
-final class EditNetworksForm extends AbstractController
+final class ManageAccessPointsForm extends AbstractController
 {
     use ComponentWithFormTrait;
     use DefaultActionTrait;
@@ -33,8 +34,8 @@ final class EditNetworksForm extends AbstractController
     {
     }
 
-    #[LiveProp(writable: ['name', 'description', 'geometryJson'])]
-    public NetworkDTO|null $networkDTO = null;
+    #[LiveProp]
+    public AccessPointDTO|null $accessPointDTO = null;
 
     /** @var array<string, array{value: ?string, description?: ?string}>|null */
     #[LiveProp]
@@ -42,6 +43,9 @@ final class EditNetworksForm extends AbstractController
 
     #[LiveProp]
     public Network|null $network = null;
+
+    #[LiveProp]
+    public AccessPoint|null $accessPoint = null;
 
     /**
      * @return FormInterface<mixed>
@@ -51,7 +55,8 @@ final class EditNetworksForm extends AbstractController
     {
         $canWrite = $this->isGranted(UserAuthenticationVoter::MAP_WRITE);
 
-        $form = $this->createForm(CreateNetworkType::class, $this->networkDTO, ['disabled' => !$canWrite]);
+
+        $form = $this->createForm(CreateAccessPointType::class, $this->accessPointDTO, ['disabled' => !$canWrite]);
 
         $currentRequest = $this->requestStack->getCurrentRequest();
         $isLiveRequest = $currentRequest && $currentRequest->headers->has('X-Live-Component-Action');
@@ -87,8 +92,11 @@ final class EditNetworksForm extends AbstractController
         $accessPoints = $this->entityManager->getRepository(AccessPoint::class)->findBy(['network' => $this->network]);
 
         foreach ($accessPoints as $ap) {
-            $locationData = $ap->getLocationData();
+            if ($this->accessPointDTO && $this->accessPointDTO->ssid === $ap->getSsid()) {
+                continue;
+            }
 
+            $locationData = $ap->getLocationData();
             if ($locationData !== null) {
                 $map->addMarker(new Marker(
                     position: new Point($locationData['lat'], $locationData['lng']),
