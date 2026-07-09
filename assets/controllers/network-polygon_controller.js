@@ -8,7 +8,7 @@ export default class extends Controller {
     };
 
     connect() {
-        this.allPolygons = []; // Formato: [[[lng, lat], ...], [[lng, lat], ...]]
+        this.allPolygons = []; // Format : [[[lng, lat], ...], [[lng, lat], ...]]
         this.polygonsLayers = [];
 
         this.drawMode = 'polygon';
@@ -50,26 +50,29 @@ export default class extends Controller {
 
         try {
             const geoJson = JSON.parse(rawValue);
+            let polygonCoordsList = [];
 
-            if (geoJson.type === 'FeatureCollection' && geoJson.features) {
-                geoJson.features.forEach((feature) => {
-                    if (feature.geometry && feature.geometry.type === 'Polygon') {
-                        const coordinates = feature.geometry.coordinates[0];
-                        if (coordinates && coordinates.length > 0) {
-                            const savedPoints = coordinates.slice(0, -1);
-                            this.allPolygons.push(savedPoints);
+            if (geoJson.type === 'Polygon') {
+                polygonCoordsList = [geoJson.coordinates];
+            } else if (geoJson.type === 'MultiPolygon') {
+                polygonCoordsList = geoJson.coordinates;
+            }
 
-                            const leafletCoords = coordinates.map((p) => [p[1], p[0]]);
-                            this.drawSavedPolygonLayer(leafletCoords, savedPoints);
-                        }
-                    }
-                });
+            polygonCoordsList.forEach((polygonCoords) => {
+                const coordinates = polygonCoords[0]; // outer ring
+                if (coordinates && coordinates.length > 0) {
+                    const savedPoints = coordinates.slice(0, -1);
+                    this.allPolygons.push(savedPoints);
 
-                this.map.invalidateSize();
-                if (this.polygonsLayers.length > 0) {
-                    const group = new this.L.FeatureGroup(this.polygonsLayers);
-                    this.map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 16 });
+                    const leafletCoords = coordinates.map((p) => [p[1], p[0]]);
+                    this.drawSavedPolygonLayer(leafletCoords, savedPoints);
                 }
+            });
+
+            this.map.invalidateSize();
+            if (this.polygonsLayers.length > 0) {
+                const group = new this.L.FeatureGroup(this.polygonsLayers);
+                this.map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 16 });
             }
         } catch (error) {
             console.error('Error loading existing polygons', error);
@@ -277,25 +280,23 @@ export default class extends Controller {
     }
 
     updateGeometryJsonValue() {
-        const features = this.allPolygons.map((polygonPoints) => {
+        if (this.allPolygons.length === 0) {
+            this.geometryJsonTarget.value = '';
+            this.geometryJsonTarget.dispatchEvent(new Event('change', { bubbles: true }));
+            return;
+        }
+
+        const closedRings = this.allPolygons.map((polygonPoints) => {
             const closed = [...polygonPoints, polygonPoints[0]];
-            return {
-                type: 'Feature',
-                properties: {},
-                geometry: {
-                    type: 'Polygon',
-                    coordinates: [closed],
-                },
-            };
+            return [closed]; // GeoJSON Polygon coordinates = array of rings
         });
 
-        const geoJsonData = {
-            type: 'FeatureCollection',
-            features: features,
-        };
+        const geometry =
+            closedRings.length === 1
+                ? { type: 'Polygon', coordinates: closedRings[0] }
+                : { type: 'MultiPolygon', coordinates: closedRings };
 
-        this.geometryJsonTarget.value = features.length > 0 ? JSON.stringify(geoJsonData) : '';
-
+        this.geometryJsonTarget.value = JSON.stringify(geometry);
         this.geometryJsonTarget.dispatchEvent(new Event('change', { bubbles: true }));
     }
 

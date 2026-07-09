@@ -51,12 +51,6 @@ final class EditNetworksForm extends AbstractController
     {
         $canWrite = $this->isGranted(UserAuthenticationVoter::MAP_WRITE);
 
-        if ($this->networkDTO && $this->network) {
-            $this->networkDTO->accessPointsFromDatabase = $this->entityManager
-                ->getRepository(AccessPoint::class)
-                ->findBy(['network' => $this->network]);
-        }
-
         $form = $this->createForm(CreateNetworkType::class, $this->networkDTO, ['disabled' => !$canWrite]);
 
         $currentRequest = $this->requestStack->getCurrentRequest();
@@ -93,17 +87,13 @@ final class EditNetworksForm extends AbstractController
         $accessPoints = $this->entityManager->getRepository(AccessPoint::class)->findBy(['network' => $this->network]);
 
         foreach ($accessPoints as $ap) {
-            $location = $ap->getLocation();
-            if ($location && isset($location['coordinates'])) {
-                $lng = $location['coordinates'][0] ?? null;
-                $lat = $location['coordinates'][1] ?? null;
+            $locationData = $ap->getLocationData();
 
-                if ($lat !== null && $lng !== null) {
-                    $map->addMarker(new Marker(
-                        position: new Point((float)$lat, (float)$lng),
-                        title: $ap->getName() ?? 'Access Point'
-                    ));
-                }
+            if ($locationData !== null) {
+                $map->addMarker(new Marker(
+                    position: new Point($locationData['lat'], $locationData['lng']),
+                    title: $ap->getName() ?? 'Access Point'
+                ));
             }
         }
 

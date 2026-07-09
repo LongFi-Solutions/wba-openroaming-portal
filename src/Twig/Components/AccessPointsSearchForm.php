@@ -89,7 +89,7 @@ class AccessPointsSearchForm
     {
         if ($this->cachedCounts === null) {
             $this->cachedCounts = [
-                'all' => count($this->accessPointRepository->findAll()),
+                'all' => $this->accessPointRepository->count(['network' => $this->network]),
             ];
         }
 
