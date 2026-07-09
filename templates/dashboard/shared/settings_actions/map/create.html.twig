@@ -1,7 +1,5 @@
 {% extends '/dashboard/base.html.twig' %}
 
-{% block title %}Map Page - Create Network{% endblock %}
-
 {% block container %}
 
     <twig:EditNetworksForm
@@ -10,6 +8,7 @@
             :form="form"
             :network="network"
     >
+
         <div class="p-6 bg-white rounded-lg shadow-sm"
              data-controller="network-polygon map-geolocation"
              data-network-polygon-tooltip-value="{{ 'deletePolygonTooltip'|trans({}, '_map') }}"
@@ -76,54 +75,6 @@
                             {{ 'drawPolygonDescription'|trans({}, '_map') }}
                         </p>
                     </div>
-
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <button
-                                type="button"
-                                data-action="click->network-polygon#setMode"
-                                data-network-polygon-mode-param="polygon"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full border border-gray-200 transition focus:ring-2 focus:ring-green-500"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"
-                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 3l8 5-2 9H6L4 8z" />
-                            </svg>
-                            {{ 'polygon'|trans({}, '_map') }}
-                        </button>
-                        <button
-                                type="button"
-                                data-action="click->network-polygon#setMode"
-                                data-network-polygon-mode-param="square"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full border border-gray-200 transition focus:ring-2 focus:ring-green-500"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"
-                                 stroke="currentColor" stroke-width="2">
-                                <rect x="4" y="6" width="16" height="12" rx="1" />
-                            </svg>
-                            {{ 'rectangle'|trans({}, '_map') }}
-                        </button>
-                        <button
-                                type="button"
-                                data-action="click->network-polygon#setMode"
-                                data-network-polygon-mode-param="circle"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full border border-gray-200 transition focus:ring-2 focus:ring-green-500"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"
-                                 stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="8" />
-                            </svg>
-                            {{ 'circle'|trans({}, '_map') }}
-                        </button>
-
-                        <button type="button" data-action="click->network-polygon#resetPolygon"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-full border border-red-200 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"
-                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7h12z" />
-                            </svg>
-                            {{ 'clean'|trans({}, '_map') }}
-                        </button>
-                    </div>
                 </div>
 
                 <div class="relative z-0 overflow-hidden w-full h-[500px] rounded-2xl coverage-map-public">
@@ -131,6 +82,49 @@
                         style: 'height: 100%; width: 100%;',
                         'data-action': 'ux:map:connect->map-geolocation#_onConnect ux:map:connect->network-polygon#_onConnect',
                     }) }}
+                </div>
+
+                {# BUTTONS TOOLBAR #}
+                <div class="relative flex flex-col sm:flex-row items-center justify-center w-full mt-4 gap-3 sm:gap-0">
+
+                    {# Centered Group (Polygon, Rectangle, Circle) #}
+                    <div class="flex gap-2">
+                        <!-- Polygon Button -->
+                        <button type="button"
+                                data-action="click->network-polygon#setMode"
+                                data-network-polygon-mode-param="polygon"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full border border-gray-200 transition focus:ring-2 focus:ring-green-500">
+                            <twig:ux:icon name="wba:polygon" class="w-3.5 h-3.5 fill-none stroke-current" />
+                            {{ 'polygon'|trans({}, '_map') }}
+                        </button>
+
+                        <!-- Rectangle Button -->
+                        <button type="button"
+                                data-action="click->network-polygon#setMode"
+                                data-network-polygon-mode-param="square"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full border border-gray-200 transition focus:ring-2 focus:ring-green-500">
+                            <twig:ux:icon name="wba:rectangle" class="w-3.5 h-3.5 fill-current stroke-none" />
+                            {{ 'rectangle'|trans({}, '_map') }}
+                        </button>
+
+                        <!-- Circle Button -->
+                        <button type="button"
+                                data-action="click->network-polygon#setMode"
+                                data-network-polygon-mode-param="circle"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full border border-gray-200 transition focus:ring-2 focus:ring-green-500">
+                            <twig:ux:icon name="wba:circle-outline" class="w-3.5 h-3.5 fill-none stroke-current" />
+                            {{ 'circle'|trans({}, '_map') }}
+                        </button>
+                    </div>
+
+                    {# Far Right Aligned Group (Clear) #}
+                    <div class="sm:absolute right-0">
+                        <button type="button" data-action="click->network-polygon#resetPolygon"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-full border border-red-200 transition">
+                            <twig:ux:icon name="wba:trash" class="w-3.5 h-3.5 fill-none stroke-current" />
+                            {{ 'clean'|trans({}, '_map') }}
+                        </button>
+                    </div>
                 </div>
 
                 <div class="text-red-500 m-2 text-sm">

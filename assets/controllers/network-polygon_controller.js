@@ -1,15 +1,17 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['geometryJson'];
+    static targets = ['geometryJson', 'coverageList', 'emptyState'];
 
     static values = {
         tooltip: { type: String, default: 'Click to remove this polygon' },
+        emptyLabel: { type: String, default: 'No coverage areas yet.' },
     };
 
     connect() {
-        this.allPolygons = []; // Format : [[[lng, lat], ...], [[lng, lat], ...]]
-        this.polygonsLayers = [];
+        // Each shape: { id, type: 'polygon'|'square'|'circle'|'area', points, areaM2, layer, radius? }
+        this.shapes = [];
+        this.nextShapeId = 1;
 
         this.drawMode = 'polygon';
 
@@ -35,6 +37,7 @@ export default class extends Controller {
 
         setTimeout(() => {
             this.loadExistingPolygons();
+            this.renderCoverageList();
         }, 150);
     }
 
@@ -62,16 +65,19 @@ export default class extends Controller {
                 const coordinates = polygonCoords[0]; // outer ring
                 if (coordinates && coordinates.length > 0) {
                     const savedPoints = coordinates.slice(0, -1);
-                    this.allPolygons.push(savedPoints);
-
                     const leafletCoords = coordinates.map((p) => [p[1], p[0]]);
-                    this.drawSavedPolygonLayer(leafletCoords, savedPoints);
+
+                    // GeoJSON alone doesn't tell us whether this was originally drawn
+                    // as a polygon, rectangle, or circle - it's labelled generically
+                    // as "Area". Persist the shape type server-side if you want the
+                    // original label to survive a reload.
+                    this.addShape('area', savedPoints, leafletCoords);
                 }
             });
 
             this.map.invalidateSize();
-            if (this.polygonsLayers.length > 0) {
-                const group = new this.L.FeatureGroup(this.polygonsLayers);
+            if (this.shapes.length > 0) {
+                const group = new this.L.FeatureGroup(this.shapes.map((s) => s.layer));
                 this.map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 16 });
             }
         } catch (error) {
@@ -84,7 +90,7 @@ export default class extends Controller {
         this.cancelCurrentDrawing();
 
         const buttons = event.currentTarget.parentElement.querySelectorAll(
-            'button[data-network-polygon-mode-param]'
+          'button[data-network-polygon-mode-param]'
         );
         buttons.forEach((btn) => {
             btn.classList.remove('bg-blue-600', 'text-white');
@@ -140,6 +146,7 @@ export default class extends Controller {
                 this.shapeStartPoint = e.latlng;
             } else {
                 let polygonPoints = [];
+                let extra = {};
 
                 if (this.drawMode === 'square') {
                     const lat1 = parseFloat(this.shapeStartPoint.lat.toFixed(7));
@@ -156,14 +163,15 @@ export default class extends Controller {
                 } else if (this.drawMode === 'circle') {
                     const radiusMeters = this.map.distance(this.shapeStartPoint, e.latlng);
                     polygonPoints = this.generateCirclePolygon(this.shapeStartPoint, radiusMeters);
+                    extra = { radius: radiusMeters };
                 }
 
                 this.cancelCurrentDrawing();
 
                 const leafletCoords = polygonPoints.map((p) => [p[1], p[0]]);
-                this.allPolygons.push([...polygonPoints]);
-                this.drawSavedPolygonLayer(leafletCoords, polygonPoints);
+                this.addShape(this.drawMode, polygonPoints, leafletCoords, extra);
                 this.updateGeometryJsonValue();
+                this.renderCoverageList();
             }
             return;
         }
@@ -249,14 +257,34 @@ export default class extends Controller {
         this.startMarker = null;
 
         const polygonPointsCopy = [...this.currentPoints];
-        this.allPolygons.push(polygonPointsCopy);
-
-        this.drawSavedPolygonLayer(leafletCoords, polygonPointsCopy);
         this.currentPoints = [];
+
+        this.addShape('polygon', polygonPointsCopy, leafletCoords);
         this.updateGeometryJsonValue();
+        this.renderCoverageList();
     }
 
-    drawSavedPolygonLayer(leafletCoords, originalPoints) {
+    // --- shape bookkeeping -------------------------------------------------
+
+    addShape(type, points, leafletCoords, extra = {}) {
+        const shape = {
+            id: this.nextShapeId++,
+            type,
+            points,
+            ...extra,
+        };
+
+        shape.areaM2 = extra.radius
+          ? Math.PI * extra.radius * extra.radius
+          : this.geodesicArea(leafletCoords);
+
+        shape.layer = this.drawShapeLayer(leafletCoords, shape);
+
+        this.shapes.push(shape);
+        return shape;
+    }
+
+    drawShapeLayer(leafletCoords, shape) {
         const polygon = this.L.polygon(leafletCoords, {
             color: '#2563eb',
             fillColor: '#3b82f6',
@@ -268,36 +296,136 @@ export default class extends Controller {
 
         polygon.on('click', (e) => {
             this.L.DomEvent.stopPropagation(e);
-
-            this.map.removeLayer(polygon);
-            this.polygonsLayers = this.polygonsLayers.filter((layer) => layer !== polygon);
-            this.allPolygons = this.allPolygons.filter((points) => points !== originalPoints);
-
-            this.updateGeometryJsonValue();
+            this.removeShapeById(shape.id);
         });
 
-        this.polygonsLayers.push(polygon);
+        return polygon;
+    }
+
+    // Triggered by the trash icon on a Coverage Overview row
+    removeShape(event) {
+        const id = parseInt(event.params.shapeId, 10);
+        this.removeShapeById(id);
+    }
+
+    removeShapeById(id) {
+        const shape = this.shapes.find((s) => s.id === id);
+        if (!shape) return;
+
+        this.map.removeLayer(shape.layer);
+        this.shapes = this.shapes.filter((s) => s.id !== id);
+
+        this.updateGeometryJsonValue();
+        this.renderCoverageList();
+    }
+
+    resetPolygon(e) {
+        if (e) e.preventDefault();
+
+        this.cancelCurrentDrawing();
+
+        this.shapes.forEach((shape) => this.map.removeLayer(shape.layer));
+        this.shapes = [];
+
+        this.geometryJsonTarget.value = '';
+        this.geometryJsonTarget.dispatchEvent(new Event('change', { bubbles: true }));
+        this.renderCoverageList();
     }
 
     updateGeometryJsonValue() {
-        if (this.allPolygons.length === 0) {
+        if (this.shapes.length === 0) {
             this.geometryJsonTarget.value = '';
             this.geometryJsonTarget.dispatchEvent(new Event('change', { bubbles: true }));
             return;
         }
 
-        const closedRings = this.allPolygons.map((polygonPoints) => {
-            const closed = [...polygonPoints, polygonPoints[0]];
+        const closedRings = this.shapes.map((shape) => {
+            const closed = [...shape.points, shape.points[0]];
             return [closed]; // GeoJSON Polygon coordinates = array of rings
         });
 
         const geometry =
-            closedRings.length === 1
-                ? { type: 'Polygon', coordinates: closedRings[0] }
-                : { type: 'MultiPolygon', coordinates: closedRings };
+          closedRings.length === 1
+            ? { type: 'Polygon', coordinates: closedRings[0] }
+            : { type: 'MultiPolygon', coordinates: closedRings };
 
         this.geometryJsonTarget.value = JSON.stringify(geometry);
         this.geometryJsonTarget.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // --- Coverage Overview list ---------------------------------------------
+
+    renderCoverageList() {
+        if (!this.hasCoverageListTarget) return;
+
+        if (this.hasEmptyStateTarget) {
+            this.emptyStateTarget.classList.toggle('hidden', this.shapes.length > 0);
+        }
+
+        if (this.shapes.length === 0) {
+            this.coverageListTarget.className =
+              'bg-gray-50 rounded-lg border border-dashed border-gray-200 p-6 text-center text-sm text-gray-400';
+            this.coverageListTarget.innerHTML = this.emptyLabelValue;
+            return;
+        }
+
+        const typeLabels = { polygon: 'Polygon', square: 'Rectangle', circle: 'Circle', area: 'Area' };
+
+        const rows = this.shapes
+          .map((shape, index) => {
+              const typeLabel = typeLabels[shape.type] || 'Area';
+              return `
+                    <div class="flex items-center justify-between gap-3 px-4 py-3 bg-white rounded-lg border border-gray-100">
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm font-medium text-gray-700">Area ${index + 1}</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-600">${typeLabel}</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-sm text-gray-500">${this.formatArea(shape.areaM2)}</span>
+                            <button type="button"
+                                    class="text-red-400 hover:text-red-600"
+                                    data-action="click->network-polygon#removeShape"
+                                    data-network-polygon-shape-id-param="${shape.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7h12z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+          })
+          .join('');
+
+        this.coverageListTarget.className = 'space-y-2';
+        this.coverageListTarget.innerHTML = rows;
+    }
+
+    formatArea(m2) {
+        if (m2 >= 1000000) {
+            return `${(m2 / 1000000).toFixed(2)} km\u00b2`;
+        }
+        return `${Math.round(m2).toLocaleString()} m\u00b2`;
+    }
+
+    // Shoelace-on-a-sphere approximation (same formula Leaflet.GeometryUtil uses).
+    // latlngs: array of [lat, lng]
+    geodesicArea(latlngs) {
+        const R = 6378137; // WGS84 mean radius, meters
+        let area = 0;
+        const len = latlngs.length;
+
+        if (len > 2) {
+            for (let i = 0; i < len; i++) {
+                const p1 = latlngs[i];
+                const p2 = latlngs[(i + 1) % len];
+                area +=
+                  ((p2[1] - p1[1]) * Math.PI) / 180 *
+                  (2 + Math.sin((p1[0] * Math.PI) / 180) + Math.sin((p2[0] * Math.PI) / 180));
+            }
+            area = (area * R * R) / 2;
+        }
+
+        return Math.abs(area);
     }
 
     generateCirclePolygon(centerLatLng, radiusMeters, points = 36) {
@@ -315,18 +443,5 @@ export default class extends Controller {
             coords.push([parseFloat(pLng.toFixed(7)), parseFloat(pLat.toFixed(7))]);
         }
         return coords;
-    }
-
-    resetPolygon(e) {
-        if (e) e.preventDefault();
-
-        this.cancelCurrentDrawing();
-
-        this.polygonsLayers.forEach((layer) => this.map.removeLayer(layer));
-        this.polygonsLayers = [];
-        this.allPolygons = [];
-
-        this.geometryJsonTarget.value = '';
-        this.geometryJsonTarget.dispatchEvent(new Event('change', { bubbles: true }));
     }
 }
