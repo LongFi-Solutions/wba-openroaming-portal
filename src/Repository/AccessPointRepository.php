@@ -66,34 +66,20 @@ class AccessPointRepository extends ServiceEntityRepository
         return $qb;
     }
 
-    public function findIntersectingBbox(
-        float $minLat,
-        float $minLng,
-        float $maxLat,
-        float $maxLng,
-    ): array {
-        $sql = '
-        SELECT id
-        FROM AccessPoint
-        WHERE CAST(JSON_EXTRACT(location, "$.coordinates[1]") AS DECIMAL(10,7)) BETWEEN :minLat AND :maxLat
-          AND CAST(JSON_EXTRACT(location, "$.coordinates[0]") AS DECIMAL(10,7)) BETWEEN :minLng AND :maxLng
-    ';
+    public function findIntersectingBbox(float $minLat, float $minLng, float $maxLat, float $maxLng): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
 
-        $ids = $this->getEntityManager()->getConnection()->fetchFirstColumn($sql, [
-            'minLat' => $minLat,
-            'maxLat' => $maxLat,
-            'minLng' => $minLng,
-            'maxLng' => $maxLng,
-        ]);
+        $bboxWkt = sprintf(
+            'POLYGON((%1$F %2$F, %1$F %4$F, %3$F %4$F, %3$F %2$F, %1$F %2$F))',
+            $minLat, $minLng, $maxLat, $maxLng
+        );
 
-        if ($ids === []) {
-            return [];
-        }
+        $ids = $conn->fetchFirstColumn(
+            'SELECT id FROM `AccessPoint` WHERE MBRContains(ST_GeomFromText(:bboxWkt, 4326), location)',
+            ['bboxWkt' => $bboxWkt]
+        );
 
-        return $this->createQueryBuilder('ap')
-            ->andWhere('ap.id IN (:ids)')
-            ->setParameter('ids', $ids)
-            ->getQuery()
-            ->getResult();
+        return $ids === [] ? [] : $this->findBy(['id' => $ids]);
     }
 }

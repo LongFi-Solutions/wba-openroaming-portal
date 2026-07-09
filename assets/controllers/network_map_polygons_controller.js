@@ -7,28 +7,29 @@ export default class extends Controller {
     };
 
     connect() {
-        this.layers = [];
-        this.debounceTimer = null;
-
-        this.element.addEventListener('ux:map:connect', (event) => {
-            this.leafletMap = event.detail.map;
-            this.L = event.detail.L;
-            this.leafletMap.on('moveend', () => this.debouncedLoad());
-            this.loadPolygons();
-        });
+        this.element.addEventListener('ux:map:connect', this.onMapConnect);
     }
 
     disconnect() {
-        clearTimeout(this.debounceTimer);
+        this.element.removeEventListener('ux:map:connect', this.onMapConnect);
+        if (this.map && this.moveEndHandler) {
+            this.map.off('moveend', this.moveEndHandler);
+        }
     }
 
-    debouncedLoad() {
-        clearTimeout(this.debounceTimer);
-        this.debounceTimer = setTimeout(() => this.loadPolygons(), 300);
-    }
+    onMapConnect = (event) => {
+        this.map = event.detail.map;
+        this.L = event.detail.L;
+        this.layerGroup = this.L.layerGroup().addTo(this.map);
 
-    async loadPolygons() {
-        const bounds = this.leafletMap.getBounds();
+        this.moveEndHandler = () => this.fetchAndRender();
+        this.map.on('moveend', this.moveEndHandler);
+
+        this.fetchAndRender();
+    };
+
+    async fetchAndRender() {
+        const bounds = this.map.getBounds();
         const params = new URLSearchParams({
             minLat: bounds.getSouth(),
             minLng: bounds.getWest(),
@@ -47,25 +48,49 @@ export default class extends Controller {
             return;
         }
 
-        this.layers.forEach((layer) => this.leafletMap.removeLayer(layer));
-        this.layers = [];
+        this.layerGroup.clearLayers();
 
-        const networks = this.showAccessPointsValue ? data.networks : data;
-
-        networks.forEach((feature) => {
-            const layer = this.L.geoJSON(feature.geometry, {
-                style: { color: '#8AB742', weight: 1, fillColor: '#8AB742', fillOpacity: 0.3 },
-            }).bindPopup(feature.name);
-            layer.addTo(this.leafletMap);
-            this.layers.push(layer);
-        });
+        (data.networks ?? []).forEach((network) => this.drawNetwork(network));
 
         if (this.showAccessPointsValue) {
-            data.accessPoints.forEach((ap) => {
-                const marker = this.L.marker([ap.lat, ap.lng]).bindPopup(ap.ssid ?? ap.name);
-                marker.addTo(this.leafletMap);
-                this.layers.push(marker);
-            });
+            (data.accessPoints ?? []).forEach((ap) => this.drawAccessPoint(ap));
         }
+    }
+
+    drawNetwork(network) {
+        const geometry = network.geometry;
+        if (!geometry) {
+            return;
+        }
+
+        const toLatLngRing = (ring) => ring.map(([lng, lat]) => [lat, lng]);
+
+        let latlngs;
+        if (geometry.type === 'Polygon') {
+            latlngs = geometry.coordinates.map(toLatLngRing);
+        } else if (geometry.type === 'MultiPolygon') {
+            latlngs = geometry.coordinates.map((polygonRings) => polygonRings.map(toLatLngRing));
+        } else {
+            return;
+        }
+
+        this.L.polygon(latlngs, {
+            color: '#8AB742',
+            weight: 3,
+            fillColor: '#8AB742',
+            fillOpacity: 0.18,
+        })
+          .addTo(this.layerGroup)
+          .bindPopup(network.name);
+    }
+
+    drawAccessPoint(ap) {
+        if (ap.lat === null || ap.lng === null) {
+            return;
+        }
+
+        this.L.marker([ap.lat, ap.lng])
+          .addTo(this.layerGroup)
+          .bindPopup(ap.name);
     }
 }
