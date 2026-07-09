@@ -419,9 +419,9 @@
 }
 
 /* Leaflet Coverage Map Overrides */
-/* Leaflet Coverage Map Overrides */
 @layer components {
-    .coverage-map-public .leaflet-marker-icon,
+    /* Only hide real AP markers (icon URL-based), not our custom divIcon pins */
+    .coverage-map-public .leaflet-marker-icon:not(.coverage-network-marker),
     .coverage-map-public .leaflet-marker-shadow {
         @apply !hidden;
     }
@@ -443,7 +443,6 @@
         @apply !border-b !border-gray-200;
     }
 
-    /* Map container corners, to match the rounded-2xl wrapper */
     .coverage-map-public .leaflet-container {
         @apply !rounded-2xl;
     }
@@ -474,12 +473,6 @@
 
     .coverage-map-popup-description {
         @apply text-sm text-[#6b7280] leading-snug m-0;
-    }
-
-    /* Only hide real AP markers (icon URL-based), not our custom divIcon pins */
-    .coverage-map-public .leaflet-marker-icon:not(.coverage-network-marker),
-    .coverage-map-public .leaflet-marker-shadow {
-        @apply !hidden;
     }
 
     .coverage-network-marker {
