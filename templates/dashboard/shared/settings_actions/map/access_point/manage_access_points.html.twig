@@ -1,0 +1,224 @@
+{% extends '/dashboard/base.html.twig' %}
+
+{% block container %}
+
+    <twig:ManageAccessPointsForm
+            :accessPointDTO="accessPointDTO"
+            :data="data"
+            :form="form"
+            :network="network"
+            :accessPoint="accessPoint"
+    >
+
+        <div class="p-6 bg-white rounded-lg shadow-sm"
+             data-controller="custom-map-picker map-geolocation"
+             data-custom-map-picker-network-geometry-value="{{ network.geometry }}">
+
+            {{ form_start(form) }}
+
+            {# BASIC INFO #}
+            <div class="mb-8">
+                <div class="mb-4">
+                    <h3 class="text-sm font-semibold text-green-600 tracking-wide">
+                        {{ 'basicInfo'|trans({}, '_acessPoint') }}
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        {{ 'basicInfoDescription'|trans({}, '_acessPoint') }}
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                    {# SSID #}
+                    <div class="relative">
+                        {{ form_label(form.ssid, 'ssid'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.ssid, {attr: {class: 'form-widget', placeholder: 'ssidPh'|trans({}, '_acessPoint')}}) }}
+                        <div class="text-red-500 m-2 text-sm">
+                            {{ form_errors(form.ssid) }}
+                        </div>
+                    </div>
+
+                    {# ACCESS POINT NAME #}
+                    <div class="relative">
+                        {{ form_label(form.name, 'name'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.name, {attr: {class: 'form-widget', placeholder: 'namePh'|trans({}, '_acessPoint')}}) }}
+                        <div class="text-red-500 m-2 text-sm">
+                            {{ form_errors(form.name) }}
+                        </div>
+                    </div>
+
+                    {# MAC ADDRESS #}
+                    <div class="relative">
+                        {{ form_label(form.macAddress, 'macAddress'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.macAddress, {attr: {class: 'form-widget', placeholder: 'macAddressPh'|trans({}, '_acessPoint')}}) }}
+                        <div class="text-red-500 m-2 text-sm">
+                            {{ form_errors(form.macAddress) }}
+                        </div>
+                    </div>
+
+                    {# SERIAL NUMBER #}
+                    <div class="relative">
+                        {{ form_label(form.serialNumber, 'serialNumber'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.serialNumber, {attr: {class: 'form-widget', placeholder: 'serialNumberPh'|trans({}, '_acessPoint')}}) }}
+                        <div class="text-red-500 m-2 text-sm">
+                            {{ form_errors(form.serialNumber) }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <hr class="border-gray-100 mb-8">
+
+            {# HARDWARE #}
+            <div class="mb-8">
+                <div class="mb-4">
+                    <h3 class="text-sm font-semibold text-green-600 tracking-wide">
+                        {{ 'hardware'|trans({}, '_acessPoint') }}
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        {{ 'hardwareDescription'|trans({}, '_acessPoint') }}
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                    {# VENDOR #}
+                    <div class="relative">
+                        {{ form_label(form.vendor, 'vendor'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.vendor, {attr: {class: 'form-widget', placeholder: 'vendorPh'|trans({}, '_acessPoint')}}) }}
+                        <div class="text-red-500 m-2 text-sm">
+                            {{ form_errors(form.vendor) }}
+                        </div>
+                    </div>
+
+                    {# MODEL #}
+                    <div class="relative">
+                        {{ form_label(form.model, 'model'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.model, {attr: {class: 'form-widget', placeholder: 'modelPh'|trans({}, '_acessPoint')}}) }}
+                        <div class="text-red-500 m-2 text-sm">
+                            {{ form_errors(form.model) }}
+                        </div>
+                    </div>
+
+                    {# STANDARD #}
+                    <div class="relative lg:col-span-2">
+                        {{ form_label(form.standard, 'wifiStandard'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.standard, {attr: {class: 'form-widget', placeholder: 'wifiStandardPh'|trans({}, '_acessPoint')}}) }}
+                        <div class="text-red-500 m-2 text-sm">
+                            {{ form_errors(form.standard) }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <hr class="border-gray-100 mb-8">
+
+            {# GEOLOCATION #}
+            <div>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-green-600 tracking-wide">
+                            {{ 'geolocation'|trans({}, '_acessPoint') }}
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-1">
+                            {{ 'selectOnMap'|trans({}, '_acessPoint') }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="relative z-0 overflow-hidden w-full h-[350px] rounded-2xl coverage-map-public">
+                    {{ ux_map(this.map, {
+                        style: 'height: 100%; width: 100%;',
+                        'data-action': 'ux:map:pre-connect->custom-map-picker#_onPreConnect ux:map:connect->map-geolocation#_onConnect ux:map:connect->custom-map-picker#_onConnect',
+                    }) }}
+                </div>
+                <p class="text-xs text-gray-400 mt-1">
+                    {{ 'clickToSetCoordinates'|trans({}, '_acessPoint') }}
+                </p>
+
+                {# BUTTONS TOOLBAR #}
+                <div class="relative flex flex-col sm:flex-row items-center justify-center w-full mt-4 gap-3 sm:gap-0">
+                    <div class="sm:absolute right-0">
+                        <button type="button"
+                                data-action="click->custom-map-picker#clearCoordinates"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition">
+                            <twig:ux:icon name="wba:trash" class="w-3.5 h-3.5 fill-none stroke-current" />
+                            {{ 'clearCoordinates'|trans({}, '_acessPoint') }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+
+                    {# LATITUDE #}
+                    <div class="relative">
+                        {{ form_label(form.latitude, 'latitude'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.latitude, {attr: {
+                            class: 'form-widget',
+                            'data-custom-map-picker-target': 'latitude',
+                            'data-action': 'change->custom-map-picker#syncMap',
+                            placeholder: 'latitudePh'|trans({}, '_acessPoint'),
+                        }}) }}
+                        <div class="text-red-500 m-2 text-sm">
+                            {{ form_errors(form.latitude) }}
+                        </div>
+                    </div>
+
+                    {# LONGITUDE #}
+                    <div class="relative">
+                        {{ form_label(form.longitude, 'longitude'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.longitude, {attr: {
+                            class: 'form-widget',
+                            'data-custom-map-picker-target': 'longitude',
+                            'data-action': 'change->custom-map-picker#syncMap',
+                            placeholder: 'longitudePh'|trans({}, '_acessPoint'),
+                        }}) }}
+                        <div class="text-red-500 m-2 text-sm">
+                            {{ form_errors(form.longitude) }}
+                        </div>
+                    </div>
+
+                    {# ALTITUDE MSL #}
+                    <div class="relative">
+                        {{ form_label(form.altitudeMsl, 'AltitudeMsl'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.altitudeMsl, {attr: {class: 'form-widget', placeholder: 'AltitudeMslPh'|trans({}, '_acessPoint')}}) }}
+                        <div class="text-red-500 m-2 text-sm">
+                            {{ form_errors(form.altitudeMsl) }}
+                        </div>
+                    </div>
+
+                    {# ALTITUDE AGL #}
+                    <div class="relative">
+                        {{ form_label(form.altitudeAgl, 'altitudeAgl'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.altitudeAgl, {attr: {class: 'form-widget', placeholder: 'altitudeAglPh'|trans({}, '_acessPoint')}}) }}
+                        <div class="text-red-500 m-2 text-sm">
+                            {{ form_errors(form.altitudeAgl) }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            {# ACTION BUTTONS #}
+            <div class="flex flex-row justify-end gap-4 md:w-full mt-8 pt-4 border-t border-gray-100">
+                <a href="{{ path('admin_dashboard_map_network_accessPoints', {id: network.id}) }}" class="btn-secondary flex items-center justify-center">
+                    {{ 'return'|trans({}, '_acessPoint') }}
+                </a>
+                <button type="submit" class="btn-primary">
+                    {% if accessPoint %}
+                        {{ 'saveChanges'|trans({}, '_acessPoint') }}
+                    {% else %}
+                        {{ 'submit'|trans({}, '_acessPoint') }}
+                    {% endif %}
+                </button>
+            </div>
+
+            {{ form_rest(form) }}
+            {{ form_end(form) }}
+        </div>
+
+    </twig:ManageAccessPointsForm>
+
+{% endblock %}

@@ -23,8 +23,8 @@
     admin_dashboard_map: {icon: 'wba:map-outline', title: 'map', class: 'fill-current stroke-none'},
     admin_dashboard_map_network_create: {icon: 'wba:network', title: 'createNetwork'},
     admin_dashboard_map_network_edit: {icon: 'wba:network', title: 'editNetwork', class: 'fill-current stroke-none'},
-    admin_dashboard_map_network_accessPoints: {icon: 'wba:map', title: 'network'},
-    admin_dashboard_map_accessPoint_create: {icon: 'wba:map', title: 'accessPoint'},
+    admin_dashboard_map_network_accessPoints: {icon: 'wba:wifi', title: 'network'},
+    admin_dashboard_map_accessPoint_create: {icon: 'wba:wifi', title: 'createAccessPoint'},
     admin_dashboard_map_accessPoint_edit: {icon: 'wba:map', title: 'accessPoint'},
     admin_dashboard_map_accessPoint_delete: {icon: 'wba:map', title: 'accessPoint'},
 } %}
@@ -32,10 +32,17 @@
 {% set currentRoute = app.request.attributes.get('_route') %}
 {% set header = routeHeaders[currentRoute] ?? {icon: 'wba:wifi', title: 'Dashboard'} %}
 
+
 <div class="flex flex-row items-center pl-4">
     <twig:ux:icon name="{{ header.icon }}"
                   class="w-10 h-10 mt-0.5 block {{ header.class ?? 'fill-none stroke-current' }}" />
-    <h1 class="text-2xl font-semibold p-5">{{ header.title|trans({}, '_header_admin') }}</h1>
+    <h1 class="text-2xl font-semibold p-5">
+        {% if currentRoute == 'admin_dashboard_map_network_accessPoints' and network is defined %}
+            {{ network.name }}
+        {% else %}
+            {{ header.title|trans({}, '_header_admin') }}
+        {% endif %}
+    </h1>
 </div>
 
 {# Main Button #}
