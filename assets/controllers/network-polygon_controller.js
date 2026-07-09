@@ -89,15 +89,20 @@ export default class extends Controller {
         this.drawMode = event.params.mode;
         this.cancelCurrentDrawing();
 
+        const ACTIVE_CLASSES = ['border-blue-500', 'bg-blue-50', 'text-blue-600'];
+        const INACTIVE_CLASSES = ['bg-white', 'border-gray-200', 'text-gray-500'];
+
         const buttons = event.currentTarget.parentElement.querySelectorAll(
           'button[data-network-polygon-mode-param]'
         );
+
         buttons.forEach((btn) => {
-            btn.classList.remove('bg-blue-600', 'text-white');
-            btn.classList.add('bg-gray-200');
+            btn.classList.remove(...ACTIVE_CLASSES);
+            btn.classList.add(...INACTIVE_CLASSES);
         });
-        event.currentTarget.classList.remove('bg-gray-200');
-        event.currentTarget.classList.add('bg-blue-600', 'text-white');
+
+        event.currentTarget.classList.remove(...INACTIVE_CLASSES);
+        event.currentTarget.classList.add(...ACTIVE_CLASSES);
     }
 
     cancelCurrentDrawing() {
@@ -358,18 +363,19 @@ export default class extends Controller {
     renderCoverageList() {
         if (!this.hasCoverageListTarget) return;
 
+        // Toggle the empty state visibility
         if (this.hasEmptyStateTarget) {
             this.emptyStateTarget.classList.toggle('hidden', this.shapes.length > 0);
         }
 
+        // Clear the list if empty
         if (this.shapes.length === 0) {
-            this.coverageListTarget.className =
-              'bg-gray-50 rounded-lg border border-dashed border-gray-200 p-6 text-center text-sm text-gray-400';
-            this.coverageListTarget.innerHTML = this.emptyLabelValue;
+            this.coverageListTarget.innerHTML = '';
             return;
         }
 
-        const typeLabels = { polygon: 'Polygon', square: 'Rectangle', circle: 'Circle', area: 'Area' };
+        // Render rows
+        const typeLabels = { polygon: 'Polígono', square: 'Retângulo', circle: 'Círculo', area: 'Área' };
 
         const rows = this.shapes
           .map((shape, index) => {
@@ -377,7 +383,7 @@ export default class extends Controller {
               return `
                     <div class="flex items-center justify-between gap-3 px-4 py-3 bg-white rounded-lg border border-gray-100">
                         <div class="flex items-center gap-3">
-                            <span class="text-sm font-medium text-gray-700">Area ${index + 1}</span>
+                            <span class="text-sm font-medium text-gray-700">Área ${index + 1}</span>
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-600">${typeLabel}</span>
                         </div>
                         <div class="flex items-center gap-4">
@@ -396,7 +402,6 @@ export default class extends Controller {
           })
           .join('');
 
-        this.coverageListTarget.className = 'space-y-2';
         this.coverageListTarget.innerHTML = rows;
     }
 

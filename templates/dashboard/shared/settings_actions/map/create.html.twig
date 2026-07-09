@@ -89,11 +89,11 @@
 
                     {# Centered Group (Polygon, Rectangle, Circle) #}
                     <div class="flex gap-2">
-                        <!-- Polygon Button -->
+                        <!-- Polygon Button (selected by default: matches drawMode='polygon' in connect()) -->
                         <button type="button"
                                 data-action="click->network-polygon#setMode"
                                 data-network-polygon-mode-param="polygon"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full border border-gray-200 transition focus:ring-2 focus:ring-green-500">
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition focus:ring-blue-500 border-blue-500 bg-blue-50 text-blue-600">
                             <twig:ux:icon name="wba:polygon" class="w-3.5 h-3.5 fill-none stroke-current" />
                             {{ 'polygon'|trans({}, '_map') }}
                         </button>
@@ -102,7 +102,7 @@
                         <button type="button"
                                 data-action="click->network-polygon#setMode"
                                 data-network-polygon-mode-param="square"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full border border-gray-200 transition focus:ring-2 focus:ring-green-500">
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition focus:ring-blue-500 bg-white border-gray-200 text-gray-500 hover:bg-gray-50">
                             <twig:ux:icon name="wba:rectangle" class="w-3.5 h-3.5 fill-current stroke-none" />
                             {{ 'rectangle'|trans({}, '_map') }}
                         </button>
@@ -111,7 +111,7 @@
                         <button type="button"
                                 data-action="click->network-polygon#setMode"
                                 data-network-polygon-mode-param="circle"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full border border-gray-200 transition focus:ring-2 focus:ring-green-500">
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition focus:ring-blue-500 bg-white border-gray-200 text-gray-500 hover:bg-gray-50">
                             <twig:ux:icon name="wba:circle-outline" class="w-3.5 h-3.5 fill-none stroke-current" />
                             {{ 'circle'|trans({}, '_map') }}
                         </button>
@@ -120,7 +120,7 @@
                     {# Far Right Aligned Group (Clear) #}
                     <div class="sm:absolute right-0">
                         <button type="button" data-action="click->network-polygon#resetPolygon"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-full border border-red-200 transition">
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition">
                             <twig:ux:icon name="wba:trash" class="w-3.5 h-3.5 fill-none stroke-current" />
                             {{ 'clean'|trans({}, '_map') }}
                         </button>
@@ -148,12 +148,14 @@
                         {{ 'coverageOverviewDescription'|trans({}, '_map') }}
                     </p>
 
-                    {# The network-polygon controller should render one row per drawn
-                       shape here, and fall back to the empty state text otherwise #}
-                    <div data-network-polygon-target="coverageList"
+                    {# Empty State Container #}
+                    <div data-network-polygon-target="emptyState"
                          class="bg-gray-50 rounded-lg border border-dashed border-gray-200 p-6 text-center text-sm text-gray-400">
                         {{ 'coverageOverviewEmpty'|trans({}, '_map') }}
                     </div>
+
+                    {# Coverage List Container (Active shapes will be injected here) #}
+                    <div data-network-polygon-target="coverageList" class="space-y-2"></div>
                 </div>
             </div>
 
