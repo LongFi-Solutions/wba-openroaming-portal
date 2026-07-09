@@ -96,17 +96,12 @@ final class CreateAccessPointsForm extends AbstractController
                 continue;
             }
 
-            $location = $ap->getLocation();
-            if ($location && isset($location['coordinates'])) {
-                $lng = $location['coordinates'][0] ?? null;
-                $lat = $location['coordinates'][1] ?? null;
-
-                if ($lat !== null && $lng !== null) {
-                    $map->addMarker(new Marker(
-                        position: new Point((float)$lat, (float)$lng),
-                        title: $ap->getName() ?? 'Access Point'
-                    ));
-                }
+            $locationData = $ap->getLocationData();
+            if ($locationData !== null) {
+                $map->addMarker(new Marker(
+                    position: new Point($locationData['lat'], $locationData['lng']),
+                    title: $ap->getName() ?? 'Access Point'
+                ));
             }
         }
 

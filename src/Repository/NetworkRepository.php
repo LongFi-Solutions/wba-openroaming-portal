@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Network;
-use App\Enum\UserVerificationStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -35,45 +34,6 @@ class NetworkRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return Network[]
-     */
-    public function findAllOrderedByName(): array
-    {
-        return $this->createQueryBuilder('n')
-            ->orderBy('n.name', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
-     * @return Network[]
-     */
-    public function findByOperator(string $operator): array
-    {
-        return $this->createQueryBuilder('n')
-            ->andWhere('n.operator = :operator')
-            ->setParameter('operator', $operator)
-            ->orderBy('n.name', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
-     * Fetches networks with their access points eagerly to avoid N+1 queries.
-     *
-     * @return Network[]
-     */
-    public function findAllWithAccessPoints(): array
-    {
-        return $this->createQueryBuilder('n')
-            ->leftJoin('n.accessPoints', 'ap')
-            ->addSelect('ap')
-            ->orderBy('n.name', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
      * Searches for Networks based on provided filter and optional search term.
      *
      */
@@ -98,5 +58,24 @@ class NetworkRepository extends ServiceEntityRepository
         }
 
         return $qb;
+    }
+
+    public function findIntersectingBbox(
+        float $minLat,
+        float $minLng,
+        float $maxLat,
+        float $maxLng,
+    ): array {
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.minLat <= :maxLat')
+            ->andWhere('n.maxLat >= :minLat')
+            ->andWhere('n.minLng <= :maxLng')
+            ->andWhere('n.maxLng >= :minLng')
+            ->setParameter('minLat', $minLat)
+            ->setParameter('maxLat', $maxLat)
+            ->setParameter('minLng', $minLng)
+            ->setParameter('maxLng', $maxLng)
+            ->getQuery()
+            ->getResult();
     }
 }

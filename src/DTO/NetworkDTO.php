@@ -4,134 +4,28 @@ namespace App\DTO;
 
 use App\Entity\AccessPoint;
 use App\Entity\Network;
+use App\Validator\Constraints as AppAssert;
 use DateTimeImmutable;
 use Symfony\Component\Validator\Constraints as Assert;
-use App\Validator\Constraints as AppAssert;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
+#[AppAssert\ValidNetworkGeometry]
 class NetworkDTO
 {
+    public ?int $networkId = null;
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     public ?string $name = null;
     public ?string $description = null;
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     public ?string $geometryJson = null;
 
-    /** @var array<AccessPoint> */
-    public array $accessPointsFromDatabase = [];
-
-
-    #[Assert\Callback]
-    public function validateGeometryContainsPoints(ExecutionContextInterface $context): void
-    {
-        if (!$this->geometryJson || $this->accessPointsFromDatabase === []) {
-            return;
-        }
-
-        $geoJson = json_decode($this->geometryJson, true);
-        $allPolygons = [];
-
-        if (isset($geoJson['type']) && $geoJson['type'] === 'FeatureCollection' && isset($geoJson['features'])) {
-            foreach ($geoJson['features'] as $feature) {
-                $geometry = $feature['geometry'] ?? null;
-                if (!$geometry) {
-                    continue;
-                }
-
-                $type = $geometry['type'] ?? 'Polygon';
-                $coordinates = $geometry['coordinates'] ?? [];
-
-                if ($type === 'Polygon' && isset($coordinates[0])) {
-                    $allPolygons[] = $coordinates[0];
-                } elseif ($type === 'MultiPolygon') {
-                    foreach ($coordinates as $polygonCoords) {
-                        if (isset($polygonCoords[0])) {
-                            $allPolygons[] = $polygonCoords[0];
-                        }
-                    }
-                }
-            }
-        } else {
-            $geometry = $geoJson['features'][0]['geometry'] ?? null;
-            if ($geometry) {
-                $type = $geometry['type'] ?? 'Polygon';
-                $coordinates = $geometry['coordinates'] ?? [];
-
-                if ($type === 'Polygon' && isset($coordinates[0])) {
-                    $allPolygons[] = $coordinates[0];
-                }
-            }
-        }
-
-        if ($allPolygons === []) {
-            return;
-        }
-
-        $pointsOutside = [];
-
-        foreach ($this->accessPointsFromDatabase as $ap) {
-            $location = $ap->getLocation();
-            if ($location && isset($location['coordinates'])) {
-                $apLng = (float)$location['coordinates'][0];
-                $apLat = (float)$location['coordinates'][1];
-                $isInsideAny = array_any($allPolygons, fn($vertices) =>
-                $this->isPointInPolygon([$apLng, $apLat], $vertices));
-
-                if (!$isInsideAny) {
-                    $pointsOutside[] = $ap->getSsid();
-                }
-            }
-        }
-
-        if (count($pointsOutside) > 0) {
-            $pointsList = implode(', ', $pointsOutside);
-
-            $message = count($pointsOutside) === 1
-                ? 'polygonWarningMessage'
-                : 'polygonWarningMessageMultiple';
-
-            $context->buildViolation($message)
-                ->setParameter('%s', $pointsList)
-                ->atPath('geometryJson')
-                ->addViolation();
-        }
-    }
-
     /**
-     * @param array{float, float} $point
-     * @param array<int, array{float, float}> $polygonVertices
+     * @throws \JsonException
      */
-    private function isPointInPolygon(array $point, array $polygonVertices): bool
-    {
-        $x = $point[0];
-        $y = $point[1];
-        $inside = false;
-        $count = count($polygonVertices);
-        for ($i = 0, $j = $count - 1; $i < $count; $j = $i++) {
-            $xi = $polygonVertices[$i][0];
-            $yi = $polygonVertices[$i][1];
-            $xj = $polygonVertices[$j][0];
-            $yj = $polygonVertices[$j][1];
-            $intersect = ($yi > $y !== $yj > $y) && ($x < ($xj - $xi) *
-                    ($y - $yi) / ($yj - $yi + 0.000000001) + $xi);
-            if ($intersect) {
-                $inside = !$inside;
-            }
-        }
-        return $inside;
-    }
-
     public function updateEntity(Network $network): Network
     {
         $network->setName($this->name);
         $network->setDescription($this->description);
-
-        if ($this->geometryJson) {
-            $network->setGeometry(json_decode($this->geometryJson, true));
-        } else {
-            $network->setGeometry(null);
-        }
-
+        $network->setGeometry($this->geometryJson);
         $network->setUpdatedAt(new DateTimeImmutable());
 
         return $network;

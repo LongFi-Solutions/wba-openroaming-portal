@@ -22,18 +22,26 @@ class Network
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
-    /**
-     * GeoJSON FeatureCollection stored as JSON.
-     * @var array<string, mixed>|null
-     */
-    #[ORM\Column(type: 'json', nullable: true)]
-    private ?array $geometry = null;
+    #[ORM\Column(type: 'revisor_geometry', nullable: false)]
+    private ?string $geometry = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $minLat = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $minLng = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $maxLat = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $maxLng = null;
 
     /** @var Collection<int, AccessPoint> */
     #[ORM\OneToMany(targetEntity: AccessPoint::class, mappedBy: 'network', orphanRemoval: true)]
@@ -71,14 +79,12 @@ class Network
         return $this;
     }
 
-    /** @return array<string, mixed>|null */
-    public function getGeometry(): ?array
+    public function getGeometry(): ?string
     {
         return $this->geometry;
     }
 
-    /** @param array<string, mixed>|null $geometry */
-    public function setGeometry(?array $geometry): static
+    public function setGeometry(?string $geometry): static
     {
         $this->geometry = $geometry;
         return $this;
@@ -126,6 +132,50 @@ class Network
         if ($this->accessPoints->removeElement($accessPoint) && $accessPoint->getNetwork() === $this) {
             $accessPoint->setNetwork(null);
         }
+        return $this;
+    }
+
+    public function getMinLat(): ?float
+    {
+        return $this->minLat;
+    }
+
+    public function setMinLat(?float $minLat): static
+    {
+        $this->minLat = $minLat;
+        return $this;
+    }
+
+    public function getMinLng(): ?float
+    {
+        return $this->minLng;
+    }
+
+    public function setMinLng(?float $minLng): static
+    {
+        $this->minLng = $minLng;
+        return $this;
+    }
+
+    public function getMaxLat(): ?float
+    {
+        return $this->maxLat;
+    }
+
+    public function setMaxLat(?float $maxLat): static
+    {
+        $this->maxLat = $maxLat;
+        return $this;
+    }
+
+    public function getMaxLng(): ?float
+    {
+        return $this->maxLng;
+    }
+
+    public function setMaxLng(?float $maxLng): static
+    {
+        $this->maxLng = $maxLng;
         return $this;
     }
 }

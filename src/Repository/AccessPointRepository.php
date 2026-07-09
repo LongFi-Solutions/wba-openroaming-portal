@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repository;
 
 use App\Entity\AccessPoint;
 use App\Entity\Network;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -36,44 +37,6 @@ class AccessPointRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return AccessPoint[]
-     */
-    public function findByNetwork(Network $network): array
-    {
-        return $this->createQueryBuilder('ap')
-            ->andWhere('ap.network = :network')
-            ->setParameter('network', $network)
-            ->orderBy('ap.name', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
-     * @throws \JsonException
-     * @return AccessPoint[]
-     */
-    public function findWithinRadius(float $lat, float $lng, float $radiusKm): array
-    {
-        return $this->getEntityManager()->createNativeQuery(
-            'SELECT * FROM AccessPoint
-         WHERE ST_Distance_Sphere(
-             ST_GeomFromGeoJSON(location),
-             ST_GeomFromGeoJSON(:point)
-         ) <= :radius',
-            new ResultSetMapping()
-        )
-            ->setParameter(
-                'point',
-                json_encode([
-                    'type' => 'Point',
-                    'coordinates' => [$lng, $lat]
-                ], JSON_THROW_ON_ERROR)
-            )
-            ->setParameter('radius', $radiusKm * 1000)
-            ->getResult();
-    }
-
-    /**
      * Searches for Networks based on provided filter and optional search term.
      *
      */
@@ -101,5 +64,36 @@ class AccessPointRepository extends ServiceEntityRepository
         }
 
         return $qb;
+    }
+
+    public function findIntersectingBbox(
+        float $minLat,
+        float $minLng,
+        float $maxLat,
+        float $maxLng,
+    ): array {
+        $sql = '
+        SELECT id
+        FROM AccessPoint
+        WHERE CAST(JSON_EXTRACT(location, "$.coordinates[1]") AS DECIMAL(10,7)) BETWEEN :minLat AND :maxLat
+          AND CAST(JSON_EXTRACT(location, "$.coordinates[0]") AS DECIMAL(10,7)) BETWEEN :minLng AND :maxLng
+    ';
+
+        $ids = $this->getEntityManager()->getConnection()->fetchFirstColumn($sql, [
+            'minLat' => $minLat,
+            'maxLat' => $maxLat,
+            'minLng' => $minLng,
+            'maxLng' => $maxLng,
+        ]);
+
+        if ($ids === []) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('ap')
+            ->andWhere('ap.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getResult();
     }
 }
