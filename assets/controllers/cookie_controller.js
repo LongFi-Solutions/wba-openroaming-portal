@@ -7,11 +7,16 @@ export default class extends Controller {
         // Initialize preferences without setting any cookies on the first page load
         this.cookieScopes = this.getCookiePreferences() || {
             rememberMe: false,
+            geolocation: false,
         };
 
         this.updateCheckboxes();
         this.checkCookies();
         this.toggleManageButton();
+
+        if (this.cookieScopes.geolocation) {
+            this.askForLocation();
+        }
     }
 
     checkCookies() {
@@ -61,6 +66,9 @@ export default class extends Controller {
 
         this.setCookiePreferences();
         this.setCookiesAccepted();
+
+        this.handleGeolocationConsent();
+
         this.hideBanner();
     }
 
@@ -78,6 +86,8 @@ export default class extends Controller {
 
         this.setCookiePreferences();
 
+        this.handleGeolocationConsent();
+
         const allEnabled = Object.values(this.cookieScopes).every((val) => val === true);
         if (allEnabled) {
             this.setCookiesAccepted();
@@ -88,6 +98,34 @@ export default class extends Controller {
 
         this.closeModal();
         this.hideBanner();
+    }
+
+    handleGeolocationConsent() {
+        if (this.cookieScopes.geolocation) {
+            this.askForLocation();
+        } else {
+            document.cookie = 'user_lat=; path=/; max-age=0';
+            document.cookie = 'user_lng=; path=/; max-age=0';
+        }
+    }
+
+    askForLocation() {
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const maxAge = 365 * 24 * 60 * 60; // 1 ano (igual aos teus outros cookies)
+
+                    document.cookie = `user_lat=${lat}; path=/; max-age=${maxAge}; path=/; SameSite=Lax`;
+                    document.cookie = `user_lng=${lng}; path=/; max-age=${maxAge}; path=/; SameSite=Lax`;
+
+                },
+                (error) => {
+                    console.error('Erro ao obter geolocalização:', error);
+                }
+            );
+        }
     }
 
     updateCheckbox(scope, checked) {
@@ -130,8 +168,7 @@ export default class extends Controller {
         cookies.forEach((cookie) => {
             const eqPos = cookie.indexOf('=');
             const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-            // Clear each cookie by setting max-age=0
-            document.cookie = name + '=; path=/; max-age=0';
+            document.cookie = name.trim() + '=; path=/; max-age=0';
         });
 
         localStorage.clear();
