@@ -109,8 +109,8 @@ class MapController extends AbstractController
     #[isGranted(AdminPermissionsType::MAP_READ->value)]
     public function mapManagement(Request $request): Response
     {
-        $lat = $request->query->get('lat');
-        $lng = $request->query->get('lng');
+        $lat = $request->cookies->get('user_lat');
+        $lng = $request->cookies->get('user_lng');
 
         $centerLat = $lat ?? 37.7412;
         $centerLng = $lng ?? -25.6756;
@@ -194,8 +194,8 @@ class MapController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_map');
         }
 
-        $lat = $request->query->get('lat');
-        $lng = $request->query->get('lng');
+        $lat = $request->cookies->get('user_lat');
+        $lng = $request->cookies->get('user_lng');
         $centerLat = $lat ?? 37.7412;
         $centerLng = $lng ?? -25.6756;
 
@@ -252,8 +252,8 @@ class MapController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_map');
         }
 
-        $lat = $request->query->get('lat');
-        $lng = $request->query->get('lng');
+        $lat = $request->cookies->get('user_lat');
+        $lng = $request->cookies->get('user_lng');
         $centerLat = $lat ?? 37.7412;
         $centerLng = $lng ?? -25.6756;
 
@@ -371,8 +371,8 @@ class MapController extends AbstractController
             $centerLng = $accessPointDTO->longitude;
             $zoom = 16;
         } else {
-            $centerLat = $request->query->get('lat') ?? 37.7412;
-            $centerLng = $request->query->get('lng') ?? -25.6756;
+            $centerLat = $request->cookies->get('user_lat');
+            $centerLng = $request->cookies->get('user_lng');
             $zoom = 13;
         }
 
