@@ -7,6 +7,34 @@
             {# Right: Search Bar & Action Buttons #}
             <div class="flex flex-col lg:flex-row items-center gap-4 w-full xl:w-auto xl:justify-end grow">
 
+                {# Left Filter Tabs #}
+                <div class="flex flex-col md:flex-row sm:items-center gap-4 sm:gap-6">
+                    {% set tabs = {
+                        all: {
+                            label: 'all',
+                            count: this.networkCounts.all,
+                            activeClass: 'border-b-2 border-y-veryDarkButton',
+                            hoverClass: 'hover:border-b-2 hover:border-y-veryDarkButton',
+                            badgeActive: 'bg-veryDarkButton text-white',
+                            badgeInactive: 'bg-gray-100 text-gray-600 group-hover:bg-veryDarkButton group-hover:text-white',
+                        },
+                    } %}
+
+                    {% for value, tab in tabs %}
+                        <button type="button"
+                                data-action="live#action"
+                                data-live-action-param="changeFilter"
+                                data-live-filter-param="{{ value }}"
+                                class="flex items-center pb-2 group transition-all duration-150 gap-2 {{ tab.hoverClass }} {{ filter == value ? tab.activeClass : 'text-gray-500 border-b-2 border-transparent' }}">
+                            <span>{{ tab.label|trans({}, 'dashboard') }}</span>
+                            <span class="text-xs px-2 py-0.5 rounded-md min-w-[24px] text-center transition-all duration-150 {{ filter == value ? tab.badgeActive : tab.badgeInactive }}">
+                            {{ tab.count }}
+                        </span>
+                        </button>
+                    {% endfor %}
+                </div>
+
+
                 {# Search Bar #}
                 <div class="w-full lg:max-w-md xl:max-w-sm grow">
                     <div class="flex flex-row items-center border rounded-md bg-white">

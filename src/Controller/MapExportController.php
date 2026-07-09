@@ -169,13 +169,11 @@ class MapExportController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_map_network_list');
         }
 
-        $bom = fread($handle, 3);
-        if ($bom !== "\xEF\xBB\xBF") {
+        if (fread($handle, 3) !== "\xEF\xBB\xBF") {
             rewind($handle);
         }
 
         $headers = fgetcsv($handle, 0, ',');
-
         if (!$headers || !in_array('network_name', $headers, true)) {
             fclose($handle);
             $this->addFlash('error', 'Invalid CSV structure. The column "network_name" is mandatory.');
@@ -183,28 +181,27 @@ class MapExportController extends AbstractController
         }
 
         $networksCreatedOrUpdated = [];
+        $bboxTracking = [];
         $apsImportedCount = 0;
-        $rowCount = 0;
+        $now = new \DateTimeImmutable();
 
         try {
             while (($row = fgetcsv($handle, 0, ',')) !== false) {
-                $rowCount++;
+                $netName    = trim($row[0] ?? '');
+                $netDesc    = trim($row[1] ?? '');
+                $netGeoRaw  = trim($row[2] ?? '');
 
-                $netName        = trim($row[0] ?? '');
-                $netDesc        = trim($row[1] ?? '');
-                $netGeoRaw      = trim($row[2] ?? '');
-
-                $apName         = trim($row[3] ?? '');
-                $apSsid         = trim($row[4] ?? '');
-                $apMac          = trim($row[5] ?? '');
-                $apVendor       = trim($row[6] ?? '');
-                $apModel        = trim($row[7] ?? '');
-                $apStandard     = trim($row[8] ?? '');
-                $apSerial       = trim($row[9] ?? '');
-                $apLng          = trim($row[10] ?? '');
-                $apLat          = trim($row[11] ?? '');
-                $apAltMsl       = trim($row[12] ?? '');
-                $apAltAgl       = trim($row[13] ?? '');
+                $apName     = trim($row[3] ?? '');
+                $apSsid     = trim($row[4] ?? '');
+                $apMac      = trim($row[5] ?? '');
+                $apVendor   = trim($row[6] ?? '');
+                $apModel    = trim($row[7] ?? '');
+                $apStandard = trim($row[8] ?? '');
+                $apSerial   = trim($row[9] ?? '');
+                $apLng      = trim($row[10] ?? '');
+                $apLat      = trim($row[11] ?? '');
+                $apAltMsl   = trim($row[12] ?? '');
+                $apAltAgl   = trim($row[13] ?? '');
 
                 if (empty($netName)) {
                     continue;
@@ -212,22 +209,33 @@ class MapExportController extends AbstractController
 
                 if (!isset($networksCreatedOrUpdated[$netName])) {
                     $network = $networkRepository->findOneBy(['name' => $netName]);
+                    $isNew = false;
 
                     if (!$network) {
                         $network = new Network();
                         $network->setName($netName);
+                        $network->setCreatedAt($now);
+                        $isNew = true;
                     }
+
+                    $network->setUpdatedAt($now);
 
                     if (!empty($netDesc)) {
                         $network->setDescription($netDesc);
                     }
 
                     if (!empty($netGeoRaw)) {
-                        $geoArray = json_decode($netGeoRaw, true);
-                        if (json_last_error() === JSON_ERROR_NONE) {
-                            $network->setGeometry($geoArray);
-                        }
+                        $network->setGeometry($netGeoRaw);
+                    } elseif ($isNew) {
+                        $network->setGeometry('GEOMETRYCOLLECTION EMPTY');
                     }
+
+                    $bboxTracking[$netName] = [
+                        'minLat' => $network->getMinLat(),
+                        'minLng' => $network->getMinLng(),
+                        'maxLat' => $network->getMaxLat(),
+                        'maxLng' => $network->getMaxLng(),
+                    ];
 
                     $em->persist($network);
                     $networksCreatedOrUpdated[$netName] = $network;
@@ -236,41 +244,72 @@ class MapExportController extends AbstractController
                 }
 
                 if (!empty($apName)) {
-                    $ap = new AccessPoint();
+                    $existingAp = null;
+                    foreach ($network->getAccessPoints() as $currentAp) {
+                        if (!empty($apMac) && $currentAp->getMacAddress() === $apMac) {
+                            $existingAp = $currentAp;
+                            break;
+                        }
+                        if (empty($apMac) && $currentAp->getName() === $apName) {
+                            $existingAp = $currentAp;
+                            break;
+                        }
+                    }
+
+                    if ($existingAp) {
+                        $ap = $existingAp;
+                    } else {
+                        $ap = new AccessPoint();
+                        $ap->setCreatedAt($now);
+                        $network->addAccessPoint($ap);
+                    }
+
                     $ap->setName($apName);
                     $ap->setSsid(!empty($apSsid) ? $apSsid : 'OpenRoaming');
-                    $ap->setMacAddress($apMac);
-                    $ap->setVendor($apVendor);
-                    $ap->setModel($apModel);
-                    $ap->setStandard($apStandard);
-                    $ap->setSerialNumber($apSerial);
+                    $ap->setMacAddress(!empty($apMac) ? $apMac : null);
+                    $ap->setVendor(!empty($apVendor) ? $apVendor : null);
+                    $ap->setModel(!empty($apModel) ? $apModel : null);
+                    $ap->setStandard(!empty($apStandard) ? $apStandard : null);
+                    $ap->setSerialNumber(!empty($apSerial) ? $apSerial : null);
+                    $ap->setUpdatedAt($now);
 
                     if ($apLng !== '' && $apLat !== '') {
-                        $ap->setLocation([
-                            'type' => 'Point',
-                            'coordinates' => [
-                                (float)$apLng,
-                                (float)$apLat
-                            ]
-                        ]);
+                        $latFloat = (float)$apLat;
+                        $lngFloat = (float)$apLng;
+
+                        $ap->setLocation(sprintf('POINT(%f %f)', $lngFloat, $latFloat));
+
+                        if ($bboxTracking[$netName]['minLat'] === null || $latFloat < $bboxTracking[$netName]['minLat']) $bboxTracking[$netName]['minLat'] = $latFloat;
+                        if ($bboxTracking[$netName]['maxLat'] === null || $latFloat > $bboxTracking[$netName]['maxLat']) $bboxTracking[$netName]['maxLat'] = $latFloat;
+                        if ($bboxTracking[$netName]['minLng'] === null || $lngFloat < $bboxTracking[$netName]['minLng']) $bboxTracking[$netName]['minLng'] = $lngFloat;
+                        if ($bboxTracking[$netName]['maxLng'] === null || $lngFloat > $bboxTracking[$netName]['maxLng']) $bboxTracking[$netName]['maxLng'] = $lngFloat;
                     }
 
                     $ap->setAltitudeMsl($apAltMsl !== '' ? (float)$apAltMsl : null);
                     $ap->setAltitudeAgl($apAltAgl !== '' ? (float)$apAltAgl : null);
 
-                    $ap->setNetwork($network);
                     $em->persist($ap);
 
-                    $apsImportedCount++;
+                    if (!$existingAp) {
+                        $apsImportedCount++;
+                    }
+                }
+            }
+
+            foreach ($networksCreatedOrUpdated as $name => $network) {
+                if (isset($bboxTracking[$name])) {
+                    $network->setMinLat($bboxTracking[$name]['minLat']);
+                    $network->setMaxLat($bboxTracking[$name]['maxLat']);
+                    $network->setMinLng($bboxTracking[$name]['minLng']);
+                    $network->setMaxLng($bboxTracking[$name]['maxLng']);
                 }
             }
 
             $em->flush();
-
             fclose($handle);
 
             $this->addFlash('success', sprintf(
-                'Import successful! Processed %d networks and imported %d Access Points.',
+                'Import successful! Processed %d networks and imported/updated %d Access Points.',
                 count($networksCreatedOrUpdated),
                 $apsImportedCount
             ));
