@@ -83,18 +83,6 @@ export default class extends Controller {
         })
           .addTo(this.layerGroup)
           .bindPopup(network.name);
-
-        const center = polygon.getBounds().getCenter();
-        const icon = this.L.divIcon({
-            className: 'coverage-network-marker',
-            html: '<div class="coverage-network-pin"><div class="coverage-network-pin-dot"></div></div>',
-            iconSize: [28, 28],
-            iconAnchor: [14, 28],
-        });
-
-        this.L.marker(center, { icon })
-          .addTo(this.layerGroup)
-          .bindPopup(network.name);
     }
 
     drawAccessPoint(ap) {
