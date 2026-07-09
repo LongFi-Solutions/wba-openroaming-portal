@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Enum\AdminPermissionsType;
 use App\Repository\NetworkRepository;
+use DateTimeImmutable;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,10 +18,17 @@ use App\Entity\AccessPoint;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
 class MapExportController extends AbstractController
 {
+
+    public function __construct(
+        private readonly TranslatorInterface $translator,
+    ) {
+    }
+
     #[Route(
         'dashboard/map/export',
         name: 'admin_dashboard_map_export'
@@ -143,30 +151,33 @@ class MapExportController extends AbstractController
         name: 'admin_dashboard_map_import'
     )]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
-    public function importCsv(Request $request, EntityManagerInterface $em, NetworkRepository $networkRepository): Response
-    {
+    public function importCsv(
+        Request $request,
+        EntityManagerInterface $em,
+        NetworkRepository $networkRepository,
+    ): Response {
         /** @var UploadedFile|null $file */
         $file = $request->files->get('import_file');
 
         if (!$file) {
-            $this->addFlash('error', 'No file was uploaded.');
+            $this->addFlash('error', $this->translator->trans('importErrorNoFile', [], 'controllers'));
             return $this->redirectToRoute('admin_dashboard_map_network_list');
         }
 
         if ($file->getClientOriginalExtension() !== 'csv') {
-            $this->addFlash('error', 'Invalid file format. Please upload a valid CSV file.');
+            $this->addFlash('error', $this->translator->trans('importErrorInvalidFormat', [], 'controllers'));
             return $this->redirectToRoute('admin_dashboard_map_network_list');
         }
 
         $realPath = $file->getRealPath();
         if ($realPath === false || !is_readable($realPath)) {
-            $this->addFlash('error', 'The uploaded file is not readable.');
+            $this->addFlash('error', $this->translator->trans('importErrorNotReadable', [], 'controllers'));
             return $this->redirectToRoute('admin_dashboard_map_network_list');
         }
 
         $handle = fopen($realPath, 'r');
         if ($handle === false) {
-            $this->addFlash('error', 'Could not open the uploaded CSV file.');
+            $this->addFlash('error', $this->translator->trans('importErrorCannotOpen', [], 'controllers'));
             return $this->redirectToRoute('admin_dashboard_map_network_list');
         }
 
@@ -177,13 +188,13 @@ class MapExportController extends AbstractController
         $headers = fgetcsv($handle, 0, ',');
         if (!$headers || !in_array('network_name', $headers, true)) {
             fclose($handle);
-            $this->addFlash('error', 'Invalid CSV structure. The column "network_name" is mandatory.');
+            $this->addFlash('error', $this->translator->trans('importErrorInvalidStructure', [], 'controllers'));
             return $this->redirectToRoute('admin_dashboard_map_network_list');
         }
 
         $networksCreatedOrUpdated = [];
         $apsImportedCount = 0;
-        $now = new \DateTimeImmutable();
+        $now = new DateTimeImmutable();
 
         try {
             while (($row = fgetcsv($handle, 0, ',')) !== false) {
@@ -294,14 +305,17 @@ class MapExportController extends AbstractController
             fclose($handle);
 
             $this->addFlash('success', sprintf(
-                'Import successful! Processed %d networks and imported/updated %d Access Points.',
+                $this->translator->trans('importSuccess', [], 'controllers'),
                 count($networksCreatedOrUpdated),
                 $apsImportedCount
             ));
 
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             fclose($handle);
-            $this->addFlash('error', 'An error occurred during import: ' . $e->getMessage());
+            $this->addFlash('error', sprintf(
+                $this->translator->trans('importErrorGeneral', [], 'controllers'),
+                $e->getMessage()
+            ));
         }
 
         return $this->redirectToRoute('admin_dashboard_map');
