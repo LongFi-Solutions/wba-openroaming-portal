@@ -19,7 +19,6 @@ class MySQLGeometryType extends Type
 
     /**
      * @param mixed $value
-     * @return mixed
      */
     #[\Override]
     public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
@@ -29,7 +28,6 @@ class MySQLGeometryType extends Type
 
     /**
      * @param mixed $value
-     * @return mixed
      */
     #[\Override]
     public function convertToPHPValue($value, AbstractPlatform $platform): mixed

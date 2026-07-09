@@ -67,9 +67,6 @@ class Network
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
     public function getGeometry(): ?string
     {
         return $this->geometry;
