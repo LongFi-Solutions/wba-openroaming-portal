@@ -37,7 +37,6 @@ class MapController extends AbstractController
         private readonly AccessPointRepository $accessPointRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly TranslatorInterface $translator,
-        private readonly GeoLocationResolver $geoLocationResolver,
     ) {
     }
 
@@ -48,20 +47,8 @@ class MapController extends AbstractController
 
         $hasLocationConsent = $this->hasLocationConsent($request);
 
-        $centerLat = null;
-        $centerLng = null;
-
-        if ($hasLocationConsent) {
-            $ip = $request->getClientIp();
-
-            if ($ip !== null) {
-                $coordinates = $this->geoLocationResolver->getCoordinatesFromIp($ip);
-
-                if ($coordinates !== null) {
-                    [$centerLat, $centerLng] = $coordinates;
-                }
-            }
-        }
+        $centerLat = $request->cookies->get('user_lat');
+        $centerLng = $request->cookies->get('user_lng');
 
         // Default fallback center
         $defaultLat = 37.7412;

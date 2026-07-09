@@ -8,19 +8,6 @@ export default class extends Controller {
 
     connect() {
         this.element.addEventListener('ux:map:connect', this.onMapConnect);
-
-        const url = new URL(window.location.href);
-
-        if (!url.searchParams.has('lat') || !url.searchParams.has('lng')) {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    url.searchParams.set('lat', position.coords.latitude);
-                    url.searchParams.set('lng', position.coords.longitude);
-
-                    window.location.replace(url.toString());
-                });
-            }
-        }
     }
 
     disconnect() {
