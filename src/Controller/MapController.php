@@ -11,12 +11,13 @@ use App\Entity\Network;
 use App\Enum\AdminPermissionsType;
 use App\Form\CreateAccessPointType;
 use App\Form\CreateNetworkType;
+use App\Repository\AccessPointRepository;
 use App\Repository\NetworkRepository;
 use App\Service\GeoLocationResolver;
 use App\Service\GetSettings;
-use App\Service\Map\NetworkGeometryMapper;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use JsonException;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,10 +34,10 @@ class MapController extends AbstractController
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly NetworkRepository $networkRepository,
+        private readonly AccessPointRepository $accessPointRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly TranslatorInterface $translator,
         private readonly GeoLocationResolver $geoLocationResolver,
-        private readonly NetworkGeometryMapper $networkGeometryMapper,
     ) {
     }
 
@@ -73,11 +74,6 @@ class MapController extends AbstractController
             ))
             ->zoom($centerLat !== null ? 14 : 6);
 
-        // Polygons are no longer loaded here. The initial viewport bounds
-        // don't exist server-side — they're only known once Leaflet mounts
-        // client-side. The Stimulus controller fetches them from
-        // /map/polygons on connect and on every `moveend`.
-
         $needsBrowserGeolocation = $hasLocationConsent && $centerLat === null;
 
         return $this->render('landing/map/index.html.twig', [
@@ -88,8 +84,27 @@ class MapController extends AbstractController
     }
 
     /**
-     * @throws \JsonException
+     * Public map: networks only, never access points.
+     *
+     * @throws JsonException
      */
+    #[Route('/map/polygons', name: 'app_map_polygons', methods: ['GET'])]
+    public function polygons(Request $request): Response
+    {
+        $bbox = $this->parseBboxOrFail($request);
+        if ($bbox instanceof Response) {
+            return $bbox;
+        }
+        [$minLat, $minLng, $maxLat, $maxLng] = $bbox;
+
+        $networks = $this->networkRepository->findIntersectingBbox($minLat, $minLng, $maxLat, $maxLng);
+
+        return $this->json([
+            'networks' => $this->serializeNetworks($networks),
+            'accessPoints' => [],
+        ]);
+    }
+
     #[Route('dashboard/map', name: 'admin_dashboard_map')]
     #[isGranted(AdminPermissionsType::MAP_READ->value)]
     public function mapManagement(Request $request): Response
@@ -105,48 +120,59 @@ class MapController extends AbstractController
             ->center(new Point((float)$centerLat, (float)$centerLng))
             ->zoom(13);
 
-        $networks = $this->networkRepository->findAllWithAccessPoints();
-
-        $mapData = array_map(static function (Network $network) {
-            $geometry = $network->getGeometry();
-            return [
-                'id' => $network->getId(),
-                'name' => $network->getName(),
-                'geometry' => $geometry !== null ? json_decode(
-                    $geometry,
-                    true,
-                    512,
-                    JSON_THROW_ON_ERROR
-                ) : null,
-                'accessPoints' => array_map(static function (AccessPoint $ap) {
-                    $location = $ap->getLocationData(); // ['lat' => ..., 'lng' => ...] ou null
-                    return [
-                        'name' => $ap->getName() ?? $ap->getSsid(),
-                        'lat' => $location['lat'] ?? null,
-                        'lng' => $location['lng'] ?? null,
-                    ];
-                }, $network->getAccessPoints()->toArray()),
-            ];
-        }, $networks);
-
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'map' => $map,
             'data' => $data,
-            'networks' => $networks,
-            'mapData' => json_encode($mapData, JSON_THROW_ON_ERROR),
-            'allNetworks' => count($networks),
-            'allActiveNetworks' => count($networks),
             'searchTerm' => null,
+        ]);
+    }
+
+    /**
+     * Dashboard map: networks + access points, both bbox-filtered.
+     *
+     * @throws JsonException
+     */
+    #[Route('dashboard/map/polygons', name: 'admin_dashboard_map_polygons', methods: ['GET'])]
+    #[isGranted(AdminPermissionsType::MAP_READ->value)]
+    public function dashboardPolygons(Request $request): Response
+    {
+        $bbox = $this->parseBboxOrFail($request);
+        if ($bbox instanceof Response) {
+            return $bbox;
+        }
+        [$minLat, $minLng, $maxLat, $maxLng] = $bbox;
+
+        $networks = $this->networkRepository->findIntersectingBbox($minLat, $minLng, $maxLat, $maxLng);
+        $accessPoints = $this->accessPointRepository->findIntersectingBbox($minLat, $minLng, $maxLat, $maxLng);
+
+        return $this->json([
+            'networks' => $this->serializeNetworks($networks),
+            'accessPoints' => array_values(
+                array_filter(
+                    array_map(
+                        static function (AccessPoint $ap): ?array {
+                            $location = $ap->getLocationData();
+                            if ($location === null) {
+                                return null;
+                            }
+                            return [
+                                'id' => $ap->getId(),
+                                'name' => $ap->getName() ?? $ap->getSsid(),
+                                'lat' => $location['lat'],
+                                'lng' => $location['lng'],
+                            ];
+                        },
+                        $accessPoints
+                    )
+                )
+            ),
         ]);
     }
 
     /**
      * @throws JsonException
      */
-    #[Route(
-        'dashboard/map/network/create',
-        name: 'admin_dashboard_map_network_create'
-    )]
+    #[Route('dashboard/map/network/create', name: 'admin_dashboard_map_network_create')]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function createNetwork(Request $request): ?Response
     {
@@ -157,25 +183,19 @@ class MapController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $network = new Network();
             $networkDTO->updateEntity($network);
-            $this->applyBoundingBox($network);
             $network->setCreatedAt(new DateTimeImmutable());
             $network->setUpdatedAt(new DateTimeImmutable());
             $this->entityManager->persist($network);
             $this->entityManager->flush();
             $this->addFlash(
                 'success',
-                $this->translator->trans(
-                    'successNetworkCreate',
-                    ['%network%' => $network->getName()],
-                    'controllers'
-                )
+                $this->translator->trans('successNetworkCreate', ['%network%' => $network->getName()], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_map');
         }
 
         $lat = $request->query->get('lat');
         $lng = $request->query->get('lng');
-
         $centerLat = $lat ?? 37.7412;
         $centerLng = $lng ?? -25.6756;
 
@@ -188,14 +208,10 @@ class MapController extends AbstractController
             'map' => $map,
             'networkDTO' => $networkDTO,
             'network' => null,
-
         ]);
     }
 
-    #[Route(
-        'dashboard/map/network/delete/{id:network<\d+>}',
-        name: 'admin_dashboard_map_network_delete'
-    )]
+    #[Route('dashboard/map/network/delete/{id:network<\d+>}', name: 'admin_dashboard_map_network_delete')]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function deleteNetwork(Network $network): Response
     {
@@ -203,17 +219,13 @@ class MapController extends AbstractController
         $this->entityManager->flush();
         $this->addFlash(
             'success',
-            $this->translator->trans(
-                'successNetworkDelete',
-                ['%network%' => $network->getName()],
-                'controllers'
-            )
+            $this->translator->trans('successNetworkDelete', ['%network%' => $network->getName()], 'controllers')
         );
         return $this->redirectToRoute('admin_dashboard_map');
     }
 
     /**
-     * @throws \JsonException
+     * @throws JsonException
      */
     #[Route('dashboard/map/network/edit/{id:network<\d+>}', name: 'admin_dashboard_map_network_edit')]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
@@ -235,11 +247,7 @@ class MapController extends AbstractController
             $this->entityManager->flush();
             $this->addFlash(
                 'success',
-                $this->translator->trans(
-                    'successNetworkEdit',
-                    ['%network%' => $network->getName()],
-                    'controllers'
-                )
+                $this->translator->trans('successNetworkEdit', ['%network%' => $network->getName()], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_map');
         }
@@ -284,10 +292,7 @@ class MapController extends AbstractController
         ]);
     }
 
-    #[Route(
-        'dashboard/map/network/{id:network<\d+>}/accessPoints',
-        name: 'admin_dashboard_map_network_accessPoints'
-    )]
+    #[Route('dashboard/map/network/{id:network<\d+>}/accessPoints', name: 'admin_dashboard_map_network_accessPoints')]
     #[isGranted(AdminPermissionsType::MAP_READ->value)]
     public function networkAccessPoints(Network $network): Response
     {
@@ -299,13 +304,7 @@ class MapController extends AbstractController
         ]);
     }
 
-    /**
-     * @throws \JsonException
-     */
-    #[Route(
-        'dashboard/map/network/{id:network<\d+>}/accessPoints/create',
-        name: 'admin_dashboard_map_accessPoint_create'
-    )]
+    #[Route('dashboard/map/network/{id:network<\d+>}/accessPoints/create', name: 'admin_dashboard_map_accessPoint_create')]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function networkAccessPointsCreate(Network $network, Request $request): Response
     {
@@ -344,12 +343,7 @@ class MapController extends AbstractController
                     'controllers'
                 )
             );
-            return $this->redirectToRoute(
-                'admin_dashboard_map_network_accessPoints',
-                [
-                    'id' => $network->getId(),
-                ]
-            );
+            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
         }
 
         return $this->render('dashboard/shared/settings_actions/map/access_point/create.html.twig', [
@@ -360,14 +354,10 @@ class MapController extends AbstractController
             'networkGeometry' => $network->getGeometry(),
             'accessPointDTO' => $accessPointDTO,
             'accessPoint' => null,
-
         ]);
     }
 
-    #[Route(
-        'dashboard/map/network/{network_id<\d+>}/accessPoints/{ap_id<\d+>}/edit',
-        name: 'admin_dashboard_map_accessPoint_edit'
-    )]
+    #[Route('dashboard/map/network/{network_id<\d+>}/accessPoints/{ap_id<\d+>}/edit', name: 'admin_dashboard_map_accessPoint_edit')]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function networkAccessPointsEdit(
         #[MapEntity(id: 'ap_id')] AccessPoint $accessPoint,
@@ -406,12 +396,7 @@ class MapController extends AbstractController
                     'controllers'
                 )
             );
-            return $this->redirectToRoute(
-                'admin_dashboard_map_network_accessPoints',
-                [
-                    'id' => $network->getId(),
-                ]
-            );
+            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
         }
         return $this->render('dashboard/shared/settings_actions/map/access_point/create.html.twig', [
             'form' => $form->createView(),
@@ -420,14 +405,10 @@ class MapController extends AbstractController
             'accessPointDTO' => $accessPointDTO,
             'network' => $network,
             'accessPoint' => $accessPoint,
-
         ]);
     }
 
-    #[Route(
-        'dashboard/map/network/{network_id<\d+>}/accessPoints/{ap_id<\d+>}/delete',
-        name: 'admin_dashboard_map_accessPoint_delete'
-    )]
+    #[Route('dashboard/map/network/{network_id<\d+>}/accessPoints/{ap_id<\d+>}/delete', name: 'admin_dashboard_map_accessPoint_delete')]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function networkAccessPointsDelete(
         #[MapEntity(id: 'ap_id')] AccessPoint $accessPoint,
@@ -443,19 +424,9 @@ class MapController extends AbstractController
                 'controllers'
             )
         );
-        return $this->redirectToRoute(
-            'admin_dashboard_map_network_accessPoints',
-            [
-                'id' => $network->getId(),
-            ]
-        );
+        return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
     }
 
-    /**
-     * Location lookups (IP-based or browser-based) are only allowed once the user
-     * has accepted all cookies, or explicitly enabled the "rememberMe" scope
-     * in their saved cookie preferences.
-     */
     private function hasLocationConsent(Request $request): bool
     {
         if ($request->cookies->get('cookies_accepted') === 'true') {
@@ -477,13 +448,36 @@ class MapController extends AbstractController
         return ($preferences['rememberMe'] ?? false) === true;
     }
 
-    private function applyBoundingBox(Network $network): void
+    private function parseBboxOrFail(Request $request): array|Response
     {
-        $bbox = $this->networkGeometryMapper->extractBoundingBox($network->getGeometry());
+        $minLat = $request->query->get('minLat');
+        $minLng = $request->query->get('minLng');
+        $maxLat = $request->query->get('maxLat');
+        $maxLng = $request->query->get('maxLng');
 
-        $network->setMinLat($bbox['minLat'] ?? null);
-        $network->setMinLng($bbox['minLng'] ?? null);
-        $network->setMaxLat($bbox['maxLat'] ?? null);
-        $network->setMaxLng($bbox['maxLng'] ?? null);
+        if ($minLat === null || $minLng === null || $maxLat === null || $maxLng === null) {
+            return $this->json(['error' => 'Missing bbox parameters'], Response::HTTP_BAD_REQUEST);
+        }
+
+        return [(float)$minLat, (float)$minLng, (float)$maxLat, (float)$maxLng];
+    }
+
+    /**
+     * @param Network[] $networks
+     * @return array<int, array{id: int, name: string, geometry: mixed}>
+     * @throws JsonException
+     */
+    private function serializeNetworks(array $networks): array
+    {
+        return array_map(
+            static fn(Network $network): array => [
+                'id' => $network->getId(),
+                'name' => $network->getName(),
+                'geometry' => $network->getGeometry() !== null
+                    ? json_decode($network->getGeometry(), true, 512, JSON_THROW_ON_ERROR)
+                    : null,
+            ],
+            $networks
+        );
     }
 }

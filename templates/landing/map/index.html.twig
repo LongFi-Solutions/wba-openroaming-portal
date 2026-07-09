@@ -48,14 +48,12 @@
                 </div>
 
                 <div class="relative z-0 overflow-hidden w-full h-[500px] rounded-2xl shadow-lg coverage-map-public"
+                        {% set mapControllers = stimulus_controller('coverage-map-style')
+                            |stimulus_controller('network-map-polygons', { polygonsUrl: path('app_map_polygons') }) %}
                         {% if needsBrowserGeolocation %}
-                            {{ stimulus_controller('coverage-map-style')
-                            |stimulus_controller('geolocation')
-                            |stimulus_controller('network-map-polygons', { polygonsUrl: path('app_map_polygons') }) }}
-                        {% else %}
-                            {{ stimulus_controller('coverage-map-style')
-                            |stimulus_controller('network-map-polygons', { polygonsUrl: path('app_map_polygons') }) }}
+                            {% set mapControllers = mapControllers|stimulus_controller('geolocation') %}
                         {% endif %}
+                        {{ mapControllers }}
                 >
                     {{ ux_map(map, {
                         style: 'height: 100%; width: 100%;',

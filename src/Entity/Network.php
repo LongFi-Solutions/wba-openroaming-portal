@@ -31,18 +31,6 @@ class Network
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $minLat = null;
-
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $minLng = null;
-
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $maxLat = null;
-
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $maxLng = null;
-
     /** @var Collection<int, AccessPoint> */
     #[ORM\OneToMany(targetEntity: AccessPoint::class, mappedBy: 'network', orphanRemoval: true)]
     private Collection $accessPoints;
@@ -132,50 +120,6 @@ class Network
         if ($this->accessPoints->removeElement($accessPoint) && $accessPoint->getNetwork() === $this) {
             $accessPoint->setNetwork(null);
         }
-        return $this;
-    }
-
-    public function getMinLat(): ?float
-    {
-        return $this->minLat;
-    }
-
-    public function setMinLat(?float $minLat): static
-    {
-        $this->minLat = $minLat;
-        return $this;
-    }
-
-    public function getMinLng(): ?float
-    {
-        return $this->minLng;
-    }
-
-    public function setMinLng(?float $minLng): static
-    {
-        $this->minLng = $minLng;
-        return $this;
-    }
-
-    public function getMaxLat(): ?float
-    {
-        return $this->maxLat;
-    }
-
-    public function setMaxLat(?float $maxLat): static
-    {
-        $this->maxLat = $maxLat;
-        return $this;
-    }
-
-    public function getMaxLng(): ?float
-    {
-        return $this->maxLng;
-    }
-
-    public function setMaxLng(?float $maxLng): static
-    {
-        $this->maxLng = $maxLng;
         return $this;
     }
 }

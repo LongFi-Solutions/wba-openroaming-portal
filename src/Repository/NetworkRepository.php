@@ -60,22 +60,20 @@ class NetworkRepository extends ServiceEntityRepository
         return $qb;
     }
 
-    public function findIntersectingBbox(
-        float $minLat,
-        float $minLng,
-        float $maxLat,
-        float $maxLng,
-    ): array {
-        return $this->createQueryBuilder('n')
-            ->andWhere('n.minLat <= :maxLat')
-            ->andWhere('n.maxLat >= :minLat')
-            ->andWhere('n.minLng <= :maxLng')
-            ->andWhere('n.maxLng >= :minLng')
-            ->setParameter('minLat', $minLat)
-            ->setParameter('maxLat', $maxLat)
-            ->setParameter('minLng', $minLng)
-            ->setParameter('maxLng', $maxLng)
-            ->getQuery()
-            ->getResult();
+    public function findIntersectingBbox(float $minLat, float $minLng, float $maxLat, float $maxLng): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $bboxWkt = sprintf(
+            'POLYGON((%1$F %2$F, %1$F %4$F, %3$F %4$F, %3$F %2$F, %1$F %2$F))',
+            $minLat, $minLng, $maxLat, $maxLng
+        );
+
+        $ids = $conn->fetchFirstColumn(
+            'SELECT id FROM `Network` WHERE MBRIntersects(geometry, ST_GeomFromText(:bboxWkt, 4326))',
+            ['bboxWkt' => $bboxWkt]
+        );
+
+        return $ids === [] ? [] : $this->findBy(['id' => $ids]);
     }
 }
