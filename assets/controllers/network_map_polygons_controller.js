@@ -74,14 +74,15 @@ export default class extends Controller {
             return;
         }
 
-        this.L.polygon(latlngs, {
+        const polygon = this.L.polygon(latlngs, {
             color: '#8AB742',
-            weight: 3,
+            weight: 2,
+            dashArray: '6, 8',
             fillColor: '#8AB742',
             fillOpacity: 0.18,
         })
-          .addTo(this.layerGroup)
-          .bindPopup(network.name);
+            .addTo(this.layerGroup)
+            .bindPopup(network.name);
     }
 
     drawAccessPoint(ap) {
@@ -89,8 +90,6 @@ export default class extends Controller {
             return;
         }
 
-        this.L.marker([ap.lat, ap.lng])
-          .addTo(this.layerGroup)
-          .bindPopup(ap.name);
+        this.L.marker([ap.lat, ap.lng]).addTo(this.layerGroup).bindPopup(ap.name);
     }
 }
