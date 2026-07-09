@@ -33,3 +33,6 @@ turnstileCookie:
 rememberMeCookie:
     title: 'Remember Me'
     description: 'Saves user session if the account was previously active.'
+locationCookie:
+    title: "Location Cookies"
+    description: "Allows us to obtain your approximate location through the browser to automatically center the map on your region and improve your experience."
