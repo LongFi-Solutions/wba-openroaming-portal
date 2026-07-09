@@ -6,6 +6,8 @@ namespace App\Validator\Constraints;
 
 use App\DTO\NetworkDTO;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
+use JsonException;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -17,6 +19,10 @@ class ValidNetworkGeometryValidator extends ConstraintValidator
     ) {
     }
 
+    /**
+     * @throws \JsonException
+     * @throws Exception
+     */
     public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof ValidNetworkGeometry) {
@@ -33,7 +39,7 @@ class ValidNetworkGeometryValidator extends ConstraintValidator
 
         try {
             $geoJsonArr = json_decode($value->geometryJson, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException) {
+        } catch (JsonException) {
             $this->context->buildViolation('invalidGeometryFormat')
                 ->atPath('geometryJson')
                 ->addViolation();
@@ -86,7 +92,7 @@ class ValidNetworkGeometryValidator extends ConstraintValidator
             }
         }
 
-        if ($polygons === [] || !is_array($polygons)) {
+        if ($polygons === []) {
             $this->context->buildViolation('invalidGeometryFormat')
                 ->atPath('geometryJson')
                 ->addViolation();
@@ -141,6 +147,9 @@ class ValidNetworkGeometryValidator extends ConstraintValidator
         }
     }
 
+    /**
+     * @param array<mixed> $coordinates
+     */
     private function validateCoordinatesBounds(array $coordinates): bool
     {
         foreach ($coordinates as $item) {
