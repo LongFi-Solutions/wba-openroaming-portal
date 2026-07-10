@@ -6,9 +6,8 @@ use App\DTO\AccessPointDTO;
 use App\Entity\AccessPoint;
 use App\Entity\Network;
 use App\Form\CreateAccessPointType;
-use Doctrine\ORM\EntityManagerInterface;
-use App\Form\CreateNetworkType;
 use App\Security\Voter\UserAuthenticationVoter;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormErrorIterator;
@@ -20,7 +19,6 @@ use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\LiveComponent\LiveCollectionTrait;
 use Symfony\UX\Map\Map;
-use Symfony\UX\Map\Marker;
 use Symfony\UX\Map\Point;
 
 #[AsLiveComponent]
@@ -88,26 +86,8 @@ final class ManageAccessPointsForm extends AbstractController
 
     public function getMap(): Map
     {
-        $map = new Map()
+        return new Map()
             ->center(new Point(37.7412, -25.6756))
             ->zoom(13);
-
-        $accessPoints = $this->entityManager->getRepository(AccessPoint::class)->findBy(['network' => $this->network]);
-
-        foreach ($accessPoints as $ap) {
-            if ($this->accessPointDTO && $this->accessPointDTO->ssid === $ap->getSsid()) {
-                continue;
-            }
-
-            $locationData = $ap->getLocationData();
-            if ($locationData !== null) {
-                $map->addMarker(new Marker(
-                    position: new Point($locationData['lat'], $locationData['lng']),
-                    title: $ap->getName() ?? 'Access Point'
-                ));
-            }
-        }
-
-        return $map;
     }
 }
