@@ -8,6 +8,14 @@ stages:
   - build
   - scan
 
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+
 build_test_image:
   stage: prepare
   image: docker:latest
@@ -20,10 +28,14 @@ build_test_image:
     - docker build --cache-from $CI_REGISTRY_IMAGE:tests-latest -t $CI_REGISTRY_IMAGE:tests-latest -f DockerfileTests .
     - docker push $CI_REGISTRY_IMAGE:tests-latest
   rules:
-    - changes:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
         - DockerfileTests
         - composer.lock
-        - package-lock.json
+    - if: '$CI_COMMIT_BRANCH'
+      changes:
+        - DockerfileTests
+        - composer.lock
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_PIPELINE_SOURCE == "web"'
 
@@ -45,6 +57,8 @@ yamllint:
   script:
     - yamllint -f colored -c yamllint.yaml .
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
     - if: '$CI_COMMIT_BRANCH'
       when: always
     - if: '$CI_COMMIT_TAG'
