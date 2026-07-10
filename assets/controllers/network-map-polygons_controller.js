@@ -82,15 +82,15 @@ export default class extends Controller {
             fillColor: '#8b5cf6',
             fillOpacity: 0.18,
         })
-          .addTo(this.layerGroup)
-          .bindPopup(network.name);
+            .addTo(this.layerGroup)
+            .bindPopup(network.name);
     }
 
     drawAccessPoint(ap) {
         if (ap.lat === null || ap.lng === null) return;
         this.L.marker([ap.lat, ap.lng], { icon: this._getIcon() })
-          .addTo(this.layerGroup)
-          .bindPopup(ap.name);
+            .addTo(this.layerGroup)
+            .bindPopup(ap.name);
     }
 
     _getIcon() {

@@ -119,7 +119,6 @@ export default class extends Controller {
 
                     document.cookie = `user_lat=${lat}; path=/; max-age=${maxAge}; path=/; SameSite=Lax`;
                     document.cookie = `user_lng=${lng}; path=/; max-age=${maxAge}; path=/; SameSite=Lax`;
-
                 },
                 (error) => {
                     console.error('Erro ao obter geolocalização:', error);

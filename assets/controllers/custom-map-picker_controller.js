@@ -95,23 +95,25 @@ export default class extends Controller {
         }
 
         const polygonCoordsList =
-          geoJson.type === 'Polygon' ? [geoJson.coordinates]
-            : geoJson.type === 'MultiPolygon' ? geoJson.coordinates
-              : [];
+            geoJson.type === 'Polygon'
+                ? [geoJson.coordinates]
+                : geoJson.type === 'MultiPolygon'
+                  ? geoJson.coordinates
+                  : [];
 
         const layers = polygonCoordsList
-          .map((polygonCoords) => polygonCoords[0]) // outer ring only
-          .filter((ring) => ring?.length > 0)
-          .map((ring) => {
-              const leafletCoords = ring.map(([lng, lat]) => [lat, lng]);
-              return this.L.polygon(leafletCoords, {
-                  color: '#2563eb',
-                  fillColor: '#3b82f6',
-                  fillOpacity: 0.35,
-                  weight: 3,
-                  interactive: false,
-              }).addTo(this.map);
-          });
+            .map((polygonCoords) => polygonCoords[0]) // outer ring only
+            .filter((ring) => ring?.length > 0)
+            .map((ring) => {
+                const leafletCoords = ring.map(([lng, lat]) => [lat, lng]);
+                return this.L.polygon(leafletCoords, {
+                    color: '#2563eb',
+                    fillColor: '#3b82f6',
+                    fillOpacity: 0.35,
+                    weight: 3,
+                    interactive: false,
+                }).addTo(this.map);
+            });
 
         if (layers.length > 0) {
             const group = this.L.featureGroup(layers);
@@ -131,8 +133,8 @@ export default class extends Controller {
             if (ap.lat == null || ap.lng == null) return;
 
             this.L.marker([ap.lat, ap.lng], { icon })
-              .bindPopup(ap.name || 'Access Point')
-              .addTo(this.map);
+                .bindPopup(ap.name || 'Access Point')
+                .addTo(this.map);
         });
     }
 
