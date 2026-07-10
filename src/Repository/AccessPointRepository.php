@@ -104,7 +104,17 @@ class AccessPointRepository extends ServiceEntityRepository
                 WHERE MBRContains(ST_GeomFromText(:bboxWkt, 4326), location)
             ';
 
-        return $conn->fetchAllAssociative($sql, ['bboxWkt' => $bboxWkt]);
+        $results = $conn->fetchAllAssociative($sql, ['bboxWkt' => $bboxWkt]);
+
+        /** @var array<int, array{
+         *     id: int|string,
+         *     name: string|null,
+         *     ssid: string|null,
+         *     lat: float|string,
+         *     lng: float|string
+         * }> $results
+         */
+        return $results;
     }
 
     /**
