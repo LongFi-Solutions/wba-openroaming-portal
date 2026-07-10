@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\AccessPoint;
 use App\Entity\Network;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -66,6 +67,9 @@ class AccessPointRepository extends ServiceEntityRepository
         return $qb;
     }
 
+    /**
+     * @throws Exception
+     */
     public function findIntersectingBbox(float $minLat, float $minLng, float $maxLat, float $maxLng): array
     {
         $conn = $this->getEntityManager()->getConnection();
