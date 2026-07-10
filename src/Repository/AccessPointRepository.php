@@ -96,8 +96,8 @@ class AccessPointRepository extends ServiceEntityRepository
             id, 
             name, 
             ssid, 
-            ST_X(location) AS lng, 
-            ST_Y(location) AS lat 
+            ST_Y(location) AS lng, 
+            ST_X(location) AS lat 
         FROM AccessPoint
         WHERE network_id = :networkId 
           AND location IS NOT NULL
