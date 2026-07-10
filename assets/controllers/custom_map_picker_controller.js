@@ -1,149 +1,186 @@
 import { Controller } from '@hotwired/stimulus';
 
+const DEFAULT_COLOR = '#dc2626';
+const DEFAULT_RANGE_RADIUS = 1500; // meters
+const ICON_SIZE = [34, 44];
+const ICON_ANCHOR = [17, 44];
+const POPUP_ANCHOR = [0, -40];
+
 export default class extends Controller {
     static targets = ['latitude', 'longitude'];
 
     static values = {
         networkGeometry: { type: String, default: '' },
+        markerIcon: { type: String, default: '' },
+        markerColor: { type: String, default: DEFAULT_COLOR },
+        rangeRadius: { type: Number, default: DEFAULT_RANGE_RADIUS },
     };
 
     connect() {
         this.marker = null;
+        this.rangeCircle = null;
+        this._divIcon = null; // built lazily once Leaflet (this.L) is available, then cached
+        this._boundHandleMapClick = this._handleMapClick.bind(this);
     }
 
-    _applyColorFilter() {
-        if (!this.marker) return;
-
-        const iconElement = this.marker._icon;
-        if (iconElement) {
-            iconElement.style.filter = 'hue-rotate(140deg) saturate(140%)';
-        }
+    disconnect() {
+        this.map?.off('click', this._boundHandleMapClick);
     }
 
     _onConnect(event) {
-        const map = event.detail.leafletMap || event.detail.map;
-        const L = window.L || event.detail.L;
+        const map = event.detail.map;
+        const L = event.detail.L || window.L;
 
         if (!map || !L) return;
 
         this.map = map;
         this.L = L;
 
-        if (this.hasNetworkGeometryValue && this.networkGeometryValue) {
-            try {
-                const geoJson = JSON.parse(this.networkGeometryValue);
-                let polygonCoordsList = [];
+        this._renderNetworkGeometry();
+        this._renderInitialMarker();
 
-                if (geoJson.type === 'Polygon') {
-                    polygonCoordsList = [geoJson.coordinates];
-                } else if (geoJson.type === 'MultiPolygon') {
-                    polygonCoordsList = geoJson.coordinates;
-                }
+        setTimeout(() => this.map.invalidateSize(), 200);
 
-                const layers = [];
-                polygonCoordsList.forEach((polygonCoords) => {
-                    const coordinates = polygonCoords[0]; // outer ring
-                    if (coordinates && coordinates.length > 0) {
-                        const leafletCoords = coordinates.map((p) => [p[1], p[0]]);
-                        const layer = this.L.polygon(leafletCoords, {
-                            color: '#2563eb',
-                            fillColor: '#3b82f6',
-                            fillOpacity: 0.35,
-                            weight: 3,
-                            interactive: false,
-                        }).addTo(this.map);
-                        layers.push(layer);
-                    }
-                });
-
-                if (layers.length > 0) {
-                    const group = new this.L.FeatureGroup(layers);
-                    this.map.fitBounds(group.getBounds(), { padding: [40, 40] });
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        }
-
-        let latRaw = this.latitudeTarget.value
-            ? this.latitudeTarget.value.toString().replace(',', '.')
-            : '';
-        let lngRaw = this.longitudeTarget.value
-            ? this.longitudeTarget.value.toString().replace(',', '.')
-            : '';
-
-        const savedLat = parseFloat(latRaw);
-        const savedLng = parseFloat(lngRaw);
-
-        if (!isNaN(savedLat) && !isNaN(savedLng) && savedLat !== 0 && savedLng !== 0) {
-            this.marker = this.L.marker([savedLat, savedLng]).addTo(this.map);
-            this._applyColorFilter();
-            this.map.setView([savedLat, savedLng], 17);
-        }
-
-        setTimeout(() => {
-            this.map.invalidateSize();
-        }, 200);
-
-        this.map.on('click', (e) => {
-            const latString = e.latlng.lat.toFixed(7);
-            const lngString = e.latlng.lng.toFixed(7);
-
-            this.latitudeTarget.value = latString;
-            this.longitudeTarget.value = lngString;
-
-            this.latitudeTarget.dispatchEvent(new Event('change', { bubbles: true }));
-            this.longitudeTarget.dispatchEvent(new Event('change', { bubbles: true }));
-
-            const markerLatLng = new this.L.LatLng(parseFloat(latString), parseFloat(lngString));
-            if (this.marker) {
-                this.marker.setLatLng(markerLatLng);
-            } else {
-                this.marker = this.L.marker(markerLatLng).addTo(this.map);
-            }
-            this._applyColorFilter();
-        });
+        // Defensive: avoids stacking a second click handler if _onConnect ever fires twice.
+        this.map.off('click', this._boundHandleMapClick);
+        this.map.on('click', this._boundHandleMapClick);
     }
 
     syncMap() {
         if (!this.map || !this.L) return;
 
-        let latRaw = this.latitudeTarget.value.toString().replace(',', '.');
-        let lngRaw = this.longitudeTarget.value.toString().replace(',', '.');
+        const coords = this._readCoordsFromInputs();
+        if (!coords) return;
 
-        const lat = parseFloat(latRaw);
-        const lng = parseFloat(lngRaw);
-
-        if (!isNaN(lat) && !isNaN(lng)) {
-            const newLatLng = new this.L.LatLng(lat, lng);
-
-            const currentZoom = this.map.getZoom();
-            this.map.setView(newLatLng, currentZoom);
-
-            if (this.marker) {
-                this.marker.setLatLng(newLatLng);
-            } else {
-                this.marker = this.L.marker(newLatLng).addTo(this.map);
-            }
-            this._applyColorFilter();
-        }
+        this.map.setView(coords, this.map.getZoom());
+        this._placeMarker(coords);
     }
 
     clearCoordinates(event) {
-        if (event) event.preventDefault();
+        event?.preventDefault();
 
-        if (this.hasLatitudeTarget) {
-            this.latitudeTarget.value = '';
-            this.latitudeTarget.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        if (this.hasLongitudeTarget) {
-            this.longitudeTarget.value = '';
-            this.longitudeTarget.dispatchEvent(new Event('change', { bubbles: true }));
+        for (const target of [this.latitudeTarget, this.longitudeTarget]) {
+            if (target) {
+                target.value = '';
+                target.dispatchEvent(new Event('change', { bubbles: true }));
+            }
         }
 
-        if (this.map && this.marker) {
-            this.marker.remove();
-            this.marker = null;
+        this.marker?.remove();
+        this.marker = null;
+        this.rangeCircle?.remove();
+        this.rangeCircle = null;
+    }
+
+    // --- internal helpers -------------------------------------------------
+
+    _handleMapClick(e) {
+        const { lat, lng } = e.latlng;
+        const latString = lat.toFixed(7);
+        const lngString = lng.toFixed(7);
+
+        this.latitudeTarget.value = latString;
+        this.longitudeTarget.value = lngString;
+        this.latitudeTarget.dispatchEvent(new Event('change', { bubbles: true }));
+        this.longitudeTarget.dispatchEvent(new Event('change', { bubbles: true }));
+
+        this._placeMarker(new this.L.LatLng(parseFloat(latString), parseFloat(lngString)));
+    }
+
+    _renderNetworkGeometry() {
+        if (!this.hasNetworkGeometryValue || !this.networkGeometryValue) return;
+
+        let geoJson;
+        try {
+            geoJson = JSON.parse(this.networkGeometryValue);
+        } catch (error) {
+            console.error('Invalid network geometry JSON:', error);
+            return;
         }
+
+        const polygonCoordsList =
+          geoJson.type === 'Polygon' ? [geoJson.coordinates]
+            : geoJson.type === 'MultiPolygon' ? geoJson.coordinates
+              : [];
+
+        const layers = polygonCoordsList
+          .map((polygonCoords) => polygonCoords[0]) // outer ring only
+          .filter((ring) => ring?.length > 0)
+          .map((ring) => {
+              const leafletCoords = ring.map(([lng, lat]) => [lat, lng]);
+              return this.L.polygon(leafletCoords, {
+                  color: '#2563eb',
+                  fillColor: '#3b82f6',
+                  fillOpacity: 0.35,
+                  weight: 3,
+                  interactive: false,
+              }).addTo(this.map);
+          });
+
+        if (layers.length > 0) {
+            const group = this.L.featureGroup(layers);
+            this.map.fitBounds(group.getBounds(), { padding: [40, 40] });
+        }
+    }
+
+    _renderInitialMarker() {
+        const coords = this._readCoordsFromInputs();
+        if (!coords) return;
+
+        this._placeMarker(coords);
+        this.map.setView(coords, 17);
+    }
+
+    _readCoordsFromInputs() {
+        const lat = this._parseCoord(this.latitudeTarget.value);
+        const lng = this._parseCoord(this.longitudeTarget.value);
+
+        if (lat === null || lng === null || (lat === 0 && lng === 0)) return null;
+
+        return new this.L.LatLng(lat, lng);
+    }
+
+    _parseCoord(rawValue) {
+        if (!rawValue) return null;
+        const value = parseFloat(rawValue.toString().replace(',', '.'));
+        return Number.isFinite(value) ? value : null;
+    }
+
+    _placeMarker(latlng) {
+        if (this.marker) {
+            this.marker.setLatLng(latlng);
+        } else {
+            this.marker = this.L.marker(latlng, { icon: this._getIcon() }).addTo(this.map);
+        }
+
+        if (this.rangeCircle) {
+            this.rangeCircle.setLatLng(latlng);
+        } else {
+            this.rangeCircle = this.L.circle(latlng, {
+                radius: this.rangeRadiusValue,
+                color: this.markerColorValue,
+                weight: 1.5,
+                dashArray: '4 6',
+                fillColor: this.markerColorValue,
+                fillOpacity: 0.08,
+                interactive: false,
+            }).addTo(this.map);
+        }
+    }
+
+    // Lazily built (needs this.L to exist) and cached — the glyph/color never
+    // change mid-session, so there's no reason to rebuild the divIcon per click.
+    _getIcon() {
+        if (this._divIcon) return this._divIcon;
+
+        this._divIcon = this.L.divIcon({
+            html: this.hasMarkerIconValue ? this.markerIconValue : '',
+            className: 'custom-pin-icon',
+            iconSize: [33, 40],
+            iconAnchor: [16, 40],   // bottom-center of the pin's point
+            popupAnchor: [0, -36],
+        });
+
+        return this._divIcon;
     }
 }
