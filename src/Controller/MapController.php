@@ -133,24 +133,16 @@ class MapController extends AbstractController
 
         return $this->json([
             'networks' => $this->serializeNetworks($networks),
-            'accessPoints' => array_values(
-                array_filter(
-                    array_map(
-                        static function (AccessPoint $ap): ?array {
-                            $location = $ap->getLocationData();
-                            if ($location === null) {
-                                return null;
-                            }
-                            return [
-                                'id' => $ap->getId(),
-                                'name' => $ap->getName() ?? $ap->getSsid(),
-                                'lat' => $location['lat'],
-                                'lng' => $location['lng'],
-                            ];
-                        },
-                        $accessPoints
-                    )
-                )
+            'accessPoints' => array_map(
+                static function (array $ap): array {
+                    return [
+                        'id' => $ap['id'],
+                        'name' => $ap['name'] ?? $ap['ssid'],
+                        'lat' => (float) $ap['lat'],
+                        'lng' => (float) $ap['lng'],
+                    ];
+                },
+                $accessPoints
             ),
         ]);
     }
@@ -340,9 +332,13 @@ class MapController extends AbstractController
             'networkGeometry' => $network->getGeometry(),
             'accessPointDTO' => $accessPointDTO,
             'accessPoint' => null,
+            'otherAccessPoints' => $this->serializeOtherAccessPoints($network, null),
         ]);
     }
 
+    /**
+     * @throws JsonException
+     */
     #[Route('dashboard/map/network/{network_id<\d+>}/accessPoints/{ap_id<\d+>}/edit', name: 'admin_dashboard_map_accessPoint_edit')]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function networkAccessPointsEdit(
@@ -391,6 +387,8 @@ class MapController extends AbstractController
             'accessPointDTO' => $accessPointDTO,
             'network' => $network,
             'accessPoint' => $accessPoint,
+            'networkGeometry' => $network->getGeometry(),
+            'otherAccessPoints' => $this->serializeOtherAccessPoints($network, $accessPoint),
         ]);
     }
 
@@ -465,5 +463,34 @@ class MapController extends AbstractController
             ],
             $networks
         );
+    }
+
+    /**
+     * @return array<int, array{lat: float, lng: float, name: string}>
+     */
+    private function serializeOtherAccessPoints(Network $network, ?AccessPoint $excludeAccessPoint): array
+    {
+        if (!$network->getId()) {
+            return [];
+        }
+
+        $accessPoints = $this->accessPointRepository->findByNetworkWithCoordinates($network);
+
+        $excludeId = $excludeAccessPoint?->getId();
+        $result = [];
+
+        foreach ($accessPoints as $ap) {
+            if ($excludeId !== null && $ap['id'] === $excludeId) {
+                continue;
+            }
+
+            $result[] = [
+                'lat' => (float) $ap['lat'],
+                'lng' => (float) $ap['lng'],
+                'name' => $ap['name'] ?? $ap['ssid'],
+            ];
+        }
+
+        return $result;
     }
 }

@@ -3,15 +3,13 @@
 
     {# SSID #}
     <td class="p-4 pl-8">
-        {{ accessPoint.ssid }}
+        {{ accessPoint.entity.ssid }}
     </td>
 
     <td class="p-4 pl-8 text-sm font-mono">
-        {% set loc = accessPoint.locationData %}
-
-        {% if loc %}
-            <span class="text-gray-700 block">Lat: {{ loc.lat|number_format(6) }}</span>
-            <span class="text-gray-400 block text-xs">Lng: {{ loc.lng|number_format(6) }}</span>
+        {% if accessPoint.lat is not null %}
+            <span class="text-gray-700 block">Lat: {{ accessPoint.lat|number_format(6) }}</span>
+            <span class="text-gray-400 block text-xs">Lng: {{ accessPoint.lng|number_format(6) }}</span>
         {% else %}
             <span class="text-gray-400 italic text-xs">{{ 'noData'|trans({}, '_blacklist') }}</span>
         {% endif %}
@@ -19,8 +17,8 @@
 
     {# Created At #}
     <td class="p-4 pl-8">
-        {% if accessPoint.createdAt %}
-            {{ accessPoint.createdAt|date('d/m/Y H:i') }}
+        {% if accessPoint.entity.createdAt %}
+            {{ accessPoint.entity.createdAt|date('d/m/Y H:i') }}
         {% else %}
             <span class="pill-error">{{ 'noData'|trans({}, '_blacklist') }}</span>
         {% endif %}
@@ -28,8 +26,8 @@
 
     {# Updated At #}
     <td class="p-4 pl-8">
-        {% if accessPoint.updatedAt %}
-            {{ accessPoint.updatedAt|date('d/m/Y H:i') }}
+        {% if accessPoint.entity.updatedAt %}
+            {{ accessPoint.entity.updatedAt|date('d/m/Y H:i') }}
         {% else %}
             <span class="pill-error">{{ 'noData'|trans({}, '_blacklist') }}</span>
         {% endif %}
@@ -49,16 +47,16 @@
                     {{ stimulus_target('nav-submenu', 'container') }}>
                 <ul class="p-2 text-gray-700 gap-y-2">
                     <li>
-                        <a href="{{ path('admin_dashboard_map_accessPoint_edit', {network_id: network.id, ap_id: accessPoint.id}) }}"
+                        <a href="{{ path('admin_dashboard_map_accessPoint_edit', {network_id: network.id, ap_id: accessPoint.entity.id}) }}"
                            class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
                             <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3 fill-none stroke-current" />
                             {{ 'edit'|trans({}, '_network') }}
                         </a>
                     </li>
                     <li>
-                        <a href="{{ path('admin_dashboard_map_accessPoint_delete', {network_id: network.id, ap_id: accessPoint.id}) }}"
+                        <a href="{{ path('admin_dashboard_map_accessPoint_delete', {network_id: network.id, ap_id: accessPoint.entity.id}) }}"
                            class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
-                            <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-current stroke-none"/>
+                            <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-none stroke-current"/>
                             {{ 'delete'|trans({}, '_network') }}
                         </a>
                     </li>

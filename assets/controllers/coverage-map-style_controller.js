@@ -15,10 +15,10 @@ export default class extends Controller {
     _onPolygonBeforeCreate(event) {
         // Leaflet bridge: these become L.Polygon options
         event.detail.definition.bridgeOptions = {
-            color: '#8AB742',
             weight: 2,
-            fillColor: '#8AB742',
-            fillOpacity: 0.25,
+            color: '#7c3aed',
+            fillColor: '#8b5cf6',
+            fillOpacity: 0.18,
             ...event.detail.definition.bridgeOptions,
         };
     }

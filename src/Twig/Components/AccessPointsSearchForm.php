@@ -4,14 +4,10 @@ namespace App\Twig\Components;
 
 use App\Entity\AccessPoint;
 use App\Entity\Network;
-use App\Entity\User;
 use App\Repository\AccessPointRepository;
-use App\Repository\NetworkRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Form\FormFactoryInterface;
+use Doctrine\DBAL\Connection;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -67,6 +63,50 @@ class AccessPointsSearchForm
         }
 
         return $this->cachedAccessPoints;
+    }
+
+    /**
+     * @return array<int, array>
+     */
+    public function getAccessPointsData(): array
+    {
+        $paginator = $this->getAccessPoints();
+        $entities = iterator_to_array($paginator);
+
+        if (empty($entities)) {
+            return [];
+        }
+
+        $ids = array_values(array_map(static fn(AccessPoint $ap) => $ap->getId(), $entities));
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+        $conn = $this->accessPointRepository->getEntityManager()->getConnection();
+
+        $sql = "SELECT id, ST_X(location) as lng, ST_Y(location) as lat FROM AccessPoint WHERE id IN ($placeholders) AND location IS NOT NULL";
+
+        $stmt = $conn->executeQuery($sql, $ids);
+        $coords = $stmt->fetchAllAssociative();
+
+        $coordMap = [];
+
+        foreach ($coords as $row) {
+            $coordMap[$row['id']] = [
+                'lat' => (float) $row['lat'],
+                'lng' => (float) $row['lng']
+            ];
+        }
+
+        $data = [];
+        foreach ($entities as $ap) {
+            $data[] = [
+                'entity' => $ap,
+                'lat' => $coordMap[$ap->getId()]['lat'] ?? null,
+                'lng' => $coordMap[$ap->getId()]['lng'] ?? null,
+            ];
+        }
+
+        return $data;
     }
 
     private function getQueryBuilder(): QueryBuilder

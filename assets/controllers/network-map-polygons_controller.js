@@ -75,10 +75,10 @@ export default class extends Controller {
         }
 
         const polygon = this.L.polygon(latlngs, {
-            color: '#8AB742',
             weight: 2,
             dashArray: '6, 8',
-            fillColor: '#8AB742',
+            color: '#7c3aed',
+            fillColor: '#8b5cf6',
             fillOpacity: 0.18,
         })
             .addTo(this.layerGroup)

@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\AccessPoint;
 use App\Entity\Network;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -66,6 +67,9 @@ class AccessPointRepository extends ServiceEntityRepository
         return $qb;
     }
 
+    /**
+     * @throws Exception
+     */
     public function findIntersectingBbox(float $minLat, float $minLng, float $maxLat, float $maxLng): array
     {
         $conn = $this->getEntityManager()->getConnection();
@@ -81,5 +85,26 @@ class AccessPointRepository extends ServiceEntityRepository
         );
 
         return $ids === [] ? [] : $this->findBy(['id' => $ids]);
+    }
+
+    public function findByNetworkWithCoordinates(Network $network): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = '
+        SELECT 
+            id, 
+            name, 
+            ssid, 
+            ST_X(location) AS lng, 
+            ST_Y(location) AS lat 
+        FROM AccessPoint
+        WHERE network_id = :networkId 
+          AND location IS NOT NULL
+    ';
+
+        return $conn->fetchAllAssociative($sql, [
+            'networkId' => $network->getId()
+        ]);
     }
 }
