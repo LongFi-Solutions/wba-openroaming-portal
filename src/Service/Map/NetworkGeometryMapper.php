@@ -7,6 +7,7 @@ namespace App\Service\Map;
 readonly class NetworkGeometryMapper
 {
     /**
+     * @param array<string, mixed>|null $geometry
      * @return array{minLat: float, minLng: float, maxLat: float, maxLng: float}|null
      */
     public function extractBoundingBox(?array $geometry): ?array
@@ -15,6 +16,7 @@ readonly class NetworkGeometryMapper
             return null;
         }
 
+        /** @var array<int, array{float, float}> $coords */
         $coords = [];
         $this->collectCoordinates($geometry, $coords);
 
@@ -33,6 +35,10 @@ readonly class NetworkGeometryMapper
         ];
     }
 
+    /**
+     * @param mixed $node
+     * @param array<int, array{float, float}> $coords
+     */
     private function collectCoordinates(mixed $node, array &$coords): void
     {
         if (!is_array($node)) {
@@ -40,6 +46,7 @@ readonly class NetworkGeometryMapper
         }
 
         if (isset($node['type'], $node['features']) && $node['type'] === 'FeatureCollection') {
+            /** @var array<string, mixed> $feature */
             foreach ($node['features'] as $feature) {
                 $this->collectCoordinates($feature, $coords);
             }
@@ -56,6 +63,10 @@ readonly class NetworkGeometryMapper
         }
     }
 
+    /**
+     * @param mixed $coordinates
+     * @param array<int, array{float, float}> $coords
+     */
     private function flattenCoordinates(mixed $coordinates, array &$coords): void
     {
         if (!is_array($coordinates)) {
