@@ -36,9 +36,10 @@ RUN ln -fs /usr/share/zoneinfo/UTC /etc/localtime
 RUN composer self-update --2
 #RUN rm -rf /var/lib/apt/lists/*
 WORKDIR /var/www/openroaming
-COPY . /var/www/openroaming/
+COPY composer.json composer.lock symfony.lock /var/www/openroaming/
+COPY package.json package-lock.json /var/www/openroaming/
 COPY ./.env.sample /var/www/openroaming/.env
-RUN composer install
+RUN composer install --no-interaction --no-scripts --no-autoloader
 
 RUN npm config set cafile /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt
 RUN npm config set strict-ssl false
@@ -46,14 +47,16 @@ RUN echo 'cafile "/usr/local/share/ca-certificates/PaloAlto_SSLInspection_Forwar
 RUN echo 'strict-ssl false' >> ~/.yarnrc
 RUN echo 'httpsCaFilePath: "/usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt"' >> ~/.yarnrc.yml
 RUN echo 'enableStrictSsl: false' >> ~/.yarnrc.yml
-RUN npm i && npm run build
-RUN rm -rf /var/www/openroaming/.env
+RUN npm i
 
+COPY --chown=www-data:www-data . /var/www/openroaming
+RUN composer dump-autoload --optimize
+RUN npm run build
+RUN rm -rf /var/www/openroaming/.env
 COPY service-config/supervisor/supervisord.conf /etc/supervisor/conf.d/
 COPY service-config/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY service-config/nginx/mime.types /etc/nginx/mime.types
 COPY service-config/nginx/fastcgi_params /etc/nginx/fastcgi_params
 COPY service-config/nginx/sites /etc/nginx/conf.d
-COPY --chown=www-data:www-data . /var/www/openroaming
 RUN mkdir /run/php
 CMD ["/usr/bin/supervisord"]
