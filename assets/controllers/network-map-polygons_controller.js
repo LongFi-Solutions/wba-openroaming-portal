@@ -4,6 +4,7 @@ export default class extends Controller {
     static values = {
         polygonsUrl: String,
         showAccessPoints: { type: Boolean, default: false },
+        markerIcon: { type: String, default: '' },
     };
 
     connect() {
@@ -86,10 +87,21 @@ export default class extends Controller {
     }
 
     drawAccessPoint(ap) {
-        if (ap.lat === null || ap.lng === null) {
-            return;
-        }
+        if (ap.lat === null || ap.lng === null) return;
+        this.L.marker([ap.lat, ap.lng], { icon: this._getIcon() })
+          .addTo(this.layerGroup)
+          .bindPopup(ap.name);
+    }
 
-        this.L.marker([ap.lat, ap.lng]).addTo(this.layerGroup).bindPopup(ap.name);
+    _getIcon() {
+        if (this._icon) return this._icon;
+        this._icon = this.L.divIcon({
+            html: this.hasMarkerIconValue ? this.markerIconValue : '',
+            className: 'custom-pin-icon coverage-network-marker',
+            iconSize: [33, 40],
+            iconAnchor: [16, 28],
+            popupAnchor: [0, -24],
+        });
+        return this._icon;
     }
 }

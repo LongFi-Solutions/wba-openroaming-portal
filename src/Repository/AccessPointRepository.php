@@ -79,12 +79,18 @@ class AccessPointRepository extends ServiceEntityRepository
             $minLat, $minLng, $maxLat, $maxLng
         );
 
-        $ids = $conn->fetchFirstColumn(
-            'SELECT id FROM `AccessPoint` WHERE MBRContains(ST_GeomFromText(:bboxWkt, 4326), location)',
-            ['bboxWkt' => $bboxWkt]
-        );
+        $sql = '
+                SELECT 
+                    id, 
+                    name, 
+                    ssid, 
+                    ST_Y(location) AS lng, 
+                    ST_X(location) AS lat 
+                FROM `AccessPoint`
+                WHERE MBRContains(ST_GeomFromText(:bboxWkt, 4326), location)
+            ';
 
-        return $ids === [] ? [] : $this->findBy(['id' => $ids]);
+        return $conn->fetchAllAssociative($sql, ['bboxWkt' => $bboxWkt]);
     }
 
     public function findByNetworkWithCoordinates(Network $network): array
@@ -92,16 +98,16 @@ class AccessPointRepository extends ServiceEntityRepository
         $conn = $this->getEntityManager()->getConnection();
 
         $sql = '
-        SELECT 
-            id, 
-            name, 
-            ssid, 
-            ST_Y(location) AS lng, 
-            ST_X(location) AS lat 
-        FROM AccessPoint
-        WHERE network_id = :networkId 
-          AND location IS NOT NULL
-    ';
+                SELECT 
+                    id, 
+                    name, 
+                    ssid, 
+                    ST_Y(location) AS lng, 
+                    ST_X(location) AS lat 
+                FROM AccessPoint
+                WHERE network_id = :networkId 
+                  AND location IS NOT NULL
+            ';
 
         return $conn->fetchAllAssociative($sql, [
             'networkId' => $network->getId()
