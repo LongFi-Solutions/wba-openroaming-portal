@@ -133,24 +133,16 @@ class MapController extends AbstractController
 
         return $this->json([
             'networks' => $this->serializeNetworks($networks),
-            'accessPoints' => array_values(
-                array_filter(
-                    array_map(
-                        static function (AccessPoint $ap): ?array {
-                            $location = $ap->getLocationData();
-                            if ($location === null) {
-                                return null;
-                            }
-                            return [
-                                'id' => $ap->getId(),
-                                'name' => $ap->getName() ?? $ap->getSsid(),
-                                'lat' => $location['lat'],
-                                'lng' => $location['lng'],
-                            ];
-                        },
-                        $accessPoints
-                    )
-                )
+            'accessPoints' => array_map(
+                static function (array $ap): array {
+                    return [
+                        'id' => $ap['id'],
+                        'name' => $ap['name'] ?? $ap['ssid'],
+                        'lat' => (float) $ap['lat'],
+                        'lng' => (float) $ap['lng'],
+                    ];
+                },
+                $accessPoints
             ),
         ]);
     }

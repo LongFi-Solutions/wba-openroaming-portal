@@ -82,4 +82,25 @@ class AccessPointRepository extends ServiceEntityRepository
 
         return $ids === [] ? [] : $this->findBy(['id' => $ids]);
     }
+
+    public function findByNetworkWithCoordinates(Network $network): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = '
+        SELECT 
+            id, 
+            name, 
+            ssid, 
+            ST_X(location) AS lng, 
+            ST_Y(location) AS lat 
+        FROM AccessPoint
+        WHERE network_id = :networkId 
+          AND location IS NOT NULL
+    ';
+
+        return $conn->fetchAllAssociative($sql, [
+            'networkId' => $network->getId()
+        ]);
+    }
 }

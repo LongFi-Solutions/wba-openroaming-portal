@@ -84,17 +84,15 @@ final class ManageNetworksForm extends AbstractController
             ->center(new Point(37.7412, -25.6756))
             ->zoom(13);
 
-        $accessPoints = $this->entityManager->getRepository(AccessPoint::class)->findBy(['network' => $this->network]);
+        $accessPoints = $this->entityManager
+            ->getRepository(AccessPoint::class)
+            ->findByNetworkWithCoordinates($this->network);
 
         foreach ($accessPoints as $ap) {
-            $locationData = $ap->getLocationData();
-
-            if ($locationData !== null) {
-                $map->addMarker(new Marker(
-                    position: new Point($locationData['lat'], $locationData['lng']),
-                    title: $ap->getName() ?? 'Access Point'
-                ));
-            }
+            $map->addMarker(new Marker(
+                position: new Point((float)$ap['lat'], (float)$ap['lng']),
+                title: $ap['name'] ?? 'Access Point'
+            ));
         }
 
         return $map;
