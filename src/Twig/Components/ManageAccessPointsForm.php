@@ -46,6 +46,7 @@ final class ManageAccessPointsForm extends AbstractController
     #[LiveProp]
     public AccessPoint|null $accessPoint = null;
 
+    /** @var array<int, array{lat: float, lng: float, name: ?string}> */
     #[LiveProp]
     public array $otherAccessPoints = [];
 
