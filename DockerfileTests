@@ -36,14 +36,6 @@ COPY composer.json composer.lock symfony.lock /var/www/openroaming/
 COPY ./.env.sample /var/www/openroaming/.env
 RUN composer install --no-interaction --no-scripts --no-autoloader
 
-RUN npm config set cafile /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt
-RUN npm config set strict-ssl false
-RUN echo 'cafile "/usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt"' >> ~/.yarnrc
-RUN echo 'strict-ssl false' >> ~/.yarnrc
-RUN echo 'httpsCaFilePath: "/usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt"' >> ~/.yarnrc.yml
-RUN echo 'enableStrictSsl: false' >> ~/.yarnrc.yml
-RUN npm i
-
 COPY --chown=www-data:www-data . /var/www/openroaming
 RUN composer dump-autoload --optimize
 RUN php bin/console tailwind:build --minify
