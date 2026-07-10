@@ -112,7 +112,7 @@
             </tr>
             </thead>
             <tbody>
-            {% for accessPoint in this.accessPoints %}
+            {% for accessPoint in this.accessPointsData %}
                 {{ include('dashboard/shared/_accessPoint.html.twig', {
                     accessPoint: accessPoint,
                 }) }}
