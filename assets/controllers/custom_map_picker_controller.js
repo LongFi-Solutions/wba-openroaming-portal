@@ -1,10 +1,8 @@
 import { Controller } from '@hotwired/stimulus';
 
-const DEFAULT_COLOR = '#dc2626';
-const DEFAULT_RANGE_RADIUS = 1500; // meters
-const ICON_SIZE = [34, 44];
-const ICON_ANCHOR = [17, 44];
-const POPUP_ANCHOR = [0, -40];
+const ICON_SIZE = [33, 40];
+const ICON_ANCHOR = [16, 28]; // matches this icon's actual pin-tip position, not the viewBox bottom
+const POPUP_ANCHOR = [0, -24];
 
 export default class extends Controller {
     static targets = ['latitude', 'longitude'];
@@ -12,13 +10,10 @@ export default class extends Controller {
     static values = {
         networkGeometry: { type: String, default: '' },
         markerIcon: { type: String, default: '' },
-        markerColor: { type: String, default: DEFAULT_COLOR },
-        rangeRadius: { type: Number, default: DEFAULT_RANGE_RADIUS },
     };
 
     connect() {
         this.marker = null;
-        this.rangeCircle = null;
         this._divIcon = null; // built lazily once Leaflet (this.L) is available, then cached
         this._boundHandleMapClick = this._handleMapClick.bind(this);
     }
@@ -68,8 +63,6 @@ export default class extends Controller {
 
         this.marker?.remove();
         this.marker = null;
-        this.rangeCircle?.remove();
-        this.rangeCircle = null;
     }
 
     // --- internal helpers -------------------------------------------------
@@ -152,33 +145,19 @@ export default class extends Controller {
         } else {
             this.marker = this.L.marker(latlng, { icon: this._getIcon() }).addTo(this.map);
         }
-
-        if (this.rangeCircle) {
-            this.rangeCircle.setLatLng(latlng);
-        } else {
-            this.rangeCircle = this.L.circle(latlng, {
-                radius: this.rangeRadiusValue,
-                color: this.markerColorValue,
-                weight: 1.5,
-                dashArray: '4 6',
-                fillColor: this.markerColorValue,
-                fillOpacity: 0.08,
-                interactive: false,
-            }).addTo(this.map);
-        }
     }
 
-    // Lazily built (needs this.L to exist) and cached — the glyph/color never
-    // change mid-session, so there's no reason to rebuild the divIcon per click.
+    // Lazily built (needs this.L to exist) and cached — the glyph never
+    // changes mid-session, so there's no reason to rebuild the divIcon per click.
     _getIcon() {
         if (this._divIcon) return this._divIcon;
 
         this._divIcon = this.L.divIcon({
             html: this.hasMarkerIconValue ? this.markerIconValue : '',
-            className: 'custom-pin-icon',
-            iconSize: [33, 40],
-            iconAnchor: [16, 40],   // bottom-center of the pin's point
-            popupAnchor: [0, -36],
+            className: 'custom-pin-icon coverage-network-marker',
+            iconSize: ICON_SIZE,
+            iconAnchor: ICON_ANCHOR,
+            popupAnchor: POPUP_ANCHOR,
         });
 
         return this._divIcon;
