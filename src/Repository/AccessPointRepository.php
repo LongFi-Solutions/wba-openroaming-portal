@@ -131,4 +131,37 @@ class AccessPointRepository extends ServiceEntityRepository
         /** @var array<int, array{id: int|string, name: string|null, ssid: string|null, lat: float|string, lng: float|string}> $results */
         return $results;
     }
+
+    /**
+     * @param array<int> $ids
+     * @return array<int, array{lat: float, lng: float}>
+     * @throws Exception
+     */
+    public function findCoordinatesByIds(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        $conn = $this->getEntityManager()->getConnection();
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+        $sql = "SELECT id, ST_X(location) as lng, ST_Y(location) as lat
+            FROM AccessPoint
+            WHERE id IN ($placeholders)
+              AND location IS NOT NULL";
+
+        $rows = $conn->executeQuery($sql, $ids)->fetchAllAssociative();
+
+        $coordMap = [];
+        foreach ($rows as $row) {
+            $coordMap[(int) $row['id']] = [
+                'lat' => (float) $row['lat'],
+                'lng' => (float) $row['lng'],
+            ];
+        }
+
+        return $coordMap;
+    }
 }
