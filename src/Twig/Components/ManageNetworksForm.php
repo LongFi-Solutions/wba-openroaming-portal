@@ -84,6 +84,10 @@ final class ManageNetworksForm extends AbstractController
             ->center(new Point(37.7412, -25.6756))
             ->zoom(13);
 
+        if (!$this->network || !$this->network->getId()) {
+            return $map;
+        }
+
         $accessPoints = $this->entityManager
             ->getRepository(AccessPoint::class)
             ->findByNetworkWithCoordinates($this->network);
