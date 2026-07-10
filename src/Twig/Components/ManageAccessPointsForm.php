@@ -29,8 +29,7 @@ final class ManageAccessPointsForm extends AbstractController
 
     public function __construct(
         private readonly RequestStack $requestStack
-    )
-    {
+    ) {
     }
 
     #[LiveProp]

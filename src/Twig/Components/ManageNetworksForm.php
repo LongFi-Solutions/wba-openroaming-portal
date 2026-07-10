@@ -31,8 +31,7 @@ final class ManageNetworksForm extends AbstractController
     public function __construct(
         private readonly RequestStack $requestStack,
         private readonly AccessPointRepository $accessPointRepository
-    )
-    {
+    ) {
     }
 
     #[LiveProp(writable: ['name', 'description', 'geometryJson'])]

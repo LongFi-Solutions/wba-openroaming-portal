@@ -72,7 +72,13 @@ class AccessPointRepository extends ServiceEntityRepository
      * @param float $minLng
      * @param float $maxLat
      * @param float $maxLng
-     * @return array<int, array{id: int|string, name: string|null, ssid: string|null, lat: float|string, lng: float|string}>
+     * @return array<int, array{
+     *     id: int|string,
+     *     name: string|null,
+     *     ssid: string|null,
+     *     lat: float|string,
+     *     lng: float|string
+     * }>
      * @throws Exception
      */
     public function findIntersectingBbox(float $minLat, float $minLng, float $maxLat, float $maxLng): array
@@ -98,10 +104,7 @@ class AccessPointRepository extends ServiceEntityRepository
                 WHERE MBRContains(ST_GeomFromText(:bboxWkt, 4326), location)
             ';
 
-        $results = $conn->fetchAllAssociative($sql, ['bboxWkt' => $bboxWkt]);
-
-        /** @var array<int, array{id: int|string, name: string|null, ssid: string|null, lat: float|string, lng: float|string}> $results */
-        return $results;
+        return $conn->fetchAllAssociative($sql, ['bboxWkt' => $bboxWkt]);
     }
 
     /**
