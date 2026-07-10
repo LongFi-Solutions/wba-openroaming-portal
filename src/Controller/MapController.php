@@ -134,14 +134,12 @@ class MapController extends AbstractController
         return $this->json([
             'networks' => $this->serializeNetworks($networks),
             'accessPoints' => array_map(
-                static function (array $ap): array {
-                    return [
-                        'id' => $ap['id'],
-                        'name' => $ap['name'] ?? $ap['ssid'],
-                        'lat' => (float) $ap['lat'],
-                        'lng' => (float) $ap['lng'],
-                    ];
-                },
+                static fn(array $ap): array => [
+                    'id' => $ap['id'],
+                    'name' => $ap['name'] ?? $ap['ssid'],
+                    'lat' => (float) $ap['lat'],
+                    'lng' => (float) $ap['lng'],
+                ],
                 $accessPoints
             ),
         ]);
@@ -441,6 +439,10 @@ class MapController extends AbstractController
         return ($preferences['rememberMe'] ?? false) === true;
     }
 
+    /**
+     * @param Request $request
+     * @return array{float, float, float, float}|Response
+     */
     private function parseBboxOrFail(Request $request): array|Response
     {
         $minLat = $request->query->get('minLat');

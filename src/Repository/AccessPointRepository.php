@@ -68,6 +68,11 @@ class AccessPointRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param float $minLat
+     * @param float $minLng
+     * @param float $maxLat
+     * @param float $maxLng
+     * @return array<int, array{id: int|string, name: string|null, ssid: string|null, lat: float|string, lng: float|string}>
      * @throws Exception
      */
     public function findIntersectingBbox(float $minLat, float $minLng, float $maxLat, float $maxLng): array
@@ -93,9 +98,16 @@ class AccessPointRepository extends ServiceEntityRepository
                 WHERE MBRContains(ST_GeomFromText(:bboxWkt, 4326), location)
             ';
 
-        return $conn->fetchAllAssociative($sql, ['bboxWkt' => $bboxWkt]);
+        $results = $conn->fetchAllAssociative($sql, ['bboxWkt' => $bboxWkt]);
+
+        /** @var array<int, array{id: int|string, name: string|null, ssid: string|null, lat: float|string, lng: float|string}> $results */
+        return $results;
     }
 
+    /**
+     * @param Network $network
+     * @return array<int, array{id: int|string, name: string|null, ssid: string|null, lat: float|string, lng: float|string}>
+     */
     public function findByNetworkWithCoordinates(Network $network): array
     {
         $conn = $this->getEntityManager()->getConnection();
@@ -112,8 +124,11 @@ class AccessPointRepository extends ServiceEntityRepository
                   AND location IS NOT NULL
             ';
 
-        return $conn->fetchAllAssociative($sql, [
+        $results = $conn->fetchAllAssociative($sql, [
             'networkId' => $network->getId()
         ]);
+
+        /** @var array<int, array{id: int|string, name: string|null, ssid: string|null, lat: float|string, lng: float|string}> $results */
+        return $results;
     }
 }

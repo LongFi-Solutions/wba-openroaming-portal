@@ -73,7 +73,7 @@ class AccessPointsSearchForm
         $paginator = $this->getAccessPoints();
         $entities = iterator_to_array($paginator);
 
-        if (empty($entities)) {
+        if ($entities === []) {
             return [];
         }
 
