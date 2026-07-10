@@ -470,26 +470,27 @@ class MapController extends AbstractController
      */
     private function serializeOtherAccessPoints(Network $network, ?AccessPoint $excludeAccessPoint): array
     {
-        $accessPoints = $this->accessPointRepository->findBy(['network' => $network]);
+        if (!$network->getId()) {
+            return [];
+        }
 
-        return array_values(array_filter(array_map(
-            static function (AccessPoint $ap) use ($excludeAccessPoint): ?array {
-                if ($excludeAccessPoint !== null && $ap->getId() === $excludeAccessPoint->getId()) {
-                    return null;
-                }
+        $accessPoints = $this->accessPointRepository->findByNetworkWithCoordinates($network);
 
-                $location = $ap->getLocationData();
-                if ($location === null) {
-                    return null;
-                }
+        $excludeId = $excludeAccessPoint?->getId();
+        $result = [];
 
-                return [
-                    'lat' => $location['lat'],
-                    'lng' => $location['lng'],
-                    'name' => $ap->getName() ?? $ap->getSsid(),
-                ];
-            },
-            $accessPoints
-        )));
+        foreach ($accessPoints as $ap) {
+            if ($excludeId !== null && $ap['id'] === $excludeId) {
+                continue;
+            }
+
+            $result[] = [
+                'lat' => (float) $ap['lat'],
+                'lng' => (float) $ap['lng'],
+                'name' => $ap['name'] ?? $ap['ssid'],
+            ];
+        }
+
+        return $result;
     }
 }
