@@ -4,12 +4,16 @@ const ICON_SIZE = [33, 40];
 const ICON_ANCHOR = [16, 28]; // matches this icon's actual pin-tip position, not the viewBox bottom
 const POPUP_ANCHOR = [0, -24];
 
+const OTHER_AP_RADIUS = 7; // px, for the muted "existing AP" dot
+
 export default class extends Controller {
     static targets = ['latitude', 'longitude'];
 
     static values = {
         networkGeometry: { type: String, default: '' },
         markerIcon: { type: String, default: '' },
+        otherMarkerIcon: { type: String, default: '' },
+        otherAccessPoints: { type: Array, default: [] },
     };
 
     connect() {
@@ -32,6 +36,7 @@ export default class extends Controller {
         this.L = L;
 
         this._renderNetworkGeometry();
+        this._renderOtherAccessPoints();
         this._renderInitialMarker();
 
         setTimeout(() => this.map.invalidateSize(), 200);
@@ -116,6 +121,23 @@ export default class extends Controller {
         }
     }
 
+    // Shows every OTHER access point already placed on this network, as a
+    // muted, non-draggable marker with a popup — so the user can see which
+    // spots are already taken and avoid placing a duplicate on top of one.
+    _renderOtherAccessPoints() {
+        if (!this.hasOtherAccessPointsValue) return;
+
+        const icon = this._getOtherIcon();
+
+        this.otherAccessPointsValue.forEach((ap) => {
+            if (ap.lat == null || ap.lng == null) return;
+
+            this.L.marker([ap.lat, ap.lng], { icon })
+              .bindPopup(ap.name || 'Access Point')
+              .addTo(this.map);
+        });
+    }
+
     _renderInitialMarker() {
         const coords = this._readCoordsFromInputs();
         if (!coords) return;
@@ -161,5 +183,19 @@ export default class extends Controller {
         });
 
         return this._divIcon;
+    }
+
+    _getOtherIcon() {
+        if (this._otherDivIcon) return this._otherDivIcon;
+
+        this._otherDivIcon = this.L.divIcon({
+            html: this.hasOtherMarkerIconValue ? this.otherMarkerIconValue : '',
+            className: 'custom-pin-icon-other coverage-network-marker',
+            iconSize: [26, 26],
+            iconAnchor: [13, 13],
+            popupAnchor: [0, -16],
+        });
+
+        return this._otherDivIcon;
     }
 }

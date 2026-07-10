@@ -8,12 +8,15 @@
             :form="form"
             :network="network"
             :accessPoint="accessPoint"
+            :otherAccessPoints="otherAccessPoints"
     >
 
         <div class="p-6 bg-white rounded-lg shadow-sm"
              data-controller="custom-map-picker map-geolocation"
              data-custom-map-picker-network-geometry-value="{{ network.geometry }}"
-             data-custom-map-picker-marker-icon-value="{{ ux_icon('wba:access-point-point', {class: 'fill-none stroke-current'})|e('html_attr') }}">
+             data-custom-map-picker-other-access-points-value="{{ otherAccessPoints|json_encode }}"
+             data-custom-map-picker-marker-icon-value="{{ ux_icon('wba:access-point-point', {class: 'fill-none stroke-current'})|e('html_attr') }}"
+             data-custom-map-picker-other-marker-icon-value="{{ ux_icon('wba:access-point-point-other', {class: 'fill-none stroke-current'})|e('html_attr') }}">
 
         {{ form_start(form) }}
 

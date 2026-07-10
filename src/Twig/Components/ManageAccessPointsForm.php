@@ -47,6 +47,9 @@ final class ManageAccessPointsForm extends AbstractController
     #[LiveProp]
     public AccessPoint|null $accessPoint = null;
 
+    #[LiveProp]
+    public array $otherAccessPoints = [];
+
     /**
      * @return FormInterface<mixed>
      */

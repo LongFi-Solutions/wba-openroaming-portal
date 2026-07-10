@@ -340,9 +340,13 @@ class MapController extends AbstractController
             'networkGeometry' => $network->getGeometry(),
             'accessPointDTO' => $accessPointDTO,
             'accessPoint' => null,
+            'otherAccessPoints' => $this->serializeOtherAccessPoints($network, null),
         ]);
     }
 
+    /**
+     * @throws JsonException
+     */
     #[Route('dashboard/map/network/{network_id<\d+>}/accessPoints/{ap_id<\d+>}/edit', name: 'admin_dashboard_map_accessPoint_edit')]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function networkAccessPointsEdit(
@@ -391,6 +395,8 @@ class MapController extends AbstractController
             'accessPointDTO' => $accessPointDTO,
             'network' => $network,
             'accessPoint' => $accessPoint,
+            'networkGeometry' => $network->getGeometry(),
+            'otherAccessPoints' => $this->serializeOtherAccessPoints($network, $accessPoint),
         ]);
     }
 
@@ -465,5 +471,33 @@ class MapController extends AbstractController
             ],
             $networks
         );
+    }
+
+    /**
+     * @return array<int, array{lat: float, lng: float, name: string}>
+     */
+    private function serializeOtherAccessPoints(Network $network, ?AccessPoint $excludeAccessPoint): array
+    {
+        $accessPoints = $this->accessPointRepository->findBy(['network' => $network]);
+
+        return array_values(array_filter(array_map(
+            static function (AccessPoint $ap) use ($excludeAccessPoint): ?array {
+                if ($excludeAccessPoint !== null && $ap->getId() === $excludeAccessPoint->getId()) {
+                    return null;
+                }
+
+                $location = $ap->getLocationData();
+                if ($location === null) {
+                    return null;
+                }
+
+                return [
+                    'lat' => $location['lat'],
+                    'lng' => $location['lng'],
+                    'name' => $ap->getName() ?? $ap->getSsid(),
+                ];
+            },
+            $accessPoints
+        )));
     }
 }
