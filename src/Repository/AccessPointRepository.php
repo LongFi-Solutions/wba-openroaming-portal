@@ -119,7 +119,13 @@ class AccessPointRepository extends ServiceEntityRepository
 
     /**
      * @param Network $network
-     * @return array<int, array{id: int|string, name: string|null, ssid: string|null, lat: float|string, lng: float|string}>
+     * @return array<int, array{
+     *     id: int|string,
+     *     name: string|null,
+     *     ssid: string|null,
+     *     lat: float|string,
+     *     lng: float|string
+     * }>
      */
     public function findByNetworkWithCoordinates(Network $network): array
     {
@@ -141,7 +147,14 @@ class AccessPointRepository extends ServiceEntityRepository
             'networkId' => $network->getId()
         ]);
 
-        /** @var array<int, array{id: int|string, name: string|null, ssid: string|null, lat: float|string, lng: float|string}> $results */
+        /** @var array<int, array{
+         *     id: int|string,
+         *     name: string|null,
+         *     ssid: string|null,
+         *     lat: float|string,
+         *     lng: float|string
+         * }> $results
+         */
         return $results;
     }
 
