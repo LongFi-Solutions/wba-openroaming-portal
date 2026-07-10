@@ -440,7 +440,6 @@ class MapController extends AbstractController
     }
 
     /**
-     * @param Request $request
      * @return array{float, float, float, float}|Response
      */
     private function parseBboxOrFail(Request $request): array|Response

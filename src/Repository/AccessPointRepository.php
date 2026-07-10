@@ -68,10 +68,6 @@ class AccessPointRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param float $minLat
-     * @param float $minLng
-     * @param float $maxLat
-     * @param float $maxLng
      * @return array<int, array{
      *     id: int|string,
      *     name: string|null,
@@ -118,7 +114,6 @@ class AccessPointRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param Network $network
      * @return array<int, array{
      *     id: int|string,
      *     name: string|null,

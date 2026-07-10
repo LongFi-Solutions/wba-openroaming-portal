@@ -36,7 +36,6 @@ readonly class NetworkGeometryMapper
     }
 
     /**
-     * @param mixed $node
      * @param array<int, array{float, float}> $coords
      */
     private function collectCoordinates(mixed $node, array &$coords): void
@@ -64,7 +63,6 @@ readonly class NetworkGeometryMapper
     }
 
     /**
-     * @param mixed $coordinates
      * @param array<int, array{float, float}> $coords
      */
     private function flattenCoordinates(mixed $coordinates, array &$coords): void

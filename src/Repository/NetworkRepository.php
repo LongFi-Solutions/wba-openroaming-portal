@@ -64,10 +64,6 @@ class NetworkRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param float $minLat
-     * @param float $minLng
-     * @param float $maxLat
-     * @param float $maxLng
      * @return array<int, Network>
      * @throws Exception
      */
