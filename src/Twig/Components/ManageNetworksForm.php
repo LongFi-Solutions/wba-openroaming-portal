@@ -3,10 +3,9 @@
 namespace App\Twig\Components;
 
 use App\DTO\NetworkDTO;
-use App\Entity\AccessPoint;
 use App\Entity\Network;
-use Doctrine\ORM\EntityManagerInterface;
 use App\Form\CreateNetworkType;
+use App\Repository\AccessPointRepository;
 use App\Security\Voter\UserAuthenticationVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -29,7 +28,10 @@ final class ManageNetworksForm extends AbstractController
     use DefaultActionTrait;
     use LiveCollectionTrait;
 
-    public function __construct(private EntityManagerInterface $entityManager, private RequestStack $requestStack)
+    public function __construct(
+        private readonly RequestStack $requestStack,
+        private readonly AccessPointRepository $accessPointRepository
+    )
     {
     }
 
@@ -88,9 +90,7 @@ final class ManageNetworksForm extends AbstractController
             return $map;
         }
 
-        $accessPoints = $this->entityManager
-            ->getRepository(AccessPoint::class)
-            ->findByNetworkWithCoordinates($this->network);
+        $accessPoints = $this->accessPointRepository->findByNetworkWithCoordinates($this->network);
 
         foreach ($accessPoints as $ap) {
             $map->addMarker(new Marker(
