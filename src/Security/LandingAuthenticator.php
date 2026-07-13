@@ -174,8 +174,8 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         $mode = OperationMode::from($loginModeSetting?->getValue() ?? OperationMode::OFF->value);
 
         $eventType = match ($mode) {
-            OperationMode::ON => AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE,
-            OperationMode::OFF => AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST,
+            OperationMode::ON, OperationMode::TRUE => AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE,
+            OperationMode::OFF, OperationMode::FALSE => AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST,
         };
 
         if (
