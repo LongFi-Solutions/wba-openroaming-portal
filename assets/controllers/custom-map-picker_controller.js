@@ -4,8 +4,6 @@ const ICON_SIZE = [33, 40];
 const ICON_ANCHOR = [16, 28]; // matches this icon's actual pin-tip position, not the viewBox bottom
 const POPUP_ANCHOR = [0, -24];
 
-const OTHER_AP_RADIUS = 7; // px, for the muted "existing AP" dot
-
 export default class extends Controller {
     static targets = ['latitude', 'longitude'];
 

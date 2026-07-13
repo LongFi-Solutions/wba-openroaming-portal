@@ -68,6 +68,13 @@ class AccessPointRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return array<int, array{
+     *     id: int|string,
+     *     name: string|null,
+     *     ssid: string|null,
+     *     lat: float|string,
+     *     lng: float|string
+     * }>
      * @throws Exception
      */
     public function findIntersectingBbox(float $minLat, float $minLng, float $maxLat, float $maxLng): array
@@ -93,9 +100,28 @@ class AccessPointRepository extends ServiceEntityRepository
                 WHERE MBRContains(ST_GeomFromText(:bboxWkt, 4326), location)
             ';
 
-        return $conn->fetchAllAssociative($sql, ['bboxWkt' => $bboxWkt]);
+        $results = $conn->fetchAllAssociative($sql, ['bboxWkt' => $bboxWkt]);
+
+        /** @var array<int, array{
+         *     id: int|string,
+         *     name: string|null,
+         *     ssid: string|null,
+         *     lat: float|string,
+         *     lng: float|string
+         * }> $results
+         */
+        return $results;
     }
 
+    /**
+     * @return array<int, array{
+     *     id: int|string,
+     *     name: string|null,
+     *     ssid: string|null,
+     *     lat: float|string,
+     *     lng: float|string
+     * }>
+     */
     public function findByNetworkWithCoordinates(Network $network): array
     {
         $conn = $this->getEntityManager()->getConnection();
@@ -112,8 +138,51 @@ class AccessPointRepository extends ServiceEntityRepository
                   AND location IS NOT NULL
             ';
 
-        return $conn->fetchAllAssociative($sql, [
+        $results = $conn->fetchAllAssociative($sql, [
             'networkId' => $network->getId()
         ]);
+
+        /** @var array<int, array{
+         *     id: int|string,
+         *     name: string|null,
+         *     ssid: string|null,
+         *     lat: float|string,
+         *     lng: float|string
+         * }> $results
+         */
+        return $results;
+    }
+
+    /**
+     * @param array<int> $ids
+     * @return array<int, array{lat: float, lng: float}>
+     * @throws Exception
+     */
+    public function findCoordinatesByIds(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        $conn = $this->getEntityManager()->getConnection();
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+        $sql = "SELECT id, ST_X(location) as lng, ST_Y(location) as lat
+            FROM AccessPoint
+            WHERE id IN ($placeholders)
+              AND location IS NOT NULL";
+
+        $rows = $conn->executeQuery($sql, $ids)->fetchAllAssociative();
+
+        $coordMap = [];
+        foreach ($rows as $row) {
+            $coordMap[(int) $row['id']] = [
+                'lat' => (float) $row['lat'],
+                'lng' => (float) $row['lng'],
+            ];
+        }
+
+        return $coordMap;
     }
 }

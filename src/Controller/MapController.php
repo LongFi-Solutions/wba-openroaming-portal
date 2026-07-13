@@ -439,6 +439,9 @@ class MapController extends AbstractController
         return ($preferences['rememberMe'] ?? false) === true;
     }
 
+    /**
+     * @return array{float, float, float, float}|Response
+     */
     private function parseBboxOrFail(Request $request): array|Response
     {
         $minLat = $request->query->get('minLat');

@@ -7,7 +7,6 @@ use App\Entity\AccessPoint;
 use App\Entity\Network;
 use App\Form\CreateAccessPointType;
 use App\Security\Voter\UserAuthenticationVoter;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormErrorIterator;
@@ -28,8 +27,9 @@ final class ManageAccessPointsForm extends AbstractController
     use DefaultActionTrait;
     use LiveCollectionTrait;
 
-    public function __construct(private EntityManagerInterface $entityManager, private RequestStack $requestStack)
-    {
+    public function __construct(
+        private readonly RequestStack $requestStack
+    ) {
     }
 
     #[LiveProp]
@@ -45,6 +45,7 @@ final class ManageAccessPointsForm extends AbstractController
     #[LiveProp]
     public AccessPoint|null $accessPoint = null;
 
+    /** @var array<int, array{lat: float, lng: float, name: ?string}> */
     #[LiveProp]
     public array $otherAccessPoints = [];
 

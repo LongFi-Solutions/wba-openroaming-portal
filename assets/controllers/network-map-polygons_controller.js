@@ -75,7 +75,7 @@ export default class extends Controller {
             return;
         }
 
-        const polygon = this.L.polygon(latlngs, {
+        this.L.polygon(latlngs, {
             weight: 2,
             dashArray: '6, 8',
             color: '#7c3aed',

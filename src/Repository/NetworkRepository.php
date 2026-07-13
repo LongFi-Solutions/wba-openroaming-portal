@@ -8,6 +8,7 @@ use App\Entity\Network;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 
 /**
  * @extends ServiceEntityRepository<Network>
@@ -62,6 +63,10 @@ class NetworkRepository extends ServiceEntityRepository
         return $qb;
     }
 
+    /**
+     * @return array<int, Network>
+     * @throws Exception
+     */
     public function findIntersectingBbox(float $minLat, float $minLng, float $maxLat, float $maxLng): array
     {
         $conn = $this->getEntityManager()->getConnection();
