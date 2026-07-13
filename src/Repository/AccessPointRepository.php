@@ -76,7 +76,10 @@ class AccessPointRepository extends ServiceEntityRepository
 
         $bboxWkt = sprintf(
             'POLYGON((%1$F %2$F, %1$F %4$F, %3$F %4$F, %3$F %2$F, %1$F %2$F))',
-            $minLat, $minLng, $maxLat, $maxLng
+            $minLat,
+            $minLng,
+            $maxLat,
+            $maxLng
         );
 
         $sql = '

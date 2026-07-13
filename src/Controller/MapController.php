@@ -282,7 +282,10 @@ class MapController extends AbstractController
         ]);
     }
 
-    #[Route('dashboard/map/network/{id:network<\d+>}/accessPoints/create', name: 'admin_dashboard_map_accessPoint_create')]
+    #[Route(
+        'dashboard/map/network/{id:network<\d+>}/accessPoints/create',
+        name: 'admin_dashboard_map_accessPoint_create'
+    )]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function networkAccessPointsCreate(Network $network, Request $request): Response
     {
@@ -339,7 +342,10 @@ class MapController extends AbstractController
     /**
      * @throws JsonException
      */
-    #[Route('dashboard/map/network/{network_id<\d+>}/accessPoints/{ap_id<\d+>}/edit', name: 'admin_dashboard_map_accessPoint_edit')]
+    #[Route(
+        'dashboard/map/network/{network_id<\d+>}/accessPoints/{ap_id<\d+>}/edit',
+        name: 'admin_dashboard_map_accessPoint_edit'
+    )]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function networkAccessPointsEdit(
         #[MapEntity(id: 'ap_id')] AccessPoint $accessPoint,
@@ -392,7 +398,10 @@ class MapController extends AbstractController
         ]);
     }
 
-    #[Route('dashboard/map/network/{network_id<\d+>}/accessPoints/{ap_id<\d+>}/delete', name: 'admin_dashboard_map_accessPoint_delete')]
+    #[Route(
+        'dashboard/map/network/{network_id<\d+>}/accessPoints/{ap_id<\d+>}/delete',
+        name: 'admin_dashboard_map_accessPoint_delete'
+    )]
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function networkAccessPointsDelete(
         #[MapEntity(id: 'ap_id')] AccessPoint $accessPoint,

@@ -23,7 +23,6 @@ use Throwable;
 
 class MapExportController extends AbstractController
 {
-
     public function __construct(
         private readonly TranslatorInterface $translator,
     ) {
@@ -309,7 +308,6 @@ class MapExportController extends AbstractController
                 count($networksCreatedOrUpdated),
                 $apsImportedCount
             ));
-
         } catch (Throwable $e) {
             fclose($handle);
             $this->addFlash('error', sprintf(

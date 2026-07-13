@@ -83,7 +83,12 @@ class AccessPointsSearchForm
 
         $conn = $this->accessPointRepository->getEntityManager()->getConnection();
 
-        $sql = "SELECT id, ST_X(location) as lng, ST_Y(location) as lat FROM AccessPoint WHERE id IN ($placeholders) AND location IS NOT NULL";
+        $sql = "SELECT id, 
+       ST_X(location) as lng, 
+       ST_Y(location) as lat 
+        FROM AccessPoint 
+        WHERE id IN ($placeholders) 
+          AND location IS NOT NULL";
 
         $stmt = $conn->executeQuery($sql, $ids);
         $coords = $stmt->fetchAllAssociative();
