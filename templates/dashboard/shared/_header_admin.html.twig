@@ -31,7 +31,6 @@
 {% set currentRoute = app.request.attributes.get('_route') %}
 {% set header = routeHeaders[currentRoute] ?? {icon: 'wba:wifi', title: 'Dashboard'} %}
 
-
 <div class="flex flex-row items-center pl-4">
     <twig:ux:icon name="{{ header.icon }}"
                   class="w-10 h-10 mt-0.5 block {{ header.class ?? 'fill-none stroke-current' }}" />
