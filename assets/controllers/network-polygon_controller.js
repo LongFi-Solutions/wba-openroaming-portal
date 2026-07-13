@@ -2,11 +2,17 @@ import { Controller } from '@hotwired/stimulus';
 
 // Extract visual configurations outside the class for easy maintenance
 const STYLES = {
-    preview: { color: '#3b82f6', weight: 2, dashArray: '5, 10', fillOpacity: 0.15, fillColor: '#3b82f6' },
+    preview: {
+        color: '#3b82f6',
+        weight: 2,
+        dashArray: '5, 10',
+        fillOpacity: 0.15,
+        fillColor: '#3b82f6',
+    },
     shape: { color: '#2563eb', fillColor: '#3b82f6', fillOpacity: 0.35, weight: 3 },
     marker: { radius: 5, color: '#2563eb', fillColor: '#3b82f6', fillOpacity: 1, weight: 2 },
     startMarker: { radius: 8, weight: 4, color: '#1d4ed8' },
-    progressLine: { color: '#3b82f6', dashArray: '5, 10', weight: 3 }
+    progressLine: { color: '#3b82f6', dashArray: '5, 10', weight: 3 },
 };
 
 const EARTH_RADIUS = 6378137; // WGS84 mean radius in meters
@@ -65,7 +71,7 @@ export default class extends Controller {
         }
 
         this.handlePolygonClick(e);
-    }
+    };
 
     handleMouseMove = (e) => {
         if (this.drawMode === 'polygon' || !this.shapeStartPoint) return;
@@ -77,9 +83,11 @@ export default class extends Controller {
             this.L.rectangle(bounds, STYLES.preview).addTo(this.previewItems);
         } else if (this.drawMode === 'circle') {
             const radius = this.map.distance(this.shapeStartPoint, e.latlng);
-            this.L.circle(this.shapeStartPoint, { ...STYLES.preview, radius }).addTo(this.previewItems);
+            this.L.circle(this.shapeStartPoint, { ...STYLES.preview, radius }).addTo(
+                this.previewItems
+            );
         }
-    }
+    };
 
     handleFixedShapeClick(e) {
         if (!this.shapeStartPoint) {
@@ -97,7 +105,10 @@ export default class extends Controller {
             const lng2 = this.truncateCoord(e.latlng.lng);
 
             polygonPoints = [
-                [lng1, lat1], [lng2, lat1], [lng2, lat2], [lng1, lat2]
+                [lng1, lat1],
+                [lng2, lat1],
+                [lng2, lat2],
+                [lng1, lat2],
             ];
         } else if (this.drawMode === 'circle') {
             const radiusMeters = this.map.distance(this.shapeStartPoint, e.latlng);
@@ -117,8 +128,9 @@ export default class extends Controller {
             const firstPoint = this.currentPoints[0];
             const firstLatLng = this.L.latLng(firstPoint[1], firstPoint[0]);
 
-            const distanceInPixels = this.map.latLngToContainerPoint(e.latlng)
-              .distanceTo(this.map.latLngToContainerPoint(firstLatLng));
+            const distanceInPixels = this.map
+                .latLngToContainerPoint(e.latlng)
+                .distanceTo(this.map.latLngToContainerPoint(firstLatLng));
 
             if (distanceInPixels < 20) {
                 this.finishPolygon();
@@ -151,7 +163,9 @@ export default class extends Controller {
         if (this.currentPolyline) {
             this.currentPolyline.setLatLngs(leafletCoords);
         } else if (leafletCoords.length > 1) {
-            this.currentPolyline = this.L.polyline(leafletCoords, STYLES.progressLine).addTo(this.previewItems);
+            this.currentPolyline = this.L.polyline(leafletCoords, STYLES.progressLine).addTo(
+                this.previewItems
+            );
         }
     }
 
@@ -171,8 +185,8 @@ export default class extends Controller {
 
     addShape(type, points, leafletCoords, extra = {}) {
         const areaM2 = extra.radius
-          ? Math.PI * extra.radius * extra.radius
-          : this.geodesicArea(leafletCoords);
+            ? Math.PI * extra.radius * extra.radius
+            : this.geodesicArea(leafletCoords);
 
         const shapeLayer = this.L.polygon(leafletCoords, STYLES.shape);
         const labelMarker = this.createShapeLabel(shapeLayer.getBounds().getCenter());
@@ -263,7 +277,9 @@ export default class extends Controller {
         const activeClasses = ['border-blue-500', 'bg-blue-50', 'text-blue-600'];
         const inactiveClasses = ['bg-white', 'border-gray-200', 'text-gray-500'];
 
-        const buttons = event.currentTarget.parentElement.querySelectorAll('button[data-network-polygon-mode-param]');
+        const buttons = event.currentTarget.parentElement.querySelectorAll(
+            'button[data-network-polygon-mode-param]'
+        );
 
         buttons.forEach((btn) => {
             btn.classList.remove(...activeClasses);
@@ -278,11 +294,12 @@ export default class extends Controller {
         if (this.shapes.length === 0) {
             this.geometryJsonTarget.value = '';
         } else {
-            const closedRings = this.shapes.map(shape => [[...shape.points, shape.points[0]]]);
+            const closedRings = this.shapes.map((shape) => [[...shape.points, shape.points[0]]]);
 
-            const geometry = closedRings.length === 1
-              ? { type: 'Polygon', coordinates: closedRings[0] }
-              : { type: 'MultiPolygon', coordinates: closedRings };
+            const geometry =
+                closedRings.length === 1
+                    ? { type: 'Polygon', coordinates: closedRings[0] }
+                    : { type: 'MultiPolygon', coordinates: closedRings };
 
             this.geometryJsonTarget.value = JSON.stringify(geometry);
         }
@@ -298,7 +315,8 @@ export default class extends Controller {
 
         try {
             const geoJson = JSON.parse(rawValue);
-            const polygonCoordsList = geoJson.type === 'MultiPolygon' ? geoJson.coordinates : [geoJson.coordinates];
+            const polygonCoordsList =
+                geoJson.type === 'MultiPolygon' ? geoJson.coordinates : [geoJson.coordinates];
 
             polygonCoordsList.forEach((polygonCoords) => {
                 const coordinates = polygonCoords[0];
@@ -332,9 +350,11 @@ export default class extends Controller {
             return;
         }
 
-        this.coverageListTarget.innerHTML = this.shapes.map((shape, index) => {
-            const typeLabel = this.typeLabelsValue[shape.type] || this.typeLabelsValue.area || shape.type;
-            return `
+        this.coverageListTarget.innerHTML = this.shapes
+            .map((shape, index) => {
+                const typeLabel =
+                    this.typeLabelsValue[shape.type] || this.typeLabelsValue.area || shape.type;
+                return `
                 <div class="flex items-center justify-between gap-3 px-4 py-3 bg-white rounded-lg border border-gray-100">
                     <div class="flex items-center gap-3">
                         <span class="text-sm font-medium text-gray-700">${this.areaItemLabelValue} ${index + 1}</span>
@@ -353,7 +373,8 @@ export default class extends Controller {
                     </div>
                 </div>
             `;
-        }).join('');
+            })
+            .join('');
     }
 
     // --- Math Utilities -----------------------------------------------------
@@ -364,8 +385,8 @@ export default class extends Controller {
 
     formatArea(m2) {
         return m2 >= 1000000
-          ? `${(m2 / 1000000).toFixed(2)} km\u00b2`
-          : `${Math.round(m2).toLocaleString()} m\u00b2`;
+            ? `${(m2 / 1000000).toFixed(2)} km\u00b2`
+            : `${Math.round(m2).toLocaleString()} m\u00b2`;
     }
 
     geodesicArea(latlngs) {
@@ -376,8 +397,9 @@ export default class extends Controller {
             for (let i = 0; i < len; i++) {
                 const p1 = latlngs[i];
                 const p2 = latlngs[(i + 1) % len];
-                area += (((p2[1] - p1[1]) * Math.PI) / 180) *
-                  (2 + Math.sin((p1[0] * Math.PI) / 180) + Math.sin((p2[0] * Math.PI) / 180));
+                area +=
+                    (((p2[1] - p1[1]) * Math.PI) / 180) *
+                    (2 + Math.sin((p1[0] * Math.PI) / 180) + Math.sin((p2[0] * Math.PI) / 180));
             }
             area = (area * EARTH_RADIUS * EARTH_RADIUS) / 2;
         }

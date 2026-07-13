@@ -89,8 +89,8 @@ export default class extends Controller {
     drawAccessPoint(ap) {
         if (ap.lat === null || ap.lng === null) return;
         this.L.marker([ap.lat, ap.lng], { icon: this._getIcon() })
-          .addTo(this.layerGroup)
-          .bindPopup(ap.name);
+            .addTo(this.layerGroup)
+            .bindPopup(ap.name);
     }
 
     _getIcon() {
