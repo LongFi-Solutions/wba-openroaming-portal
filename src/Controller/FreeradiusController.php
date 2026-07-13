@@ -217,7 +217,7 @@ class FreeradiusController extends AbstractController
         if ($exportStatus === OperationMode::FALSE->value) {
             $this->addFlash(
                 'error',
-                $this->translator->trans('accountWithoutProfilesAssociated', [], 'controllers')
+                $this->translator->trans('operationDisabledForSecurityReasons', [], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
         }
