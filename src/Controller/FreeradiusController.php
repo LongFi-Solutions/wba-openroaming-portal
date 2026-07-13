@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
+use App\Enum\OperationMode;
 use App\Enum\TimeRangePresetStatistics;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
@@ -35,7 +36,8 @@ class FreeradiusController extends AbstractController
         private readonly FreeradiusConnectionService $freeradiusConnectionService,
         private readonly FreeradiusStatistics $statisticsFreeradius,
         private readonly DashboardFormatter $statisticsFreeradiusFormatter,
-        private readonly ExportService $freeradiusExportService
+        private readonly ExportService $freeradiusExportService,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -209,6 +211,16 @@ class FreeradiusController extends AbstractController
     #[Route('/dashboard/statistics/freeradius/export', name: 'admin_dashboard_statistics_freeradius_export')]
     public function exportFreeradius(Request $request): Response
     {
+
+        $exportStatus = $_ENV['EXPORT_FREERADIUS_STATISTICS'] ?? OperationMode::FALSE->value;
+
+        if ($exportStatus === OperationMode::FALSE->value) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('accountWithoutProfilesAssociated', [], 'controllers')
+            );
+            return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
+        }
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
