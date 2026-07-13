@@ -118,7 +118,7 @@ class AdminController extends AbstractController
         $allUsersCount = $this->userRepository->countUsers($searchTerm, $filter, true);
         $verifiedUsersCount = $this->userRepository->countVerifiedUsers($searchTerm, true);
         $bannedUsersCount = $this->userRepository->countBannedUsers($searchTerm, true);
-        
+
         // Check if the delete action has a public PGP key defined
         $deleteUsers = $this->parameterBag->get('app.pgp_public_key');
         // Create form views
