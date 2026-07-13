@@ -184,7 +184,7 @@ class MapExportController extends AbstractController
             rewind($handle);
         }
 
-        $headers = fgetcsv($handle, 0, ',');
+        $headers = fgetcsv($handle, 0, ',', escape: '\\');
         if (!$headers || !in_array('network_name', $headers, true)) {
             fclose($handle);
             $this->addFlash('error', $this->translator->trans('importErrorInvalidStructure', [], 'controllers'));
@@ -196,7 +196,7 @@ class MapExportController extends AbstractController
         $now = new DateTimeImmutable();
 
         try {
-            while (($row = fgetcsv($handle, 0, ',')) !== false) {
+            while (($row = fgetcsv($handle, 0, ',', escape: '\\')) !== false) {
                 $netName    = trim($row[0] ?? '');
                 $netDesc    = trim($row[1] ?? '');
                 $netGeoRaw  = trim($row[2] ?? '');
@@ -213,7 +213,7 @@ class MapExportController extends AbstractController
                 $apAltMsl   = trim($row[12] ?? '');
                 $apAltAgl   = trim($row[13] ?? '');
 
-                if (empty($netName)) {
+                if ($netName === '' || $netName === '0') {
                     continue;
                 }
 
@@ -221,7 +221,7 @@ class MapExportController extends AbstractController
                     $network = $networkRepository->findOneBy(['name' => $netName]);
                     $isNew = false;
 
-                    if (!$network) {
+                    if (!$network instanceof Network) {
                         $network = new Network();
                         $network->setName($netName);
                         $network->setCreatedAt($now);
@@ -230,11 +230,11 @@ class MapExportController extends AbstractController
 
                     $network->setUpdatedAt($now);
 
-                    if (!empty($netDesc)) {
+                    if ($netDesc !== '' && $netDesc !== '0') {
                         $network->setDescription($netDesc);
                     }
 
-                    if (!empty($netGeoRaw)) {
+                    if ($netGeoRaw !== '' && $netGeoRaw !== '0') {
                         $network->setGeometry($netGeoRaw);
                     } elseif ($isNew) {
                         $network->setGeometry(json_encode([
@@ -249,14 +249,14 @@ class MapExportController extends AbstractController
                     $network = $networksCreatedOrUpdated[$netName];
                 }
 
-                if (!empty($apName)) {
+                if ($apName !== '' && $apName !== '0') {
                     $existingAp = null;
                     foreach ($network->getAccessPoints() as $currentAp) {
-                        if (!empty($apMac) && $currentAp->getMacAddress() === $apMac) {
+                        if ($apMac !== '' && $apMac !== '0' && $currentAp->getMacAddress() === $apMac) {
                             $existingAp = $currentAp;
                             break;
                         }
-                        if (empty($apMac) && $currentAp->getName() === $apName) {
+                        if (($apMac === '' || $apMac === '0') && $currentAp->getName() === $apName) {
                             $existingAp = $currentAp;
                             break;
                         }
@@ -271,12 +271,12 @@ class MapExportController extends AbstractController
                     }
 
                     $ap->setName($apName);
-                    $ap->setSsid(!empty($apSsid) ? $apSsid : 'OpenRoaming');
-                    $ap->setMacAddress(!empty($apMac) ? $apMac : null);
-                    $ap->setVendor(!empty($apVendor) ? $apVendor : null);
-                    $ap->setModel(!empty($apModel) ? $apModel : null);
-                    $ap->setStandard(!empty($apStandard) ? $apStandard : null);
-                    $ap->setSerialNumber(!empty($apSerial) ? $apSerial : null);
+                    $ap->setSsid($apSsid === '' || $apSsid === '0' ? 'OpenRoaming' : $apSsid);
+                    $ap->setMacAddress($apMac === '' || $apMac === '0' ? null : $apMac);
+                    $ap->setVendor($apVendor === '' || $apVendor === '0' ? null : $apVendor);
+                    $ap->setModel($apModel === '' || $apModel === '0' ? null : $apModel);
+                    $ap->setStandard($apStandard === '' || $apStandard === '0' ? null : $apStandard);
+                    $ap->setSerialNumber($apSerial === '' || $apSerial === '0' ? null : $apSerial);
                     $ap->setUpdatedAt($now);
 
                     if ($apLng !== '' && $apLat !== '') {

@@ -89,22 +89,5 @@ final class ManageAccessPointsForm extends AbstractController
         return new Map()
             ->center(new Point(37.7412, -25.6756))
             ->zoom(13);
-
-        $accessPoints = $this->entityManager
-            ->getRepository(AccessPoint::class)
-            ->findByNetworkWithCoordinates($this->network);
-
-        foreach ($accessPoints as $ap) {
-            if ($this->accessPointDTO && $this->accessPointDTO->ssid === $ap['ssid']) {
-                continue;
-            }
-
-            $map->addMarker(new Marker(
-                position: new Point((float)$ap['lat'], (float)$ap['lng']),
-                title: $ap['name'] ?? 'Access Point'
-            ));
-        }
-
-        return $map;
     }
 }
