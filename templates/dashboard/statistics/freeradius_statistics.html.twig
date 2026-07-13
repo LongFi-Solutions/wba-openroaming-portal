@@ -21,7 +21,7 @@
     <div class="flex flex-col gap-6 lg:w-2/3">
 
     {# Date filter - top right aligned #}
-    {% if exportFreeradiusStatistics == constant('App\\Enum\\OperationMode::ON').value %}
+    {% if exportFreeradiusStatistics == constant('App\\Enum\\OperationMode::TRUE').value %}
         <div class="flex justify-start">
             <a href="{{ path('admin_dashboard_statistics_freeradius_export', {startDate: selectedStartDate, endDate: selectedEndDate}) }}"
                onclick="return confirm('...')"
