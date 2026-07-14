@@ -212,7 +212,7 @@ class FreeradiusController extends AbstractController
     public function exportFreeradius(Request $request): Response
     {
 
-        $exportStatus = $this->parameterBag->get('app.export_freeradius_statistics') ?? OperationMode::FALSE->value;
+        $exportStatus = $this->parameterBag->get('app.export_freeradius_statistics');
 
         if ($exportStatus === OperationMode::FALSE->value) {
             $this->addFlash(
