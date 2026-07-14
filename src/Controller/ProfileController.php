@@ -5,10 +5,10 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\OperationMode;
 use App\Enum\OSType;
 use App\Enum\SettingName;
-use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileStatus;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
@@ -92,7 +92,6 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
         $radiusUser = $this->createOrUpdateRadiusUser(
@@ -162,13 +161,14 @@ class ProfileController extends AbstractController
         $response->headers->set('Content-Type', 'application/x-wifi-config');
         $response->headers->set('Content-Transfer-Encoding', 'base64');
 
-        $eventMetadata = [
-            'ip' => $request->getClientIp(),
-            'user_agent' => $request->headers->get('User-Agent'),
-            'platform' => $this->settingRepository->findOneBy(
+        $eventMetaData = [
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
                 ['name' => SettingName::PLATFORM_MODE->value]
             )->getValue(),
-            'type' => OSType::ANDROID->value,
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
+            EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value => OSType::ANDROID->value,
         ];
 
         // Save the event Action using the service
@@ -176,7 +176,7 @@ class ProfileController extends AbstractController
             $user,
             AnalyticalEventType::DOWNLOAD_PROFILE->value,
             new DateTime(),
-            $eventMetadata
+            $eventMetaData
         );
 
         return $response;
@@ -314,24 +314,26 @@ class ProfileController extends AbstractController
 
         // Save the event Action using the service
         $userAgent = $request->headers->get('User-Agent');
-        $eventMetadata = [];
+        $eventMetaData = [];
         if (stripos((string)$userAgent, 'iPhone') !== false || stripos((string)$userAgent, 'iPad') !== false) {
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'platform' => $this->settingRepository->findOneBy(
-                    ['name' => [SettingName::PLATFORM_MODE->value]]
+            $eventMetaData = [
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
+                    ['name' => SettingName::PLATFORM_MODE->value]
                 )->getValue(),
-                'type' => OSType::IOS->value,
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
+                EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value => OSType::IOS->value,
             ];
         } elseif (stripos((string)$userAgent, 'Mac OS') !== false) {
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'platform' => $this->settingRepository->findOneBy(
-                    ['name' => [SettingName::PLATFORM_MODE->value]]
+            $eventMetaData = [
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
+                    ['name' => SettingName::PLATFORM_MODE->value]
                 )->getValue(),
-                'type' => OSType::MACOS->value
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
+                EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value => OSType::MACOS->value,
             ];
         }
 
@@ -339,7 +341,7 @@ class ProfileController extends AbstractController
             $user,
             AnalyticalEventType::DOWNLOAD_PROFILE->value,
             new DateTime(),
-            $eventMetadata
+            $eventMetaData
         );
 
         return $response;
@@ -487,13 +489,14 @@ class ProfileController extends AbstractController
         $cache = new CacheUtils();
         $cache->write('profile_' . $uuid, $signedProfileContents);
 
-        $eventMetadata = [
-            'ip' => $request->getClientIp(),
-            'user_agent' => $request->headers->get('User-Agent'),
-            'platform' => $this->settingRepository->findOneBy([
-                'name' => [SettingName::PLATFORM_MODE->value]
-            ])->getValue(),
-            'type' => OSType::WINDOWS->value,
+        $eventMetaData = [
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::PLATFORM_MODE->value]
+            )->getValue(),
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
+            EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value => OSType::WINDOWS->value,
         ];
 
         // Save the event Action using the service
@@ -501,7 +504,7 @@ class ProfileController extends AbstractController
             $user,
             AnalyticalEventType::DOWNLOAD_PROFILE->value,
             new DateTime(),
-            $eventMetadata
+            $eventMetaData
         );
 
         return $this->redirect(

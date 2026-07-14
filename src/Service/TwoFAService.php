@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Entity\OTPcode;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\TwoFAType;
@@ -323,10 +324,9 @@ readonly class TwoFAService
 
         if ($eventType !== AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value) {
             $eventMetaData = [
-                'platform' => PlatformMode::LIVE->value,
-                'user_agent' => $userAgent ?? 'Unknown',
-                'uuid' => $user->getUuid(),
-                'ip' => $ip ?? null,
+                EventMetadataKeysType::IP->value => $ip,
+                EventMetadataKeysType::USER_AGENT->value => $userAgent,
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
             ];
             $this->eventActions->saveEvent(
                 $user,
@@ -426,20 +426,34 @@ readonly class TwoFAService
         $this->entityManager->flush();
     }
 
-    public function event2FA(string $ip, User $user, string $eventType, string $userAgent): void
+    public function event2FA(string $ip, User $user, string $eventType, string $userAgent, ?User $admin = null): void
     {
-        $eventMetaData = [
-            'platform' => PlatformMode::LIVE->value,
-            'user_agent' => $userAgent,
-            'uuid' => $user->getUuid(),
-            'ip' => $ip,
-        ];
-        $this->eventActions->saveEvent(
-            $user,
-            $eventType,
-            new DateTime(),
-            $eventMetaData
-        );
+        if ($admin instanceof User) {
+            $eventMetaData = [
+                EventMetadataKeysType::USER_AGENT->value => $userAgent,
+                EventMetadataKeysType::UUID->value => $admin->getUuid(),
+                EventMetadataKeysType::IP->value => $ip,
+                EventMetadataKeysType::PERFORMED_ON_UUID->value => $user->getUuid(),
+            ];
+            $this->eventActions->saveEvent(
+                $admin,
+                $eventType,
+                new DateTime(),
+                $eventMetaData
+            );
+        } else {
+            $eventMetaData = [
+                EventMetadataKeysType::USER_AGENT->value => $userAgent,
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
+                EventMetadataKeysType::IP->value => $ip,
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                $eventType,
+                new DateTime(),
+                $eventMetaData
+            );
+        }
     }
 
     public function canValidationCode(User $user, string $eventType): bool

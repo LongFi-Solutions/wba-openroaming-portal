@@ -53,7 +53,6 @@ security:
                 - App\Security\DashboardAuthenticator
             entry_point: App\Security\DashboardAuthenticator
             saml:
-                identifier_attribute: '%env(string:SAML_IDENTIFIER_ATTRIBUTE)%'
                 user_factory: saml_user_factory
                 persist_user: true
                 use_attribute_friendly_name: true
@@ -70,7 +69,7 @@ security:
             logout:
                 path: app_dashboard_logout
                 target: /dashboard
-                invalidate_session: false
+                invalidate_session: true
 
         landing:
             pattern: ^/
@@ -94,7 +93,6 @@ security:
                 path: /
                 name: REMEMBERME
             saml:
-                identifier_attribute: '%env(string:SAML_IDENTIFIER_ATTRIBUTE)%'
                 user_factory: saml_user_factory
                 persist_user: true
                 use_attribute_friendly_name: true
@@ -104,7 +102,7 @@ security:
             logout:
                 path: app_logout
                 target: / # Redirect users to the homepage (or another path) after logout
-                invalidate_session: false
+                invalidate_session: true
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall
 

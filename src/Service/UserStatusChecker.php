@@ -6,7 +6,6 @@ use App\Api\V1\BaseResponse as BaseResponseV1;
 use App\Api\V2\BaseResponse as BaseResponseV2;
 use App\Api\V3\BaseResponse as BaseResponseV3;
 use App\Entity\User;
-use App\Enum\DomainMatchType;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\DomainBlacklistRepository;

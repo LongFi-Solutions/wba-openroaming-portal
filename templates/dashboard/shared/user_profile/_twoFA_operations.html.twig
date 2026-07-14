@@ -1,0 +1,68 @@
+{# Content - Two-Factor Options #}
+{% if app.user and userData.user.id == app.user.id %}
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+            {{ 'TwoFAOptions'|trans({}, 'edit') }}
+        </h2>
+        {% if userData.user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
+            <p class="text-xs text-gray-400 mb-4">
+                {% set twoFALabels = {
+                    0: 'twoFALabel.disabled'|trans({}, 'show'),
+                    1: 'twoFALabel.totp'|trans({}, 'show'),
+                    2: 'twoFALabel.sms'|trans({}, 'show'),
+                    3: 'twoFALabel.email'|trans({}, 'show'),
+                } %}
+                {{ 'currentMethod'|trans({}, 'show') }}:
+                <span class="font-medium text-gray-600">
+                    {{ twoFALabels[userData.user.twoFAtype] ?? '—' }}
+                </span>
+            </p>
+            <div class="flex flex-col gap-3">
+                <a href="{{ path('app_configure2FA', {context: context}) }}"
+                   class="btn-secondary w-full text-center">
+                    {{ 'configureTwoFactorAuthentication'|trans({}, 'edit') }}
+                </a>
+                <a href="{{ path('app_disable2FA', {context: context}) }}"
+                   class="btn-logout w-full text-center">
+                    {{ 'disable'|trans({}, 'edit') }}
+                </a>
+            </div>
+        {% else %}
+            <a href="{{ path('app_configure2FA', {context: context}) }}"
+               class="btn-primary w-full text-center block">
+                {{ 'configureTwoFactorAuthentication'|trans({}, 'edit') }}
+            </a>
+        {% endif %}
+    </div>
+{% else %}
+    {% set can2FA = userData.isAdmin
+        ? is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE'))
+        : is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
+
+    {% if can2FA %}
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+                {{ 'TwoFAOptions'|trans({}, 'edit') }}
+            </h2>
+            {% if userData.user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
+                {% set twoFALabels = {
+                    0: 'twoFALabel.disabled'|trans({}, 'show'),
+                    1: 'twoFALabel.totp'|trans({}, 'show'),
+                    2: 'twoFALabel.sms'|trans({}, 'show'),
+                    3: 'twoFALabel.email'|trans({}, 'show'),
+                } %}
+                <p class="text-xs text-gray-400 mb-4">
+                    {{ 'currentMethod'|trans({}, 'show') }}: <span
+                            class="font-medium text-gray-600">{{ twoFALabels[userData.user.twoFAtype] ?? '—' }}</span>
+                </p>
+                <a href="{{ path('admin_dashboard_user_disable2FA', {id: userData.user.id}) }}"
+                   class="btn-logout w-full text-center block"
+                   data-confirm="{{ 'disable2FAMessage'|trans({}, 'edit')|e('html_attr') }}">
+                    {{ 'disable'|trans({}, 'edit') }}
+                </a>
+            {% else %}
+                <p class="text-sm text-gray-400">{{ 'no2FAConfigured'|trans({}, 'show') }}</p>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endif %}

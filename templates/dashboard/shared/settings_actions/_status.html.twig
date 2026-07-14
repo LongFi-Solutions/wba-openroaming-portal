@@ -231,11 +231,12 @@
             {% do form.apiStatus.setRendered() %}
         </div>
 
-        {# USER_DELETE_TIME #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        {# EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS #}
+        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}
+             id="EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS">
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'deleteUnverifiedAccounts'|trans({}, '_status') }}</h1>
+                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'timeIntervalBetweenRequests'|trans({}, '_status') }}</h1>
                 </div>
                 <label class="flex items-center bg-opacity-40">
                     <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
@@ -243,22 +244,22 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.USER_DELETE_TIME.description}) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS.description}) }}
 
             <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.userDeleteTime, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+                {{ form_widget(form.timeIntervalBetweenRequests, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
             </div>
             <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                {{ form_errors(form.userDeleteTime) }}
+                {{ form_errors(form.timeIntervalBetweenRequests) }}
             </div>
         </div>
 
-        {# TIME_INTERVAL_NOTIFICATION #}
+        {# EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS #}
         <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}
-             id="TIME_INTERVAL_NOTIFICATION">
+             id="EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS">
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'profileExpirationNotification'|trans({}, '_status') }}</h1>
+                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'timeIntervalToResetAttempts'|trans({}, '_status') }}</h1>
                 </div>
                 <label class="flex items-center bg-opacity-40">
                     <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
@@ -266,13 +267,36 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TIME_INTERVAL_NOTIFICATION.description}) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS.description}) }}
 
             <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.timeIntervalNotification, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+                {{ form_widget(form.timeIntervalToResetAttempts, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
             </div>
             <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                {{ form_errors(form.timeIntervalNotification) }}
+                {{ form_errors(form.timeIntervalToResetAttempts) }}
+            </div>
+        </div>
+
+        {# EMAIL_ATTEMPTS_NUMBER #}
+        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}
+             id="EMAIL_ATTEMPTS_NUMBER">
+            <div class="flex flex-row justify-between">
+                <div class="text-base font-medium text-center break-normal md:break-all">
+                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'attemptsNumber'|trans({}, '_status') }}</h1>
+                </div>
+                <label class="flex items-center bg-opacity-40">
+                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                </label>
+            </div>
+
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.EMAIL_ATTEMPTS_NUMBER.description}) }}
+
+            <div class="flex items-center space-x-2 mt-5">
+                {{ form_widget(form.attemptsNumber, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+            </div>
+            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                {{ form_errors(form.attemptsNumber) }}
             </div>
         </div>
     </div>

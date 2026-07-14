@@ -16,14 +16,18 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use DOMDocument;
+use DOMElement;
+use DOMNodeList;
+use DOMXPath;
 use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
 class CustomSamlUserFactory implements SamlUserFactoryInterface
 {
@@ -64,14 +68,19 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
             );
         }
 
-        /**
-         * ---------------------------------------------------------
-         * Resolve identifier (UUID)
-         * ---------------------------------------------------------
-         */
         $uuidAttribute = $this->attribute_mapping['uuid'] ?? null;
         if (!$uuidAttribute) {
             throw new RuntimeException('SAML uuid mapping is missing');
+        }
+
+        /**
+         * ---------------------------------------------------------
+         * Safe Fallback: Extract standard Name attributes from raw XML
+         * if the expected UUID key isn't populated by FriendlyName.
+         * ---------------------------------------------------------
+         */
+        if (!isset($attributes[$uuidAttribute])) {
+            $attributes = array_merge($attributes, $this->extractStandardAttributesFromRequest());
         }
 
         $uuid = $this->getAttributeValue($attributes, $uuidAttribute);
@@ -125,9 +134,21 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         $user->setDisabled(false);
         $user->setCreatedAt(new DateTime());
 
-        $samlAccountName = isset($this->attribute_mapping['username'])
-            ? $this->getAttributeValue($attributes, $this->attribute_mapping['username'])
-            : ($attributes['sAMAccountName'][0] ?? null);
+        $usernameAttribute = $this->attribute_mapping['username'] ?? '';
+
+        // Check if username attribute is specified and present in SAML data
+        if (!empty($usernameAttribute) && isset($attributes[$usernameAttribute])) {
+            $samlAccountName = $this->getAttributeValue(
+                $attributes,
+                $usernameAttribute
+            );
+        } elseif (isset($attributes['sAMAccountName'][0])) {
+            // Fallback to old sAMAccountName if available
+            $samlAccountName = $attributes['sAMAccountName'][0];
+        } else {
+            // Use the email address for Google Suite
+            $samlAccountName = $email;
+        }
 
         $userAuth = new UserExternalAuth();
         $userAuth->setUser($user)
@@ -166,5 +187,73 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         }
 
         return $value;
+    }
+
+    /**
+     * Extracts standard attributes from the raw SAMLResponse XML payload when
+     * use_attribute_friendly_name is true globally but an IdP only sends standard Names.
+     *
+     * @return array<string, array<int, string>>
+     */
+    private function extractStandardAttributesFromRequest(): array
+    {
+        $request = $this->requestStack->getCurrentRequest();
+        if (!$request || !$request->request->has('SAMLResponse')) {
+            return [];
+        }
+
+        $xmlStr = base64_decode((string)$request->request->get('SAMLResponse'), true);
+        if (!$xmlStr) {
+            return [];
+        }
+
+        try {
+            $dom = new DOMDocument();
+            libxml_use_internal_errors(true);
+            $dom->loadXML($xmlStr);
+            libxml_clear_errors();
+
+            $xpath = new DOMXPath($dom);
+            $xpath->registerNamespace('saml', 'urn:oasis:names:tc:SAML:2.0:assertion');
+
+            // Locate standard saml:Attribute elements
+            $nodes = $xpath->query('//saml:Attribute');
+            $extracted = [];
+
+            if ($nodes instanceof DOMNodeList) {
+                foreach ($nodes as $node) {
+                    if ($node instanceof DOMElement) {
+                        $name = $node->getAttribute('Name');
+                        if (!$name) {
+                            continue;
+                        }
+
+                        $values = [];
+                        // Extract values safely considering potential XML namespaces
+                        $valueNodes = $node->getElementsByTagNameNS(
+                            'urn:oasis:names:tc:SAML:2.0:assertion',
+                            'AttributeValue'
+                        );
+                        foreach ($valueNodes as $valueNode) {
+                            $values[] = $valueNode->nodeValue;
+                        }
+
+                        if ($values === []) {
+                            $valueNodes = $node->getElementsByTagName('AttributeValue');
+                            foreach ($valueNodes as $valueNode) {
+                                $values[] = $valueNode->nodeValue;
+                            }
+                        }
+
+                        $extracted[$name] = $values;
+                    }
+                }
+            }
+
+            return $extracted;
+        } catch (Throwable) {
+            // Fail silently to prevent breaking other production flows
+            return [];
+        }
     }
 }

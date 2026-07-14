@@ -7,6 +7,7 @@ use App\Entity\CertificateSetupProcess;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\ProcessStatusType;
 use App\Repository\EventRepository;
 use DateTime;
@@ -38,9 +39,9 @@ readonly class CertificateStorageService
             AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_CREATION->value,
             new DateTime(),
             [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'by' => $user->getUuid(),
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $user->getUuid(),
             ]
         );
 
