@@ -211,16 +211,15 @@ class FreeradiusController extends AbstractController
     #[Route('/dashboard/statistics/freeradius/export', name: 'admin_dashboard_statistics_freeradius_export')]
     public function exportFreeradius(Request $request): Response
     {
-
         $exportStatus = $this->parameterBag->get('app.export_freeradius_statistics');
-
-        if ($exportStatus === OperationMode::FALSE->value) {
+        if ($exportStatus === false) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('operationDisabledForSecurityReasons', [], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
         }
+
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 

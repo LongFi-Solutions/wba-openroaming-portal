@@ -68,7 +68,7 @@
             </div>
 
             {# Right Button #}
-            {% if this.exportUsers == constant('App\\Enum\\OperationMode::TRUE').value %}
+            {% if this.exportUsers === true %}
                 <a href="{{ path('admin_dashboard_users_export') }}"
                    class="btn-primary px-4 min-w-[150px]"
                    data-download="true">

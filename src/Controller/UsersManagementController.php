@@ -145,7 +145,7 @@ class UsersManagementController extends AbstractController
     {
         // Check if export is enabled
         $exportUsers = $this->parameterBag->get('app.export_users');
-        if ($exportUsers === OperationMode::FALSE->value) {
+        if ($exportUsers === false) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('operationDisabledForSecurityReasons', [], 'controllers')

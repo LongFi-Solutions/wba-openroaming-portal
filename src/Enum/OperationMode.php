@@ -8,6 +8,4 @@ enum OperationMode: string
 {
     case ON = 'ON';
     case OFF = 'OFF';
-    case TRUE = 'true';
-    case FALSE = 'false';
 }
