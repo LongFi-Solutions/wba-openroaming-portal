@@ -31,7 +31,7 @@
             </a>
         </li>
 
-        {% if delete_users == constant('App\\Enum\\OperationMode::ON').value %}
+        {% if delete_users === true %}
             <li {{ stimulus_controller('alert') }}>
                 <form action="{{ path('admin_dashboard_user_delete', {id: user.id}) }}"
                       method="post" {{ stimulus_target('alert', 'form') }}>
