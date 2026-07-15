@@ -1,3 +1,6 @@
 <div class="fixed bottom-4 left-4 p-2 bg-gray-200/50 backdrop-blur-md rounded-lg text-sm text-gray-700 hidden xl:block cursor-default z-50">
     {{ 'version'|trans({}, 'app_version') }} {{ app_version() }}
+    {% if app_branch() is not null %}
+        <span class="text-gray-700">({{ app_branch() }})</span>
+    {% endif %}
 </div>
