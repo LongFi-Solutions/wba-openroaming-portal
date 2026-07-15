@@ -31,5 +31,7 @@
         {{ include('dashboard/shared/settings_actions/_returnApps.html.twig') }}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_map' %}
         {{ include('dashboard/shared/settings_actions/_map.html.twig') }}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_map_networks' %}
+            {{ include('dashboard/shared/settings_actions/_networks.html.twig') }}
     {% endif %}
 {% endblock %}

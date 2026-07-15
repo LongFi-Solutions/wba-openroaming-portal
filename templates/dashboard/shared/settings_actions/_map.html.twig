@@ -1,50 +1,11 @@
-<div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
-
-    <div
-            data-controller="toggle-pages"
-            class="w-full"
-    >
-
-        {# Tabs #}
-        <div class="flex justify-center mb-6">
-
-            <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
-
-                {# MAP Tab #}
-                <button
-                        type="button"
-                        data-toggle-pages-target="toggle1"
-                        data-action="toggle-pages#showPage1"
-                        class="flex-1 text-center px-4 py-2 rounded-md transition-all duration-200
-                       bg-white text-black font-semibold shadow-md"
-                >
-                    {{ 'map'|trans({}, '_map') }}
-                </button>
-
-                {# TABLE Tab #}
-                <button
-                        type="button"
-                        data-toggle-pages-target="toggle2"
-                        data-action="toggle-pages#showPage2"
-                        class="flex-1 text-center px-4 py-2 rounded-md transition-all duration-200
-                       text-gray-700"
-                >
-                    {{ 'management'|trans({}, '_map') }}
-                </button>
-
-            </div>
-
-        </div>
-
-        {# MAP #}
-        <div data-toggle-pages-target="page1">
-            {{ include('dashboard/shared/settings_actions/map/map.html.twig') }}
-        </div>
-
-        {# TABLE #}
-        <div data-toggle-pages-target="page2" class="hidden">
-            {{ component('NetworkSearchForm') }}
-        </div>
-
+<div class="pt-5 pb-1 rounded-xl bg-white">
+    <div class="p-6 relative z-0 overflow-hidden w-full h-[600px] rounded-2xl coverage-map-public">
+        {{ ux_map(map, {
+            style: 'height: 100%; width: 100%;',
+            'data-controller': 'network-map-polygons',
+            'data-network-map-polygons-polygons-url-value': path('admin_dashboard_map_polygons'),
+            'data-network-map-polygons-show-access-points-value': 'true',
+            'data-network-map-polygons-marker-icon-value': ux_icon('wba:access-point-point', {class: 'fill-none stroke-current'}),
+        }) }}
     </div>
 </div>
