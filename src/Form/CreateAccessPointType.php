@@ -23,7 +23,6 @@ class CreateAccessPointType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Nome do Access Point',
                 'required' => false,
                 'attr' => [
                     'placeholder' => 'Ex: AP-Piso1-SalaA',
@@ -31,7 +30,6 @@ class CreateAccessPointType extends AbstractType
                 ]
             ])
             ->add('ssid', TextType::class, [
-                'label' => 'SSID (Nome da Rede Wi-Fi)',
                 'required' => true,
                 'attr' => [
                     'placeholder' => 'Ex: Empresa_Guest_WiFI',
@@ -39,7 +37,6 @@ class CreateAccessPointType extends AbstractType
                 ]
             ])
             ->add('macAddress', TextType::class, [
-                'label' => 'Endereço MAC',
                 'required' => false,
                 'attr' => [
                     'placeholder' => 'Ex: AA:BB:CC:DD:EE:FF',
@@ -47,7 +44,6 @@ class CreateAccessPointType extends AbstractType
                 ]
             ])
             ->add('vendor', TextType::class, [
-                'label' => 'Fabricante / Marca',
                 'required' => false,
                 'attr' => [
                     'placeholder' => 'Ex: Ubiquiti, Cisco, TP-Link',
@@ -55,7 +51,6 @@ class CreateAccessPointType extends AbstractType
                 ]
             ])
             ->add('model', TextType::class, [
-                'label' => 'Modelo',
                 'required' => false,
                 'attr' => [
                     'placeholder' => 'Ex: UniFi AP AC Pro',
@@ -63,7 +58,6 @@ class CreateAccessPointType extends AbstractType
                 ]
             ])
             ->add('standard', TextType::class, [
-                'label' => 'Padrão Wi-Fi (Standard)',
                 'required' => false,
                 'attr' => [
                     'placeholder' => 'Ex: 802.11ax (Wi-Fi 6)',
@@ -71,7 +65,6 @@ class CreateAccessPointType extends AbstractType
                 ]
             ])
             ->add('serialNumber', TextType::class, [
-                'label' => 'Número de Série',
                 'required' => false,
                 'attr' => [
                     'placeholder' => 'Ex: SN1234567890',
@@ -98,7 +91,6 @@ class CreateAccessPointType extends AbstractType
                 ]
             ])
             ->add('altitudeMsl', NumberType::class, [
-                'label' => 'Altitude MSL (Acima do Nível do Mar - metros)',
                 'scale' => 2,
                 'required' => false,
                 'attr' => [
@@ -107,7 +99,6 @@ class CreateAccessPointType extends AbstractType
                 ]
             ])
             ->add('altitudeAgl', NumberType::class, [
-                'label' => 'Altitude AGL (Acima do Nível do Solo - metros)',
                 'scale' => 2,
                 'required' => false,
                 'attr' => [

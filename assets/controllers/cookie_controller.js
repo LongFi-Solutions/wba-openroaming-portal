@@ -115,7 +115,7 @@ export default class extends Controller {
                 (position) => {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
-                    const maxAge = 365 * 24 * 60 * 60; // 1 ano (igual aos teus outros cookies)
+                    const maxAge = 365 * 24 * 60 * 60;
 
                     document.cookie = `user_lat=${lat}; path=/; max-age=${maxAge}; path=/; SameSite=Lax`;
                     document.cookie = `user_lng=${lng}; path=/; max-age=${maxAge}; path=/; SameSite=Lax`;

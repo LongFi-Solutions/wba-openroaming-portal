@@ -5,15 +5,18 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\DTO\AccessPointDTO;
+use App\DTO\MapSettingsDTO;
 use App\DTO\NetworkDTO;
 use App\Entity\AccessPoint;
 use App\Entity\Network;
 use App\Enum\AdminPermissionsType;
 use App\Form\CreateAccessPointType;
 use App\Form\CreateNetworkType;
+use App\Form\MapSettingsType;
 use App\Repository\AccessPointRepository;
 use App\Repository\NetworkRepository;
 use App\Service\GetSettings;
+use App\Service\SettingsService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonException;
@@ -36,6 +39,7 @@ class MapController extends AbstractController
         private readonly AccessPointRepository $accessPointRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly TranslatorInterface $translator,
+        private readonly SettingsService $settingsService,
     ) {
     }
 
@@ -427,6 +431,29 @@ class MapController extends AbstractController
             )
         );
         return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
+    }
+
+    #[Route('dashboard/map/settings', name: 'admin_dashboard_map_settings')]
+    #[isGranted(AdminPermissionsType::MAP_READ->value)]
+    public function mapSettings(Request $request): Response
+    {
+        $data = $this->getSettings->getSettings();
+        $dto = new MapSettingsDTO($data);
+        $map = new Map()
+            ->center(new Point((float)$dto->latitude, (float)$dto->longitude))
+            ->zoom($dto->zoom);
+        $form = $this->createForm(MapSettingsType::class, $dto);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $this->settingsService->flush();
+        }
+
+        return $this->render('dashboard/shared/settings_actions/map/settings.html.twig', [
+            'form' => $form->createView(),
+            'data' => $data,
+            'map' => $map,
+        ]);
     }
 
     private function hasLocationConsent(Request $request): bool
