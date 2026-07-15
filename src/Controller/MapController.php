@@ -145,6 +145,17 @@ class MapController extends AbstractController
         ]);
     }
 
+    #[Route('/dashboard/map/networks', name: 'admin_dashboard_map_networks', methods: ['GET'])]
+    public function networks(): Response
+    {
+        $data = $this->getSettings->getSettings();
+
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
+            'data' => $data,
+            'searchTerm' => null,
+        ]);
+    }
+
     /**
      * @throws JsonException
      */
