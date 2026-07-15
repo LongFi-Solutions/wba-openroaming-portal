@@ -9,14 +9,20 @@ use App\DTO\MapSettingsDTO;
 use App\DTO\NetworkDTO;
 use App\Entity\AccessPoint;
 use App\Entity\Network;
+use App\Entity\User;
 use App\Enum\AdminPermissionsType;
+use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Form\CreateAccessPointType;
 use App\Form\CreateNetworkType;
 use App\Form\MapSettingsType;
 use App\Repository\AccessPointRepository;
 use App\Repository\NetworkRepository;
+use App\Security\Voter\UserAuthenticationVoter;
+use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SettingsService;
+use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonException;
@@ -40,6 +46,7 @@ class MapController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly TranslatorInterface $translator,
         private readonly SettingsService $settingsService,
+        private readonly EventActions $eventActions,
     ) {
     }
 
@@ -437,16 +444,42 @@ class MapController extends AbstractController
     #[isGranted(AdminPermissionsType::MAP_READ->value)]
     public function mapSettings(Request $request): Response
     {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
         $data = $this->getSettings->getSettings();
         $dto = new MapSettingsDTO($data);
+
         $map = new Map()
             ->center(new Point((float)$dto->latitude, (float)$dto->longitude))
             ->zoom($dto->zoom);
+
         $form = $this->createForm(MapSettingsType::class, $dto);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+
+        $canWrite = $this->isGranted(UserAuthenticationVoter::MAP_WRITE);
+
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
+
+            // Track event
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::SETTING_MAP_REQUEST->value,
+                new DateTime(),
+                [
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::CHANGESET->value => $changeset
+                ]
+            );
+
+            $this->addFlash(
+                'success',
+                $this->translator->trans('mapSettingsAppliedSuccessfully', [], 'controllers')
+            );
         }
 
         return $this->render('dashboard/shared/settings_actions/map/settings.html.twig', [
