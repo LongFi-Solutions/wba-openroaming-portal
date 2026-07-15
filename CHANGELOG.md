@@ -1,5 +1,10 @@
 # Changelog
 
+# Release V1.12.1
+
+- Removed the preparation command that was introduced for v1.11.
+- Updated configuration variables default value to follow better practices (bool instead of ON & OFF, please consult the `env.sample` for more details)
+
 # Release V1.12.0
 
 - New settings to configure the number of retry attempts for email & SMS at a specific timeframe, with customization available on the dashboard.
