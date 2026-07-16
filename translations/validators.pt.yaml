@@ -98,7 +98,7 @@ polygonWarningMessage: 'A área desenhada deve abranger todos os pontos de acess
 polygonWarningMessageMultiple: 'A área desenhada deve abranger todos os pontos de acesso existentes (Os pontos "%s" ficaram de fora!).'
 invalidMacAddressFormat: "O endereço MAC introduzido não é válido. Use o formato AA:BB:CC:11:22:33 ou AA-BB-CC-11-22-33."
 altitudeAglCannotBeNegative: "A altitude acima do solo (AGL) não pode ser inferior a 0 metros."
-invalidAltitudeMsl: "A altitude MSL introduzida está fora dos limites geográficos realistas (-500m a 9000m)."
+invalidAltitudeMsl: "A altitude MSL introduzida está fora dos limites geográficos realistas (0m a 9000m)."
 networkHasNoGeometry: "A rede selecionada não possui uma área geográfica (polígono) definida."
 pointOutsideNetworkPolygon: "As coordenadas selecionadas ficam fora da área de cobertura permitida para esta rede."
 coordinateDegreeBetween90: 'A latitude deve ser um valor numérico entre -90 e 90 graus.'
