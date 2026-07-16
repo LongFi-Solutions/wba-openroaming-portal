@@ -39,7 +39,7 @@ class AccessPoint
     #[ORM\Column(name: 'serial_number', length: 255, nullable: true)]
     private ?string $serialNumber = null;
 
-    #[ORM\Column(type: 'point', nullable: true)]
+    #[ORM\Column(type: 'point', nullable: false)]
     private ?string $location = null;
 
     #[ORM\Column(name: 'altitude_msl', type: 'float', nullable: true)]

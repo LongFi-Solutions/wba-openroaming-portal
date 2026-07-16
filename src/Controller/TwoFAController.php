@@ -1118,7 +1118,7 @@ class TwoFAController extends AbstractController
         $session = $request->getSession();
         $data = $this->getSettings->getSettings();
         $form = $this->createForm(TwoFACode::class);
-        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
             // Check if the code used is the one generated in the BD.

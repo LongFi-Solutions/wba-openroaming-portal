@@ -14,9 +14,6 @@ export default class extends Controller {
         this.checkCookies();
         this.toggleManageButton();
 
-        if (this.cookieScopes.geolocation) {
-            this.askForLocation();
-        }
     }
 
     checkCookies() {
@@ -92,8 +89,7 @@ export default class extends Controller {
         if (allEnabled) {
             this.setCookiesAccepted();
         } else {
-            // If even one is false, remove cookies_accepted
-            document.cookie = 'cookies_accepted=; path=/; max-age=0';
+            document.cookie = 'cookies_accepted=; path=/; max-age=0; Secure; SameSite=Lax';
         }
 
         this.closeModal();
@@ -101,29 +97,9 @@ export default class extends Controller {
     }
 
     handleGeolocationConsent() {
-        if (this.cookieScopes.geolocation) {
-            this.askForLocation();
-        } else {
-            document.cookie = 'user_lat=; path=/; max-age=0';
-            document.cookie = 'user_lng=; path=/; max-age=0';
-        }
-    }
-
-    askForLocation() {
-        if ('geolocation' in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    const maxAge = 365 * 24 * 60 * 60;
-
-                    document.cookie = `user_lat=${lat}; path=/; max-age=${maxAge}; path=/; SameSite=Lax`;
-                    document.cookie = `user_lng=${lng}; path=/; max-age=${maxAge}; path=/; SameSite=Lax`;
-                },
-                (error) => {
-                    console.error('Erro ao obter geolocalização:', error);
-                }
-            );
+        if (!this.cookieScopes.geolocation) {
+            document.cookie = 'user_lat=; path=/; max-age=0; Secure; SameSite=Strict';
+            document.cookie = 'user_lng=; path=/; max-age=0; Secure; SameSite=Strict';
         }
     }
 
@@ -143,11 +119,12 @@ export default class extends Controller {
             'cookie_preferences=' +
             JSON.stringify(this.cookieScopes) +
             '; path=/; max-age=' +
-            365 * 24 * 60 * 60;
+            365 * 24 * 60 * 60 +
+            '; Secure; SameSite=Lax';
     }
 
     setCookiesAccepted() {
-        document.cookie = 'cookies_accepted=true; path=/; max-age=' + 365 * 24 * 60 * 60;
+        document.cookie = 'cookies_accepted=true; path=/; max-age=' + 365 * 24 * 60 * 60 + '; Secure; SameSite=Lax';
     }
 
     getCookiePreferences() {
@@ -167,7 +144,7 @@ export default class extends Controller {
         cookies.forEach((cookie) => {
             const eqPos = cookie.indexOf('=');
             const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-            document.cookie = name.trim() + '=; path=/; max-age=0';
+            document.cookie = name.trim() + '=; path=/; max-age=0; Secure; SameSite=Lax';
         });
 
         localStorage.clear();
