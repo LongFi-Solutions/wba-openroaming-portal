@@ -104,3 +104,4 @@ pointOutsideNetworkPolygon: "As coordenadas selecionadas ficam fora da área de 
 coordinateDegreeBetween90: 'A latitude deve ser um valor numérico entre -90 e 90 graus.'
 coordinateDegreeBetween180: 'A longitude deve ser um valor numérico entre -180 e 180 graus.'
 invalidGeometryFormat: 'Formato de geometria inválido.'
+valueMustBeBetween: 'The value must be between {{ min }} and {{ max }}.'

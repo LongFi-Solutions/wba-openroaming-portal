@@ -48,6 +48,7 @@
             'admin_dashboard_statistics_freeradius',
         ] %}
         {% set mapViewRoutes = ['admin_dashboard_map'] %}
+        {% set mapSettingsRoutes = ['admin_dashboard_map_settings'] %}
         {% set mapManagementRoutes = [
             'admin_dashboard_map_networks',
             'admin_dashboard_map_network_create',
@@ -58,7 +59,7 @@
             'admin_dashboard_map_accessPoint_edit',
             'admin_dashboard_map_accessPoint_delete',
         ] %}
-        {% set mapRoutes = mapViewRoutes|merge(mapManagementRoutes) %}
+        {% set mapRoutes = mapViewRoutes|merge(mapManagementRoutes)|merge(mapSettingsRoutes) %}
 
         {# User Management - Submenu #}
         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USER_MANAGEMENT')) %}
@@ -259,6 +260,15 @@
                                 routes: mapManagementRoutes,
                                 icon: 'wba:table',
                                 iconClass: 'fill-current stroke-none',
+                            }) }}
+                        {% endif %}
+                        {# SideBar Button - Network Management #}
+                        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP_READ')) %}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {
+                                label: 'mapSettings'|trans({}, '_header_admin'),
+                                routes: mapSettingsRoutes,
+                                icon: 'wba:cog',
+                                iconClass: 'w-5 mr-2 fill-none stroke-current',
                             }) }}
                         {% endif %}
                     </ul>
