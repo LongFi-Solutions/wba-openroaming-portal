@@ -52,32 +52,21 @@ class MapController extends AbstractController
     }
 
     #[Route('/map', name: 'app_map')]
-    public function index(Request $request): Response
+    public function index(): Response
     {
         $data = $this->getSettings->getSettings();
-
-        $hasLocationConsent = $this->hasLocationConsent($request);
-
-        $centerLat = $request->cookies->get('user_lat');
-        $centerLng = $request->cookies->get('user_lng');
 
         // Default fallback center
         $defaultLat = (float)$data[SettingName::MAP_CENTER_LATITUDE->value]['value'];
         $defaultLng = (float)$data[SettingName::MAP_CENTER_LONGITUDE->value]['value'];
 
         $map = new Map()
-            ->center(new Point(
-                (float)($centerLat ?? $defaultLat),
-                (float)($centerLng ?? $defaultLng)
-            ))
+            ->center(new Point($defaultLat, $defaultLng))
             ->zoom((int)$data[SettingName::MAP_CENTER_ZOOM->value]['value']);
-
-        $needsBrowserGeolocation = $hasLocationConsent && $centerLat === null;
 
         return $this->render('landing/map/index.html.twig', [
             'data' => $data,
             'map' => $map,
-            'needsBrowserGeolocation' => $needsBrowserGeolocation,
         ]);
     }
 
@@ -105,18 +94,15 @@ class MapController extends AbstractController
 
     #[Route('dashboard/map', name: 'admin_dashboard_map')]
     #[isGranted(AdminPermissionsType::MAP_READ->value)]
-    public function mapManagement(Request $request): Response
+    public function mapManagement(): Response
     {
         $data = $this->getSettings->getSettings();
-        $lat = $request->cookies->get('user_lat');
-        $lng = $request->cookies->get('user_lng');
 
-        $centerLat = $lat ?? (float)$data[SettingName::MAP_CENTER_LATITUDE->value]['value'];
-        $centerLng = $lng ?? (float)$data[SettingName::MAP_CENTER_LONGITUDE->value]['value'];
+        $centerLat = (float)$data[SettingName::MAP_CENTER_LATITUDE->value]['value'];
+        $centerLng = (float)$data[SettingName::MAP_CENTER_LONGITUDE->value]['value'];
 
-        $data = $this->getSettings->getSettings();
         $map = new Map()
-            ->center(new Point((float)$centerLat, (float)$centerLng))
+            ->center(new Point($centerLat, $centerLng))
             ->zoom((int)$data[SettingName::MAP_CENTER_ZOOM->value]['value']);
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
@@ -194,13 +180,11 @@ class MapController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_map_networks');
         }
 
-        $lat = $request->cookies->get('user_lat');
-        $lng = $request->cookies->get('user_lng');
-        $centerLat = $lat ?? (float)$data[SettingName::MAP_CENTER_LATITUDE->value]['value'];
-        $centerLng = $lng ?? (float)$data[SettingName::MAP_CENTER_LONGITUDE->value]['value'];
+        $centerLat = (float)$data[SettingName::MAP_CENTER_LATITUDE->value]['value'];
+        $centerLng = (float)$data[SettingName::MAP_CENTER_LONGITUDE->value]['value'];
 
         $map = new Map()
-            ->center(new Point((float)$centerLat, (float)$centerLng))
+            ->center(new Point($centerLat, $centerLng))
             ->zoom((int)$data[SettingName::MAP_CENTER_ZOOM->value]['value']);
         return $this->render('dashboard/shared/settings_actions/map/manage_network.html.twig', [
             'form' => $form->createView(),
@@ -252,13 +236,11 @@ class MapController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_map_networks');
         }
 
-        $lat = $request->cookies->get('user_lat');
-        $lng = $request->cookies->get('user_lng');
-        $centerLat = $lat ?? (float)$data[SettingName::MAP_CENTER_LATITUDE->value]['value'];
-        $centerLng = $lng ?? (float)$data[SettingName::MAP_CENTER_LONGITUDE->value]['value'];
+        $centerLat = (float)$data[SettingName::MAP_CENTER_LATITUDE->value]['value'];
+        $centerLng = (float)$data[SettingName::MAP_CENTER_LONGITUDE->value]['value'];
 
         $map = new Map()
-            ->center(new Point((float)$centerLat, (float)$centerLng))
+            ->center(new Point($centerLat, $centerLng))
             ->zoom((int)$data[SettingName::MAP_CENTER_ZOOM->value]['value']);
 
         $accessPoints = $this->entityManager->getRepository(AccessPoint::class)->findBy(['network' => $network]);
@@ -317,12 +299,11 @@ class MapController extends AbstractController
         if ($accessPointDTO->latitude !== null && $accessPointDTO->longitude !== null) {
             $centerLat = $accessPointDTO->latitude;
             $centerLng = $accessPointDTO->longitude;
-            $zoom = (int)$data[SettingName::MAP_CENTER_ZOOM->value]['value'];
         } else {
-            $centerLat = $request->cookies->get('user_lat') ?? (float)$data[SettingName::MAP_CENTER_LATITUDE->value]['value'];
-            $centerLng = $request->cookies->get('user_lng') ?? (float)$data[SettingName::MAP_CENTER_LONGITUDE->value]['value'];
-            $zoom = (int)$data[SettingName::MAP_CENTER_ZOOM->value]['value'];
+            $centerLat = (float)$data[SettingName::MAP_CENTER_LATITUDE->value]['value'];
+            $centerLng = (float)$data[SettingName::MAP_CENTER_LONGITUDE->value]['value'];
         }
+        $zoom = (int)$data[SettingName::MAP_CENTER_ZOOM->value]['value'];
 
         $map = new Map()
             ->center(new Point((float)$centerLat, (float)$centerLng))
@@ -379,12 +360,11 @@ class MapController extends AbstractController
         if ($accessPointDTO->latitude !== null && $accessPointDTO->longitude !== null) {
             $centerLat = $accessPointDTO->latitude;
             $centerLng = $accessPointDTO->longitude;
-            $zoom = (int)$data[SettingName::MAP_CENTER_ZOOM->value]['value'];
         } else {
-            $centerLat = $request->cookies->get('user_lat') ?? (float)$data[SettingName::MAP_CENTER_LATITUDE->value]['value'];
-            $centerLng = $request->cookies->get('user_lng') ?? (float)$data[SettingName::MAP_CENTER_LONGITUDE->value]['value'];
-            $zoom = (int)$data[SettingName::MAP_CENTER_ZOOM->value]['value'];
+            $centerLat = (float)$data[SettingName::MAP_CENTER_LATITUDE->value]['value'];
+            $centerLng = (float)$data[SettingName::MAP_CENTER_LONGITUDE->value]['value'];
         }
+        $zoom = (int)$data[SettingName::MAP_CENTER_ZOOM->value]['value'];
 
         $map = new Map()
             ->center(new Point((float)$centerLat, (float)$centerLng))
@@ -489,27 +469,6 @@ class MapController extends AbstractController
             'data' => $data,
             'map' => $map,
         ]);
-    }
-
-    private function hasLocationConsent(Request $request): bool
-    {
-        if ($request->cookies->get('cookies_accepted') === 'true') {
-            return true;
-        }
-
-        $preferencesCookie = $request->cookies->get('cookie_preferences');
-
-        if ($preferencesCookie === null) {
-            return false;
-        }
-
-        try {
-            $preferences = json_decode($preferencesCookie, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException) {
-            return false;
-        }
-
-        return ($preferences['rememberMe'] ?? false) === true;
     }
 
     /**
