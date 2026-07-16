@@ -105,3 +105,4 @@ coordinateDegreeBetween90: 'The latitude must be a numerical value between -90 a
 coordinateDegreeBetween180: 'The longitude must be a numerical value between -180 and 180 degrees.'
 invalidGeometryFormat: 'Invalid geometry format.'
 valueMustBeBetween: 'O valor deve estar entre {{ min }} e {{ max }}.'
+invalidSerialNumberFormat: "The serial number format is invalid."
