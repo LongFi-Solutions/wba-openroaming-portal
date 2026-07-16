@@ -14,9 +14,6 @@ export default class extends Controller {
         this.checkCookies();
         this.toggleManageButton();
 
-        if (this.cookieScopes.geolocation) {
-            this.askForLocation();
-        }
     }
 
     checkCookies() {
@@ -100,29 +97,9 @@ export default class extends Controller {
     }
 
     handleGeolocationConsent() {
-        if (this.cookieScopes.geolocation) {
-            this.askForLocation();
-        } else {
+        if (!this.cookieScopes.geolocation) {
             document.cookie = 'user_lat=; path=/; max-age=0; Secure; SameSite=Strict';
             document.cookie = 'user_lng=; path=/; max-age=0; Secure; SameSite=Strict';
-        }
-    }
-
-    askForLocation() {
-        if ('geolocation' in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    const maxAge = 365 * 24 * 60 * 60;
-
-                    document.cookie = `user_lat=${lat}; path=/; max-age=${maxAge}; Secure; SameSite=Strict`;
-                    document.cookie = `user_lng=${lng}; path=/; max-age=${maxAge}; Secure; SameSite=Strict`;
-                },
-                (error) => {
-                    console.error('Error:', error);
-                }
-            );
         }
     }
 
