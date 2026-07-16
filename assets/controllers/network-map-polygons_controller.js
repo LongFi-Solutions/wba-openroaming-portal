@@ -66,24 +66,28 @@ export default class extends Controller {
 
         const toLatLngRing = (ring) => ring.map(([lng, lat]) => [lat, lng]);
 
-        let latlngs;
-        if (geometry.type === 'Polygon') {
-            latlngs = geometry.coordinates.map(toLatLngRing);
-        } else if (geometry.type === 'MultiPolygon') {
-            latlngs = geometry.coordinates.map((polygonRings) => polygonRings.map(toLatLngRing));
-        } else {
-            return;
-        }
+        const drawSinglePolygon = (rings) => {
+            this.L.polygon(rings, {
+                weight: 2,
+                dashArray: '6, 8',
+                color: '#7c3aed',
+                fillColor: '#8b5cf6',
+                fillOpacity: 0.18,
+                fillRule: 'nonzero',
+            })
+                .addTo(this.layerGroup)
+                .bindPopup(network.name);
+        };
 
-        this.L.polygon(latlngs, {
-            weight: 2,
-            dashArray: '6, 8',
-            color: '#7c3aed',
-            fillColor: '#8b5cf6',
-            fillOpacity: 0.18,
-        })
-            .addTo(this.layerGroup)
-            .bindPopup(network.name);
+        if (geometry.type === 'Polygon') {
+            const rings = geometry.coordinates.map(toLatLngRing);
+            drawSinglePolygon(rings);
+        } else if (geometry.type === 'MultiPolygon') {
+            geometry.coordinates.forEach((polygonRings) => {
+                const rings = polygonRings.map(toLatLngRing);
+                drawSinglePolygon(rings);
+            });
+        }
     }
 
     drawAccessPoint(ap) {
