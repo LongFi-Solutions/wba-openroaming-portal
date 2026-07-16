@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\DefaultUser;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -614,5 +615,10 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         $this->isDisabled = $isDisabled;
 
         return $this;
+    }
+
+    public function isDefaultAdmin(): bool
+    {
+        return $this->email === DefaultUser::ADMIN->value;
     }
 }
