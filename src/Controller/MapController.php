@@ -191,7 +191,7 @@ class MapController extends AbstractController
                 'success',
                 $this->translator->trans('successNetworkCreate', ['%network%' => $network->getName()], 'controllers')
             );
-            return $this->redirectToRoute('admin_dashboard_map');
+            return $this->redirectToRoute('admin_dashboard_map_networks');
         }
 
         $lat = $request->cookies->get('user_lat');
@@ -221,7 +221,7 @@ class MapController extends AbstractController
             'success',
             $this->translator->trans('successNetworkDelete', ['%network%' => $network->getName()], 'controllers')
         );
-        return $this->redirectToRoute('admin_dashboard_map');
+        return $this->redirectToRoute('admin_dashboard_map_networks');
     }
 
     /**
@@ -249,7 +249,7 @@ class MapController extends AbstractController
                 'success',
                 $this->translator->trans('successNetworkEdit', ['%network%' => $network->getName()], 'controllers')
             );
-            return $this->redirectToRoute('admin_dashboard_map');
+            return $this->redirectToRoute('admin_dashboard_map_networks');
         }
 
         $lat = $request->cookies->get('user_lat');
