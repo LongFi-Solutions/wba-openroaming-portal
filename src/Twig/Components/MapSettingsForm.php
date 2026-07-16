@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Twig\Components;
 
 use App\DTO\MapSettingsDTO;
@@ -59,7 +61,7 @@ final class MapSettingsForm extends AbstractController
         $lng = -8.2245;
         $zoom = 6;
 
-        if ($this->mapSettingsDTO !== null) {
+        if ($this->mapSettingsDTO instanceof MapSettingsDTO) {
             if ($this->mapSettingsDTO->latitude !== null && $this->mapSettingsDTO->longitude !== null) {
                 $lat = (float) $this->mapSettingsDTO->latitude;
                 $lng = (float) $this->mapSettingsDTO->longitude;
