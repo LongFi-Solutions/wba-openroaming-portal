@@ -50,15 +50,6 @@
                     }) }}
                 {% endif %}
 
-                {% set isDefaultAdminEmail2FA = app.user
-                    and is_granted(constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value)
-                    and app.user.isDefaultAdmin
-                    and app.user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value %}
-
-                {% if isDefaultAdminEmail2FA %}
-                    {{ include('dashboard/shared/_default_admin_2fa_warning.html.twig') }}
-                {% endif %}
-
                 {% block content %}
                 {% endblock %}
             </div>
