@@ -42,3 +42,5 @@ longitudeDescription: 'E.g., -8.6291'
 zoomLevel: 'Zoom Level'
 zoomDescription: 'Initial zoom'
 saveSettings: 'Save Settings'
+intersectionCloseError: "Cannot close polygon: the closing line intersects with existing lines!"
+intersectionSegmentError: "Invalid point: lines cannot cross each other!"

@@ -42,3 +42,5 @@ longitudeDescription: 'Ex: -8.6291'
 zoomLevel: 'Nível de Zoom'
 zoomDescription: 'Aproximação inicial'
 saveSettings: 'Guardar Definições'
+intersectionCloseError: "Não é possível fechar o polígono: a linha de fecho cruza-se com as linhas existentes!"
+intersectionSegmentError: "Ponto inválido: as linhas não se podem cruzar!"

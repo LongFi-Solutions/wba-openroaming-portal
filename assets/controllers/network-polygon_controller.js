@@ -30,6 +30,14 @@ export default class extends Controller {
         emptyLabel: { type: String, default: 'No coverage areas yet.' },
         typeLabels: { type: Object, default: {} },
         areaItemLabel: { type: String, default: 'Area' },
+        intersectionCloseError: {
+            type: String,
+            default: 'Cannot close polygon: the closing line intersects with existing lines!'
+        },
+        intersectionSegmentError: {
+            type: String,
+            default: 'Invalid point: lines cannot cross each other!'
+        },
     };
 
     connect() {
@@ -141,7 +149,7 @@ export default class extends Controller {
 
             if (distanceInPixels < 20) {
                 if (!this.isClosingSegmentValid()) {
-                    alert('Cannot close polygon: the closing line intersects with existing lines!');
+                    alert(this.intersectionCloseErrorValue);
                     return;
                 }
                 this.finishPolygon();
@@ -154,7 +162,7 @@ export default class extends Controller {
         const newPoint = [lng, lat];
 
         if (!this.isNewSegmentValid(newPoint)) {
-            alert('Invalid point: lines cannot cross each other!');
+            alert(this.intersectionSegmentErrorValue);
             return;
         }
 
@@ -169,7 +177,7 @@ export default class extends Controller {
                 this.L.DomEvent.stopPropagation(event);
                 if (this.currentPoints.length >= 3) {
                     if (!this.isClosingSegmentValid()) {
-                        alert('Cannot close polygon: the closing line intersects with existing lines!');
+                        alert(this.intersectionCloseErrorValue);
                         return;
                     }
                     this.finishPolygon();
