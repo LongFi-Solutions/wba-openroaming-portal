@@ -93,7 +93,7 @@ export default class extends Controller {
     drawAccessPoint(ap) {
         if (ap.lat === null || ap.lng === null) return;
 
-        console.log("Campos recebidos para o AP:", ap);
+        console.log('Campos recebidos para o AP:', ap);
 
         const ssid = ap.ssid;
         const macAddress = ap.macAddress || ap.mac_address;
@@ -114,21 +114,29 @@ export default class extends Controller {
         ${ssid ? `<div><strong>SSID:</strong> ${ssid}</div>` : ''}
         ${macAddress ? `<div><strong>MAC:</strong> <span style="font-family: monospace; background: #f3f4f6; padding: 2px 4px; border-radius: 4px;">${macAddress}</span></div>` : ''}
         
-        ${(vendor || model || standard || serialNumber) ? `
+        ${
+            vendor || model || standard || serialNumber
+                ? `
           <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #e5e7eb;">
             ${vendor ? `<div><strong>Fabricante:</strong> ${vendor}</div>` : ''}
             ${model ? `<div><strong>Modelo:</strong> ${model}</div>` : ''}
             ${standard ? `<div><strong>Standard:</strong> ${standard}</div>` : ''}
             ${serialNumber ? `<div><strong>Nº Série:</strong> ${serialNumber}</div>` : ''}
           </div>
-        ` : ''}
+        `
+                : ''
+        }
 
-        ${(altitudeAgl != null || altitudeMsl != null) ? `
+        ${
+            altitudeAgl != null || altitudeMsl != null
+                ? `
           <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #e5e7eb;">
             ${altitudeAgl != null ? `<div><strong>Altitude (Solo):</strong> ${altitudeAgl} m</div>` : ''}
             ${altitudeMsl != null ? `<div><strong>Altitude (Mar):</strong> ${altitudeMsl} m</div>` : ''}
           </div>
-        ` : ''}
+        `
+                : ''
+        }
       </div>
     </div>
   `;

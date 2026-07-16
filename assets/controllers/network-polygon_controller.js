@@ -15,7 +15,7 @@ const STYLES = {
         fillColor: '#3b82f6',
         fillOpacity: 0.35,
         weight: 3,
-        fillRule: 'nonzero'
+        fillRule: 'nonzero',
     },
     marker: { radius: 5, color: '#2563eb', fillColor: '#3b82f6', fillOpacity: 1, weight: 2 },
     startMarker: { radius: 8, weight: 4, color: '#1d4ed8' },
@@ -32,11 +32,11 @@ export default class extends Controller {
         areaItemLabel: { type: String, default: 'Area' },
         intersectionCloseError: {
             type: String,
-            default: 'Cannot close polygon: the closing line intersects with existing lines!'
+            default: 'Cannot close polygon: the closing line intersects with existing lines!',
         },
         intersectionSegmentError: {
             type: String,
-            default: 'Invalid point: lines cannot cross each other!'
+            default: 'Invalid point: lines cannot cross each other!',
         },
     };
 
@@ -220,7 +220,7 @@ export default class extends Controller {
         const ccw = (p1, p2, p3) => {
             return (p3[1] - p1[1]) * (p2[0] - p1[0]) > (p2[1] - p1[1]) * (p3[0] - p1[0]);
         };
-        return (ccw(a, c, d) !== ccw(b, c, d)) && (ccw(a, b, c) !== ccw(a, b, d));
+        return ccw(a, c, d) !== ccw(b, c, d) && ccw(a, b, c) !== ccw(a, b, d);
     }
 
     isNewSegmentValid(newPoint) {
