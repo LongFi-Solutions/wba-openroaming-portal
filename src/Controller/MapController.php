@@ -54,6 +54,7 @@ class MapController extends AbstractController
     #[Route('/map', name: 'app_map')]
     public function index(): Response
     {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         // Default fallback center
@@ -95,6 +96,7 @@ class MapController extends AbstractController
     #[isGranted(AdminPermissionsType::MAP_READ->value)]
     public function mapManagement(): Response
     {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         $centerLat = (float)$data[SettingName::MAP_CENTER_LATITUDE->value]['value'];
@@ -169,6 +171,7 @@ class MapController extends AbstractController
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function createNetwork(Request $request): ?Response
     {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
         $networkDTO = new NetworkDTO();
         $form = $this->createForm(CreateNetworkType::class, $networkDTO);
@@ -222,6 +225,7 @@ class MapController extends AbstractController
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function editNetwork(Network $network, Request $request): Response
     {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
         $networkDTO = new NetworkDTO();
         $networkDTO->networkId = $network->getId();
@@ -300,6 +304,7 @@ class MapController extends AbstractController
     #[isGranted(AdminPermissionsType::MAP_WRITE->value)]
     public function networkAccessPointsCreate(Network $network, Request $request): Response
     {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
         $accessPointDTO = new AccessPointDTO();
         $accessPointDTO->network = $network;
@@ -362,6 +367,7 @@ class MapController extends AbstractController
         #[MapEntity(id: 'network_id')] Network $network,
         Request $request
     ): Response {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
         $accessPointDTO = AccessPointDTO::createFromEntity($accessPoint);
         if ($accessPointDTO->latitude !== null && $accessPointDTO->longitude !== null) {
@@ -436,6 +442,7 @@ class MapController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
         $dto = new MapSettingsDTO($data);
 

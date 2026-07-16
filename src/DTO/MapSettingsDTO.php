@@ -48,7 +48,7 @@ class MapSettingsDTO
         return [
             SettingName::MAP_CENTER_LATITUDE->value => ['value' => $this->latitude],
             SettingName::MAP_CENTER_LONGITUDE->value => ['value' => $this->longitude],
-            SettingName::MAP_CENTER_ZOOM->value => ['value' => $this->zoom],
+            SettingName::MAP_CENTER_ZOOM->value => ['value' => (string) $this->zoom],
         ];
     }
 }
