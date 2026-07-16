@@ -8,7 +8,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class MapSettingsDTO
 {
-
     #[Assert\NotBlank(message: 'fieldNotBlank')]
     #[Assert\Regex(pattern: '/^-?\d+(\.\d+)?$/', message: 'decimalNumber')]
     #[Assert\Range(notInRangeMessage: 'coordinateDegreeBetween90', min: -90, max: 90)]
@@ -52,5 +51,4 @@ class MapSettingsDTO
             SettingName::MAP_CENTER_ZOOM->value => ['value' => $this->zoom],
         ];
     }
-
 }
