@@ -4,6 +4,7 @@
 
 - Removed the preparation command that was introduced for v1.11.
 - Updated configuration variables default value to follow better practices (bool instead of ON & OFF, please consult the `env.sample` for more details)
+- Add fallback message error in case the default super admin account has 2fa forced with email
 
 # Release V1.12.0
 
