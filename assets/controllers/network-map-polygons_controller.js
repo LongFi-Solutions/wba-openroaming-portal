@@ -92,9 +92,50 @@ export default class extends Controller {
 
     drawAccessPoint(ap) {
         if (ap.lat === null || ap.lng === null) return;
+
+        console.log("Campos recebidos para o AP:", ap);
+
+        const ssid = ap.ssid;
+        const macAddress = ap.macAddress || ap.mac_address;
+        const vendor = ap.vendor;
+        const model = ap.model;
+        const standard = ap.standard;
+        const serialNumber = ap.serialNumber || ap.serial_number;
+
+        const altitudeAgl = ap.altitudeAgl !== undefined ? ap.altitudeAgl : ap.altitude_agl;
+        const altitudeMsl = ap.altitudeMsl !== undefined ? ap.altitudeMsl : ap.altitude_msl;
+
+        const popupContent = `
+    <div class="ap-info-window" style="font-family: system-ui, sans-serif; min-width: 220px;">
+      <h4 style="margin: 0 0 10px 0; padding-bottom: 5px; border-bottom: 1px solid #e5e7eb; color: #7c3aed; font-size: 16px;">
+        ${ap.name || 'Access Point Sem Nome'}
+      </h4>
+      <div style="font-size: 13px; line-height: 1.6; color: #374151;">
+        ${ssid ? `<div><strong>SSID:</strong> ${ssid}</div>` : ''}
+        ${macAddress ? `<div><strong>MAC:</strong> <span style="font-family: monospace; background: #f3f4f6; padding: 2px 4px; border-radius: 4px;">${macAddress}</span></div>` : ''}
+        
+        ${(vendor || model || standard || serialNumber) ? `
+          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #e5e7eb;">
+            ${vendor ? `<div><strong>Fabricante:</strong> ${vendor}</div>` : ''}
+            ${model ? `<div><strong>Modelo:</strong> ${model}</div>` : ''}
+            ${standard ? `<div><strong>Standard:</strong> ${standard}</div>` : ''}
+            ${serialNumber ? `<div><strong>Nº Série:</strong> ${serialNumber}</div>` : ''}
+          </div>
+        ` : ''}
+
+        ${(altitudeAgl != null || altitudeMsl != null) ? `
+          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #e5e7eb;">
+            ${altitudeAgl != null ? `<div><strong>Altitude (Solo):</strong> ${altitudeAgl} m</div>` : ''}
+            ${altitudeMsl != null ? `<div><strong>Altitude (Mar):</strong> ${altitudeMsl} m</div>` : ''}
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+
         this.L.marker([ap.lat, ap.lng], { icon: this._getIcon() })
             .addTo(this.layerGroup)
-            .bindPopup(ap.name);
+            .bindPopup(popupContent, { minWidth: 240 });
     }
 
     _getIcon() {

@@ -69,11 +69,21 @@ class AccessPointRepository extends ServiceEntityRepository
 
     /**
      * @return array<int, array{
-     *     id: int|string,
-     *     name: string|null,
-     *     ssid: string|null,
-     *     lat: float|string,
-     *     lng: float|string
+     * id: int|string,
+     * network_id: int|string,
+     * name: string|null,
+     * ssid: string|null,
+     * macAddress: string|null,
+     * vendor: string|null,
+     * model: string|null,
+     * standard: string|null,
+     * serialNumber: string|null,
+     * altitudeMsl: float|string|null,
+     * altitudeAgl: float|string|null,
+     * createdAt: string,
+     * updatedAt: string,
+     * lat: float|string,
+     * lng: float|string
      * }>
      * @throws Exception
      */
@@ -90,24 +100,39 @@ class AccessPointRepository extends ServiceEntityRepository
         );
 
         $sql = '
-                SELECT 
-                    id, 
-                    name, 
-                    ssid, 
-                    ST_Y(location) AS lng, 
-                    ST_X(location) AS lat 
-                FROM `AccessPoint`
-                WHERE MBRContains(ST_GeomFromText(:bboxWkt, 4326), location)
-            ';
+            SELECT 
+                id, 
+                name, 
+                ssid, 
+                mac_address AS macAddress,
+                vendor,
+                model,
+                standard,
+                serial_number AS serialNumber,
+                ST_Y(location) AS lng, 
+                ST_X(location) AS lat 
+            FROM `AccessPoint`
+            WHERE MBRContains(ST_GeomFromText(:bboxWkt, 4326), location)
+        ';
 
         $results = $conn->fetchAllAssociative($sql, ['bboxWkt' => $bboxWkt]);
 
         /** @var array<int, array{
-         *     id: int|string,
-         *     name: string|null,
-         *     ssid: string|null,
-         *     lat: float|string,
-         *     lng: float|string
+         * id: int|string,
+         * network_id: int|string,
+         * name: string|null,
+         * ssid: string|null,
+         * macAddress: string|null,
+         * vendor: string|null,
+         * model: string|null,
+         * standard: string|null,
+         * serialNumber: string|null,
+         * altitudeMsl: float|string|null,
+         * altitudeAgl: float|string|null,
+         * createdAt: string,
+         * updatedAt: string,
+         * lat: float|string,
+         * lng: float|string
          * }> $results
          */
         return $results;

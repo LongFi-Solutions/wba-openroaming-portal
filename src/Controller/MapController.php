@@ -135,9 +135,17 @@ class MapController extends AbstractController
             'accessPoints' => array_map(
                 static fn(array $ap): array => [
                     'id' => $ap['id'],
-                    'name' => $ap['name'] ?? $ap['ssid'],
+                    'name' => $ap['name'] ?? $ap['ssid'] ?? 'Access Point Sem Nome',
                     'lat' => (float) $ap['lat'],
                     'lng' => (float) $ap['lng'],
+                    'ssid' => $ap['ssid'] ?? null,
+                    'macAddress' => $ap['macAddress'] ?? null,
+                    'vendor' => $ap['vendor'] ?? null,
+                    'model' => $ap['model'] ?? null,
+                    'standard' => $ap['standard'] ?? null,
+                    'serialNumber' => $ap['serialNumber'] ?? null,
+                    'altitudeMsl' => isset($ap['altitudeMsl']) ? (float) $ap['altitudeMsl'] : null,
+                    'altitudeAgl' => isset($ap['altitudeAgl']) ? (float) $ap['altitudeAgl'] : null,
                 ],
                 $accessPoints
             ),
