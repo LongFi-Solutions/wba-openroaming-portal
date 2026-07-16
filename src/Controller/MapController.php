@@ -88,7 +88,6 @@ class MapController extends AbstractController
 
         return $this->json([
             'networks' => $this->serializeNetworks($networks),
-            'accessPoints' => [],
         ]);
     }
 
