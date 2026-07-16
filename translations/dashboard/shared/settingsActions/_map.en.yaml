@@ -44,3 +44,4 @@ zoomDescription: 'Initial zoom'
 saveSettings: 'Save Settings'
 intersectionCloseError: "Cannot close polygon: the closing line intersects with existing lines!"
 intersectionSegmentError: "Invalid point: lines cannot cross each other!"
+editAPs: "Manage APs"
