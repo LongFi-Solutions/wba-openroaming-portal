@@ -381,7 +381,7 @@ readonly class InstallationService
 
         $envContent = file_get_contents($envPath);
 
-        $expectedValue = $expectedValue ?? '';
+        $expectedValue ??= '';
 
         $pattern = sprintf('/^%s=("?)(.*?)\1$/m', preg_quote($key, '/'));
 
