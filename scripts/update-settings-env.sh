@@ -13,13 +13,13 @@ elif [ "$#" -eq 4 ]; then
     TURNSTILE_KEY="$3"
     TURNSTILE_SECRET="$4"
 else
-    echo "Erro: Número incorreto de argumentos."
-    echo "Uso: $0 [JWT_PASSPHRASE] \"TRUSTED_PROXIES\" \"TURNSTILE_KEY\" \"TURNSTILE_SECRET\""
+    echo "Error: Incorrect number of arguments."
+    echo "Usage: $0 [JWT_PASSPHRASE] \"TRUSTED_PROXIES\" \"TURNSTILE_KEY\" \"TURNSTILE_SECRET\""
     exit 1
 fi
 
 if [ ! -f "$ENV_FILE" ]; then
-    echo "Erro: O ficheiro $ENV_FILE não existe."
+    echo "Error: The file $ENV_FILE does not exist."
     exit 1
 fi
 
@@ -33,17 +33,17 @@ set_env() {
         echo "$KEY=\"$VALUE\"" >> "$ENV_FILE"
     fi
 
-    echo "Atualizado: $KEY"
+    echo "Updated: $KEY"
 }
 
 if [ "$#" -eq 4 ]; then
     set_env "JWT_PASSPHRASE" "$JWT_PASSPHRASE"
 else
-    echo "JWT_PASSPHRASE omitida (não alterada)"
+    echo "JWT_PASSPHRASE omitted (unchanged)"
 fi
 
 set_env "TRUSTED_PROXIES" "$TRUSTED_PROXIES"
 set_env "TURNSTILE_KEY" "$TURNSTILE_KEY"
 set_env "TURNSTILE_SECRET" "$TURNSTILE_SECRET"
 
-echo "Atualização concluída com sucesso."
+echo "Update completed successfully."
