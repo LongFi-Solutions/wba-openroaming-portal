@@ -357,11 +357,13 @@ readonly class InstallationService
         ) {
             return false;
         }
+
+        $jwtPassphrase = $installationProgress->getJwtPassphrase();
         if (
-            $installationProgress->getJwtPassphrase() !== null &&
+            $jwtPassphrase !== null &&
             !$this->envValueMatches(
                 SettingsConfigType::JWT_PASSPHRASE->value,
-                $installationProgress->getJwtPassphrase()
+                $jwtPassphrase
             )
         ) {
             return false;
@@ -369,16 +371,22 @@ readonly class InstallationService
         return true;
     }
 
-    public function envValueMatches(string $key, string $expectedValue): bool
+    public function envValueMatches(string $key, ?string $expectedValue): bool
     {
         $envPath = $this->parameterBag->get('kernel.project_dir') . '/.env';
+
+        if (!file_exists($envPath)) {
+            return false;
+        }
+
         $envContent = file_get_contents($envPath);
 
-        // Match both quoted and unquoted values
-        $pattern = sprintf('/^%s=("?)(.+?)\1$/m', preg_quote($key, '/'));
+        $expectedValue = $expectedValue ?? '';
+
+        $pattern = sprintf('/^%s=("?)(.*?)\1$/m', preg_quote($key, '/'));
 
         if (preg_match($pattern, (string)$envContent, $matches)) {
-            return trim($matches[2]) === $expectedValue;
+            return trim($matches[2]) === trim($expectedValue);
         }
 
         return false;
