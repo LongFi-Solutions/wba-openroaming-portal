@@ -2,14 +2,16 @@
 
 namespace App\Service;
 
+use App\Entity\SMSProvider;
 use App\Entity\User;
 use App\Enum\SettingName;
 use App\Enum\SMSResponse;
 use App\Repository\SettingRepository;
+use App\Repository\SMSProviderRepository;
 use App\Repository\UserRepository;
 use DateTime;
 use Random\RandomException;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use RuntimeException;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -23,7 +25,7 @@ readonly class SendSMS
      */
     public function __construct(
         private SettingRepository $settingRepository,
-        private ParameterBagInterface $parameterBag,
+        private SMSProviderRepository $smsProviderRepository,
         private UserRepository $userRepository,
     ) {
     }
@@ -41,13 +43,7 @@ readonly class SendSMS
             $user->getPhoneNumber()->getCountryCode() .
             $user->getPhoneNumber()->getNationalNumber();
 
-        $apiUrl = $this->parameterBag->get('app.budget_api_url');
-
-        // Fetch SMS credentials from the database
-        $username = $this->settingRepository->findOneBy(['name' => SettingName::SMS_USERNAME->value])->getValue();
-        $userId = $this->settingRepository->findOneBy(['name' => SettingName::SMS_USER_ID->value])->getValue();
-        $handle = $this->settingRepository->findOneBy(['name' => SettingName::SMS_HANDLE->value])->getValue();
-        $from = $this->settingRepository->findOneBy(['name' => SettingName::SMS_FROM->value])->getValue();
+        $provider = $this->getActiveProvider();
 
         // Check if the user can regenerate the SMS code
         $client = HttpClient::create();
@@ -58,13 +54,21 @@ readonly class SendSMS
             $user->setTwoFAcodeIsActive(true);
             $this->userRepository->save($user, true);
 
-            $code = $user->getTwoFACode();
-
-            $message = 'Verification code is: ' . $code;
+            $message = 'Verification code is: ' . $user->getTwoFACode();
         }
 
-        // Adjust the API endpoint and parameters based on the Budget SMS documentation
-        $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
+        // Every provider-specific credential (username, userid, handle, from, ...) comes
+        // straight from that provider's SMSProviderParam rows — nothing is hardcoded here,
+        // so adding/switching providers is a data change, not a code change.
+        $queryParams = array_merge(
+            $this->getProviderParams($provider),
+            [
+                'to' => $recipient,
+                'msg' => $message,
+            ]
+        );
+
+        $apiUrl = $provider->getAddress() . '?' . http_build_query($queryParams);
         $response = $client->request('GET', $apiUrl);
 
         // Handle the API response as needed
@@ -80,5 +84,54 @@ readonly class SendSMS
     public function verifyMessageLength(string $message): bool
     {
         return strlen($message) > 612;
+    }
+
+    /**
+     * Resolves which SMSProvider is active by reading its name off the
+     * SMS_ACTIVE_PROVIDER setting, then loading the matching SMSProvider entity.
+     */
+    private function getActiveProvider(): SMSProvider
+    {
+        $activeProviderName = $this->settingRepository
+            ->findOneBy(['name' => SettingName::SMS_ACTIVE_PROVIDER->value])
+            ?->getValue();
+
+        if ($activeProviderName === null || $activeProviderName === '') {
+            throw new RuntimeException(
+                'No active SMS provider configured — set a value for the SMS_ACTIVE_PROVIDER setting.'
+            );
+        }
+
+        $provider = $this->smsProviderRepository->findOneBy(['name' => $activeProviderName]);
+
+        if ($provider === null) {
+            throw new RuntimeException(
+                sprintf(
+                    'Active SMS provider "%s" (from SMS_ACTIVE_PROVIDER) has no matching SMSProvider entity.',
+                    $activeProviderName
+                )
+            );
+        }
+
+        return $provider;
+    }
+
+    /**
+     * @return array<string, string>
+     *     paramType => value, e.g. [
+     *         'username' => ...,
+     *         'userid' => ...,
+     *         'handle' => ...,
+     *         'from' => ...
+     * ]
+     */
+    private function getProviderParams(SMSProvider $provider): array
+    {
+        $params = [];
+        foreach ($provider->getSmsProviderParams() as $param) {
+            $params[$param->getParamType()] = $param->getValue();
+        }
+
+        return $params;
     }
 }
