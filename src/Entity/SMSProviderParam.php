@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Enum\Alert\AlertType;
 use App\Enum\ParamType;
 use App\Repository\SMSProviderParamRepository;
 use Doctrine\DBAL\Types\Types;

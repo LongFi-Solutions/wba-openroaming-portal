@@ -3,7 +3,9 @@
 namespace App\Form;
 
 use App\DTO\SMSProviderParamDTO;
+use App\Enum\ParamType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -18,6 +20,12 @@ class SMSProviderParamType extends AbstractType
     {
         $builder
             ->add('id', HiddenType::class, ['required' => false])
+            ->add('type', EnumType::class, [
+                'class' => ParamType::class,
+                'label' => false,
+                'placeholder' => 'selectType',
+                'choice_label' => fn(ParamType $type) => $type->value,
+            ])
             ->add('paramType', TextType::class, [
                 'required' => true,
                 'attr' => ['placeholder' => 'e.g. username, userid, handle, from'],
