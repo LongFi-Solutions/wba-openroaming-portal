@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\SMSProvider;
 use App\Entity\SMSProviderParam;
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -54,7 +55,7 @@ class MultipleSMSMigrationCommand extends Command
             }
         }
 
-        $settingsToMigrate = ['SMS_USERNAME', 'SMS_USER_ID', 'SMS_HANDLE'];
+        $settingsToMigrate = [SettingName::SMS_USERNAME->value, SettingName::SMS_USER_ID->value, SettingName::SMS_HANDLE->value];
         $settingsToUpdate = [];
 
         foreach ($settingsToMigrate as $settingName) {
