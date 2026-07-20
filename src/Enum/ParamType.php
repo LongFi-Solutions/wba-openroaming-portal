@@ -4,9 +4,8 @@ namespace App\Enum;
 
 enum ParamType: string
 {
-
-    case JSON = 'JSON';
-    case STRING = 'STRING';
-    case BOOLEAN = 'BOOLEAN';
-    case XML = 'XML';
+    case JSON = 'json';
+    case STRING = 'string';
+    case BOOLEAN = 'boolean';
+    case XML = 'xml';
 }
