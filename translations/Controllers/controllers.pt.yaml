@@ -204,3 +204,7 @@ emailAliasesNotAllowed: 'Não é permitido o uso de aliases de email para o regi
 canSkipThisPage: 'A configuração do Turnstile é opcional. Para ignorar este passo, submeta o formulário sem preencher nenhum dos campos.'
 chmodDbScript: 'Concede as permissões de execução ao script de atualização da base de dados.'
 chmodSettingsScript: 'Concede as permissões de execução ao script de atualização das configurações.'
+SMSProviderSavedSuccessfully: 'Fornecedor de SMS guardado com sucesso.'
+SMSProviderActivatedSuccessfully: 'Fornecedor de SMS ativado com sucesso.'
+SMSProviderDeletedSuccessfully: 'Fornecedor de SMS eliminado com sucesso.'
+CannotDeleteActiveSMSProvider: 'O fornecedor de SMS ativo não pode ser eliminado.'
