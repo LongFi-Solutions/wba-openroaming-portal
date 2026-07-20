@@ -8,8 +8,15 @@ const STYLES = {
         dashArray: '5, 10',
         fillOpacity: 0.15,
         fillColor: '#3b82f6',
+        fillRule: 'nonzero',
     },
-    shape: { color: '#2563eb', fillColor: '#3b82f6', fillOpacity: 0.35, weight: 3 },
+    shape: {
+        color: '#2563eb',
+        fillColor: '#3b82f6',
+        fillOpacity: 0.35,
+        weight: 3,
+        fillRule: 'nonzero',
+    },
     marker: { radius: 5, color: '#2563eb', fillColor: '#3b82f6', fillOpacity: 1, weight: 2 },
     startMarker: { radius: 8, weight: 4, color: '#1d4ed8' },
     progressLine: { color: '#3b82f6', dashArray: '5, 10', weight: 3 },
@@ -23,6 +30,14 @@ export default class extends Controller {
         emptyLabel: { type: String, default: 'No coverage areas yet.' },
         typeLabels: { type: Object, default: {} },
         areaItemLabel: { type: String, default: 'Area' },
+        intersectionCloseError: {
+            type: String,
+            default: 'Cannot close polygon: the closing line intersects with existing lines!',
+        },
+        intersectionSegmentError: {
+            type: String,
+            default: 'Invalid point: lines cannot cross each other!',
+        },
     };
 
     connect() {
@@ -133,6 +148,10 @@ export default class extends Controller {
                 .distanceTo(this.map.latLngToContainerPoint(firstLatLng));
 
             if (distanceInPixels < 20) {
+                if (!this.isClosingSegmentValid()) {
+                    alert(this.intersectionCloseErrorValue);
+                    return;
+                }
                 this.finishPolygon();
                 return;
             }
@@ -140,7 +159,14 @@ export default class extends Controller {
 
         const lat = this.truncateCoord(e.latlng.lat);
         const lng = this.truncateCoord(e.latlng.lng);
-        this.currentPoints.push([lng, lat]);
+        const newPoint = [lng, lat];
+
+        if (!this.isNewSegmentValid(newPoint)) {
+            alert(this.intersectionSegmentErrorValue);
+            return;
+        }
+
+        this.currentPoints.push(newPoint);
 
         const marker = this.L.circleMarker([lat, lng], STYLES.marker).addTo(this.previewItems);
 
@@ -149,7 +175,13 @@ export default class extends Controller {
             this.startMarker.setStyle(STYLES.startMarker);
             this.startMarker.on('click', (event) => {
                 this.L.DomEvent.stopPropagation(event);
-                if (this.currentPoints.length >= 3) this.finishPolygon();
+                if (this.currentPoints.length >= 3) {
+                    if (!this.isClosingSegmentValid()) {
+                        alert(this.intersectionCloseErrorValue);
+                        return;
+                    }
+                    this.finishPolygon();
+                }
             });
         }
 
@@ -179,6 +211,51 @@ export default class extends Controller {
         this.cancelCurrentDrawing();
         this.addShape('polygon', polygonPointsCopy, leafletCoords);
         this.syncState();
+    }
+
+    // --- Geometrical Protection & Intersection Checks ----------------------
+
+    // Standard orientation test (CCW) to check if segments intersect
+    intersects(a, b, c, d) {
+        const ccw = (p1, p2, p3) => {
+            return (p3[1] - p1[1]) * (p2[0] - p1[0]) > (p2[1] - p1[1]) * (p3[0] - p1[0]);
+        };
+        return ccw(a, c, d) !== ccw(b, c, d) && ccw(a, b, c) !== ccw(a, b, d);
+    }
+
+    isNewSegmentValid(newPoint) {
+        const len = this.currentPoints.length;
+        if (len < 2) return true;
+
+        const lastPoint = this.currentPoints[len - 1];
+
+        // Checks if the segment between the last point and the clicked point crosses any older segment
+        for (let i = 0; i < len - 2; i++) {
+            const p1 = this.currentPoints[i];
+            const p2 = this.currentPoints[i + 1];
+            if (this.intersects(lastPoint, newPoint, p1, p2)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    isClosingSegmentValid() {
+        const len = this.currentPoints.length;
+        if (len < 4) return true; // Triangles cannot self-intersect when closing
+
+        const firstPoint = this.currentPoints[0];
+        const lastPoint = this.currentPoints[len - 1];
+
+        // Checks if closing line (lastPoint -> firstPoint) crosses any segment except the first and last
+        for (let i = 1; i < len - 2; i++) {
+            const p1 = this.currentPoints[i];
+            const p2 = this.currentPoints[i + 1];
+            if (this.intersects(lastPoint, firstPoint, p1, p2)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // --- Shape Bookkeeping -------------------------------------------------

@@ -13,7 +13,6 @@ export default class extends Controller {
         this.updateCheckboxes();
         this.checkCookies();
         this.toggleManageButton();
-
     }
 
     checkCookies() {
@@ -124,7 +123,10 @@ export default class extends Controller {
     }
 
     setCookiesAccepted() {
-        document.cookie = 'cookies_accepted=true; path=/; max-age=' + 365 * 24 * 60 * 60 + '; Secure; SameSite=Lax';
+        document.cookie =
+            'cookies_accepted=true; path=/; max-age=' +
+            365 * 24 * 60 * 60 +
+            '; Secure; SameSite=Lax';
     }
 
     getCookiePreferences() {

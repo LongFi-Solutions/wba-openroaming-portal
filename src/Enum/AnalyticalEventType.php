@@ -304,6 +304,7 @@ enum AnalyticalEventType: string
             self::BREAKING_GLASS_ACCOUNT_GENERATION => 'Breaking Glass Account Generation',
             self::BREAKING_GLASS_ACCOUNT_RESET => 'Breaking Glass Account Reset',
             self::EXPORT_ACTIVITY_LOGS_REQUEST => 'Export Activity Logs Request',
+            self::SETTING_MAP_REQUEST => 'Settings Map Request',
         };
     }
 }

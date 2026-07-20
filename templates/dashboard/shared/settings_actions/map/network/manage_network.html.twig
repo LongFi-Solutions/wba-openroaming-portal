@@ -19,7 +19,9 @@
                  circle: 'circle'|trans({}, '_map'),
                  area: 'genericArea'|trans({}, '_map'),
              }|json_encode }}"
-             data-network-polygon-area-item-label-value="{{ 'coverageAreaItemLabel'|trans({}, '_map') }}">
+             data-network-polygon-area-item-label-value="{{ 'coverageAreaItemLabel'|trans({}, '_map') }}"
+             data-network-polygon-intersection-close-error-value="{{ 'intersectionCloseError'|trans({}, '_map') }}"
+             data-network-polygon-intersection-segment-error-value="{{ 'intersectionSegmentError'|trans({}, '_map') }}">
 
             {{ form_start(form) }}
 
@@ -27,13 +29,24 @@
 
             {# IDENTIFICATION #}
             <div class="mb-8">
-                <div class="mb-4">
-                    <h3 class="text-lg font-semibold text-green-600 tracking-wide">
-                        {{ 'identification'|trans({}, '_map') }}
-                    </h3>
-                    <p class="text-xs text-gray-400 mt-1">
-                        {{ 'identificationDescription'|trans({}, '_map') }}
-                    </p>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-green-600 tracking-wide">
+                            {{ 'identification'|trans({}, '_map') }}
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-1">
+                            {{ 'identificationDescription'|trans({}, '_map') }}
+                        </p>
+                    </div>
+                    <div>
+                        {% if network %}
+                            <a href="{{ path('admin_dashboard_map_network_accessPoints', {id: network.id}) }}"
+                               class="btn-primary flex items-center justify-center gap-1.5">
+                                <twig:ux:icon name="wba:wifi" class="w-3.5 h-3.5 fill-none stroke-current" />
+                                {{ 'editAPs'|trans({}, '_map') }}
+                            </a>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">

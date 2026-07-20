@@ -2,7 +2,7 @@ import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
     static values = {
-        zoom: { type: Number, default: 13 }
+        zoom: { type: Number, default: 13 },
     };
 
     connect() {
@@ -20,7 +20,9 @@ export default class extends Controller {
 
     locateUser() {
         if (!('geolocation' in navigator)) {
-            console.warn('[NATIVE GPS] Geolocation not supported by this browser (or missing HTTPS).');
+            console.warn(
+                '[NATIVE GPS] Geolocation not supported by this browser (or missing HTTPS).'
+            );
             return;
         }
 
@@ -31,16 +33,19 @@ export default class extends Controller {
 
                 this.map.flyTo([lat, lng], this.zoomValue, {
                     animate: true,
-                    duration: 1.5
+                    duration: 1.5,
                 });
             },
             (error) => {
-                console.info('[NATIVE GPS] User ignored, denied permission, or an error occurred:', error.message);
+                console.info(
+                    '[NATIVE GPS] User ignored, denied permission, or an error occurred:',
+                    error.message
+                );
             },
             {
                 enableHighAccuracy: true,
                 timeout: 5000,
-                maximumAge: 0
+                maximumAge: 0,
             }
         );
     }

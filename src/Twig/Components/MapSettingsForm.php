@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Twig\Components;
 
 use App\DTO\MapSettingsDTO;
 use App\Form\MapSettingsType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormErrorIterator;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -48,6 +51,9 @@ final class MapSettingsForm extends AbstractController
         return $form;
     }
 
+    /**
+     * @return FormErrorIterator<FormError>
+     */
     public function getFormErrors(): FormErrorIterator
     {
         return $this->getForm()->getErrors(true);
@@ -59,14 +65,12 @@ final class MapSettingsForm extends AbstractController
         $lng = -8.2245;
         $zoom = 6;
 
-        if ($this->mapSettingsDTO !== null) {
+        if ($this->mapSettingsDTO instanceof MapSettingsDTO) {
             if ($this->mapSettingsDTO->latitude !== null && $this->mapSettingsDTO->longitude !== null) {
                 $lat = (float) $this->mapSettingsDTO->latitude;
                 $lng = (float) $this->mapSettingsDTO->longitude;
             }
-            if ($this->mapSettingsDTO->zoom !== null) {
-                $zoom = $this->mapSettingsDTO->zoom;
-            }
+            $zoom = $this->mapSettingsDTO->zoom;
         }
 
         return new Map()

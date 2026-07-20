@@ -83,7 +83,7 @@ class NetworkSearchForm
     {
         if ($this->cachedCounts === null) {
             $this->cachedCounts = [
-                'all' => count($this->networkRepository->findAll()),
+                'all' => $this->networkRepository->countAll(),
             ];
         }
 

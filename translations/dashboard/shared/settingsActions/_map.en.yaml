@@ -17,8 +17,8 @@ polygon: 'Polygon'
 rectangle: 'Rectangle'
 circle: 'Circle'
 identification: 'Identification'
-identificationDescription: 'Informação básica para identificar esta rede'
-networkNameHelp: 'A clear, recognizable name for this network'
+identificationDescription: 'Basic information to identify this network'
+networkNameHelp: 'A clear, recognizable name for this network. Note: This name is visible to end-users.'
 networkDescriptionHelp: 'Brief description of this networks purpose'
 coverageArea: 'Coverage Area'
 coverageOverview: 'Coverage Overview'
@@ -42,3 +42,6 @@ longitudeDescription: 'E.g., -8.6291'
 zoomLevel: 'Zoom Level'
 zoomDescription: 'Initial zoom'
 saveSettings: 'Save Settings'
+intersectionCloseError: "Cannot close polygon: the closing line intersects with existing lines!"
+intersectionSegmentError: "Invalid point: lines cannot cross each other!"
+editAPs: "Manage APs"

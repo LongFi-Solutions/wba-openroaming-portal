@@ -86,4 +86,12 @@ class NetworkRepository extends ServiceEntityRepository
 
         return $ids === [] ? [] : $this->findBy(['id' => $ids]);
     }
+
+    public function countAll(): int
+    {
+        return (int) $this->createQueryBuilder('n')
+            ->select('COUNT(n.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }
