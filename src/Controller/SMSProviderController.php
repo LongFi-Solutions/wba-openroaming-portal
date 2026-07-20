@@ -53,7 +53,11 @@ class SMSProviderController extends AbstractController
         );
     }
 
-    #[Route('/dashboard/settings/sms/providers/new', name: 'admin_dashboard_settings_sms_providers_new', methods: ['GET', 'POST'])]
+    #[Route(
+        '/dashboard/settings/sms/providers/new',
+        name: 'admin_dashboard_settings_sms_providers_new',
+        methods: ['GET', 'POST']
+    )]
     #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
     public function new(Request $request): Response
     {
@@ -96,7 +100,11 @@ class SMSProviderController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/settings/sms/providers/{id}/edit', name: 'admin_dashboard_settings_sms_providers_edit', methods: ['GET', 'POST'])]
+    #[Route(
+        '/dashboard/settings/sms/providers/{id}/edit',
+        name: 'admin_dashboard_settings_sms_providers_edit',
+        methods: ['GET', 'POST']
+    )]
     #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
     public function edit(SMSProvider $provider, Request $request): Response
     {
@@ -152,7 +160,11 @@ class SMSProviderController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/settings/sms/providers/{id}/activate', name: 'admin_dashboard_settings_sms_providers_activate', methods: ['POST'])]
+    #[Route(
+        '/dashboard/settings/sms/providers/{id}/activate',
+        name: 'admin_dashboard_settings_sms_providers_activate',
+        methods: ['POST']
+    )]
     #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
     public function activate(SMSProvider $provider, Request $request): Response
     {
@@ -192,7 +204,11 @@ class SMSProviderController extends AbstractController
         return $this->redirectToRoute('admin_dashboard_settings_sms_providers');
     }
 
-    #[Route('/dashboard/settings/sms/providers/{id}/deactivate', name: 'admin_dashboard_settings_sms_providers_deactivate', methods: ['POST'])]
+    #[Route(
+        '/dashboard/settings/sms/providers/{id}/deactivate',
+        name: 'admin_dashboard_settings_sms_providers_deactivate',
+        methods: ['POST']
+    )]
     #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
     public function deactivate(SMSProvider $provider, Request $request): Response
     {
@@ -237,7 +253,11 @@ class SMSProviderController extends AbstractController
         return $this->redirectToRoute('admin_dashboard_settings_sms_providers');
     }
 
-    #[Route('/dashboard/settings/sms/providers/{id}/delete', name: 'admin_dashboard_settings_sms_providers_delete', methods: ['POST'])]
+    #[Route(
+        '/dashboard/settings/sms/providers/{id}/delete',
+        name: 'admin_dashboard_settings_sms_providers_delete',
+        methods: ['POST']
+    )]
     #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
     public function delete(SMSProvider $provider, Request $request): Response
     {

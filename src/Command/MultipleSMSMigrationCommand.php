@@ -19,7 +19,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[AsCommand(
     name: 'prepare:multiSMSMigration',
-    description: 'Migrate current credentials about BudgetSMS Api from the Settings table for the new dedicated SMSProvider management',
+    description: 'Migrate current credentials about BudgetSMS Api from the 
+    Settings table for the new dedicated SMSProvider management',
 )]
 class MultipleSMSMigrationCommand extends Command
 {
@@ -36,7 +37,8 @@ class MultipleSMSMigrationCommand extends Command
         $this
             ->setName('prepare:multiSMSMigration')
             ->setDescription(
-                'Migrate current credentials about BudgetSMS Api from the Settings table for the new dedicated SMSProvider management'
+                'Migrate current credentials about BudgetSMS Api from 
+                the Settings table for the new dedicated SMSProvider management'
             )
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the migration');
     }
@@ -56,7 +58,11 @@ class MultipleSMSMigrationCommand extends Command
             }
         }
 
-        $settingsToMigrate = [SettingName::SMS_USERNAME->value, SettingName::SMS_USER_ID->value, SettingName::SMS_HANDLE->value];
+        $settingsToMigrate = [
+            SettingName::SMS_USERNAME->value,
+            SettingName::SMS_USER_ID->value,
+            SettingName::SMS_HANDLE->value
+        ];
         $settingsToUpdate = [];
 
         foreach ($settingsToMigrate as $settingName) {
