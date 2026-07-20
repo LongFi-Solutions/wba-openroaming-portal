@@ -196,7 +196,7 @@ class MapController extends AbstractController
         $map = new Map()
             ->center(new Point($centerLat, $centerLng))
             ->zoom((int)$data[SettingName::MAP_CENTER_ZOOM->value]['value']);
-        return $this->render('dashboard/shared/settings_actions/map/manage_network.html.twig', [
+        return $this->render('dashboard/shared/settings_actions/map/network/manage_network.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'map' => $map,
@@ -276,7 +276,7 @@ class MapController extends AbstractController
             }
         }
 
-        return $this->render('dashboard/shared/settings_actions/map/manage_network.html.twig', [
+        return $this->render('dashboard/shared/settings_actions/map/network/manage_network.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'map' => $map,
