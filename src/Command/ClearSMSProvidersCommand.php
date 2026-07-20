@@ -22,7 +22,6 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 )]
 class ClearSMSProvidersCommand extends Command
 {
-
     public function __construct(
         private readonly EntityManagerInterface $entityManager
     ) {

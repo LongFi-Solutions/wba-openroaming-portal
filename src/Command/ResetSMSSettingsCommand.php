@@ -65,7 +65,6 @@ class ResetSMSSettingsCommand extends Command
         $this->entityManager->beginTransaction();
 
         try {
-
             $settingsRepository = $this->entityManager->getRepository(Setting::class);
 
             foreach ($settings as $settingData) {
