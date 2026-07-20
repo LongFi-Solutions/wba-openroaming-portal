@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\SMSProvider;
 use App\Entity\User;
+use App\Enum\ParamType;
 use App\Enum\SettingName;
 use App\Enum\SMSResponse;
 use App\Repository\SettingRepository;
@@ -117,19 +118,22 @@ readonly class SendSMS
     }
 
     /**
-     * @return array<string, string>
-     *     paramType => value, e.g. [
-     *         'username' => ...,
-     *         'userid' => ...,
-     *         'handle' => ...,
-     *         'from' => ...
-     * ]
+     * @return array<string, mixed>
      */
     private function getProviderParams(SMSProvider $provider): array
     {
         $params = [];
         foreach ($provider->getSmsProviderParams() as $param) {
-            $params[$param->getParamType()] = $param->getValue();
+            $value = $param->getValue();
+            $type = $param->getType();
+
+            $parsedValue = match ($type) {
+                ParamType::BOOLEAN => filter_var($value, FILTER_VALIDATE_BOOLEAN),
+                ParamType::JSON => json_decode((string)$value, true, 512, JSON_THROW_ON_ERROR) ?? [],
+                default => $value, // STRING
+            };
+
+            $params[$param->getParamType()] = $parsedValue;
         }
 
         return $params;
