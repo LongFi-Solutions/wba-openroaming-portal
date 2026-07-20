@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Validator\Constraints;
 
 use App\DTO\SMSProviderParamDTO;
@@ -22,7 +24,7 @@ class ValueMatchesParamTypeValidator extends ConstraintValidator
         }
 
         // Let NotNull/NotBlank handle empty type or value on their own
-        if ($value->type === null || $value->value === null || $value->value === '') {
+        if (!$value->type instanceof \App\Enum\ParamType || $value->value === null || $value->value === '') {
             return;
         }
 

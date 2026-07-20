@@ -67,7 +67,7 @@ class MultipleSMSMigrationCommand extends Command
             }
         }
 
-        if (!empty($settingsToUpdate)) {
+        if ($settingsToUpdate !== []) {
             $smsProvider = new SMSProvider();
 
             /** @var string $budgetSmsUrl */

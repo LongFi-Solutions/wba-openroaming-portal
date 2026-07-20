@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
@@ -11,6 +13,7 @@ class ValueMatchesParamType extends Constraint
     public string $booleanMessage = 'valueMustBeValidBoolean';
     public string $xmlMessage = 'valueMustBeValidXml';
 
+    #[\Override]
     public function getTargets(): string|array
     {
         return self::CLASS_CONSTRAINT;
