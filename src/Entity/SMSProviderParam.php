@@ -2,7 +2,10 @@
 
 namespace App\Entity;
 
+use App\Enum\Alert\AlertType;
+use App\Enum\ParamType;
 use App\Repository\SMSProviderParamRepository;
+use Doctrine\DBAL\Types\Types;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -15,10 +18,13 @@ class SMSProviderParam
     /** @phpstan-ignore-next-line */
     private ?int $id = null;
 
+    #[ORM\Column(enumType: ParamType::class)]
+    private ?ParamType $type = null;
+
     #[ORM\Column(length: 255)]
     private ?string $paramType = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT, length: 4294967295, nullable: true)]
     private ?string $value = null;
 
     #[ORM\Column]
@@ -100,5 +106,15 @@ class SMSProviderParam
         $this->smsProvider = $smsProvider;
 
         return $this;
+    }
+
+    public function getType(): ?ParamType
+    {
+        return $this->type;
+    }
+
+    public function setType(?ParamType $type): void
+    {
+        $this->type = $type;
     }
 }
