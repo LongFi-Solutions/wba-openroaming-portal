@@ -3,10 +3,13 @@
 namespace App\Controller;
 
 use App\DTO\SMSProviderDTO;
+use App\Entity\Setting;
 use App\Entity\SMSProvider;
 use App\Entity\SMSProviderParam;
 use App\Entity\User;
+use App\Enum\SettingName;
 use App\Form\SMSProviderType;
+use App\Repository\SettingRepository;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\GetSettings;
 use DateTimeImmutable;
@@ -26,6 +29,7 @@ class SMSProviderController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly TranslatorInterface $translator,
         private readonly GetSettings $getSettings,
+        private readonly SettingRepository $settingRepository,
     ) {
     }
 
@@ -59,6 +63,57 @@ class SMSProviderController extends AbstractController
     public function edit(SMSProvider $provider, Request $request): Response
     {
         return $this->handleForm($request, SMSProviderDTO::fromEntity($provider), $provider);
+    }
+
+    #[Route('/{id}/activate', name: 'admin_dashboard_settings_sms_providers_activate', methods: ['POST'])]
+    #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
+    public function activate(SMSProvider $provider, Request $request): Response
+    {
+        $setting = $this->settingRepository->findOneBy(['name' => SettingName::SMS_ACTIVE_PROVIDER->value]);
+
+        if ($setting === null) {
+            $setting = new Setting();
+            $setting->setName(SettingName::SMS_ACTIVE_PROVIDER->value);
+            $this->entityManager->persist($setting);
+        }
+
+        $setting->setValue($provider->getName());
+        $this->entityManager->flush();
+
+        $this->addFlash(
+            'success',
+            $this->translator->trans('SMSProviderActivatedSuccessfully', [], 'controllers')
+        );
+
+        return $this->redirectToRoute('admin_dashboard_settings_sms_providers');
+    }
+
+    #[Route('/{id}/delete', name: 'admin_dashboard_settings_sms_providers_delete', methods: ['POST'])]
+    #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
+    public function delete(SMSProvider $provider, Request $request): Response
+    {
+        $activeProviderName = $this->settingRepository
+            ->findOneBy(['name' => SettingName::SMS_ACTIVE_PROVIDER->value])
+            ?->getValue();
+
+        if ($activeProviderName !== null && $activeProviderName === $provider->getName()) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('CannotDeleteActiveSMSProvider', [], 'controllers')
+            );
+
+            return $this->redirectToRoute('admin_dashboard_settings_sms_providers');
+        }
+
+        $this->entityManager->remove($provider);
+        $this->entityManager->flush();
+
+        $this->addFlash(
+            'success',
+            $this->translator->trans('SMSProviderDeletedSuccessfully', [], 'controllers')
+        );
+
+        return $this->redirectToRoute('admin_dashboard_settings_sms_providers');
     }
 
     private function handleForm(Request $request, SMSProviderDTO $dto, ?SMSProvider $provider): Response

@@ -2,21 +2,15 @@
 
 namespace App\Twig\Components;
 
-use App\Entity\Setting;
 use App\Entity\SMSProvider;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Repository\SMSProviderRepository;
 use App\Security\Voter\UserAuthenticationVoter;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
-use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
-use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
 
@@ -24,20 +18,26 @@ use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
 class SMSProviderSearchForm
 {
     use DefaultActionTrait;
-    use ComponentToolsTrait;
 
     #[LiveProp(writable: true)]
     public string $query = '';
 
+    #[LiveProp(writable: true)]
+    public int $page = 1;
+
+    #[LiveProp(writable: true)]
+    public int $count = 7;
+
     /** @var SMSProvider[]|null */
-    private ?array $cachedProviders = null;
+    private ?array $cachedFilteredProviders = null;
+
+    /** @var SMSProvider[]|null */
+    private ?array $cachedPageProviders = null;
 
     public function __construct(
         private readonly SMSProviderRepository $smsProviderRepository,
         private readonly SettingRepository $settingRepository,
-        private readonly EntityManagerInterface $entityManager,
         private readonly Security $security,
-        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -47,27 +47,24 @@ class SMSProviderSearchForm
     #[ExposeInTemplate]
     public function getProviders(): array
     {
-        if ($this->cachedProviders === null) {
-            $providers = $this->smsProviderRepository->findAll();
-
-            if ($this->query !== '') {
-                $needle = mb_strtolower($this->query);
-                $providers = array_values(
-                    array_filter(
-                        $providers,
-                        static fn(SMSProvider $provider): bool => str_contains(
-                                mb_strtolower($provider->getName() ?? ''),
-                                $needle
-                            )
-                            || str_contains(mb_strtolower($provider->getAddress() ?? ''), $needle)
-                    )
-                );
-            }
-
-            $this->cachedProviders = $providers;
+        if ($this->cachedPageProviders === null) {
+            $offset = ($this->page - 1) * $this->count;
+            $this->cachedPageProviders = array_slice($this->getFilteredProviders(), $offset, $this->count);
         }
 
-        return $this->cachedProviders;
+        return $this->cachedPageProviders;
+    }
+
+    #[ExposeInTemplate]
+    public function getTotalProviders(): int
+    {
+        return count($this->getFilteredProviders());
+    }
+
+    #[ExposeInTemplate]
+    public function getTotalPages(): int
+    {
+        return max(1, (int)ceil($this->getTotalProviders() / $this->count));
     }
 
     #[ExposeInTemplate]
@@ -85,56 +82,42 @@ class SMSProviderSearchForm
     }
 
     #[LiveAction]
-    public function activate(#[LiveArg] int $id): void
+    public function prevPage(): void
     {
-        if (!$this->getCanWrite()) {
-            throw new AccessDeniedException();
-        }
-
-        $provider = $this->smsProviderRepository->find($id);
-        if (!$provider instanceof SMSProvider) {
-            return;
-        }
-
-        $setting = $this->settingRepository->findOneBy([
-            'name' => SettingName::SMS_ACTIVE_PROVIDER->value
-        ]);
-
-        if ($setting === null) {
-            $setting = new Setting();
-            $setting->setName(SettingName::SMS_ACTIVE_PROVIDER->value);
-            $this->entityManager->persist($setting);
-        }
-
-        $setting->setValue($provider->getName());
-        $this->entityManager->flush();
-
-        $this->cachedProviders = null;
-        $this->addFlash('success', $this->translator->trans('SMSProviderActivatedSuccessfully', [], 'controllers'));
+        $this->page--;
     }
 
     #[LiveAction]
-    public function delete(#[LiveArg] int $id): void
+    public function nextPage(): void
     {
-        if (!$this->getCanWrite()) {
-            throw new AccessDeniedException();
+        $this->page++;
+    }
+
+    /**
+     * @return SMSProvider[]
+     */
+    private function getFilteredProviders(): array
+    {
+        if ($this->cachedFilteredProviders === null) {
+            $providers = $this->smsProviderRepository->findAll();
+
+            if ($this->query !== '') {
+                $needle = mb_strtolower($this->query);
+                $providers = array_values(
+                    array_filter(
+                        $providers,
+                        static fn(SMSProvider $provider): bool => str_contains(
+                                mb_strtolower($provider->getName() ?? ''),
+                                $needle
+                            )
+                            || str_contains(mb_strtolower($provider->getAddress() ?? ''), $needle)
+                    )
+                );
+            }
+
+            $this->cachedFilteredProviders = $providers;
         }
 
-        $provider = $this->smsProviderRepository->find($id);
-        if (!$provider instanceof SMSProvider) {
-            return;
-        }
-
-        if ($this->getActiveProviderName() === $provider->getName()) {
-            $this->addFlash('error', $this->translator->trans('CannotDeleteActiveSMSProvider', [], 'controllers'));
-
-            return;
-        }
-
-        $this->entityManager->remove($provider);
-        $this->entityManager->flush();
-
-        $this->cachedProviders = null;
-        $this->addFlash('success', $this->translator->trans('SMSProviderDeletedSuccessfully', [], 'controllers'));
+        return $this->cachedFilteredProviders;
     }
 }

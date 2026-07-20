@@ -7,7 +7,7 @@
             <div class="flex flex-row items-center border-b-2 border-y-veryDarkButton">
                 <h1 class="px-2">{{ 'totalProviders'|trans({}, '_sms') }}</h1>
                 <div class="w-auto h-6 mb-1 px-2 rounded-md text-center bg-veryDarkButton text-white">
-                    {{ this.providers|length }}
+                    {{ this.totalProviders }}
                 </div>
             </div>
 
@@ -87,36 +87,48 @@
                             {# Items List Dropdown #}
                             <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
                                     {{ stimulus_target('nav-submenu', 'container') }}>
-                                <ul class="py-2 text-sm">
+                                <ul class="p-2 text-gray-700 gap-y-2">
                                     <li>
                                         <a href="{{ path('admin_dashboard_settings_sms_providers_edit', {id: provider.id}) }}"
-                                           class="flex items-center space-x-2 px-4 py-2 hover:bg-veryLightGreen hover:text-lightGreen transition-all duration-100">
+                                           class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                                            <twig:ux:icon name="wba:pencil-edit"
+                                                          class="w-5 mr-3 fill-none stroke-current" />
                                             {{ 'edit'|trans({}, '_sms') }}
                                         </a>
                                     </li>
+
                                     {% if not isActive %}
                                         <li>
-                                            <button type="button"
-                                                    data-action="live#action"
-                                                    data-live-action-param="activate"
-                                                    data-live-id-param="{{ provider.id }}"
-                                                    onclick="if (!confirm('{{ 'confirmActivateProvider'|trans({}, '_sms')|e('js') }}')) { event.stopImmediatePropagation(); return false; }"
-                                                    class="w-full flex items-center space-x-2 px-4 py-2 text-left hover:bg-veryLightGreen hover:text-lightGreen transition-all duration-100">
-                                                {{ 'activate'|trans({}, '_sms') }}
-                                            </button>
+                                            <form action="{{ path('admin_dashboard_settings_sms_providers_activate', {id: provider.id}) }}"
+                                                  method="post">
+                                                <input type="hidden" name="_token"
+                                                       value="{{ csrf_token('sms-provider-activate-' ~ provider.id) }}">
+                                                <button type="submit"
+                                                        onclick="return confirm('{{ 'confirmActivateProvider'|trans({}, '_sms')|e('js') }}')"
+                                                        class="w-full text-left flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                                                    <twig:ux:icon name="wba:check-circle-rounded"
+                                                                  class="w-5 mr-3 fill-none stroke-current" />
+                                                    {{ 'activate'|trans({}, '_sms') }}
+                                                </button>
+                                            </form>
                                         </li>
                                     {% endif %}
+
                                     <li>
-                                        <button type="button"
-                                                data-action="live#action"
-                                                data-live-action-param="delete"
-                                                data-live-id-param="{{ provider.id }}"
-                                                onclick="if (!confirm('{{ 'confirmDeleteProvider'|trans({}, '_sms')|e('js') }}')) { event.stopImmediatePropagation(); return false; }"
-                                                class="w-full flex items-center space-x-2 px-4 py-2 text-left hover:bg-red-50 hover:text-red-600 transition-all duration-100 {{ isActive ? 'opacity-40 cursor-not-allowed' : '' }}"
-                                                {% if isActive %}disabled
-                                                title="{{ 'cannotDeleteActiveProvider'|trans({}, '_sms') }}"{% endif %}>
-                                            {{ 'delete'|trans({}, '_sms') }}
-                                        </button>
+                                        <form action="{{ path('admin_dashboard_settings_sms_providers_delete', {id: provider.id}) }}"
+                                              method="post">
+                                            <input type="hidden" name="_token"
+                                                   value="{{ csrf_token('sms-provider-delete-' ~ provider.id) }}">
+                                            <button type="submit"
+                                                    onclick="return confirm('{{ 'confirmDeleteProvider'|trans({}, '_sms')|e('js') }}')"
+                                                    class="w-full text-left flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400 {{ isActive ? 'opacity-40 cursor-not-allowed' : '' }}"
+                                                    {% if isActive %}disabled
+                                                    title="{{ 'cannotDeleteActiveProvider'|trans({}, '_sms') }}"{% endif %}>
+                                                <twig:ux:icon name="wba:trash"
+                                                              class="w-5 mr-3 fill-none stroke-current" />
+                                                {{ 'delete'|trans({}, '_sms') }}
+                                            </button>
+                                        </form>
                                     </li>
                                 </ul>
                             </div>
@@ -128,8 +140,8 @@
                     <td colspan="{{ this.canWrite ? 5 : 4 }}">
                         <div class="flex flex-row justify-center items-start mt-2 p-4">
                             <div class="pill-error">
-                                {% if this.query %}
-                                    {{ 'noProvidersFoundWith'|trans({}, '_sms') }} "{{ this.query }}"
+                                {% if query %}
+                                    {{ 'noProvidersFoundWith'|trans({}, '_sms') }} "{{ query }}"
                                 {% else %}
                                     {{ 'noProvidersConfigured'|trans({}, '_sms') }}
                                 {% endif %}
@@ -140,5 +152,17 @@
             {% endfor %}
             </tbody>
         </table>
+    </div>
+
+    {# Pagination #}
+    <div class="m-8">
+        <hr class="w-full h-0.5 bg-gray-300/50 border-0 rounded">
+        {{ include('dashboard/shared/pagination/_pagination_live.html.twig', {
+            label: 'providersPerPage'|trans({}, '_sms'),
+            occurrencies: this.providers|length,
+            totalPages: this.totalPages,
+            page: page,
+            count: count,
+        }) }}
     </div>
 </div>
