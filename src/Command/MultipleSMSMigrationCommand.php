@@ -2,6 +2,10 @@
 
 namespace App\Command;
 
+use App\Entity\SMSProvider;
+use App\Entity\SMSProviderParam;
+use App\Repository\SettingRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -9,6 +13,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[AsCommand(
     name: 'prepare:multiSMSMigration',
@@ -17,7 +22,9 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 class MultipleSMSMigrationCommand extends Command
 {
     public function __construct(
-
+        private readonly EntityManagerInterface $entityManager,
+        private readonly SettingRepository $settingRepository,
+        private readonly ParameterBagInterface $parameterBag,
     )
     {
         parent::__construct();
@@ -49,8 +56,49 @@ class MultipleSMSMigrationCommand extends Command
             }
         }
 
+        $smsUsernameSetting = $this->settingRepository->findOneBy(['name' => 'SMS_USERNAME']); // Search with string because we will remove this setting name from enum
+        if ($smsUsernameSetting) {
+            $settingsToUpdate['SMS_USERNAME'] = $smsUsernameSetting->getValue();
+        }
 
-        // get SMS_USERNAME, SMS_USER_ID, SMS_HANDLE and add to the new format
+        $this->entityManager->remove($smsUsernameSetting);
+
+        $smsUserIdSetting = $this->settingRepository->findOneBy(['name' => 'SMS_USER_ID']); // Search with string because we will remove this setting name from enum
+
+        $settingsToUpdate = [];
+        if ($smsUserIdSetting) {
+            $settingsToUpdate['SMS_USER_ID'] = $smsUserIdSetting->getValue();
+        }
+
+        $this->entityManager->remove($smsUserIdSetting);
+
+        $smsHandleSetting = $this->settingRepository->findOneBy(['name' => 'SMS_HANDLE']); // Search with string because we will remove this setting name from enum
+
+        if ($smsHandleSetting) {
+            $settingsToUpdate['SMS_HANDLE'] = $smsHandleSetting->getValue();
+        }
+
+        $this->entityManager->remove($smsHandleSetting);
+        $this->entityManager->flush();
+
+        $smsProvider = new SMSProvider();
+
+        $budgetSmsUrl = $this->parameterBag->get('app.budget_api_url');
+
+        $smsProvider->setName('BudgetSMS');
+        $smsProvider->setAddress($budgetSmsUrl);
+
+        foreach ($settingsToUpdate as $settingName => $settingValue) {
+            $smsParam = new SMSProviderParam();
+            $smsParam->setParamType($settingName);
+            $smsParam->setValue($settingValue);
+            $smsParam->setSmsProvider($smsProvider);
+            $smsProvider->addSmsProviderParam($smsParam);
+            $this->entityManager->persist($smsProvider);
+        }
+
+        $this->entityManager->persist($smsProvider);
+        $this->entityManager->flush();
 
 
         return Command::SUCCESS;
