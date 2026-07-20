@@ -7,11 +7,15 @@ use App\Entity\Setting;
 use App\Entity\SMSProvider;
 use App\Entity\SMSProviderParam;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\SettingName;
 use App\Form\SMSProviderType;
 use App\Repository\SettingRepository;
 use App\Security\Voter\UserAuthenticationVoter;
+use App\Service\EventActions;
 use App\Service\GetSettings;
+use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -30,6 +34,7 @@ class SMSProviderController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
+        private readonly EventActions $eventActions,
     ) {
     }
 
@@ -69,7 +74,11 @@ class SMSProviderController extends AbstractController
     #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
     public function activate(SMSProvider $provider, Request $request): Response
     {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
         $setting = $this->settingRepository->findOneBy(['name' => SettingName::SMS_ACTIVE_PROVIDER->value]);
+        $previousActiveProviderName = $setting?->getValue();
 
         if ($setting === null) {
             $setting = new Setting();
@@ -79,6 +88,19 @@ class SMSProviderController extends AbstractController
 
         $setting->setValue($provider->getName());
         $this->entityManager->flush();
+
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::SMS_PROVIDER_ACTIVATED->value,
+            new DateTime(),
+            [
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::OLD_DATA->value => $previousActiveProviderName,
+                EventMetadataKeysType::NEW_DATA->value => $provider->getName(),
+            ]
+        );
 
         $this->addFlash(
             'success',
@@ -92,6 +114,9 @@ class SMSProviderController extends AbstractController
     #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
     public function delete(SMSProvider $provider, Request $request): Response
     {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
         $activeProviderName = $this->settingRepository
             ->findOneBy(['name' => SettingName::SMS_ACTIVE_PROVIDER->value])
             ?->getValue();
@@ -105,8 +130,24 @@ class SMSProviderController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_sms_providers');
         }
 
+        // Capture identifying info before removal, since the entity is gone from the DB after flush
+        $deletedProviderName = $provider->getName();
+
         $this->entityManager->remove($provider);
         $this->entityManager->flush();
+
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::SMS_PROVIDER_DELETED->value,
+            new DateTime(),
+            [
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::OLD_DATA->value => $deletedProviderName,
+                EventMetadataKeysType::NEW_DATA->value => null,
+            ]
+        );
 
         $this->addFlash(
             'success',
@@ -149,8 +190,8 @@ class SMSProviderController extends AbstractController
             $this->entityManager->persist($provider);
         }
 
-        $provider->setName((string)$dto->name);
-        $provider->setAddress((string)$dto->address);
+        $provider->setName((string) $dto->name);
+        $provider->setAddress((string) $dto->address);
         $provider->setUpdatedAt($now);
 
         // Reconcile the param collection against the DTO: update rows that still exist,
@@ -171,8 +212,8 @@ class SMSProviderController extends AbstractController
                 $this->entityManager->persist($param);
             }
 
-            $param->setParamType((string)$paramDto->paramType);
-            $param->setValue((string)$paramDto->value);
+            $param->setParamType((string) $paramDto->paramType);
+            $param->setValue((string) $paramDto->value);
             $param->setUpdatedAt($now);
 
             if ($param->getId() !== null) {
