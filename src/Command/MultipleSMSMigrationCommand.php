@@ -25,8 +25,7 @@ class MultipleSMSMigrationCommand extends Command
         private readonly EntityManagerInterface $entityManager,
         private readonly SettingRepository $settingRepository,
         private readonly ParameterBagInterface $parameterBag,
-    )
-    {
+    ) {
         parent::__construct();
     }
 
@@ -42,7 +41,6 @@ class MultipleSMSMigrationCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // Check if the --yes option is provided (comes from a controller), then skip the confirmation prompt
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(
@@ -56,50 +54,45 @@ class MultipleSMSMigrationCommand extends Command
             }
         }
 
-        $smsUsernameSetting = $this->settingRepository->findOneBy(['name' => 'SMS_USERNAME']); // Search with string because we will remove this setting name from enum
-        if ($smsUsernameSetting) {
-            $settingsToUpdate['SMS_USERNAME'] = $smsUsernameSetting->getValue();
-        }
-
-        $this->entityManager->remove($smsUsernameSetting);
-
-        $smsUserIdSetting = $this->settingRepository->findOneBy(['name' => 'SMS_USER_ID']); // Search with string because we will remove this setting name from enum
-
+        $settingsToMigrate = ['SMS_USERNAME', 'SMS_USER_ID', 'SMS_HANDLE'];
         $settingsToUpdate = [];
-        if ($smsUserIdSetting) {
-            $settingsToUpdate['SMS_USER_ID'] = $smsUserIdSetting->getValue();
+
+        foreach ($settingsToMigrate as $settingName) {
+            $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
+
+            if ($setting !== null) {
+                $settingsToUpdate[$settingName] = (string) $setting->getValue();
+                $this->entityManager->remove($setting);
+            }
         }
 
-        $this->entityManager->remove($smsUserIdSetting);
+        if (!empty($settingsToUpdate)) {
+            $smsProvider = new SMSProvider();
 
-        $smsHandleSetting = $this->settingRepository->findOneBy(['name' => 'SMS_HANDLE']); // Search with string because we will remove this setting name from enum
+            /** @var string $budgetSmsUrl */
+            $budgetSmsUrl = $this->parameterBag->get('app.budget_api_url');
 
-        if ($smsHandleSetting) {
-            $settingsToUpdate['SMS_HANDLE'] = $smsHandleSetting->getValue();
-        }
+            $smsProvider->setName('BudgetSMS');
+            $smsProvider->setAddress($budgetSmsUrl);
 
-        $this->entityManager->remove($smsHandleSetting);
-        $this->entityManager->flush();
+            foreach ($settingsToUpdate as $settingName => $settingValue) {
+                $smsParam = new SMSProviderParam();
+                $smsParam->setParamType($settingName);
+                $smsParam->setValue($settingValue);
+                $smsParam->setSmsProvider($smsProvider);
 
-        $smsProvider = new SMSProvider();
+                $smsProvider->addSmsProviderParam($smsParam);
+                $this->entityManager->persist($smsParam);
+            }
 
-        $budgetSmsUrl = $this->parameterBag->get('app.budget_api_url');
-
-        $smsProvider->setName('BudgetSMS');
-        $smsProvider->setAddress($budgetSmsUrl);
-
-        foreach ($settingsToUpdate as $settingName => $settingValue) {
-            $smsParam = new SMSProviderParam();
-            $smsParam->setParamType($settingName);
-            $smsParam->setValue($settingValue);
-            $smsParam->setSmsProvider($smsProvider);
-            $smsProvider->addSmsProviderParam($smsParam);
             $this->entityManager->persist($smsProvider);
+
+            $this->entityManager->flush();
+
+            $output->writeln('<info>SMS settings successfully migrated to SMSProvider.</info>');
+        } else {
+            $output->writeln('<comment>No old SMS settings found to migrate.</comment>');
         }
-
-        $this->entityManager->persist($smsProvider);
-        $this->entityManager->flush();
-
 
         return Command::SUCCESS;
     }
