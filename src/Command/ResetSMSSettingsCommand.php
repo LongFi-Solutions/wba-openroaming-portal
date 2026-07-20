@@ -65,8 +65,6 @@ class ResetSMSSettingsCommand extends Command
         $this->entityManager->beginTransaction();
 
         try {
-            $this->entityManager->createQuery('DELETE FROM ' . SMSProviderParam::class)->execute();
-            $this->entityManager->createQuery('DELETE FROM ' . SMSProvider::class)->execute();
 
             $settingsRepository = $this->entityManager->getRepository(Setting::class);
 

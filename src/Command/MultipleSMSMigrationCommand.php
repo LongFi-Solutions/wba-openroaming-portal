@@ -64,7 +64,6 @@ class MultipleSMSMigrationCommand extends Command
 
             if ($setting !== null) {
                 $settingsToUpdate[$settingName] = (string) $setting->getValue();
-                $this->entityManager->remove($setting);
             }
         }
 
