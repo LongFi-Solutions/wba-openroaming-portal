@@ -1,0 +1,96 @@
+{# Expects: provider, canWrite, activeProviderName #}
+{% set isActive = activeProviderName is not null and activeProviderName == provider.name %}
+<tr class="hover:bg-veryLightGreen transition-all duration-100 {{ isActive ? 'bg-lightGreen/5' : '' }}">
+    {# Name #}
+    <td class="p-4 pl-8 font-medium break-normal md:break-all">
+        {{ provider.name }}
+    </td>
+
+    {# Address #}
+    <td class="p-4 break-normal md:break-all">
+        {{ provider.address }}
+    </td>
+
+    {# Params #}
+    <td class="p-4">
+        <p class="text-left ml-1 p-1">
+            {{ provider.smsProviderParams|length }} {{ 'paramsConfigured'|trans({}, '_sms') }}
+        </p>
+    </td>
+
+    {# Status #}
+    <td class="p-4">
+        <p class="font-semibold p-1">
+            {% if isActive %}
+                <span class="pill-success">
+                    {{ 'active'|trans({}, '_sms') }}
+                </span>
+            {% else %}
+                <span class="pill-error">
+                    {{ 'inactive'|trans({}, '_sms') }}
+                </span>
+            {% endif %}
+        </p>
+    </td>
+
+    {# Created At #}
+    <td class="px-6 py-4 font-medium">
+        {{ provider.createdAt|date('d/m/Y H:i') }}
+    </td>
+
+    {% if canWrite %}
+        <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>
+            <button type="button" class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
+                    {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
+                    {{ stimulus_target('nav-submenu', 'button') }}>
+                <twig:ux:icon name="wba:menu-dots" class="w-5 h-5 fill-current" />
+            </button>
+
+            {# Items List Dropdown #}
+            <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
+                    {{ stimulus_target('nav-submenu', 'container') }}>
+                <ul class="p-2 text-gray-700 gap-y-2">
+                    <li>
+                        <a href="{{ path('admin_dashboard_settings_sms_providers_edit', {id: provider.id}) }}"
+                           class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                            <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3 fill-none stroke-current" />
+                            {{ 'edit'|trans({}, '_sms') }}
+                        </a>
+                    </li>
+
+                    {% if not isActive %}
+                        <li>
+                            <form action="{{ path('admin_dashboard_settings_sms_providers_activate', {id: provider.id}) }}"
+                                  method="post">
+                                <input type="hidden" name="_token"
+                                       value="{{ csrf_token('sms-provider-activate-' ~ provider.id) }}">
+                                <button type="submit"
+                                        onclick="return confirm('{{ 'confirmActivateProvider'|trans({}, '_sms')|e('js') }}')"
+                                        class="w-full text-left flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                                    <twig:ux:icon name="wba:check-circle-rounded" class="w-5 mr-3 fill-none stroke-current" />
+                                    {{ 'activate'|trans({}, '_sms') }}
+                                </button>
+                            </form>
+                        </li>
+                    {% endif %}
+
+                    <li>
+                        <form action="{{ path('admin_dashboard_settings_sms_providers_delete', {id: provider.id}) }}"
+                              method="post">
+                            <input type="hidden" name="_token"
+                                   value="{{ csrf_token('sms-provider-delete-' ~ provider.id) }}">
+                            <button type="submit"
+                                    onclick="return confirm('{{ 'confirmDeleteProvider'|trans({}, '_sms')|e('js') }}')"
+                                    class="w-full text-left flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400 {{ isActive ? 'opacity-40 cursor-not-allowed' : '' }}"
+                                    {% if isActive %}disabled
+                                    title="{{ 'cannotDeleteActiveProvider'|trans({}, '_sms') }}"{% endif %}>
+                                <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-none stroke-current" />
+                                {{ 'delete'|trans({}, '_sms') }}
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </td>
+    {% endif %}
+</tr>

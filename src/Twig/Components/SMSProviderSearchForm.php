@@ -10,6 +10,7 @@ use App\Security\Voter\UserAuthenticationVoter;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
+use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
@@ -27,6 +28,12 @@ class SMSProviderSearchForm
 
     #[LiveProp(writable: true)]
     public int $count = 7;
+
+    #[LiveProp(writable: true)]
+    public string $sort = 'createdAt';
+
+    #[LiveProp(writable: true)]
+    public string $order = 'desc';
 
     /** @var SMSProvider[]|null */
     private ?array $cachedFilteredProviders = null;
@@ -93,6 +100,17 @@ class SMSProviderSearchForm
         $this->page++;
     }
 
+    #[LiveAction]
+    public function changeSort(#[LiveArg] string $field): void
+    {
+        if ($this->sort === $field) {
+            $this->order = $this->order === 'desc' ? 'asc' : 'desc';
+        } else {
+            $this->sort = $field;
+            $this->order = 'desc';
+        }
+    }
+
     /**
      * @return SMSProvider[]
      */
@@ -114,6 +132,16 @@ class SMSProviderSearchForm
                     )
                 );
             }
+
+            usort($providers, function (SMSProvider $a, SMSProvider $b): int {
+                $result = match ($this->sort) {
+                    'name' => strcmp($a->getName() ?? '', $b->getName() ?? ''),
+                    'address' => strcmp($a->getAddress() ?? '', $b->getAddress() ?? ''),
+                    default => $a->getCreatedAt() <=> $b->getCreatedAt(),
+                };
+
+                return $this->order === 'asc' ? $result : -$result;
+            });
 
             $this->cachedFilteredProviders = $providers;
         }
