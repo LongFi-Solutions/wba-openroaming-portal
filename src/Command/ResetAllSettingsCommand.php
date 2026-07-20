@@ -4,6 +4,8 @@ namespace App\Command;
 
 use App\Entity\Setting;
 use App\Entity\SettingTranslation;
+use App\Entity\SMSProvider;
+use App\Entity\SMSProviderParam;
 use App\Enum\LanguageType;
 use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
@@ -329,6 +331,9 @@ class ResetAllSettingsCommand extends Command
         $this->entityManager->beginTransaction();
 
         try {
+            $this->entityManager->createQuery('DELETE FROM ' . SMSProviderParam::class)->execute();
+            $this->entityManager->createQuery('DELETE FROM ' . SMSProvider::class)->execute();
+
             $settingsRepository = $this->entityManager->getRepository(Setting::class);
             $translationsRepository = $this->entityManager->getRepository(SettingTranslation::class);
 
