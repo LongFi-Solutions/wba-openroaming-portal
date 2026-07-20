@@ -12,6 +12,17 @@
                 </div>
             </div>
 
+            {# Active Provider #}
+            {% if this.activeProvider %}
+                <a href="{{ path('admin_dashboard_settings_sms_providers_edit', {id: this.activeProvider.id}) }}"
+                   class="flex flex-row items-center group transition-all duration-100 text-gray-500 border-b-2 border-transparent hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50">
+                    <h1 class="px-2">{{ 'activeProvider'|trans({}, '_sms') }}</h1>
+                    <div class="w-auto h-6 mb-1 px-2 rounded-md text-center transition-all duration-100 bg-veryLightGreen group-hover:bg-lightGreen group-hover:text-white whitespace-nowrap">
+                        {{ this.activeProvider.name }}
+                    </div>
+                </a>
+            {% endif %}
+
             {# Search Bar #}
             <div class="w-full md:w-3/6">
                 <div class="flex flex-row items-center border rounded-md">

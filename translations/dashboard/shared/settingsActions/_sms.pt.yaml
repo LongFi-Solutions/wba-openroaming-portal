@@ -33,3 +33,4 @@ cannotDeleteActiveProvider: 'O fornecedor ativo não pode ser eliminado. Ative p
 searchProviders: 'Pesquisar fornecedores'
 totalProviders: 'Total de Fornecedores'
 providersPerPage: 'fornecedores por página'
+activeProvider: 'Fornecedor Ativo'

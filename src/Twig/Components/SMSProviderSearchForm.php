@@ -41,6 +41,9 @@ class SMSProviderSearchForm
     /** @var SMSProvider[]|null */
     private ?array $cachedPageProviders = null;
 
+    private ?SMSProvider $cachedActiveProvider = null;
+    private bool $activeProviderResolved = false;
+
     public function __construct(
         private readonly SMSProviderRepository $smsProviderRepository,
         private readonly SettingRepository $settingRepository,
@@ -71,15 +74,31 @@ class SMSProviderSearchForm
     #[ExposeInTemplate]
     public function getTotalPages(): int
     {
-        return max(1, (int)ceil($this->getTotalProviders() / $this->count));
+        return max(1, (int) ceil($this->getTotalProviders() / $this->count));
+    }
+
+    #[ExposeInTemplate]
+    public function getActiveProvider(): ?SMSProvider
+    {
+        if (!$this->activeProviderResolved) {
+            $this->activeProviderResolved = true;
+
+            $activeName = $this->settingRepository
+                ->findOneBy(['name' => SettingName::SMS_ACTIVE_PROVIDER->value])
+                ?->getValue();
+
+            $this->cachedActiveProvider = $activeName !== null
+                ? $this->smsProviderRepository->findOneBy(['name' => $activeName])
+                : null;
+        }
+
+        return $this->cachedActiveProvider;
     }
 
     #[ExposeInTemplate]
     public function getActiveProviderName(): ?string
     {
-        return $this->settingRepository
-            ->findOneBy(['name' => SettingName::SMS_ACTIVE_PROVIDER->value])
-            ?->getValue();
+        return $this->getActiveProvider()?->getName();
     }
 
     #[ExposeInTemplate]
@@ -121,16 +140,12 @@ class SMSProviderSearchForm
 
             if ($this->query !== '') {
                 $needle = mb_strtolower($this->query);
-                $providers = array_values(
-                    array_filter(
-                        $providers,
-                        static fn(SMSProvider $provider): bool => str_contains(
-                                mb_strtolower($provider->getName() ?? ''),
-                                $needle
-                            )
-                            || str_contains(mb_strtolower($provider->getAddress() ?? ''), $needle)
-                    )
-                );
+                $providers = array_values(array_filter(
+                    $providers,
+                    static fn (SMSProvider $provider): bool =>
+                        str_contains(mb_strtolower($provider->getName() ?? ''), $needle)
+                        || str_contains(mb_strtolower($provider->getAddress() ?? ''), $needle)
+                ));
             }
 
             usort($providers, function (SMSProvider $a, SMSProvider $b): int {

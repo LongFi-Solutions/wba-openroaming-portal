@@ -33,3 +33,4 @@ cannotDeleteActiveProvider: 'The active provider cannot be deleted. Activate ano
 searchProviders: 'Search providers'
 totalProviders: 'Total Providers'
 providersPerPage: 'providers per page'
+activeProvider: 'Active Provider'
