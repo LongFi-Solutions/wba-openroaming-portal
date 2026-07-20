@@ -63,8 +63,24 @@ class SMSProviderController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->createProviderFromDto($dto);
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+
+            $provider = $this->createProviderFromDto($dto);
             $this->entityManager->flush();
+
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::SMS_PROVIDER_CREATED->value,
+                new DateTime(),
+                [
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::OLD_DATA->value => null,
+                    EventMetadataKeysType::NEW_DATA->value => $provider->getName(),
+                ]
+            );
 
             $this->addFlash(
                 'success',
@@ -90,8 +106,37 @@ class SMSProviderController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+
+            // Capture before mutating, same reasoning as delete() — the entity's
+            // old state is gone once updateProviderFromDto() overwrites it
+            $previousName = $provider->getName();
+            $previousAddress = $provider->getAddress();
+
             $this->updateProviderFromDto($provider, $dto);
             $this->entityManager->flush();
+
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::SMS_PROVIDER_UPDATED->value,
+                new DateTime(),
+                [
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                    EventMetadataKeysType::OLD_DATA->value => sprintf(
+                        '%s (%s)',
+                        $previousName,
+                        $previousAddress
+                    ),
+                    EventMetadataKeysType::NEW_DATA->value => sprintf(
+                        '%s (%s)',
+                        $provider->getName(),
+                        $provider->getAddress()
+                    ),
+                ]
+            );
 
             $this->addFlash(
                 'success',
@@ -199,7 +244,7 @@ class SMSProviderController extends AbstractController
      * Builds and persists a brand-new SMSProvider (plus all its params) from the DTO.
      * No reconciliation needed here — every param on the DTO is necessarily a new row.
      */
-    private function createProviderFromDto(SMSProviderDTO $dto): void
+    private function createProviderFromDto(SMSProviderDTO $dto): SMSProvider
     {
         $now = new DateTimeImmutable();
 
@@ -214,11 +259,14 @@ class SMSProviderController extends AbstractController
             $param = new SMSProviderParam();
             $param->setCreatedAt($now);
             $param->setUpdatedAt($now);
+            $param->setType($paramDto->type);
             $param->setParamType((string)$paramDto->paramType);
             $param->setValue((string)$paramDto->value);
             $provider->addSmsProviderParam($param);
             $this->entityManager->persist($param);
         }
+
+        return $provider;
     }
 
     /**
@@ -250,6 +298,7 @@ class SMSProviderController extends AbstractController
                 $this->entityManager->persist($param);
             }
 
+            $param->setType($paramDto->type);
             $param->setParamType((string) $paramDto->paramType);
             $param->setValue((string) $paramDto->value);
             $param->setUpdatedAt($now);
