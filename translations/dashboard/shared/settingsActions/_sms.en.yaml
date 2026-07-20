@@ -12,3 +12,4 @@ sms_provider_notice: 'This is for the
 timeIntervalBetweenRequests: 'Time Interval Between Request'
 timeIntervalToResetAttempts: 'Time Interval To Reset Attempts'
 attemptsNumber: 'Number of Attempts'
+newProvider: 'New Provider'

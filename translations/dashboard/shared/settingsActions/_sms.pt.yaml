@@ -12,3 +12,4 @@ sms_provider_notice: 'Isto é para o fornecedor
 timeIntervalBetweenRequests: 'Intervalo entre pedidos'
 timeIntervalToResetAttempts: 'Tempo para reiniciar tentativas'
 attemptsNumber: 'Número de tentativas'
+newProvider: 'Novo fornecedor'

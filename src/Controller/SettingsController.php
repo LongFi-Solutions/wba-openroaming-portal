@@ -1036,9 +1036,8 @@ class SettingsController extends AbstractController
         $form = $this->createForm(SMSSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
+        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
             // Save updated settings
-
             $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
 

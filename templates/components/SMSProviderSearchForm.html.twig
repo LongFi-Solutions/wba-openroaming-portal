@@ -1,0 +1,144 @@
+<div {{ attributes }}>
+
+    <div class="sm:w-auto px-5 py-4">
+        <div class="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0 sm:space-x-4">
+
+            {# Total Count #}
+            <div class="flex flex-row items-center border-b-2 border-y-veryDarkButton">
+                <h1 class="px-2">{{ 'totalProviders'|trans({}, '_sms') }}</h1>
+                <div class="w-auto h-6 mb-1 px-2 rounded-md text-center bg-veryDarkButton text-white">
+                    {{ this.providers|length }}
+                </div>
+            </div>
+
+            {# Search Bar #}
+            <div class="w-full md:w-3/6">
+                <div class="flex flex-row items-center border rounded-md">
+                    <button type="button">
+                        <svg class="w-5 mx-3 text-gray-400" fill="none" stroke="currentColor"
+                             stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                    </button>
+                    <label class="w-full">
+                        <input type="text"
+                               class="form-widget w-full p-2 bg-transparent border-none outline-none"
+                               placeholder="{{ 'searchProviders'|trans({}, '_sms') }}"
+                               data-model="debounce(300)|query"
+                               autocomplete="off" />
+                    </label>
+                </div>
+            </div>
+
+            {# Right Button #}
+            {% if this.canWrite %}
+                <a href="{{ path('admin_dashboard_settings_sms_providers_new') }}"
+                   class="btn-primary px-4 min-w-[150px]">
+                    {{ 'newProvider'|trans({}, '_sms') }}
+                </a>
+            {% endif %}
+
+        </div>
+    </div>
+
+    {# Table #}
+    <div class="overflow-x-auto max-w-full mt-3">
+        <table class="w-full items-start">
+            <thead class="text-sm text-gray-700 bg-veryLightGreen">
+            <tr>
+                <th scope="col" class="p-4 pl-8">{{ 'name'|trans({}, '_sms') }}</th>
+                <th scope="col" class="px-6 py-3">{{ 'address'|trans({}, '_sms') }}</th>
+                <th scope="col" class="px-6 py-3">{{ 'params'|trans({}, '_sms') }}</th>
+                <th scope="col" class="px-6 py-3">{{ 'status'|trans({}, '_sms') }}</th>
+                {% if this.canWrite %}
+                    <th scope="col" class="px-6 py-3"><span class="none"></span></th>
+                {% endif %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for provider in this.providers %}
+                {% set isActive = this.activeProviderName is not null and this.activeProviderName == provider.name %}
+                <tr class="text-sm hover:bg-veryLightGreen transition-all duration-100 {{ isActive ? 'bg-lightGreen/5' : '' }}">
+                    <td class="p-4 pl-8 font-medium break-normal md:break-all">{{ provider.name }}</td>
+                    <td class="p-4 text-gray-500 break-normal md:break-all">{{ provider.address }}</td>
+                    <td class="p-4 text-gray-500 whitespace-nowrap">
+                        {{ provider.smsProviderParams|length }} {{ 'paramsConfigured'|trans({}, '_sms') }}
+                    </td>
+                    <td class="p-4">
+                        {% if isActive %}
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-lightGreen/20 text-lightGreen whitespace-nowrap">
+                                    {{ 'active'|trans({}, '_sms') }}
+                                </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 whitespace-nowrap">
+                                    {{ 'inactive'|trans({}, '_sms') }}
+                                </span>
+                        {% endif %}
+                    </td>
+                    {% if this.canWrite %}
+                        <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>
+                            <button type="button" class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
+                                    {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
+                                    {{ stimulus_target('nav-submenu', 'button') }}>
+                                <twig:ux:icon name="wba:menu-dots" class="w-5 h-5 fill-current" />
+                            </button>
+
+                            {# Items List Dropdown #}
+                            <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
+                                    {{ stimulus_target('nav-submenu', 'container') }}>
+                                <ul class="py-2 text-sm">
+                                    <li>
+                                        <a href="{{ path('admin_dashboard_settings_sms_providers_edit', {id: provider.id}) }}"
+                                           class="flex items-center space-x-2 px-4 py-2 hover:bg-veryLightGreen hover:text-lightGreen transition-all duration-100">
+                                            {{ 'edit'|trans({}, '_sms') }}
+                                        </a>
+                                    </li>
+                                    {% if not isActive %}
+                                        <li>
+                                            <button type="button"
+                                                    data-action="live#action"
+                                                    data-live-action-param="activate"
+                                                    data-live-id-param="{{ provider.id }}"
+                                                    onclick="if (!confirm('{{ 'confirmActivateProvider'|trans({}, '_sms')|e('js') }}')) { event.stopImmediatePropagation(); return false; }"
+                                                    class="w-full flex items-center space-x-2 px-4 py-2 text-left hover:bg-veryLightGreen hover:text-lightGreen transition-all duration-100">
+                                                {{ 'activate'|trans({}, '_sms') }}
+                                            </button>
+                                        </li>
+                                    {% endif %}
+                                    <li>
+                                        <button type="button"
+                                                data-action="live#action"
+                                                data-live-action-param="delete"
+                                                data-live-id-param="{{ provider.id }}"
+                                                onclick="if (!confirm('{{ 'confirmDeleteProvider'|trans({}, '_sms')|e('js') }}')) { event.stopImmediatePropagation(); return false; }"
+                                                class="w-full flex items-center space-x-2 px-4 py-2 text-left hover:bg-red-50 hover:text-red-600 transition-all duration-100 {{ isActive ? 'opacity-40 cursor-not-allowed' : '' }}"
+                                                {% if isActive %}disabled
+                                                title="{{ 'cannotDeleteActiveProvider'|trans({}, '_sms') }}"{% endif %}>
+                                            {{ 'delete'|trans({}, '_sms') }}
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="{{ this.canWrite ? 5 : 4 }}">
+                        <div class="flex flex-row justify-center items-start mt-2 p-4">
+                            <div class="pill-error">
+                                {% if this.query %}
+                                    {{ 'noProvidersFoundWith'|trans({}, '_sms') }} "{{ this.query }}"
+                                {% else %}
+                                    {{ 'noProvidersConfigured'|trans({}, '_sms') }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

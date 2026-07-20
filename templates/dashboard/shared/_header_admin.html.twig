@@ -15,6 +15,9 @@
     admin_dashboard_statistics: {icon: 'wba:piechart', title: 'portalStatistics'},
     admin_dashboard_statistics_freeradius: {icon: 'wba:hdd', title: 'connectivityStatistics'},
     admin_dashboard_settings_sms: {icon: 'wba:sms', title: 'SMSConfiguration'},
+    admin_dashboard_settings_sms_providers: {icon: 'wba:sms', title: 'SMSProviders'},
+    admin_dashboard_settings_sms_providers_new: {icon: 'wba:sms', title: 'newSMSProvider'},
+    admin_dashboard_settings_sms_providers_edit: {icon: 'wba:sms', title: 'editSMSProvider'},
     admin_dashboard_settings_domains: {icon: 'wba:file-cross', title: 'domainBlacklist'},
     admin_dashboard_settings_certs_management: {icon: 'wba:certificate', title: 'certsManagement'},
     admin_dashboard_return_apps: {icon: 'wba:mobile-arrows', title: 'returnAppsManagement'},
@@ -37,26 +40,26 @@
         <twig:ux:icon name="wba:menu" class="stroke-current"/>
     </button>
 
-  <div class="hidden xl:block">
-    <div {{ stimulus_target('nav-dropdown', 'container') }}
-            class="w-full max-w-[250px] z-40 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-md min-w-max absolute right-0 mt-2">
-      <ul class="py-2 text-sm space-y-1" aria-labelledby="adminActionsDropdownButton">
-        <li class="px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
-          {# Account Option #}
-            <a href="{{ path('admin_dashboard_user_show', {id: app.user.id}) }}"
-             class="flex items-center space-x-2">
-            <twig:ux:icon name="wba:user-circle" class="w-7 pr-2 mr-2 fill-none stroke-current"/>
-            {{ 'account'|trans({}, '_header_admin') }}
-          </a>
-        </li>
-        {# Language Dropdown #}
-        <div {{ stimulus_controller('nav-dropdown') }}>
-            <div class="px-2 mx-2">
-                <button
-                        type="button"
-                        {{ stimulus_target('nav-dropdown', 'button') }}
-                        {{ stimulus_action('nav-dropdown', 'toggleHeader')|stimulus_action('nav-dropdown', 'lost_focusHeader', 'focusout') }}
-                        class="w-full flex items-center space-x-2 px-2 py-2 rounded cursor-pointer hover:shadow hover:bg-gray-100 hover:text-lightGreen duration-100">
+    <div class="hidden xl:block">
+        <div {{ stimulus_target('nav-dropdown', 'container') }}
+                class="w-full max-w-[250px] z-40 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-md min-w-max absolute right-0 mt-2">
+            <ul class="py-2 text-sm space-y-1" aria-labelledby="adminActionsDropdownButton">
+                <li class="px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
+                    {# Account Option #}
+                    <a href="{{ path('admin_dashboard_user_show', {id: app.user.id}) }}"
+                       class="flex items-center space-x-2">
+                        <twig:ux:icon name="wba:user-circle" class="w-7 pr-2 mr-2 fill-none stroke-current"/>
+                        {{ 'account'|trans({}, '_header_admin') }}
+                    </a>
+                </li>
+                {# Language Dropdown #}
+                <div {{ stimulus_controller('nav-dropdown') }}>
+                    <div class="px-2 mx-2">
+                        <button
+                                type="button"
+                                {{ stimulus_target('nav-dropdown', 'button') }}
+                                {{ stimulus_action('nav-dropdown', 'toggleHeader')|stimulus_action('nav-dropdown', 'lost_focusHeader', 'focusout') }}
+                                class="w-full flex items-center space-x-2 px-2 py-2 rounded cursor-pointer hover:shadow hover:bg-gray-100 hover:text-lightGreen duration-100">
 
                             <twig:ux:icon name="wba:globe" class="w-6 pr-1 mr-2 fill-none stroke-current"/>
                             <span class="truncate">{{ 'language'|trans({}, 'landing') }}</span>
