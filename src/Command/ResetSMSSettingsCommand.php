@@ -3,6 +3,8 @@
 namespace App\Command;
 
 use App\Entity\Setting;
+use App\Entity\SMSProvider;
+use App\Entity\SMSProviderParam;
 use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -51,9 +53,6 @@ class ResetSMSSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => SettingName::SMS_USERNAME->value, 'value' => ''],
-            ['name' => SettingName::SMS_USER_ID->value, 'value' => ''],
-            ['name' => SettingName::SMS_HANDLE->value, 'value' => ''],
             ['name' => SettingName::SMS_FROM->value, 'value' => 'OpenRoaming'],
             ['name' => SettingName::SMS_TIMER_RESEND->value, 'value' => '5'],
             ['name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value, 'value' => 'PT, US, GB'],
@@ -66,6 +65,9 @@ class ResetSMSSettingsCommand extends Command
         $this->entityManager->beginTransaction();
 
         try {
+            $this->entityManager->createQuery('DELETE FROM ' . SMSProviderParam::class)->execute();
+            $this->entityManager->createQuery('DELETE FROM ' . SMSProvider::class)->execute();
+
             $settingsRepository = $this->entityManager->getRepository(Setting::class);
 
             foreach ($settings as $settingData) {
