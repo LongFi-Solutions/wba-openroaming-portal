@@ -193,6 +193,51 @@ class SMSProviderController extends AbstractController
         return $this->redirectToRoute('admin_dashboard_settings_sms_providers');
     }
 
+    #[Route('/{id}/deactivate', name: 'admin_dashboard_settings_sms_providers_deactivate', methods: ['POST'])]
+    #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
+    public function deactivate(SMSProvider $provider, Request $request): Response
+    {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        $setting = $this->settingRepository->findOneBy(['name' => SettingName::SMS_ACTIVE_PROVIDER->value]);
+        $activeProviderName = $setting?->getValue();
+
+        // Only the provider that's actually active can be deactivated — guards against
+        // a stale page deactivating whatever happens to be active by the time this runs.
+        if ($setting === null || $activeProviderName !== $provider->getName()) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('ProviderIsNotActive', [], 'controllers')
+            );
+
+            return $this->redirectToRoute('admin_dashboard_settings_sms_providers');
+        }
+
+        $setting->setValue(null);
+        $this->entityManager->flush();
+
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::SMS_PROVIDER_DEACTIVATED->value,
+            new DateTime(),
+            [
+                EventMetadataKeysType::IP->value => $request->getClientIp(),
+                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                EventMetadataKeysType::OLD_DATA->value => $provider->getName(),
+                EventMetadataKeysType::NEW_DATA->value => null,
+            ]
+        );
+
+        $this->addFlash(
+            'success',
+            $this->translator->trans('SMSProviderDeactivatedSuccessfully', [], 'controllers')
+        );
+
+        return $this->redirectToRoute('admin_dashboard_settings_sms_providers');
+    }
+
     #[Route('/{id}/delete', name: 'admin_dashboard_settings_sms_providers_delete', methods: ['POST'])]
     #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
     public function delete(SMSProvider $provider, Request $request): Response
@@ -207,7 +252,7 @@ class SMSProviderController extends AbstractController
         if ($activeProviderName !== null && $activeProviderName === $provider->getName()) {
             $this->addFlash(
                 'error',
-                $this->translator->trans('CannotDeleteActiveSMSProvider', [], 'controllers')
+                $this->translator->trans('cannotDeleteActiveSMSProvider', [], 'controllers')
             );
 
             return $this->redirectToRoute('admin_dashboard_settings_sms_providers');
@@ -251,8 +296,8 @@ class SMSProviderController extends AbstractController
         $provider = new SMSProvider();
         $provider->setCreatedAt($now);
         $provider->setUpdatedAt($now);
-        $provider->setName((string)$dto->name);
-        $provider->setAddress((string)$dto->address);
+        $provider->setName((string) $dto->name);
+        $provider->setAddress((string) $dto->address);
         $this->entityManager->persist($provider);
 
         foreach ($dto->params as $paramDto) {
@@ -260,8 +305,8 @@ class SMSProviderController extends AbstractController
             $param->setCreatedAt($now);
             $param->setUpdatedAt($now);
             $param->setType($paramDto->type);
-            $param->setParamType((string)$paramDto->paramType);
-            $param->setValue((string)$paramDto->value);
+            $param->setParamType((string) $paramDto->paramType);
+            $param->setValue((string) $paramDto->value);
             $provider->addSmsProviderParam($param);
             $this->entityManager->persist($param);
         }

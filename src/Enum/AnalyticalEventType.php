@@ -146,6 +146,7 @@ enum AnalyticalEventType: string
     case SMS_PROVIDER_UPDATED = 'SMS_PROVIDER_UPDATED';
     case SMS_PROVIDER_DELETED = 'SMS_PROVIDER_DELETED';
     case SMS_PROVIDER_ACTIVATED = 'SMS_PROVIDER_ACTIVATED';
+    case SMS_PROVIDER_DEACTIVATED = 'SMS_PROVIDER_DEACTIVATED';
 
     public function getLabel(): string
     {
@@ -304,6 +305,7 @@ enum AnalyticalEventType: string
             self::SMS_PROVIDER_UPDATED => 'SMS Provider Updated',
             self::SMS_PROVIDER_DELETED => 'SMS Provider Deleted',
             self::SMS_PROVIDER_ACTIVATED => 'SMS Provider Activated',
+            self::SMS_PROVIDER_DEACTIVATED => 'SMS Provider Deactivated',
 
             // Other
             self::RADIUS_TLS_UPDATED => 'RADIUS TLS Updated',

@@ -58,7 +58,21 @@
                         </a>
                     </li>
 
-                    {% if not isActive %}
+                    {% if isActive %}
+                        <li>
+                            <form action="{{ path('admin_dashboard_settings_sms_providers_deactivate', {id: provider.id}) }}"
+                                  method="post">
+                                <input type="hidden" name="_token"
+                                       value="{{ csrf_token('sms-provider-deactivate-' ~ provider.id) }}">
+                                <button type="submit"
+                                        onclick="return confirm('{{ 'confirmDeactivateProvider'|trans({}, '_sms')|e('js') }}')"
+                                        class="w-full text-left flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400">
+                                    <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 mr-3 fill-none stroke-current" />
+                                    {{ 'deactivate'|trans({}, '_sms') }}
+                                </button>
+                            </form>
+                        </li>
+                    {% else %}
                         <li>
                             <form action="{{ path('admin_dashboard_settings_sms_providers_activate', {id: provider.id}) }}"
                                   method="post">

@@ -207,4 +207,6 @@ chmodSettingsScript: 'Concede as permissões de execução ao script de atualiza
 SMSProviderSavedSuccessfully: 'Fornecedor de SMS guardado com sucesso.'
 SMSProviderActivatedSuccessfully: 'Fornecedor de SMS ativado com sucesso.'
 SMSProviderDeletedSuccessfully: 'Fornecedor de SMS eliminado com sucesso.'
-CannotDeleteActiveSMSProvider: 'O fornecedor de SMS ativo não pode ser eliminado.'
+cannotDeleteActiveSMSProvider: 'O fornecedor de SMS ativo não pode ser eliminado.'
+ProviderIsNotActive: 'Este fornecedor não está atualmente ativo.'
+SMSProviderDeactivatedSuccessfully: 'Fornecedor de SMS desativado com sucesso.'
