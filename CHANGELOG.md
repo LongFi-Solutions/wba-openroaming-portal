@@ -1,10 +1,23 @@
 # Changelog
 
+# Release V1.13.0
+
+- **Required one-time action:** After upgrading, run
+  the [MultipleSMSMigrationCommand.php](src/Command/MultipleSMSMigrationCommand.php) to migrate
+  existing BudgetSMS API credentials from the Settings table to the new dedicated SMSProvider management system.
+  This command should be executed **only once** and while the portal is **offline or restricted**.
+  - Run the command with:
+    ```bash
+    php bin/console prepare:multiSMSMigration
+    ```
+
+
 # Release V1.12.1
 
 - Removed the preparation command that was introduced for v1.11.
 - Updated configuration variables default value to follow better practices (bool instead of ON & OFF, please consult the `env.sample` for more details)
 - Add fallback message error in case the default super admin account has 2fa forced with email
+- 
 
 # Release V1.12.0
 
