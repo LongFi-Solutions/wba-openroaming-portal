@@ -142,6 +142,8 @@ enum AnalyticalEventType: string
     case RETURN_APPS_RESET_REQUEST = 'RETURN_APPS_RESET_REQUEST';
     case BREAKING_GLASS_ACCOUNT_GENERATION = 'BREAKING_GLASS_ACCOUNT_GENERATION';
     case BREAKING_GLASS_ACCOUNT_RESET = 'BREAKING_GLASS_ACCOUNT_RESET';
+    case SMS_PROVIDER_DELETED = 'SMS_PROVIDER_DELETED';
+    case SMS_PROVIDER_ACTIVATED = 'SMS_PROVIDER_ACTIVATED';
 
     public function getLabel(): string
     {
@@ -294,6 +296,10 @@ enum AnalyticalEventType: string
             self::NOTIFY_ADMIN_EXPIRING_CERT_MONTH => 'Admin Notified: Certificate Expires in 1 Month',
             self::NOTIFY_ADMIN_EXPIRING_CERT_TWO_MONTHS => 'Admin Notified: Certificate Expires in 2 Months',
             self::NOTIFY_ADMIN_EXPIRING_CERT_THREE_MONTHS => 'Admin Notified: Certificate Expires in 3 Months',
+
+            // SMS
+            self::SMS_PROVIDER_DELETED => 'SMS Provider Deleted',
+            self::SMS_PROVIDER_ACTIVATED => 'SMS Provider Activated',
 
             // Other
             self::RADIUS_TLS_UPDATED => 'RADIUS TLS Updated',
