@@ -59,15 +59,53 @@ class SMSProviderController extends AbstractController
     public function new(Request $request): Response
     {
         $dto = new SMSProviderDTO();
+        $form = $this->createForm(SMSProviderType::class, $dto);
+        $form->handleRequest($request);
 
-        return $this->handleForm($request, $dto, null);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->createProviderFromDto($dto);
+            $this->entityManager->flush();
+
+            $this->addFlash(
+                'success',
+                $this->translator->trans('SMSProviderSavedSuccessfully', [], 'controllers')
+            );
+
+            return $this->redirectToRoute('admin_dashboard_settings_sms_providers');
+        }
+
+        return $this->render('dashboard/shared/settings_actions/sms_providers/form.html.twig', [
+            'form' => $form->createView(),
+            'provider' => null,
+            'data' => $this->getSettings->getSettings(),
+        ]);
     }
 
     #[Route('/{id}/edit', name: 'admin_dashboard_settings_sms_providers_edit', methods: ['GET', 'POST'])]
     #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
     public function edit(SMSProvider $provider, Request $request): Response
     {
-        return $this->handleForm($request, SMSProviderDTO::fromEntity($provider), $provider);
+        $dto = SMSProviderDTO::fromEntity($provider);
+        $form = $this->createForm(SMSProviderType::class, $dto);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->updateProviderFromDto($provider, $dto);
+            $this->entityManager->flush();
+
+            $this->addFlash(
+                'success',
+                $this->translator->trans('SMSProviderSavedSuccessfully', [], 'controllers')
+            );
+
+            return $this->redirectToRoute('admin_dashboard_settings_sms_providers');
+        }
+
+        return $this->render('dashboard/shared/settings_actions/sms_providers/form.html.twig', [
+            'form' => $form->createView(),
+            'provider' => $provider,
+            'data' => $this->getSettings->getSettings(),
+        ]);
     }
 
     #[Route('/{id}/activate', name: 'admin_dashboard_settings_sms_providers_activate', methods: ['POST'])]
@@ -157,45 +195,45 @@ class SMSProviderController extends AbstractController
         return $this->redirectToRoute('admin_dashboard_settings_sms_providers');
     }
 
-    private function handleForm(Request $request, SMSProviderDTO $dto, ?SMSProvider $provider): Response
-    {
-        $form = $this->createForm(SMSProviderType::class, $dto);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->applyDtoToEntity($dto, $provider);
-            $this->entityManager->flush();
-
-            $this->addFlash(
-                'success',
-                $this->translator->trans('SMSProviderSavedSuccessfully', [], 'controllers')
-            );
-
-            return $this->redirectToRoute('admin_dashboard_settings_sms_providers');
-        }
-
-        return $this->render('dashboard/shared/settings_actions/sms_providers/form.html.twig', [
-            'form' => $form->createView(),
-            'provider' => $provider,
-        ]);
-    }
-
-    private function applyDtoToEntity(SMSProviderDTO $dto, ?SMSProvider $provider): void
+    /**
+     * Builds and persists a brand-new SMSProvider (plus all its params) from the DTO.
+     * No reconciliation needed here — every param on the DTO is necessarily a new row.
+     */
+    private function createProviderFromDto(SMSProviderDTO $dto): void
     {
         $now = new DateTimeImmutable();
 
-        if ($provider === null) {
-            $provider = new SMSProvider();
-            $provider->setCreatedAt($now);
-            $this->entityManager->persist($provider);
+        $provider = new SMSProvider();
+        $provider->setCreatedAt($now);
+        $provider->setUpdatedAt($now);
+        $provider->setName((string)$dto->name);
+        $provider->setAddress((string)$dto->address);
+        $this->entityManager->persist($provider);
+
+        foreach ($dto->params as $paramDto) {
+            $param = new SMSProviderParam();
+            $param->setCreatedAt($now);
+            $param->setUpdatedAt($now);
+            $param->setParamType((string)$paramDto->paramType);
+            $param->setValue((string)$paramDto->value);
+            $provider->addSmsProviderParam($param);
+            $this->entityManager->persist($param);
         }
+    }
+
+    /**
+     * Updates an existing SMSProvider in place from the DTO, reconciling its param
+     * collection: rows still present get updated, new rows get created, and rows
+     * removed from the form get deleted.
+     */
+    private function updateProviderFromDto(SMSProvider $provider, SMSProviderDTO $dto): void
+    {
+        $now = new DateTimeImmutable();
 
         $provider->setName((string) $dto->name);
         $provider->setAddress((string) $dto->address);
         $provider->setUpdatedAt($now);
 
-        // Reconcile the param collection against the DTO: update rows that still exist,
-        // add new ones, and delete any that were removed in the form.
         $existingParams = [];
         foreach ($provider->getSmsProviderParams() as $existingParam) {
             $existingParams[$existingParam->getId()] = $existingParam;

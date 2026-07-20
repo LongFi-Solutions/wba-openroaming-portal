@@ -1,6 +1,73 @@
 {% extends '/dashboard/base.html.twig' %}
 
 {% block container %}
-    pretty form will render here
-{% endblock %}
+    <div class="p-2">
+        <div class="bg-white rounded-md shadow p-6 max-w-2xl">
+            {{ form_start(form) }}
 
+            <div class="mb-4">
+                {{ form_label(form.name, 'name'|trans({}, '_sms')) }}
+                {{ form_widget(form.name, {attr: {class: 'form-widget w-full'}}) }}
+                {{ form_errors(form.name) }}
+            </div>
+
+            <div class="mb-6">
+                {{ form_label(form.address, 'address'|trans({}, '_sms')) }}
+                {{ form_widget(form.address, {attr: {class: 'form-widget w-full'}}) }}
+                {{ form_errors(form.address) }}
+            </div>
+
+            <div class="mb-6">
+                <h2 class="font-semibold mb-2">{{ 'params'|trans({}, '_sms') }}</h2>
+                {{ form_errors(form.params) }}
+
+                <div {{ stimulus_controller('sms-provider-params', {
+                    prototype: form_widget(form.params.vars.prototype)|e('html_attr'),
+                    index: form.params|length,
+                }) }}>
+                    <div {{ stimulus_target('sms-provider-params', 'list') }}>
+                        {% for paramField in form.params %}
+                            <div {{ stimulus_target('sms-provider-params', 'row') }}
+                                    class="flex items-center gap-2 mb-2">
+                                {{ form_widget(paramField.id) }}
+                                {{ form_widget(paramField.paramType, {
+                                    attr: {
+                                        placeholder: 'e.g. username, userid, handle, from',
+                                        class: 'form-widget',
+                                    },
+                                }) }}
+                                {{ form_widget(paramField.value, {
+                                    attr: {placeholder: 'value', class: 'form-widget'},
+                                }) }}
+                                <button type="button"
+                                        {{ stimulus_action('sms-provider-params', 'removeParam') }}
+                                        class="hover:text-red-400 transition">
+                                    <twig:ux:icon name="wba:trash" class="w-5 h-5 fill-none stroke-current" />
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <button type="button"
+                            {{ stimulus_action('sms-provider-params', 'addParam') }}
+                            class="text-sm font-semibold hover:text-lightGreen transition">
+                        + {{ 'addParam'|trans({}, '_sms') }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex flex-row justify-end items-center gap-4">
+                <a href="{{ path('admin_dashboard_settings_sms_providers') }}"
+                   class="hover:text-lightGreen transition">
+                    {{ 'cancel'|trans({}, '_sms') }}
+                </a>
+                <button type="submit" class="btn-primary">
+                    {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
+                </button>
+            </div>
+
+            {{ form_rest(form) }}
+            {{ form_end(form, {render_rest: false}) }}
+        </div>
+    </div>
+{% endblock %}
