@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\SMSProvider;
 use App\Entity\SMSProviderParam;
+use App\Enum\ParamType;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -80,6 +81,7 @@ class MultipleSMSMigrationCommand extends Command
                 $smsParam = new SMSProviderParam();
                 $smsParam->setParamType($settingName);
                 $smsParam->setValue($settingValue);
+                $smsParam->setType(ParamType::STRING);
                 $smsParam->setSmsProvider($smsProvider);
 
                 $smsProvider->addSmsProviderParam($smsParam);
