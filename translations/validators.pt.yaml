@@ -94,3 +94,6 @@ invalidIosTeamId: "Introduza um Team ID iOS válido (e.g., ABC123DEF9)."
 invalidIosBundleId: "Introduza um Bundle ID iOS válido (e.g., com.exemplo.app)."
 invalidSha256Fingerprint: "Introduza uma impressão digital SHA-256 válida (formato: XX:XX:...:XX)."
 atLeastOneFingerprint: "Introduza pelo menos uma impressão digital."
+valueMustBeValidJson: 'O valor tem de ser um JSON válido.'
+valueMustBeValidBoolean: 'O valor tem de ser true, false, 1 ou 0.'
+valueMustBeValidXml: 'O valor tem de ser um XML válido.'

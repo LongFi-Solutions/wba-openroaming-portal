@@ -2,12 +2,15 @@
 
 {% macro paramRow(paramField) %}
     <div {{ stimulus_target('sms-provider-params', 'row') }}
-            class="flex items-center gap-3">
+            class="flex items-start gap-3">
         {{ form_widget(paramField.id) }}
         <div class="w-1/4">
             {{ form_widget(paramField.type, {
                 attr: {class: 'form-widget'},
             }) }}
+            <div class="text-red-500 text-sm">
+                {{ form_errors(paramField.type) }}
+            </div>
         </div>
         <div class="w-1/4">
             {{ form_widget(paramField.paramType, {
@@ -16,11 +19,17 @@
                     class: 'form-widget',
                 },
             }) }}
+            <div class="text-red-500 text-sm">
+                {{ form_errors(paramField.paramType) }}
+            </div>
         </div>
         <div class="w-1/2">
             {{ form_widget(paramField.value, {
                 attr: {placeholder: 'value', class: 'form-widget'},
             }) }}
+            <div class="text-red-500 text-sm">
+                {{ form_errors(paramField.value) }}
+            </div>
         </div>
         <button type="button"
                 {{ stimulus_action('sms-provider-params', 'removeParam') }}

@@ -4,8 +4,10 @@ namespace App\DTO;
 
 use App\Entity\SMSProviderParam;
 use App\Enum\ParamType;
+use App\Validator\Constraints\ValueMatchesParamType;
 use Symfony\Component\Validator\Constraints as Assert;
 
+#[ValueMatchesParamType]
 class SMSProviderParamDTO
 {
     public ?int $id = null;
