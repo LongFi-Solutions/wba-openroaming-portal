@@ -11,7 +11,8 @@ class NetworkExtension extends AbstractExtension
 {
     public function __construct(
         private readonly AccessPointRepository $accessPointRepository
-    ) {}
+    ) {
+    }
 
     public function getFunctions(): array
     {
