@@ -9,7 +9,7 @@
                 {% set tabs = {
                     all: {
                         label: 'all',
-                        count: this.networkCounts.all,
+                        count: this.networkCounts,
                         activeClass: 'border-b-2 border-y-veryDarkButton',
                         hoverClass: 'hover:border-b-2 hover:border-y-veryDarkButton',
                         badgeActive: 'bg-veryDarkButton text-white',
@@ -131,7 +131,7 @@
         <hr class="w-full h-0.5 bg-gray-300/50 border-0 rounded">
         {{ include('dashboard/shared/pagination/_pagination_live.html.twig', {
             label: 'networksPerPage'|trans({}, '_network'),
-            occurrencies: this.networks|length,
+            occurrencies: this.networkCounts,
             totalPages: this.totalPages,
             page: page,
             count: count,
