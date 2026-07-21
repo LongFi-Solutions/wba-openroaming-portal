@@ -4,7 +4,6 @@ namespace App\Service;
 
 use App\Entity\SMSProvider;
 use App\Entity\User;
-use App\Enum\ParamType;
 use App\Enum\SettingName;
 use App\Enum\SMSResponse;
 use App\Repository\SettingRepository;
@@ -13,17 +12,9 @@ use App\Repository\UserRepository;
 use DateTime;
 use Random\RandomException;
 use RuntimeException;
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 readonly class SendSMS
 {
-    /**
-     * SendSMS constructor.
-     */
     public function __construct(
         private SettingRepository $settingRepository,
         private SMSProviderRepository $smsProviderRepository,
@@ -32,22 +23,12 @@ readonly class SendSMS
     }
 
     /**
-     * @throws TransportExceptionInterface
      * @throws RandomException
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ClientExceptionInterface
      */
     public function sendSmsNoValidation(User $user, string $message): string
     {
-        $recipient = "+" .
-            $user->getPhoneNumber()->getCountryCode() .
-            $user->getPhoneNumber()->getNationalNumber();
-
         $provider = $this->getActiveProvider();
 
-        // Check if the user can regenerate the SMS code
-        $client = HttpClient::create();
         $messageLength = $this->verifyMessageLength($message);
         if ($messageLength) {
             $user->setTwoFACode((string)random_int(100000, 999999));
@@ -58,23 +39,8 @@ readonly class SendSMS
             $message = 'Verification code is: ' . $user->getTwoFACode();
         }
 
-        // Every provider-specific credential (username, userid, handle, from, ...) comes
-        // straight from that provider's SMSProviderParam rows — nothing is hardcoded here,
-        // so adding/switching providers is a data change, not a code change.
-        $queryParams = array_merge(
-            $this->getProviderParams($provider),
-            [
-                'to' => $recipient,
-                'msg' => $message,
-            ]
-        );
-
-        $apiUrl = $provider->getAddress() . '?' . http_build_query($queryParams);
-        $response = $client->request('GET', $apiUrl);
-
-        // Handle the API response as needed
-        $response->getStatusCode();
-        $response->getContent();
+        $serviceClass = $provider->getSMSProviderType()->getServiceClass();
+        $serviceClass::sendSMS($provider, $message, $user);
 
         if ($messageLength) {
             return SMSResponse::SMS_SUCCESS_CODE->value;
@@ -115,27 +81,5 @@ readonly class SendSMS
         }
 
         return $provider;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function getProviderParams(SMSProvider $provider): array
-    {
-        $params = [];
-        foreach ($provider->getSmsProviderParams() as $param) {
-            $value = $param->getValue();
-            $type = $param->getType();
-
-            $parsedValue = match ($type) {
-                ParamType::BOOLEAN => filter_var($value, FILTER_VALIDATE_BOOLEAN),
-                ParamType::JSON => json_decode((string)$value, true, 512, JSON_THROW_ON_ERROR) ?? [],
-                default => $value, // STRING
-            };
-
-            $params[$param->getParamType()] = $parsedValue;
-        }
-
-        return $params;
     }
 }

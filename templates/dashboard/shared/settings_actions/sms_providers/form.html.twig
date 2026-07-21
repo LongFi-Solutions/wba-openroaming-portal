@@ -44,6 +44,14 @@
     {{ form_errors(form) }}
 
     <div class="p-6 bg-white">
+        <div class="relative mb-4">
+            {{ form_label(form.smsProviderType, 'smsProviderType'|trans({}, '_sms'), {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.smsProviderType, {attr: {class: 'form-widget'}}) }}
+            <div class="text-red-500 m-2">
+                {{ form_errors(form.smsProviderType) }}
+            </div>
+        </div>
+
         <div class="mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div class="relative">
                 {{ form_label(form.name, 'name'|trans({}, '_sms'), {label_attr: {class: 'form-label'}}) }}

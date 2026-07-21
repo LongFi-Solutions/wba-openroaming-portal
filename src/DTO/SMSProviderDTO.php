@@ -3,6 +3,7 @@
 namespace App\DTO;
 
 use App\Entity\SMSProvider;
+use App\Enum\SMSProviderType;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class SMSProviderDTO
@@ -18,6 +19,9 @@ class SMSProviderDTO
     #[Assert\Length(max: 255, maxMessage: 'fieldCannotBeLongerThan')]
     public ?string $address = null;
 
+    #[Assert\NotNull(message: 'fieldCannotBeBlank')]
+    public ?SMSProviderType $smsProviderType = null;
+
     /**
      * @var SMSProviderParamDTO[]
      */
@@ -31,6 +35,7 @@ class SMSProviderDTO
         $dto->id = $provider->getId();
         $dto->name = $provider->getName();
         $dto->address = $provider->getAddress();
+        $dto->smsProviderType = $provider->getSMSProviderType();
 
         foreach ($provider->getSmsProviderParams() as $param) {
             $dto->params[] = SMSProviderParamDTO::fromEntity($param);

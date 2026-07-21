@@ -317,6 +317,7 @@ class SMSProviderController extends AbstractController
         $provider->setUpdatedAt($now);
         $provider->setName((string) $dto->name);
         $provider->setAddress((string) $dto->address);
+        $provider->setSMSProviderType($dto->smsProviderType);
         $this->entityManager->persist($provider);
 
         foreach ($dto->params as $paramDto) {
@@ -344,6 +345,7 @@ class SMSProviderController extends AbstractController
 
         $provider->setName((string) $dto->name);
         $provider->setAddress((string) $dto->address);
+        $provider->setSMSProviderType($dto->smsProviderType);
         $provider->setUpdatedAt($now);
 
         $existingParams = [];

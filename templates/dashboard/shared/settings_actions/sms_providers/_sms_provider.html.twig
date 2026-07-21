@@ -11,6 +11,11 @@
         {{ provider.address }}
     </td>
 
+    {# Type #}
+    <td class="p-4 whitespace-nowrap">
+        {{ provider.smsProviderType.name|lower|capitalize }}
+    </td>
+
     {# Params #}
     <td class="p-4">
         <p class="text-left ml-1 p-1">
