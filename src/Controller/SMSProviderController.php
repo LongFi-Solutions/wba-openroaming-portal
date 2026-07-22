@@ -17,15 +17,18 @@ use App\Repository\SettingRepository;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\SMSProvider\BudgetSMS\BudgetSMSProviderService;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
 #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_READ)]
 class SMSProviderController extends AbstractController
@@ -162,6 +165,50 @@ class SMSProviderController extends AbstractController
         ]);
     }
 
+    /**
+     * Validates provider credentials by making a real (but harmless) test
+     * request to the actual provider's API, before anything is saved.
+     */
+    #[Route(
+        '/dashboard/settings/sms/providers/test-connection',
+        name: 'admin_dashboard_settings_sms_providers_test_connection',
+        methods: ['POST']
+    )]
+    #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
+    public function testConnection(Request $request): JsonResponse
+    {
+        $token = $request->request->get('_token');
+
+        if (!$this->isCsrfTokenValid('sms-provider-test-connection', is_string($token) ? $token : null)) {
+            return new JsonResponse(['success' => false, 'message' => 'Invalid CSRF token.'], 403);
+        }
+
+        $smsProviderTypeValue = $request->request->get('smsProviderType');
+
+        if ($smsProviderTypeValue !== SMSProviderType::BUDGET_SMS->value) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Testing is not yet supported for this provider type.',
+            ], 400);
+        }
+
+        $username = (string)$request->request->get('username', '');
+        $userid = (string)$request->request->get('userid', '');
+        $handle = (string)$request->request->get('handle', '');
+        $from = (string)$request->request->get('from', '');
+
+        try {
+            $result = BudgetSMSProviderService::testCredentials($username, $userid, $handle, $from);
+        } catch (Throwable $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Could not reach BudgetSMS: ' . $e->getMessage(),
+            ], 502);
+        }
+
+        return new JsonResponse(['success' => $result->success, 'message' => $result->message]);
+    }
+
     #[Route(
         '/dashboard/settings/sms/providers/{id}/activate',
         name: 'admin_dashboard_settings_sms_providers_activate',
@@ -172,12 +219,10 @@ class SMSProviderController extends AbstractController
     {
         $token = $request->request->get('_token');
 
-        if (
-            !$this->isCsrfTokenValid(
-                'sms-provider-activate-' . $provider->getId(),
-                is_string($token) ? $token : null
-            )
-        ) {
+        if (!$this->isCsrfTokenValid(
+            'sms-provider-activate-' . $provider->getId(),
+            is_string($token) ? $token : null
+        )) {
             throw $this->createAccessDeniedException('Invalid CSRF token.');
         }
 
@@ -227,12 +272,10 @@ class SMSProviderController extends AbstractController
     {
         $token = $request->request->get('_token');
 
-        if (
-            !$this->isCsrfTokenValid(
-                'sms-provider-deactivate-' . $provider->getId(),
-                is_string($token) ? $token : null
-            )
-        ) {
+        if (!$this->isCsrfTokenValid(
+            'sms-provider-deactivate-' . $provider->getId(),
+            is_string($token) ? $token : null
+        )) {
             throw $this->createAccessDeniedException('Invalid CSRF token.');
         }
 
@@ -242,8 +285,6 @@ class SMSProviderController extends AbstractController
         $setting = $this->settingRepository->findOneBy(['name' => SettingName::SMS_ACTIVE_PROVIDER->value]);
         $activeProviderName = $setting?->getValue();
 
-        // Only the provider that's actually active can be deactivated — guards against
-        // a stale page deactivating whatever happens to be active by the time this runs.
         if ($setting === null || $activeProviderName !== $provider->getName()) {
             $this->addFlash(
                 'error',
@@ -307,7 +348,6 @@ class SMSProviderController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_sms_providers');
         }
 
-        // Capture identifying info before removal, since the entity is gone from the DB after flush
         $deletedProviderName = $provider->getName();
 
         $this->entityManager->remove($provider);
@@ -401,8 +441,6 @@ class SMSProviderController extends AbstractController
             $this->entityManager->persist($param);
         }
 
-        // Anything left here belonged to a different provider type's fields
-        // (e.g. the type was switched on an existing record) — no longer needed.
         foreach ($existingParamsByType as $staleParam) {
             $provider->removeSmsProviderParam($staleParam);
             $this->entityManager->remove($staleParam);
@@ -410,11 +448,6 @@ class SMSProviderController extends AbstractController
     }
 
     /**
-     * Maps the DTO's named fields to (paramType => value) pairs for whichever
-     * provider type is selected. Adding a new provider type means adding a new
-     * match arm here, plus its own fields on the DTO/form/template — nothing
-     * else in this controller changes.
-     *
      * @return array<string, string>
      */
     private function buildParamValues(SMSProviderDTO $dto): array

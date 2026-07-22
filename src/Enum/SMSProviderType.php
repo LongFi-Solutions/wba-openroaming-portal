@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enum;
 
-use App\Service\SMSProvider\BudgetSMSProviderService;
+use App\Service\SMSProvider\BudgetSMS\BudgetSMSProviderService;
 use App\Service\SMSProvider\SMSProviderInterface;
 
 enum SMSProviderType: string

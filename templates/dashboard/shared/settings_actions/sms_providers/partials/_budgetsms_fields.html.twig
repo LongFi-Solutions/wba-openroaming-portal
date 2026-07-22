@@ -18,7 +18,7 @@
     </div>
     {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: 'budgetSmsUsernameHelp'|trans({}, '_sms')}) }}
     <div class="flex items-center space-x-2 mt-5">
-        {{ form_widget(form.username, {attr: {class: 'form-widget'}}) }}
+        {{ form_widget(form.username, {attr: {class: 'form-widget', 'data-sms-provider-test-target': 'username'}}) }}
     </div>
     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
         {{ form_errors(form.username) }}
@@ -30,7 +30,7 @@
      data-provider-type="budgetsms" {{ stimulus_controller('card') }}>
     <div class="flex flex-row justify-between">
         <div class="text-base font-medium text-center break-normal md:break-all">
-            <h1 class="text-base md:text-lg whitespace-nowrap">User ID</h1>
+            <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'userId'|trans({}, '_sms') }}</h1>
         </div>
         <label class="flex items-center bg-opacity-40">
             <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
@@ -40,7 +40,7 @@
     </div>
     {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: 'budgetSmsUseridHelp'|trans({}, '_sms')}) }}
     <div class="flex items-center space-x-2 mt-5">
-        {{ form_widget(form.userid, {attr: {class: 'form-widget'}}) }}
+        {{ form_widget(form.userid, {attr: {class: 'form-widget', 'data-sms-provider-test-target': 'userid'}}) }}
     </div>
     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
         {{ form_errors(form.userid) }}
@@ -62,7 +62,7 @@
     </div>
     {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: 'budgetSmsHandleHelp'|trans({}, '_sms')}) }}
     <div class="flex items-center space-x-2 mt-5">
-        {{ form_widget(form.handle, {attr: {class: 'form-widget'}}) }}
+        {{ form_widget(form.handle, {attr: {class: 'form-widget', 'data-sms-provider-test-target': 'handle'}}) }}
     </div>
     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
         {{ form_errors(form.handle) }}
@@ -84,9 +84,21 @@
     </div>
     {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: 'budgetSmsFromHelp'|trans({}, '_sms')}) }}
     <div class="flex items-center space-x-2 mt-5">
-        {{ form_widget(form.from, {attr: {class: 'form-widget'}}) }}
+        {{ form_widget(form.from, {attr: {class: 'form-widget', 'data-sms-provider-test-target': 'from'}}) }}
     </div>
     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
         {{ form_errors(form.from) }}
     </div>
+</div>
+
+{# Test Credentials #}
+<div class="lg:col-span-2 bg-white rounded-md p-6 w-full flex flex-col sm:flex-row items-start sm:items-center gap-4"
+     data-provider-type="budgetsms">
+    <button type="button"
+            data-sms-provider-test-target="button"
+            data-action="sms-provider-test#test"
+            class="btn-secondary whitespace-nowrap">
+        {{ 'testCredentials'|trans({}, '_sms') }}
+    </button>
+    <span data-sms-provider-test-target="result" class="hidden text-sm font-semibold"></span>
 </div>
