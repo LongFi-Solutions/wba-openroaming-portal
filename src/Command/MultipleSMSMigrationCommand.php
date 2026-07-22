@@ -28,7 +28,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 )]
 class MultipleSMSMigrationCommand extends Command
 {
-    private const string PROVIDER_NAME = 'BudgetSMS';
+    private const PROVIDER_NAME = 'BudgetSMS';
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
