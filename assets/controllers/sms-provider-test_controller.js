@@ -1,13 +1,19 @@
 import { Controller } from '@hotwired/stimulus';
 
-/*
- * Reads the currently entered provider-type + credential fields and POSTs
- * them to the test-connection endpoint, without needing anything saved
- * first. Displays the result (a real message from the provider's own API,
- * translated from their error code where possible) inline next to the button.
- */
 export default class extends Controller {
-    static targets = ['providerType', 'username', 'userid', 'handle', 'from', 'result', 'button'];
+    // ADD 'phoneCountry' AND 'phoneNumber' TO TARGETS
+    static targets = [
+        'providerType',
+        'username',
+        'userid',
+        'handle',
+        'from',
+        'phoneCountry',
+        'phoneNumber',
+        'result',
+        'button'
+    ];
+
     static values = {
         url: String,
         csrfToken: String,
@@ -27,6 +33,10 @@ export default class extends Controller {
         payload.set('userid', this.useridTarget.value);
         payload.set('handle', this.handleTarget.value);
         payload.set('from', this.fromTarget.value);
+
+        // SEND 'country' AND 'number' EXPECTED BY YOUR PHP CONTROLLER
+        payload.set('country', this.phoneCountryTarget.value);
+        payload.set('number', this.phoneNumberTarget.value);
 
         try {
             const response = await fetch(this.urlValue, {

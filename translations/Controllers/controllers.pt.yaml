@@ -210,3 +210,9 @@ SMSProviderDeletedSuccessfully: 'Fornecedor de SMS eliminado com sucesso.'
 cannotDeleteActiveSMSProvider: 'O fornecedor de SMS ativo não pode ser eliminado.'
 ProviderIsNotActive: 'Este fornecedor não está atualmente ativo.'
 SMSProviderDeactivatedSuccessfully: 'Fornecedor de SMS desativado com sucesso.'
+sms_provider_test:
+  invalid_csrf: "Token CSRF inválido."
+  unsupported_provider: "O teste ainda não é suportado para este tipo de fornecedor."
+  empty_phone_number: "Por favor, introduza um número de telefone para enviar o teste."
+  invalid_phone_number: "Esse número de telefone não parece ser válido."
+  unreachable_provider: "Não foi possível contactar o BudgetSMS: %error%"

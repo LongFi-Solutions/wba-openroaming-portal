@@ -15,13 +15,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
 #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_READ)]
 class SMSProviderTestConnectionController extends AbstractController
 {
     public function __construct(
-        private readonly BudgetSMSProviderService $budgetSMSProviderService
+        private readonly BudgetSMSProviderService $budgetSMSProviderService,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -42,7 +44,7 @@ class SMSProviderTestConnectionController extends AbstractController
         if (!$this->isCsrfTokenValid('sms-provider-test-connection', is_string($token) ? $token : null)) {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'Invalid CSRF token.',
+                'message' => $this->translator->trans('sms_provider_test.invalid_csrf', [], 'controllers'),
             ], Response::HTTP_FORBIDDEN);
         }
 
@@ -51,7 +53,7 @@ class SMSProviderTestConnectionController extends AbstractController
         if ($smsProviderTypeValue !== SMSProviderType::BUDGET_SMS->value) {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'Testing is not yet supported for this provider type.',
+                'message' => $this->translator->trans('sms_provider_test.unsupported_provider', [], 'controllers'),
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -68,7 +70,7 @@ class SMSProviderTestConnectionController extends AbstractController
         if ($nationalNumber === '') {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'Please enter a phone number to send the test to.',
+                'message' => $this->translator->trans('sms_provider_test.empty_phone_number', [], 'controllers'),
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -77,7 +79,7 @@ class SMSProviderTestConnectionController extends AbstractController
         } catch (NumberParseException) {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'That phone number doesn\'t look valid.',
+                'message' => $this->translator->trans('sms_provider_test.invalid_phone_number', [], 'controllers'),
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -86,7 +88,7 @@ class SMSProviderTestConnectionController extends AbstractController
         } catch (Throwable $e) {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'Could not reach BudgetSMS: ' . $e->getMessage(),
+                'message' => $this->translator->trans('sms_provider_test.unreachable_provider', ['%error%' => $e->getMessage()], 'controllers'),
             ], Response::HTTP_BAD_GATEWAY);
         }
 

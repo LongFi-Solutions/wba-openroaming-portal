@@ -36,7 +36,7 @@ final readonly class BudgetSMSProviderService implements SMSProviderInterface
      */
     public static function sendSMS(SMSProvider $provider, string $message, User $user): string
     {
-        $recipient = '+' . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber();
+        $recipient = $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber();
 
         $queryParams = array_merge(
             self::getProviderParams($provider),
@@ -70,18 +70,21 @@ final readonly class BudgetSMSProviderService implements SMSProviderInterface
         string $handle,
         string $from,
         PhoneNumber $to,
-        string $message = 'Test message from provider configuration',
+        string $message = 'Test message from provider configuration Openroaming Portal',
     ): BudgetSMSTestResult {
         $queryParams = [
             'username' => $username,
             'userid' => $userid,
             'handle' => $handle,
             'from' => $from,
-            'to' => PhoneNumberUtil::getInstance()->format($to, PhoneNumberFormat::E164),
+            'to' => ltrim(
+                PhoneNumberUtil::getInstance()->format($to, PhoneNumberFormat::E164),
+                '+'
+            ),
             'msg' => $message,
         ];
 
-        $apiUrl = self::LIVE_API_URL . '?' . http_build_query($queryParams);
+        $apiUrl = self::TEST_API_URL . '?' . http_build_query($queryParams);
 
         $client = HttpClient::create();
         $response = $client->request('GET', $apiUrl)->getContent();
