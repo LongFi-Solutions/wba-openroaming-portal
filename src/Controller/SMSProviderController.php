@@ -168,6 +168,15 @@ class SMSProviderController extends AbstractController
     #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
     public function activate(SMSProvider $provider, Request $request): Response
     {
+        if (
+            !$this->isCsrfTokenValid(
+                'sms-provider-activate-' . $provider->getId(),
+                $request->request->get('_token')
+            )
+        ) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
@@ -212,6 +221,15 @@ class SMSProviderController extends AbstractController
     #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
     public function deactivate(SMSProvider $provider, Request $request): Response
     {
+        if (
+            !$this->isCsrfTokenValid(
+                'sms-provider-deactivate-' . $provider->getId(),
+                $request->request->get('_token')
+            )
+        ) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
@@ -261,6 +279,15 @@ class SMSProviderController extends AbstractController
     #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
     public function delete(SMSProvider $provider, Request $request): Response
     {
+        if (
+            !$this->isCsrfTokenValid(
+                'sms-provider-delete-' . $provider->getId(),
+                $request->request->get('_token')
+            )
+        ) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
