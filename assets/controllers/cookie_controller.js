@@ -7,7 +7,6 @@ export default class extends Controller {
         // Initialize preferences without setting any cookies on the first page load
         this.cookieScopes = this.getCookiePreferences() || {
             rememberMe: false,
-            geolocation: false,
         };
 
         this.updateCheckboxes();
@@ -63,8 +62,6 @@ export default class extends Controller {
         this.setCookiePreferences();
         this.setCookiesAccepted();
 
-        this.handleGeolocationConsent();
-
         this.hideBanner();
     }
 
@@ -82,8 +79,6 @@ export default class extends Controller {
 
         this.setCookiePreferences();
 
-        this.handleGeolocationConsent();
-
         const allEnabled = Object.values(this.cookieScopes).every((val) => val === true);
         if (allEnabled) {
             this.setCookiesAccepted();
@@ -93,13 +88,6 @@ export default class extends Controller {
 
         this.closeModal();
         this.hideBanner();
-    }
-
-    handleGeolocationConsent() {
-        if (!this.cookieScopes.geolocation) {
-            document.cookie = 'user_lat=; path=/; max-age=0; Secure; SameSite=Strict';
-            document.cookie = 'user_lng=; path=/; max-age=0; Secure; SameSite=Strict';
-        }
     }
 
     updateCheckbox(scope, checked) {
