@@ -20,7 +20,7 @@ final readonly class BudgetSMSTestResult
 
     public static function failed(int $errorCode, ?string $rawMessage = null): self
     {
-        $mapped = BudgetSmsErrorCode::tryFrom($errorCode)?->getMessage();
+        $mapped = BudgetSmsErrorCode::tryFrom($errorCode)?->getTranslationKey();
 
         return new self(
             success: false,

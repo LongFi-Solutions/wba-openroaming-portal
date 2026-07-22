@@ -119,7 +119,7 @@ final readonly class BudgetSMSProviderService implements SMSProviderInterface
         );
     }
 
-    private function resolveApiUrl(SMSProvider $provider): string
+    private static function resolveApiUrl(SMSProvider $provider): string
     {
         return $provider->isTestMode() ? self::TEST_API_URL : self::LIVE_API_URL;
     }
@@ -128,7 +128,7 @@ final readonly class BudgetSMSProviderService implements SMSProviderInterface
      * @return array<string, mixed>
      * @throws \JsonException
      */
-    private function getProviderParams(SMSProvider $provider): array
+    private static function getProviderParams(SMSProvider $provider): array
     {
         $params = [];
         foreach ($provider->getSmsProviderParams() as $param) {
