@@ -19,11 +19,16 @@ class PemKeyMatchesCertificate extends Constraint
     public function __construct(
         public string $certificateField = 'client',
         public string $privateKeyField = 'key',
+        ?string $message = null,
         array $options = [],
         ?array $groups = null,
-        $payload = null
+        mixed $payload = null
     ) {
-        parent::__construct($options, $groups, $payload);
+        parent::__construct([], $groups, $payload);
+
+        $this->message = $message ?? $this->message;
+        $this->certificateField = $options['certificateField'] ?? $this->certificateField;
+        $this->privateKeyField = $options['privateKeyField'] ?? $this->privateKeyField;
     }
 
     #[\Override]
