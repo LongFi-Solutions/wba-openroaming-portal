@@ -1,6 +1,24 @@
 {# Section divider #}
-<div class="lg:col-span-2 mt-4 mb-2" data-provider-type="budgetsms">
+<div class="lg:col-span-2 mt-4 mb-2 flex items-center justify-between" data-provider-type="budgetsms">
     <h2 class="text-lg font-semibold text-gray-800">{{ 'budgetSmsConfiguration'|trans({}, '_sms') }}</h2>
+
+    {# Test Credentials #}
+    <div class="flex items-center gap-3" data-provider-type="budgetsms">
+        <span data-sms-provider-test-target="result"
+              class="hidden items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full">
+            <svg data-sms-provider-test-target="resultIcon"
+                 class="w-4 h-4 shrink-0"
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"></svg>
+            <span data-sms-provider-test-target="resultText"></span>
+        </span>
+
+        <button type="button"
+                data-sms-provider-test-target="button"
+                data-action="sms-provider-test#test"
+                class="btn-secondary whitespace-nowrap inline-flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed transition-opacity">
+            <span>{{ 'testCredentials'|trans({}, '_sms') }}</span>
+        </button>
+    </div>
 </div>
 
 {# Username #}
@@ -89,16 +107,4 @@
     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
         {{ form_errors(form.from) }}
     </div>
-</div>
-
-{# Test Credentials #}
-<div class="lg:col-span-2 bg-white rounded-md p-6 w-full flex flex-col sm:flex-row items-start sm:items-center gap-4"
-     data-provider-type="budgetsms">
-    <button type="button"
-            data-sms-provider-test-target="button"
-            data-action="sms-provider-test#test"
-            class="btn-secondary whitespace-nowrap">
-        {{ 'testCredentials'|trans({}, '_sms') }}
-    </button>
-    <span data-sms-provider-test-target="result" class="hidden text-sm font-semibold"></span>
 </div>

@@ -4,9 +4,13 @@
     {{ form_start(form) }}
     {{ form_errors(form) }}
 
-    <div class="p-2 z-0" {{ stimulus_controller('sms-provider-type') }}>
+    <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-2 p-2 z-0"
+            {{ stimulus_controller('sms-provider-type')|stimulus_controller('sms-provider-test', {
+                url: path('admin_dashboard_settings_sms_providers_test_connection'),
+                csrfToken: csrf_token('sms-provider-test-connection'),
+            }) }}>
 
-        <div class="mb-8 w-full" {{ stimulus_controller('card') }}>
+        <div class="mb-8 w-full lg:col-span-2" {{ stimulus_controller('card') }}>
             <div class="flex items-center gap-2 mb-2">
                 <label class="text-sm md:text-base font-semibold text-gray-800 break-words">
                     {{ 'smsProviderType'|trans({}, '_sms') }}
@@ -23,14 +27,18 @@
             </div>
 
             <div class="hidden">
-                {{ form_widget(form.smsProviderType) }}
+                {{ form_widget(form.smsProviderType, {
+                    attr: {
+                        'data-sms-provider-type-target': 'hiddenSelect',
+                        'data-sms-provider-test-target': 'providerType',
+                    },
+                }) }}
             </div>
 
             <div class="flex flex-row flex-wrap gap-4">
 
                 <label class="relative cursor-pointer group">
                     <input type="radio"
-                           name="{{ form.smsProviderType.vars.full_name }}"
                            value="budgetsms"
                            class="peer sr-only"
                            data-action="change->sms-provider-type#toggle"

@@ -1,20 +1,25 @@
 import { Controller } from '@hotwired/stimulus';
 
 /*
- * Shows only the [data-provider-type="X"] block matching the currently
- * selected smsProviderType, hiding the rest. Runs on connect (so the right
- * block is visible on page load / after a failed validation re-render) and
- * again whenever the select changes.
+ * The visible radio-cards are purely a UI proxy — they carry no `name` of
+ * their own. On change, this syncs the clicked radio's value into the real
+ * (hidden) Symfony-bound select, then shows only the [data-provider-type]
+ * block matching that value.
  */
 export default class extends Controller {
-    static targets = ['select'];
+    static targets = ['hiddenSelect'];
 
     connect() {
-        this.toggle();
+        this.applyVisibility();
     }
 
-    toggle() {
-        const selected = this.selectTarget.value;
+    toggle(event) {
+        this.hiddenSelectTarget.value = event.target.value;
+        this.applyVisibility();
+    }
+
+    applyVisibility() {
+        const selected = this.hiddenSelectTarget.value;
 
         this.element.querySelectorAll('[data-provider-type]').forEach((block) => {
             block.classList.toggle('hidden', block.dataset.providerType !== selected);

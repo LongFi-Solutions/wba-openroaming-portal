@@ -12,11 +12,17 @@ use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class BudgetSMSProviderService implements SMSProviderInterface
 {
     private const string LIVE_API_URL = 'https://api.budgetsms.net/sendsms/';
     private const string TEST_API_URL = 'https://api.budgetsms.net/testsms/';
+
+    public function __construct(
+        private readonly TranslatorInterface $translator,
+    ) {
+    }
 
     /**
      * @throws TransportExceptionInterface
@@ -56,7 +62,7 @@ final class BudgetSMSProviderService implements SMSProviderInterface
      * @throws RedirectionExceptionInterface
      * @throws ClientExceptionInterface
      */
-    public static function testCredentials(
+    public function testCredentials(
         string $username,
         string $userid,
         string $handle,
@@ -78,35 +84,41 @@ final class BudgetSMSProviderService implements SMSProviderInterface
         $client = HttpClient::create();
         $response = $client->request('GET', $apiUrl)->getContent();
 
-        return self::parseResponse($response);
+        return $this->parseResponse($response);
     }
 
     /**
      * BudgetSMS replies in plain text, not JSON — "OK <smsid>" on success,
      * "ERR <code>" on failure, per their HTTP API Specification.
      */
-    private static function parseResponse(string $response): BudgetSMSTestResult
+    private function parseResponse(string $response): BudgetSMSTestResult
     {
         $response = trim($response);
 
         if (str_starts_with($response, 'OK')) {
-            return new BudgetSMSTestResult(true, 'Credentials verified successfully.');
+            return new BudgetSMSTestResult(
+                true, $this->translator->trans('budgetSmsSuccess.credentialsVerified', [], '_sms')
+            );
         }
 
         if (preg_match('/ERR\s*(\d+)/', $response, $matches)) {
             $code = (int)$matches[1];
             $errorCode = BudgetSmsErrorCode::tryFrom($code);
 
-            return new BudgetSMSTestResult(
-                false,
-                $errorCode?->getMessage() ?? sprintf('Unknown BudgetSMS error code: %d', $code)
-            );
+            $message = $errorCode !== null
+                ? $this->translator->trans($errorCode->getTranslationKey(), [], '_sms')
+                : $this->translator->trans('budgetSmsError.unknownCode', ['%code%' => $code], '_sms');
+
+            return new BudgetSMSTestResult(false, $message, $code);
         }
 
-        return new BudgetSMSTestResult(false, 'Unexpected response from BudgetSMS: ' . $response);
+        return new BudgetSMSTestResult(
+            false,
+            $this->translator->trans('budgetSmsError.unexpectedResponse', ['%response%' => $response], '_sms')
+        );
     }
 
-    private static function resolveApiUrl(SMSProvider $provider): string
+    private function resolveApiUrl(SMSProvider $provider): string
     {
         return $provider->isTestMode() ? self::TEST_API_URL : self::LIVE_API_URL;
     }
@@ -115,7 +127,7 @@ final class BudgetSMSProviderService implements SMSProviderInterface
      * @return array<string, mixed>
      * @throws \JsonException
      */
-    private static function getProviderParams(SMSProvider $provider): array
+    private function getProviderParams(SMSProvider $provider): array
     {
         $params = [];
         foreach ($provider->getSmsProviderParams() as $param) {
@@ -124,7 +136,12 @@ final class BudgetSMSProviderService implements SMSProviderInterface
 
             $params[$param->getParamType()] = match ($type) {
                 ParamType::BOOLEAN => filter_var($value, FILTER_VALIDATE_BOOLEAN),
-                ParamType::JSON => json_decode((string) $value, true, 512, JSON_THROW_ON_ERROR) ?? [],
+                ParamType::JSON => json_decode(
+                    (string)$value,
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR
+                ) ?? [],
                 default => $value,
             };
         }

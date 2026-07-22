@@ -17,7 +17,6 @@ use App\Repository\SettingRepository;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
 use App\Service\GetSettings;
-use App\Service\SMSProvider\BudgetSMS\BudgetSMSProviderService;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -165,50 +164,6 @@ class SMSProviderController extends AbstractController
         ]);
     }
 
-    /**
-     * Validates provider credentials by making a real (but harmless) test
-     * request to the actual provider's API, before anything is saved.
-     */
-    #[Route(
-        '/dashboard/settings/sms/providers/test-connection',
-        name: 'admin_dashboard_settings_sms_providers_test_connection',
-        methods: ['POST']
-    )]
-    #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
-    public function testConnection(Request $request): JsonResponse
-    {
-        $token = $request->request->get('_token');
-
-        if (!$this->isCsrfTokenValid('sms-provider-test-connection', is_string($token) ? $token : null)) {
-            return new JsonResponse(['success' => false, 'message' => 'Invalid CSRF token.'], 403);
-        }
-
-        $smsProviderTypeValue = $request->request->get('smsProviderType');
-
-        if ($smsProviderTypeValue !== SMSProviderType::BUDGET_SMS->value) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Testing is not yet supported for this provider type.',
-            ], 400);
-        }
-
-        $username = (string)$request->request->get('username', '');
-        $userid = (string)$request->request->get('userid', '');
-        $handle = (string)$request->request->get('handle', '');
-        $from = (string)$request->request->get('from', '');
-
-        try {
-            $result = BudgetSMSProviderService::testCredentials($username, $userid, $handle, $from);
-        } catch (Throwable $e) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Could not reach BudgetSMS: ' . $e->getMessage(),
-            ], 502);
-        }
-
-        return new JsonResponse(['success' => $result->success, 'message' => $result->message]);
-    }
-
     #[Route(
         '/dashboard/settings/sms/providers/{id}/activate',
         name: 'admin_dashboard_settings_sms_providers_activate',
@@ -328,7 +283,11 @@ class SMSProviderController extends AbstractController
     {
         $token = $request->request->get('_token');
 
-        if (!$this->isCsrfTokenValid('sms-provider-delete-' . $provider->getId(), is_string($token) ? $token : null)) {
+        if (!$this->isCsrfTokenValid(
+            'sms-provider-delete-' .
+            $provider->getId(),
+            is_string($token) ? $token : null
+        )) {
             throw $this->createAccessDeniedException('Invalid CSRF token.');
         }
 
