@@ -27,7 +27,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 )]
 class MultipleSMSMigrationCommand extends Command
 {
-    private const PROVIDER_NAME = 'BudgetSMS';
+    private const string PROVIDER_NAME = 'BudgetSMS';
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
