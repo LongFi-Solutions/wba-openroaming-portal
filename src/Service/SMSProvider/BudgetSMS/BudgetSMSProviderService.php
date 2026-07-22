@@ -97,7 +97,8 @@ final class BudgetSMSProviderService implements SMSProviderInterface
 
         if (str_starts_with($response, 'OK')) {
             return new BudgetSMSTestResult(
-                true, $this->translator->trans('budgetSmsSuccess.credentialsVerified', [], '_sms')
+                true,
+                $this->translator->trans('budgetSmsSuccess.credentialsVerified', [], '_sms')
             );
         }
 
