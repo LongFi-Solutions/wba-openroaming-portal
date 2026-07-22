@@ -11,7 +11,7 @@ export default class extends Controller {
         'phoneCountry',
         'phoneNumber',
         'result',
-        'button'
+        'button',
     ];
 
     static values = {
