@@ -168,6 +168,21 @@ class MapExportController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_map_network_list');
         }
 
+        $allowedMimeTypes = [
+            'text/csv',
+            'text/plain',
+            'application/csv',
+            'text/x-csv',
+            'application/vnd.ms-excel',
+        ];
+
+        $mimeType = $file->getMimeType();
+
+        if (!in_array($mimeType, $allowedMimeTypes, true)) {
+            $this->addFlash('error', $this->translator->trans('importErrorInvalidMimeType', [], 'controllers'));
+            return $this->redirectToRoute('admin_dashboard_map_network_list');
+        }
+
         $realPath = $file->getRealPath();
         if ($realPath === false || !is_readable($realPath)) {
             $this->addFlash('error', $this->translator->trans('importErrorNotReadable', [], 'controllers'));

@@ -220,3 +220,4 @@ importErrorInvalidStructure: 'Invalid CSV structure. The column "network_name" i
 importSuccess: 'Import successful! Processed %d networks and imported/updated %d Access Points.'
 importErrorGeneral: 'An error occurred during import: %s'
 mapSettingsAppliedSuccessfully: 'Map settings applied successfully!'
+importErrorInvalidMimeType: 'The file content is not a valid CSV (invalid MIME type).'
