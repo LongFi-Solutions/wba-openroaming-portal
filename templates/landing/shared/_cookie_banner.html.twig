@@ -216,107 +216,34 @@
                                             -
                                             {{ 'rememberMeCookie.description'|trans({}, '_cookie_banner') }}
                                             <span>
-                    <br>
-                    {{ 'controlledBy'|trans({}, '_cookie_banner') }}:
-                    <a class="underline text-primary font-semibold"
-                       href="{{ absolute_url(path('app_landing')) }}">
-                        {{ app.request.getHost() }}
-                    </a>
-                    </span>
-                                    <br>
-                                    <p>
-                                        <a href="{{ path('app_privacy_policy') }}"
-                                           class="underline text-primary"
-                                           target="_blank">
-                                            {{ 'privacyPolicy'|trans({}, '_cookie_banner') }}
-                                        </a>
-                                    </p>
-                                </div>
-                                <div>
-                                    <label class="inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" class="sr-only peer" data-scope="rememberMe">
-                                        <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
-                                    </label>
-                                </div>
-                            </div>
-                        </li>
-
-                        {# Analytics Cookies Section
-                        <div class="flex flex-col space-y-3">
-                            <h3 class="font-semibold">Preferences Cookies</h3>
-                            <p class="text-sm">
-                                These cookies help save your preferences and provide a personalized experience on our
-                                platform.
-                            </p>
-                            <ul class="list-disc list-inside text-sm">
-                                <li class="flex justify-between items-center">
-                                    <div>
-                                        <strong>Terms & Policies</strong> - We use these cookies to track user consent
-                                        and
-                                        interactions with our platform.
-                                        <a href="{{ data.PRIVACY_POLICY_LINK.value }}"
-                                           class="underline text-primary font-semibold" target="_blank">Privacy
-                                            Policy</a>
-                                        and
-                                        <a href="{{ data.TOS_LINK.value }}"
-                                           class="underline text-primary font-semibold" target="_blank">Terms &
-                                            Conditions</a>.
+                                                <br>
+                                                {{ 'controlledBy'|trans({}, '_cookie_banner') }}:
+                                                <a class="underline text-primary font-semibold"
+                                                   href="{{ absolute_url(path('app_landing')) }}">
+                                                    {{ app.request.getHost() }}
+                                                </a>
+                                            </span>
+                                            <br>
+                                            <p>
+                                                <a href="{{ path('app_privacy_policy') }}"
+                                                   class="underline text-primary"
+                                                   target="_blank">
+                                                    {{ 'privacyPolicy'|trans({}, '_cookie_banner') }}
+                                                </a>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" class="sr-only peer" data-scope="rememberMe">
+                                                <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                                            </label>
+                                        </div>
                                     </div>
-                                    <label class="mb-4 inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" class="sr-only peer" data-scope="terms">
-                                        <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
-                                    </label>
                                 </li>
                             </ul>
                         </div>
+                    </div>
 
-                    <div class="flex flex-col space-y-3">
-                        <h3 class="font-semibold">Analytics Cookies</h3>
-                        <p class="text-sm">
-                            These cookies help us understand how our platform is used.
-                        </p>
-                        <ul class="list-disc list-inside text-sm">
-                            <li class="flex justify-between items-center">
-                                <div>
-                                    <strong>Google Analytics</strong> - Tracks user interactions on the platform.
-                                    Controlled by:
-                                    <a href="https://policies.google.com/privacy"
-                                       class="underline text-primary font-semibold" target="_blank">Google Privacy
-                                        Policy</a>.
-                                </div>
-                                <label class="inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" class="sr-only peer" data-scope="analytics">
-                                    <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
-                                </label>
-                            </li>
-                        </ul>
-                    </div>
-                        #}
-
-                        {# Marketing Cookies Section - Commented for later if needed
-                    <div class="flex flex-col space-y-3">
-                        <h3 class="font-semibold">Marketing Cookies</h3>
-                        <p class="text-sm">
-                            These cookies are used for advertising and marketing purposes.
-                        </p>
-                        <ul class="list-disc list-inside text-sm">
-                            <li class="flex justify-between items-center">
-                                <div>
-                                    <strong>Facebook Pixel</strong> - Tracks user behavior for targeted advertising.
-                                    Controlled by:
-                                    <a href="https://www.facebook.com/policy.php"
-                                       class="underline text-primary font-semibold" target="_blank">Facebook Privacy
-                                        Policy</a>.
-                                </div>
-                                <label class="inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" class="sr-only peer" data-scope="marketing">
-                                    <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
-                                </label>
-                            </li>
-                        </ul>
-                    </div>
-                        #}
-                    </div>
                     {# Apply Cookies #}
                     <div class="mt-10">
                         <div class="md:flex md:justify-between justify-cente items-centerr">
@@ -348,9 +275,8 @@
             <span class="text-sm text-[#707070]">{{ 'manage'|trans({}, '_cookie_banner') }}</span>
             <button id="modalManageCookies" type="button" data-action="cookie#showModal"
                     class="flex items-center duration-300 cursor-pointer rounded-full text-[#707070] focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
-                <twig:ux:icon name="wba:cookie" class="stroke-current" />
+                <twig:ux:icon name="wba:cookie" class="stroke-current"/>
             </button>
         </div>
     </div>
-</div>
 </div>
