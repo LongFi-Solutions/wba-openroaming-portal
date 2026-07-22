@@ -172,10 +172,12 @@ class SMSProviderController extends AbstractController
     {
         $token = $request->request->get('_token');
 
-        if (!$this->isCsrfTokenValid(
-            'sms-provider-activate-' . $provider->getId(),
-            is_string($token) ? $token : null
-        )) {
+        if (
+            !$this->isCsrfTokenValid(
+                'sms-provider-activate-' . $provider->getId(),
+                is_string($token) ? $token : null
+            )
+        ) {
             throw $this->createAccessDeniedException('Invalid CSRF token.');
         }
 
@@ -225,10 +227,12 @@ class SMSProviderController extends AbstractController
     {
         $token = $request->request->get('_token');
 
-        if (!$this->isCsrfTokenValid(
-            'sms-provider-deactivate-' . $provider->getId(),
-            is_string($token) ? $token : null
-        )) {
+        if (
+            !$this->isCsrfTokenValid(
+                'sms-provider-deactivate-' . $provider->getId(),
+                is_string($token) ? $token : null
+            )
+        ) {
             throw $this->createAccessDeniedException('Invalid CSRF token.');
         }
 
