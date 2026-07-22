@@ -13,8 +13,8 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 final class BudgetSMSProviderService implements SMSProviderInterface
 {
-    private const LIVE_API_URL = 'https://api.budgetsms.net/sendsms/';
-    private const TEST_API_URL = 'https://api.budgetsms.net/testsms/';
+    private const string LIVE_API_URL = 'https://api.budgetsms.net/sendsms/';
+    private const string TEST_API_URL = 'https://api.budgetsms.net/testsms/';
 
     /**
      * @throws TransportExceptionInterface
