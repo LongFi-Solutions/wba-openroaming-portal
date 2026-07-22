@@ -4,6 +4,8 @@ namespace App\Command;
 
 use App\Entity\Setting;
 use App\Entity\SettingTranslation;
+use App\Entity\SMSProvider;
+use App\Entity\SMSProviderParam;
 use App\Enum\LanguageType;
 use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
@@ -163,10 +165,6 @@ class ResetAllSettingsCommand extends Command
             ['name' => SettingName::CAPPORT_PORTAL_URL->value, 'value' => 'https://example.com/'],
             ['name' => SettingName::CAPPORT_VENUE_INFO_URL->value, 'value' => 'https://openroaming.org/'],
 
-            ['name' => SettingName::SMS_USERNAME->value, 'value' => ''],
-            ['name' => SettingName::SMS_USER_ID->value, 'value' => ''],
-            ['name' => SettingName::SMS_HANDLE->value, 'value' => ''],
-            ['name' => SettingName::SMS_FROM->value, 'value' => 'OpenRoaming'],
             ['name' => SettingName::SMS_TIMER_RESEND->value, 'value' => '5'],
             ['name' => SettingName::USER_DELETE_TIME->value, 'value' => '5'],
             ['name' => SettingName::TIME_INTERVAL_NOTIFICATION->value, 'value' => '7'],
@@ -335,6 +333,9 @@ class ResetAllSettingsCommand extends Command
         $this->entityManager->beginTransaction();
 
         try {
+            $this->entityManager->createQuery('DELETE FROM ' . SMSProviderParam::class)->execute();
+            $this->entityManager->createQuery('DELETE FROM ' . SMSProvider::class)->execute();
+
             $settingsRepository = $this->entityManager->getRepository(Setting::class);
             $translationsRepository = $this->entityManager->getRepository(SettingTranslation::class);
 

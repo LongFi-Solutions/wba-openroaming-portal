@@ -94,6 +94,9 @@ invalidIosTeamId: "Please enter a valid iOS TEAM identifier (e.g., ABC123DEF9)."
 invalidIosBundleId: "Please enter a valid iOS bundle identifier (e.g., com.example.app)."
 invalidSha256Fingerprint: "Please enter a valid SHA-256 fingerprint (format: XX:XX:...:XX)."
 atLeastOneFingerprint: "Please provide at least one fingerprint."
+valueMustBeValidJson: 'Value must be valid JSON.'
+valueMustBeValidBoolean: 'Value must be true, false, 1 or 0.'
+valueMustBeValidXml: 'Value must be valid XML.'
 polygonWarningMessage: 'The drawn area must enclose all existing access points (The point "%s" is outside the area!).'
 polygonWarningMessageMultiple: 'The drawn area must enclose all existing access points (The points "%s" are outside the area!).'
 invalidMacAddressFormat: "The entered MAC address is invalid. Please use the format AA:BB:CC:11:22:33 or AA-BB-CC-11-22-33."
