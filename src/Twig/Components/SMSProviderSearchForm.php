@@ -144,14 +144,12 @@ class SMSProviderSearchForm
                     $providers,
                     static fn (SMSProvider $provider): bool =>
                         str_contains(mb_strtolower($provider->getName() ?? ''), $needle)
-                        || str_contains(mb_strtolower($provider->getAddress() ?? ''), $needle)
                 ));
             }
 
             usort($providers, function (SMSProvider $a, SMSProvider $b): int {
                 $result = match ($this->sort) {
                     'name' => strcmp($a->getName() ?? '', $b->getName() ?? ''),
-                    'address' => strcmp($a->getAddress() ?? '', $b->getAddress() ?? ''),
                     default => $a->getCreatedAt() <=> $b->getCreatedAt(),
                 };
 
