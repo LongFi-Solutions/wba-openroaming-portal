@@ -38,6 +38,8 @@ enum AnalyticalEventType: string
     case SETTING_PLATFORM_2FA_REQUEST = 'SETTING_PLATFORM_2FA_REQUEST';
     case SETTING_PLATFORM_2FA_RESET_REQUEST = 'SETTING_PLATFORM_2FA_RESET_REQUEST';
     case SETTING_TERMS_REQUEST = 'SETTING_TERMS_REQUEST';
+
+    case SETTING_MAP_REQUEST = 'SETTINGS_MAP_REQUEST';
     case SETTING_TERMS_RESET_REQUEST = 'SETTING_TERMS_RESET_REQUEST';
     case SETTING_RADIUS_CONF_REQUEST = 'SETTING_RADIUS_CONF_REQUEST';
     case SETTING_RADIUS_CONF_RESET_REQUEST = 'SETTING_RADIUS_CONF_RESET_REQUEST';
@@ -302,6 +304,7 @@ enum AnalyticalEventType: string
             self::BREAKING_GLASS_ACCOUNT_GENERATION => 'Breaking Glass Account Generation',
             self::BREAKING_GLASS_ACCOUNT_RESET => 'Breaking Glass Account Reset',
             self::EXPORT_ACTIVITY_LOGS_REQUEST => 'Export Activity Logs Request',
+            self::SETTING_MAP_REQUEST => 'Settings Map Request',
         };
     }
 }

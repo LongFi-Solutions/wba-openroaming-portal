@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repository;
 
 use App\Entity\AccessPoint;
 use App\Entity\Network;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\Query\ResultSetMapping;
+use Doctrine\DBAL\Exception;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -35,40 +38,176 @@ class AccessPointRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return AccessPoint[]
+     * Searches for Networks based on provided filter and optional search term.
+     *
      */
-    public function findByNetwork(Network $network): array
-    {
-        return $this->createQueryBuilder('ap')
-            ->andWhere('ap.network = :network')
+    public function searchWithFilter(
+        string $sort,
+        string $order,
+        ?string $query,
+        int $page,
+        int $count,
+        Network $network,
+    ): QueryBuilder {
+        $qb = $this->createQueryBuilder('n')
+            ->orderBy('n.' . $sort, $order)
+            ->Where('n.network = :network')
             ->setParameter('network', $network)
-            ->orderBy('ap.name', 'ASC')
-            ->getQuery()
-            ->getResult();
+            ->setFirstResult(($page - 1) * $count)
+            ->setMaxResults($count);
+
+        if ($query !== null) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->like('n.name', ':query'),
+                )
+            )->setParameter('query', '%' . $query . '%');
+        }
+
+        return $qb;
     }
 
     /**
-     * @throws \JsonException
-     * @return AccessPoint[]
+     * @return array<int, array{
+     * id: int|string,
+     * network_id: int|string,
+     * name: string|null,
+     * ssid: string|null,
+     * macAddress: string|null,
+     * vendor: string|null,
+     * model: string|null,
+     * standard: string|null,
+     * serialNumber: string|null,
+     * altitudeMsl: float|string|null,
+     * altitudeAgl: float|string|null,
+     * createdAt: string,
+     * updatedAt: string,
+     * lat: float|string,
+     * lng: float|string
+     * }>
+     * @throws Exception
      */
-    public function findWithinRadius(float $lat, float $lng, float $radiusKm): array
+    public function findIntersectingBbox(float $minLat, float $minLng, float $maxLat, float $maxLng): array
     {
-        return $this->getEntityManager()->createNativeQuery(
-            'SELECT * FROM AccessPoint
-         WHERE ST_Distance_Sphere(
-             ST_GeomFromGeoJSON(location),
-             ST_GeomFromGeoJSON(:point)
-         ) <= :radius',
-            new ResultSetMapping()
-        )
-            ->setParameter(
-                'point',
-                json_encode([
-                    'type' => 'Point',
-                    'coordinates' => [$lng, $lat]
-                ], JSON_THROW_ON_ERROR)
-            )
-            ->setParameter('radius', $radiusKm * 1000)
-            ->getResult();
+        $conn = $this->getEntityManager()->getConnection();
+
+        $bboxWkt = sprintf(
+            'POLYGON((%1$F %2$F, %1$F %4$F, %3$F %4$F, %3$F %2$F, %1$F %2$F))',
+            $minLat,
+            $minLng,
+            $maxLat,
+            $maxLng
+        );
+
+        $sql = '
+            SELECT 
+                id, 
+                name, 
+                ssid, 
+                mac_address AS macAddress,
+                vendor,
+                model,
+                standard,
+                serial_number AS serialNumber,
+                ST_Y(location) AS lng, 
+                ST_X(location) AS lat 
+            FROM `AccessPoint`
+            WHERE MBRContains(ST_GeomFromText(:bboxWkt, 4326), location)
+        ';
+
+        $results = $conn->fetchAllAssociative($sql, ['bboxWkt' => $bboxWkt]);
+
+        /** @var array<int, array{
+         * id: int|string,
+         * network_id: int|string,
+         * name: string|null,
+         * ssid: string|null,
+         * macAddress: string|null,
+         * vendor: string|null,
+         * model: string|null,
+         * standard: string|null,
+         * serialNumber: string|null,
+         * altitudeMsl: float|string|null,
+         * altitudeAgl: float|string|null,
+         * createdAt: string,
+         * updatedAt: string,
+         * lat: float|string,
+         * lng: float|string
+         * }> $results
+         */
+        return $results;
+    }
+
+    /**
+     * @return array<int, array{
+     *     id: int|string,
+     *     name: string|null,
+     *     ssid: string|null,
+     *     lat: float|string,
+     *     lng: float|string
+     * }>
+     */
+    public function findByNetworkWithCoordinates(Network $network): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = '
+                SELECT 
+                    id, 
+                    name, 
+                    ssid, 
+                    ST_Y(location) AS lng, 
+                    ST_X(location) AS lat 
+                FROM AccessPoint
+                WHERE network_id = :networkId 
+                  AND location IS NOT NULL
+            ';
+
+        $results = $conn->fetchAllAssociative($sql, [
+            'networkId' => $network->getId()
+        ]);
+
+        /** @var array<int, array{
+         *     id: int|string,
+         *     name: string|null,
+         *     ssid: string|null,
+         *     lat: float|string,
+         *     lng: float|string
+         * }> $results
+         */
+        return $results;
+    }
+
+    /**
+     * @param array<int> $ids
+     * @return array<int, array{lat: float, lng: float}>
+     * @throws Exception
+     */
+    public function findCoordinatesByIds(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        $conn = $this->getEntityManager()->getConnection();
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+        $sql = "SELECT id, ST_X(location) as lng, ST_Y(location) as lat
+            FROM AccessPoint
+            WHERE id IN ($placeholders)
+              AND location IS NOT NULL";
+
+        $rows = $conn->executeQuery($sql, $ids)->fetchAllAssociative();
+
+        $coordMap = [];
+        foreach ($rows as $row) {
+            $coordMap[(int) $row['id']] = [
+                'lat' => (float) $row['lat'],
+                'lng' => (float) $row['lng'],
+            ];
+        }
+
+        return $coordMap;
     }
 }

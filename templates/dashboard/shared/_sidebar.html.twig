@@ -47,6 +47,19 @@
             'admin_dashboard_statistics',
             'admin_dashboard_statistics_freeradius',
         ] %}
+        {% set mapViewRoutes = ['admin_dashboard_map'] %}
+        {% set mapSettingsRoutes = ['admin_dashboard_map_settings'] %}
+        {% set mapManagementRoutes = [
+            'admin_dashboard_map_networks',
+            'admin_dashboard_map_network_create',
+            'admin_dashboard_map_network_delete',
+            'admin_dashboard_map_network_edit',
+            'admin_dashboard_map_accessPoints',
+            'admin_dashboard_map_accessPoint_create',
+            'admin_dashboard_map_accessPoint_edit',
+            'admin_dashboard_map_accessPoint_delete',
+        ] %}
+        {% set mapRoutes = mapViewRoutes|merge(mapManagementRoutes)|merge(mapSettingsRoutes) %}
 
         {# User Management - Submenu #}
         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USER_MANAGEMENT')) %}
@@ -206,6 +219,57 @@
                         {# SideBar Button - Freeradius Statistics - Button #}
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::CONNECTIVITY_STATISTICS_READ')) %}
                             {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'connectivityStatistics'|trans({}, '_header_admin'), routes: ['admin_dashboard_statistics_freeradius'], icon: 'wba:hdd'}) }}
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+
+        {# Map - Submenu #}
+        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP')) %}
+            <div class="relative" {{ stimulus_controller('nav-submenu') }}>
+                <button type="button" class="w-full duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
+            {% if app.request.attributes.get('_route') in mapRoutes %}selected{% endif %}"
+                        {{ stimulus_action('nav-submenu', 'toggle') }}>
+                    <div class="flex items-center space-x-2">
+                        <twig:ux:icon name="wba:access-point" class="w-5 mr-2 fill-none stroke-current"/>
+                        {{ 'networksAndAccessPoints'|trans({}, '_header_admin') }}
+                    </div>
+
+                    <twig:ux:icon name="wba:right"
+                                  class="w-4 fill-none stroke-current transition ease-in {{ (app.request.attributes.get('_route') in mapRoutes) ? 'rotate-90' : '' }}"
+                                  data-nav-submenu-target="icon"/>
+                </button>
+                <div {{ stimulus_target('nav-submenu', 'container') }}
+                        class="py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in mapRoutes) ? '' : 'hidden' }}">
+                    <ul class="mx-2">
+                        {# SideBar Button - Map View #}
+                        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP_READ')) %}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {
+                                label: 'mapView'|trans({}, '_header_admin'),
+                                routes: mapViewRoutes,
+                                icon: 'wba:map-outline',
+                                iconClass: 'fill-current stroke-none',
+                            }) }}
+                        {% endif %}
+
+                        {# SideBar Button - Network Management #}
+                        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP_READ')) %}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {
+                                label: 'networkManagement'|trans({}, '_header_admin'),
+                                routes: mapManagementRoutes,
+                                icon: 'wba:table',
+                                iconClass: 'fill-current stroke-none',
+                            }) }}
+                        {% endif %}
+                        {# SideBar Button - Network Management #}
+                        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP_READ')) %}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {
+                                label: 'mapSettings'|trans({}, '_header_admin'),
+                                routes: mapSettingsRoutes,
+                                icon: 'wba:cog',
+                                iconClass: 'w-5 mr-2 fill-none stroke-current',
+                            }) }}
                         {% endif %}
                     </ul>
                 </div>

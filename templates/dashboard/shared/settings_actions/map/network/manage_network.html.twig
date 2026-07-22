@@ -1,0 +1,202 @@
+{% extends '/dashboard/base.html.twig' %}
+
+{% block container %}
+
+    <twig:ManageNetworksForm
+            :networkDTO="networkDTO"
+            :data="data"
+            :form="form"
+            :network="network"
+    >
+
+        <div class="p-6 bg-white rounded-lg shadow-sm"
+             data-controller="network-polygon map-geolocation"
+             data-network-polygon-tooltip-value="{{ 'deletePolygonTooltip'|trans({}, '_map') }}"
+             data-network-polygon-empty-label-value="{{ 'coverageOverviewEmpty'|trans({}, '_map') }}"
+             data-network-polygon-type-labels-value="{{ {
+                 polygon: 'polygon'|trans({}, '_map'),
+                 square: 'rectangle'|trans({}, '_map'),
+                 circle: 'circle'|trans({}, '_map'),
+                 area: 'genericArea'|trans({}, '_map'),
+             }|json_encode }}"
+             data-network-polygon-area-item-label-value="{{ 'coverageAreaItemLabel'|trans({}, '_map') }}"
+             data-network-polygon-intersection-close-error-value="{{ 'intersectionCloseError'|trans({}, '_map') }}"
+             data-network-polygon-intersection-segment-error-value="{{ 'intersectionSegmentError'|trans({}, '_map') }}">
+
+            {{ form_start(form) }}
+
+            {{ form_widget(form.geometryJson, {attr: {'data-network-polygon-target': 'geometryJson'}}) }}
+
+            {# IDENTIFICATION #}
+            <div class="mb-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-green-600 tracking-wide">
+                            {{ 'identification'|trans({}, '_map') }}
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-1">
+                            {{ 'identificationDescription'|trans({}, '_map') }}
+                        </p>
+                    </div>
+                    <div>
+                        {% if network %}
+                            <a href="{{ path('admin_dashboard_map_network_accessPoints', {id: network.id}) }}"
+                               class="btn-primary flex items-center justify-center gap-1.5">
+                                <twig:ux:icon name="wba:wifi" class="w-3.5 h-3.5 fill-none stroke-current" />
+                                {{ 'editAPs'|trans({}, '_map') }}
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                    {# NAME #}
+                    <div class="relative">
+                        {{ form_label(form.name, 'networkName'|trans({}, '_map'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.name, {attr: {class: 'form-widget', placeholder: 'networkNamePlaceHolder'|trans({}, '_map')}}) }}
+                        <p class="text-xs text-gray-400 mt-1">
+                            {{ 'networkNameHelp'|trans({}, '_map') }}
+                        </p>
+                        <div class="text-red-500 m-2 text-sm">
+                            {{ form_errors(form.name) }}
+                        </div>
+                    </div>
+
+                    {# DESCRIPTION #}
+                    <div class="relative">
+                        {{ form_label(form.description, 'networkDescription'|trans({}, '_map'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.description, {attr: {
+                            class: 'form-widget min-h-[80px]',
+                            rows: '3',
+                            placeholder: 'networkDescriptionPlaceHolder'|trans({}, '_map'),
+                        }}) }}
+                        <p class="text-xs text-gray-400 mt-1">
+                            {{ 'networkDescriptionHelp'|trans({}, '_map') }}
+                        </p>
+                        <div class="text-red-500 m-2 text-sm">
+                            {{ form_errors(form.description) }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <hr class="border-gray-100 mb-8">
+
+            {# COVERAGE AREA #}
+            <div>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-green-600 tracking-wide">
+                            {{ 'coverageArea'|trans({}, '_map') }}
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-1">
+                            {{ 'drawPolygonDescription'|trans({}, '_map') }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="relative z-0 overflow-hidden w-full h-[500px] rounded-2xl coverage-map-public">
+                    {{ ux_map(this.map, {
+                        style: 'height: 100%; width: 100%;',
+                        'data-action': 'ux:map:connect->map-geolocation#_onConnect ux:map:connect->network-polygon#_onConnect',
+                    }) }}
+                </div>
+
+                {# BUTTONS TOOLBAR #}
+                <div class="relative flex flex-col sm:flex-row items-center justify-center w-full mt-4 gap-3 sm:gap-0">
+
+                    {# Centered Group (Polygon, Rectangle, Circle) #}
+                    <div class="flex gap-2">
+                        <!-- Polygon Button (selected by default: matches drawMode='polygon' in connect()) -->
+                        <button type="button"
+                                data-action="click->network-polygon#setMode"
+                                data-network-polygon-mode-param="polygon"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition focus:ring-blue-500 border-blue-500 bg-blue-50 text-blue-600">
+                            <twig:ux:icon name="wba:polygon" class="w-3.5 h-3.5 fill-none stroke-current" />
+                            {{ 'polygon'|trans({}, '_map') }}
+                        </button>
+
+                        <!-- Rectangle Button -->
+                        <button type="button"
+                                data-action="click->network-polygon#setMode"
+                                data-network-polygon-mode-param="square"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition focus:ring-blue-500 bg-white border-gray-200 text-gray-500 hover:bg-gray-50">
+                            <twig:ux:icon name="wba:rectangle" class="w-3.5 h-3.5 fill-current stroke-none" />
+                            {{ 'rectangle'|trans({}, '_map') }}
+                        </button>
+
+                        <!-- Circle Button -->
+                        <button type="button"
+                                data-action="click->network-polygon#setMode"
+                                data-network-polygon-mode-param="circle"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition focus:ring-blue-500 bg-white border-gray-200 text-gray-500 hover:bg-gray-50">
+                            <twig:ux:icon name="wba:circle-outline" class="w-3.5 h-3.5 fill-none stroke-current" />
+                            {{ 'circle'|trans({}, '_map') }}
+                        </button>
+                    </div>
+
+                    {# Far Right Aligned Group (Clear) #}
+                    <div class="sm:absolute right-0">
+                        <button type="button" data-action="click->network-polygon#resetPolygon"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition">
+                            <twig:ux:icon name="wba:trash" class="w-3.5 h-3.5 fill-none stroke-current" />
+                            {{ 'clean'|trans({}, '_map') }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-red-500 m-2 text-sm">
+                    {{ form_errors(form.geometryJson) }}
+
+                    {% for error in form.vars.errors %}
+                        {% if error.cause is defined and error.cause is not null %}
+                            {% if error.cause.propertyPath is defined and error.cause.propertyPath == 'data.geometryJson' %}
+                                <p>{{ error.message }}</p>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                {# COVERAGE OVERVIEW #}
+                <div class="mt-8">
+                    <h4 class="text-lg font-semibold text-gray-700">
+                        {{ 'coverageOverview'|trans({}, '_map') }}
+                    </h4>
+                    <p class="text-xs text-gray-400 mt-1 mb-3">
+                        {{ 'coverageOverviewDescription'|trans({}, '_map') }}
+                    </p>
+
+                    {# Empty State Container #}
+                    <div data-network-polygon-target="emptyState"
+                         class="bg-gray-50 rounded-lg border border-dashed border-gray-200 p-6 text-center text-sm text-gray-400">
+                        {{ 'coverageOverviewEmpty'|trans({}, '_map') }}
+                    </div>
+
+                    {# Coverage List Container (Active shapes will be injected here) #}
+                    <div data-network-polygon-target="coverageList" class="space-y-2"></div>
+                </div>
+            </div>
+
+            {# ACTION BUTTONS #}
+            <div class="flex flex-row justify-end gap-4 md:w-full mt-8 pt-4 border-t border-gray-100">
+                <a href="{{ path('admin_dashboard_map') }}" class="btn-secondary flex items-center justify-center">
+                    {{ 'cancel'|trans({}, '_map') }}
+                </a>
+                <button type="submit" class="btn-primary">
+                    {% if network %}
+                        {{ 'saveChanges'|trans({}, '_map') }}
+                    {% else %}
+                        {{ 'createNetwork'|trans({}, '_map') }}
+                    {% endif %}
+                </button>
+            </div>
+
+            {{ form_rest(form) }}
+            {{ form_end(form) }}
+        </div>
+
+    </twig:ManageNetworksForm>
+
+{% endblock %}
