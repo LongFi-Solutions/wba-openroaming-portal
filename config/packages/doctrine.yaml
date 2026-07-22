@@ -9,7 +9,7 @@ doctrine:
                 server_version: '8.0.44'
                 mapping_types:
                     geometry: revisor_geometry
-                    point: string
+                    point: point
             freeradius:
                 url: '%env(resolve:DATABASE_FREERADIUS_URL)%'
                 server_version: '8.0.44'
