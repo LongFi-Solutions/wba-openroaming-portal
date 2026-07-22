@@ -84,7 +84,7 @@ final readonly class BudgetSMSProviderService implements SMSProviderInterface
             'msg' => $message,
         ];
 
-        $apiUrl = self::TEST_API_URL . '?' . http_build_query($queryParams);
+        $apiUrl = self::LIVE_API_URL . '?' . http_build_query($queryParams);
 
         $client = HttpClient::create();
         $response = $client->request('GET', $apiUrl)->getContent();
