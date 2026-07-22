@@ -204,3 +204,15 @@ emailAliasesNotAllowed: 'Não é permitido o uso de aliases de email para o regi
 canSkipThisPage: 'A configuração do Turnstile é opcional. Para ignorar este passo, submeta o formulário sem preencher nenhum dos campos.'
 chmodDbScript: 'Concede as permissões de execução ao script de atualização da base de dados.'
 chmodSettingsScript: 'Concede as permissões de execução ao script de atualização das configurações.'
+SMSProviderSavedSuccessfully: 'Fornecedor de SMS guardado com sucesso.'
+SMSProviderActivatedSuccessfully: 'Fornecedor de SMS ativado com sucesso.'
+SMSProviderDeletedSuccessfully: 'Fornecedor de SMS eliminado com sucesso.'
+cannotDeleteActiveSMSProvider: 'O fornecedor de SMS ativo não pode ser eliminado.'
+ProviderIsNotActive: 'Este fornecedor não está atualmente ativo.'
+SMSProviderDeactivatedSuccessfully: 'Fornecedor de SMS desativado com sucesso.'
+sms_provider_test:
+  invalid_csrf: "Token CSRF inválido."
+  unsupported_provider: "O teste ainda não é suportado para este tipo de fornecedor."
+  empty_phone_number: "Por favor, introduza um número de telefone para enviar o teste."
+  invalid_phone_number: "Esse número de telefone não parece ser válido."
+  unreachable_provider: "Não foi possível contactar o BudgetSMS: %error%"

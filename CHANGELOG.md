@@ -1,5 +1,24 @@
 # Changelog
 
+# Release V1.13.0
+
+- **Required one-time action:** After upgrading, run
+  the [MultipleSMSMigrationCommand.php](src/Command/MultipleSMSMigrationCommand.php) to migrate
+  existing BudgetSMS API credentials from the Settings table to the new dedicated SMSProvider management system.
+  This command should be executed **only once** and while the portal is **offline or restricted**.
+  - Run the command with:
+    ```bash
+    php bin/console prepare:multiSMSMigration
+    ```
+
+Also, please make sure to execute the new migration to update and use the new required configuration tables for
+SMSProvider management page
+
+- Run the migrations with:
+  ```bash
+  php bin/console doctrine:migrations:migrate
+  ```
+
 # Release V1.12.1
 
 - Removed the preparation command that was introduced for v1.11.

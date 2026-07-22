@@ -206,3 +206,15 @@ emailAliasesNotAllowed: 'Email aliases are not allowed for registration.'
 canSkipThisPage: 'Turnstile setup is optional. To skip this step, submit the page without filling in any fields.'
 chmodDbScript: 'Grant execution permissions to the database update script.'
 chmodSettingsScript: 'Grant execution permissions to the settings update script.'
+SMSProviderSavedSuccessfully: 'SMS provider saved successfully.'
+SMSProviderActivatedSuccessfully: 'SMS provider activated successfully.'
+SMSProviderDeletedSuccessfully: 'SMS provider deleted successfully.'
+cannotDeleteActiveSMSProvider: 'The active SMS provider cannot be deleted.'
+ProviderIsNotActive: 'This provider is not currently active.'
+SMSProviderDeactivatedSuccessfully: 'SMS provider deactivated successfully.'
+sms_provider_test:
+  invalid_csrf: "Invalid CSRF token."
+  unsupported_provider: "Testing is not yet supported for this provider type."
+  empty_phone_number: "Please enter a phone number to send the test to."
+  invalid_phone_number: "That phone number doesn't look valid."
+  unreachable_provider: "Could not reach BudgetSMS: %error%"

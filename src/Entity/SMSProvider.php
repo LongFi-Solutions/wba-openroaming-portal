@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\SMSProviderType;
 use App\Repository\SMSProviderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -19,8 +20,15 @@ class SMSProvider
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $address = null;
+    /**
+     * Identifies which SMSProviderInterface implementation handles this
+     * provider — Doctrine maps this natively to/from the PHP enum.
+     */
+    #[ORM\Column(length: 50, enumType: SMSProviderType::class)]
+    private ?SMSProviderType $smsProviderType = null;
+
+    #[ORM\Column]
+    private bool $testMode = false;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -56,14 +64,26 @@ class SMSProvider
         return $this;
     }
 
-    public function getAddress(): ?string
+    public function getSMSProviderType(): ?SMSProviderType
     {
-        return $this->address;
+        return $this->smsProviderType;
     }
 
-    public function setAddress(string $address): static
+    public function setSMSProviderType(SMSProviderType $smsProviderType): static
     {
-        $this->address = $address;
+        $this->smsProviderType = $smsProviderType;
+
+        return $this;
+    }
+
+    public function isTestMode(): bool
+    {
+        return $this->testMode;
+    }
+
+    public function setTestMode(bool $testMode): static
+    {
+        $this->testMode = $testMode;
 
         return $this;
     }

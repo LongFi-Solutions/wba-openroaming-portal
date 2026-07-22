@@ -2,10 +2,10 @@
 
 namespace App\Entity;
 
-use App\Enum\Alert\AlertType;
 use App\Enum\ParamType;
 use App\Repository\SMSProviderParamRepository;
 use Doctrine\DBAL\Types\Types;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SMSProviderParamRepository::class)]
@@ -35,6 +35,12 @@ class SMSProviderParam
     #[ORM\ManyToOne(inversedBy: 'smsProviderParams')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?SMSProvider $smsProvider = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {
