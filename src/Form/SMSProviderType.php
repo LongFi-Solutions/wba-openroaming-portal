@@ -6,7 +6,6 @@ use App\DTO\SMSProviderDTO;
 use App\Enum\SMSProviderType as SMSProviderTypeEnum;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -31,17 +30,14 @@ class SMSProviderType extends AbstractType
                 'required' => false,
                 'label' => 'testMode',
             ])
-            // Dynamic list of (paramType, value) rows — allow_add/allow_delete so a provider
-            // isn't limited to a fixed set of credential fields. The prototype + JS wiring for
-            // adding/removing rows in the UI is part of the twig/design pass, not this step.
-            ->add('params', CollectionType::class, [
-                'entry_type' => SMSProviderParamType::class,
-                'allow_add' => true,
-                'allow_delete' => true,
-                'by_reference' => false,
-                'prototype' => true,
-                'label' => false,
-            ])
+            // BudgetSMS fields — always present in the form tree (so submission/validation
+            // works regardless of which type is visually selected), shown/hidden client-side
+            // by the sms-provider-type Stimulus controller based on smsProviderType's value.
+            // A future provider type adds its own fields here the same way.
+            ->add('username', TextType::class, ['required' => false])
+            ->add('userid', TextType::class, ['required' => false])
+            ->add('handle', TextType::class, ['required' => false])
+            ->add('from', TextType::class, ['required' => false])
         ;
     }
 

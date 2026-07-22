@@ -9,8 +9,10 @@ use App\Entity\SMSProviderParam;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
+use App\Enum\ParamType;
 use App\Enum\SettingName;
-use App\Form\SMSProviderType;
+use App\Enum\SMSProviderType;
+use App\Form\SMSProviderType as SMSProviderFormType;
 use App\Repository\SettingRepository;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
@@ -62,7 +64,7 @@ class SMSProviderController extends AbstractController
     public function new(Request $request): Response
     {
         $dto = new SMSProviderDTO();
-        $form = $this->createForm(SMSProviderType::class, $dto);
+        $form = $this->createForm(SMSProviderFormType::class, $dto);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -109,7 +111,7 @@ class SMSProviderController extends AbstractController
     public function edit(SMSProvider $provider, Request $request): Response
     {
         $dto = SMSProviderDTO::fromEntity($provider);
-        $form = $this->createForm(SMSProviderType::class, $dto);
+        $form = $this->createForm(SMSProviderFormType::class, $dto);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -170,12 +172,10 @@ class SMSProviderController extends AbstractController
     {
         $token = $request->request->get('_token');
 
-        if (
-            !$this->isCsrfTokenValid(
-                'sms-provider-activate-' . $provider->getId(),
-                is_string($token) ? $token : null
-            )
-        ) {
+        if (!$this->isCsrfTokenValid(
+            'sms-provider-activate-' . $provider->getId(),
+            is_string($token) ? $token : null
+        )) {
             throw $this->createAccessDeniedException('Invalid CSRF token.');
         }
 
@@ -225,12 +225,10 @@ class SMSProviderController extends AbstractController
     {
         $token = $request->request->get('_token');
 
-        if (
-            !$this->isCsrfTokenValid(
-                'sms-provider-deactivate-' . $provider->getId(),
-                is_string($token) ? $token : null
-            )
-        ) {
+        if (!$this->isCsrfTokenValid(
+            'sms-provider-deactivate-' . $provider->getId(),
+            is_string($token) ? $token : null
+        )) {
             throw $this->createAccessDeniedException('Invalid CSRF token.');
         }
 
@@ -333,8 +331,7 @@ class SMSProviderController extends AbstractController
     }
 
     /**
-     * Builds and persists a brand-new SMSProvider (plus all its params) from the DTO.
-     * No reconciliation needed here — every param on the DTO is necessarily a new row.
+     * Builds and persists a brand-new SMSProvider from the DTO's named fields.
      */
     private function createProviderFromDto(SMSProviderDTO $dto): SMSProvider
     {
@@ -348,13 +345,13 @@ class SMSProviderController extends AbstractController
         $provider->setTestMode($dto->testMode);
         $this->entityManager->persist($provider);
 
-        foreach ($dto->params as $paramDto) {
+        foreach ($this->buildParamValues($dto) as $paramType => $value) {
             $param = new SMSProviderParam();
             $param->setCreatedAt($now);
             $param->setUpdatedAt($now);
-            $param->setType($paramDto->type);
-            $param->setParamType((string) $paramDto->paramType);
-            $param->setValue((string) $paramDto->value);
+            $param->setType(ParamType::STRING);
+            $param->setParamType($paramType);
+            $param->setValue($value);
             $provider->addSmsProviderParam($param);
             $this->entityManager->persist($param);
         }
@@ -363,9 +360,9 @@ class SMSProviderController extends AbstractController
     }
 
     /**
-     * Updates an existing SMSProvider in place from the DTO, reconciling its param
-     * collection: rows still present get updated, new rows get created, and rows
-     * removed from the form get deleted.
+     * Updates an existing SMSProvider's named fields, matched by paramType.
+     * If the provider type itself changed, any params belonging to the old
+     * type are removed since they no longer apply.
      */
     private function updateProviderFromDto(SMSProvider $provider, SMSProviderDTO $dto): void
     {
@@ -376,37 +373,56 @@ class SMSProviderController extends AbstractController
         $provider->setTestMode($dto->testMode);
         $provider->setUpdatedAt($now);
 
-        $existingParams = [];
+        $existingParamsByType = [];
         foreach ($provider->getSmsProviderParams() as $existingParam) {
-            $existingParams[$existingParam->getId()] = $existingParam;
+            $existingParamsByType[$existingParam->getParamType()] = $existingParam;
         }
 
-        $keptIds = [];
-        foreach ($dto->params as $paramDto) {
-            if ($paramDto->id !== null && isset($existingParams[$paramDto->id])) {
-                $param = $existingParams[$paramDto->id];
-            } else {
-                $param = new SMSProviderParam();
-                $param->setCreatedAt($now);
-                $provider->addSmsProviderParam($param);
-                $this->entityManager->persist($param);
+        foreach ($this->buildParamValues($dto) as $paramType => $value) {
+            if (isset($existingParamsByType[$paramType])) {
+                $existingParamsByType[$paramType]->setValue($value);
+                $existingParamsByType[$paramType]->setUpdatedAt($now);
+                unset($existingParamsByType[$paramType]);
+
+                continue;
             }
 
-            $param->setType($paramDto->type);
-            $param->setParamType((string) $paramDto->paramType);
-            $param->setValue((string) $paramDto->value);
+            $param = new SMSProviderParam();
+            $param->setCreatedAt($now);
             $param->setUpdatedAt($now);
-
-            if ($param->getId() !== null) {
-                $keptIds[] = $param->getId();
-            }
+            $param->setType(ParamType::STRING);
+            $param->setParamType($paramType);
+            $param->setValue($value);
+            $provider->addSmsProviderParam($param);
+            $this->entityManager->persist($param);
         }
 
-        foreach ($existingParams as $id => $existingParam) {
-            if (!in_array($id, $keptIds, true)) {
-                $provider->removeSmsProviderParam($existingParam);
-                $this->entityManager->remove($existingParam);
-            }
+        // Anything left here belonged to a different provider type's fields
+        // (e.g. the type was switched on an existing record) — no longer needed.
+        foreach ($existingParamsByType as $staleParam) {
+            $provider->removeSmsProviderParam($staleParam);
+            $this->entityManager->remove($staleParam);
         }
+    }
+
+    /**
+     * Maps the DTO's named fields to (paramType => value) pairs for whichever
+     * provider type is selected. Adding a new provider type means adding a new
+     * match arm here, plus its own fields on the DTO/form/template — nothing
+     * else in this controller changes.
+     *
+     * @return array<string, string>
+     */
+    private function buildParamValues(SMSProviderDTO $dto): array
+    {
+        return match ($dto->smsProviderType) {
+            SMSProviderType::BUDGET_SMS => [
+                'username' => (string)$dto->username,
+                'userid' => (string)$dto->userid,
+                'handle' => (string)$dto->handle,
+                'from' => (string)$dto->from,
+            ],
+            default => [],
+        };
     }
 }

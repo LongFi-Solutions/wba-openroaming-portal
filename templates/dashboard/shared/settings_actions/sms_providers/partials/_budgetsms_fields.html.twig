@@ -1,0 +1,92 @@
+{# Section divider #}
+<div class="lg:col-span-2 mt-4 mb-2" data-provider-type="budgetsms">
+    <h2 class="text-lg font-semibold text-gray-800">{{ 'budgetSmsConfiguration'|trans({}, '_sms') }}</h2>
+</div>
+
+{# Username #}
+<div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
+     data-provider-type="budgetsms" {{ stimulus_controller('card') }}>
+    <div class="flex flex-row justify-between">
+        <div class="text-base font-medium text-center break-normal md:break-all">
+            <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'username'|trans({}, '_sms') }}</h1>
+        </div>
+        <label class="flex items-center bg-opacity-40">
+            <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
+        </label>
+    </div>
+    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: 'budgetSmsUsernameHelp'|trans({}, '_sms')}) }}
+    <div class="flex items-center space-x-2 mt-5">
+        {{ form_widget(form.username, {attr: {class: 'form-widget'}}) }}
+    </div>
+    <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+        {{ form_errors(form.username) }}
+    </div>
+</div>
+
+{# User ID #}
+<div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
+     data-provider-type="budgetsms" {{ stimulus_controller('card') }}>
+    <div class="flex flex-row justify-between">
+        <div class="text-base font-medium text-center break-normal md:break-all">
+            <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'userid'|trans({}, '_sms') }}</h1>
+        </div>
+        <label class="flex items-center bg-opacity-40">
+            <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
+        </label>
+    </div>
+    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: 'budgetSmsUseridHelp'|trans({}, '_sms')}) }}
+    <div class="flex items-center space-x-2 mt-5">
+        {{ form_widget(form.userid, {attr: {class: 'form-widget'}}) }}
+    </div>
+    <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+        {{ form_errors(form.userid) }}
+    </div>
+</div>
+
+{# Handle #}
+<div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
+     data-provider-type="budgetsms" {{ stimulus_controller('card') }}>
+    <div class="flex flex-row justify-between">
+        <div class="text-base font-medium text-center break-normal md:break-all">
+            <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'handle'|trans({}, '_sms') }}</h1>
+        </div>
+        <label class="flex items-center bg-opacity-40">
+            <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
+        </label>
+    </div>
+    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: 'budgetSmsHandleHelp'|trans({}, '_sms')}) }}
+    <div class="flex items-center space-x-2 mt-5">
+        {{ form_widget(form.handle, {attr: {class: 'form-widget'}}) }}
+    </div>
+    <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+        {{ form_errors(form.handle) }}
+    </div>
+</div>
+
+{# From (Sender ID) #}
+<div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
+     data-provider-type="budgetsms" {{ stimulus_controller('card') }}>
+    <div class="flex flex-row justify-between">
+        <div class="text-base font-medium text-center break-normal md:break-all">
+            <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'from'|trans({}, '_sms') }}</h1>
+        </div>
+        <label class="flex items-center bg-opacity-40">
+            <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
+        </label>
+    </div>
+    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: 'budgetSmsFromHelp'|trans({}, '_sms')}) }}
+    <div class="flex items-center space-x-2 mt-5">
+        {{ form_widget(form.from, {attr: {class: 'form-widget'}}) }}
+    </div>
+    <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+        {{ form_errors(form.from) }}
+    </div>
+</div>

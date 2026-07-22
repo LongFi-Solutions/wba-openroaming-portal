@@ -1,115 +1,113 @@
 {% extends '/dashboard/base.html.twig' %}
 
-{% macro paramRow(paramField) %}
-    <div {{ stimulus_target('sms-provider-params', 'row') }}
-            class="flex justify-center items-center gap-3">
-        {{ form_widget(paramField.id) }}
-        <div class="w-1/4">
-            {{ form_widget(paramField.type, {
-                attr: {class: 'form-widget'},
-            }) }}
-            <div class="text-red-500 text-sm">
-                {{ form_errors(paramField.type) }}
-            </div>
-        </div>
-        <div class="w-1/4">
-            {{ form_widget(paramField.paramType, {
-                attr: {
-                    placeholder: 'e.g. username, userid, handle, from',
-                    class: 'form-widget',
-                },
-            }) }}
-            <div class="text-red-500 text-sm">
-                {{ form_errors(paramField.paramType) }}
-            </div>
-        </div>
-        <div class="w-1/2">
-            {{ form_widget(paramField.value, {
-                attr: {placeholder: 'value', class: 'form-widget'},
-            }) }}
-            <div class="text-red-500 text-sm">
-                {{ form_errors(paramField.value) }}
-            </div>
-        </div>
-        <button type="button"
-                {{ stimulus_action('sms-provider-params', 'removeParam') }}
-                class="hover:text-red-400 transition">
-            <twig:ux:icon name="wba:trash" class="w-5 h-5 fill-none stroke-current" />
-        </button>
-    </div>
-{% endmacro %}
-
 {% block container %}
     {{ form_start(form) }}
     {{ form_errors(form) }}
 
-    <div class="p-6 bg-white">
-        <div class="relative mb-4">
-            {{ form_label(form.smsProviderType, 'smsProviderType'|trans({}, '_sms'), {label_attr: {class: 'form-label'}}) }}
-            {{ form_widget(form.smsProviderType, {attr: {class: 'form-widget'}}) }}
-            <div class="text-red-500 m-2">
-                {{ form_errors(form.smsProviderType) }}
-            </div>
-        </div>
+    <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-2 p-2 z-0" {{ stimulus_controller('sms-provider-type') }}>
 
-        <div class="relative mb-4">
-            {{ form_label(form.name, 'name'|trans({}, '_sms'), {label_attr: {class: 'form-label'}}) }}
-            {{ form_widget(form.name, {attr: {class: 'form-widget'}}) }}
-            <div class="text-red-500 m-2">
-                {{ form_errors(form.name) }}
-            </div>
-        </div>
+        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full lg:col-span-2" {{ stimulus_controller('card') }}>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
 
-        <div class="relative mb-4">
-            <div class="flex flex-col space-y-2">
-                <p class="font-bold">{{ 'testMode'|trans({}, '_sms') }}</p>
-                <label class="inline-flex items-center cursor-pointer">
-                    {{ form_widget(form.testMode, {attr: {class: 'sr-only peer'}}) }}
-                    <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
-                </label>
-            </div>
-            <div class="text-red-500 m-2">
-                {{ form_errors(form.testMode) }}
-            </div>
-        </div>
-
-        {# ── Params ──────────────────────────────────────────────────────────── #}
-        <div class="mt-6 lg:col-span-2 flex flex-col gap-4">
-            <p class="font-bold">{{ 'params'|trans({}, '_sms') }}</p>
-            {{ form_errors(form.params) }}
-
-            <div {{ stimulus_controller('sms-provider-params', {
-                prototype: _self.paramRow(form.params.vars.prototype),
-                index: form.params|length,
-            }) }}>
-                <div {{ stimulus_target('sms-provider-params', 'list') }} class="flex flex-col gap-2">
-                    {% for paramField in form.params %}
-                        {{ _self.paramRow(paramField) }}
-                    {% endfor %}
+                {# Provider Type #}
+                <div class="flex flex-col h-full">
+                    <div class="min-h-[88px]">
+                        <div class="flex flex-row justify-between">
+                            <div class="text-base font-medium text-center break-normal md:break-all">
+                                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'smsProviderType'|trans({}, '_sms') }}</h1>
+                            </div>
+                            <label class="flex items-center bg-opacity-40">
+                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                                        {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
+                            </label>
+                        </div>
+                        {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: 'smsProviderTypeHelp'|trans({}, '_sms')}) }}
+                    </div>
+                    <div class="flex items-center space-x-2 mt-5">
+                        {{ form_widget(form.smsProviderType, {
+                            attr: {
+                                class: 'form-widget',
+                                'data-action': 'change->sms-provider-type#toggle',
+                                'data-sms-provider-type-target': 'select',
+                            },
+                        }) }}
+                    </div>
+                    <div class="mt-2 text-center text-red-500 text-base">
+                        {{ form_errors(form.smsProviderType) }}
+                    </div>
                 </div>
 
-                <button type="button"
-                        {{ stimulus_action('sms-provider-params', 'addParam') }}
-                        class="flex flex-row items-center justify-center gap-2 w-full mt-2 py-2 rounded-lg border-2 border-dashed border-gray-300 text-sm font-semibold text-gray-500 hover:border-lightGreen hover:text-lightGreen transition">
-                    <twig:ux:icon name="wba:add" class="w-4 h-4 fill-current" />
-                    {{ 'addParam'|trans({}, '_sms') }}
-                </button>
+                {# Name #}
+                <div class="flex flex-col h-full">
+                    <div class="min-h-[88px]">
+                        <div class="flex flex-row justify-between">
+                            <div class="text-base font-medium text-center break-normal md:break-all">
+                                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'name'|trans({}, '_sms') }}</h1>
+                            </div>
+                            <label class="flex items-center bg-opacity-40 invisible">
+                                <img class="w-6" src="{{ asset('resources/logos/info_icon.svg') }}" alt="" />
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 mt-5">
+                        {{ form_widget(form.name, {attr: {class: 'form-widget'}}) }}
+                    </div>
+                    <div class="mt-2 text-center text-red-500 text-base">
+                        {{ form_errors(form.name) }}
+                    </div>
+                </div>
+
+                {# Test Mode #}
+                <div class="flex flex-col h-full">
+                    <div class="min-h-[88px]">
+                        <div class="flex flex-row justify-between">
+                            <div class="text-base font-medium text-center break-normal md:break-all">
+                                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'testMode'|trans({}, '_sms') }}</h1>
+                            </div>
+                            <label class="flex items-center bg-opacity-40 invisible">
+                                <img class="w-6" src="{{ asset('resources/logos/info_icon.svg') }}" alt="" />
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 mt-5">
+                        <label class="inline-flex items-center cursor-pointer">
+                            {{ form_widget(form.testMode, {attr: {class: 'sr-only peer'}}) }}
+                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                        </label>
+                    </div>
+                    <div class="mt-2 text-center text-red-500 text-base">
+                        {{ form_errors(form.testMode) }}
+                    </div>
+                </div>
+
             </div>
         </div>
 
-        <div class="flex flex-row justify-end gap-4 md:w-full mt-6">
-            <a href="{{ path('admin_dashboard_settings_sms_providers') }}"
-               class="btn-secondary flex items-center justify-center">
-                {{ 'cancel'|trans({}, '_sms') }}
-            </a>
-            <button type="submit" class="btn-primary">
-                {% if provider %}
-                    {{ 'saveProvider'|trans({}, '_sms') }}
-                {% else %}
-                    {{ 'createProvider'|trans({}, '_sms') }}
-                {% endif %}
-            </button>
-        </div>
+        {# ── Provider-specific configuration ──────────────────────────────
+           Only the block matching the selected type is visible (toggled
+           client-side by sms-provider-type, checking each card's
+           data-provider-type attribute). A future provider type adds its
+           own include here, following the same pattern. #}
+        {{ include('dashboard/shared/settings_actions/sms_providers/partials/_budgetsms_fields.html.twig', {form: form}) }}
+
+    </div>
+
+    <div class="mt-8 divider-solid"></div>
+
+    <div class="mt-6 flex flex-row w-full justify-end items-center gap-2 p-2">
+        <a href="{{ path('admin_dashboard_settings_sms_providers') }}"
+           class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
+            {{ 'cancel'|trans({}, '_sms') }}
+        </a>
+        <button type="submit" class="btn-primary"
+                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general')|e('js') }}')">
+            {% if provider %}
+                {{ 'saveProvider'|trans({}, '_sms') }}
+            {% else %}
+                {{ 'createProvider'|trans({}, '_sms') }}
+            {% endif %}
+        </button>
     </div>
 
     {{ form_rest(form) }}
