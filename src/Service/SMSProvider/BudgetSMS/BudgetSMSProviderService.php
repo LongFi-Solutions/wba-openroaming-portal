@@ -14,13 +14,13 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final class BudgetSMSProviderService implements SMSProviderInterface
+final readonly class BudgetSMSProviderService implements SMSProviderInterface
 {
     private const string LIVE_API_URL = 'https://api.budgetsms.net/sendsms/';
     private const string TEST_API_URL = 'https://api.budgetsms.net/testsms/';
 
     public function __construct(
-        private readonly TranslatorInterface $translator,
+        private TranslatorInterface $translator,
     ) {
     }
 

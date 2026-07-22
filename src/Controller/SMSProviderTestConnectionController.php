@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Enum\SMSProviderType;
@@ -8,6 +10,7 @@ use App\Service\SMSProvider\BudgetSMS\BudgetSMSProviderService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Throwable;
@@ -35,7 +38,10 @@ class SMSProviderTestConnectionController extends AbstractController
         $token = $request->request->get('_token');
 
         if (!$this->isCsrfTokenValid('sms-provider-test-connection', is_string($token) ? $token : null)) {
-            return new JsonResponse(['success' => false, 'message' => 'Invalid CSRF token.'], 403);
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Invalid CSRF token.'
+            ], Response::HTTP_FORBIDDEN);
         }
 
         $smsProviderTypeValue = $request->request->get('smsProviderType');
@@ -44,7 +50,7 @@ class SMSProviderTestConnectionController extends AbstractController
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Testing is not yet supported for this provider type.',
-            ], 400);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $username = (string)$request->request->get('username', '');
@@ -58,7 +64,7 @@ class SMSProviderTestConnectionController extends AbstractController
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Could not reach BudgetSMS: ' . $e->getMessage(),
-            ], 502);
+            ], Response::HTTP_BAD_GATEWAY);
         }
 
         return new JsonResponse([
