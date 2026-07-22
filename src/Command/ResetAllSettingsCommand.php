@@ -165,7 +165,6 @@ class ResetAllSettingsCommand extends Command
             ['name' => SettingName::CAPPORT_PORTAL_URL->value, 'value' => 'https://example.com/'],
             ['name' => SettingName::CAPPORT_VENUE_INFO_URL->value, 'value' => 'https://openroaming.org/'],
 
-            ['name' => SettingName::SMS_FROM->value, 'value' => 'OpenRoaming'],
             ['name' => SettingName::SMS_TIMER_RESEND->value, 'value' => '5'],
             ['name' => SettingName::USER_DELETE_TIME->value, 'value' => '5'],
             ['name' => SettingName::TIME_INTERVAL_NOTIFICATION->value, 'value' => '7'],
