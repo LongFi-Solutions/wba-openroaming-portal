@@ -6,14 +6,24 @@
         {{ provider.name }}
     </td>
 
-    {# Address #}
-    <td class="p-4 break-normal md:break-all">
-        {{ provider.address }}
-    </td>
-
     {# Type #}
     <td class="p-4 whitespace-nowrap">
         {{ provider.smsProviderType.name|lower|capitalize }}
+    </td>
+
+    {# Test Mode #}
+    <td class="p-4">
+        <p class="font-semibold p-1">
+            {% if provider.testMode %}
+                <span class="pill-error">
+                    {{ 'testMode'|trans({}, '_sms') }}
+                </span>
+            {% else %}
+                <span class="pill-success">
+                    {{ 'liveMode'|trans({}, '_sms') }}
+                </span>
+            {% endif %}
+        </p>
     </td>
 
     {# Params #}

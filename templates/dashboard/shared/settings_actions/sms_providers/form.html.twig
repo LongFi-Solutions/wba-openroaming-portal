@@ -52,21 +52,19 @@
             </div>
         </div>
 
-        <div class="mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div class="relative">
-                {{ form_label(form.name, 'name'|trans({}, '_sms'), {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.name, {attr: {class: 'form-widget'}}) }}
-                <div class="text-red-500 m-2">
-                    {{ form_errors(form.name) }}
-                </div>
+        <div class="relative mb-4">
+            {{ form_label(form.name, 'name'|trans({}, '_sms'), {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.name, {attr: {class: 'form-widget'}}) }}
+            <div class="text-red-500 m-2">
+                {{ form_errors(form.name) }}
             </div>
+        </div>
 
-            <div class="relative">
-                {{ form_label(form.address, 'address'|trans({}, '_sms'), {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.address, {attr: {class: 'form-widget'}}) }}
-                <div class="text-red-500 m-2">
-                    {{ form_errors(form.address) }}
-                </div>
+        <div class="relative mb-4 flex items-center gap-2">
+            {{ form_widget(form.testMode) }}
+            {{ form_label(form.testMode, 'testMode'|trans({}, '_sms'), {label_attr: {class: 'form-label'}}) }}
+            <div class="text-red-500 m-2">
+                {{ form_errors(form.testMode) }}
             </div>
         </div>
 

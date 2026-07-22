@@ -19,7 +19,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[AsCommand(
     name: 'prepare:multiSMSMigration',
@@ -28,13 +27,12 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 )]
 class MultipleSMSMigrationCommand extends Command
 {
-    private const string PROVIDER_NAME = 'BudgetSMS';
+    private const PROVIDER_NAME = 'BudgetSMS';
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly SettingRepository $settingRepository,
         private readonly SMSProviderRepository $smsProviderRepository,
-        private readonly ParameterBagInterface $parameterBag,
     ) {
         parent::__construct();
     }
@@ -96,7 +94,7 @@ class MultipleSMSMigrationCommand extends Command
             if ($setting !== null && $setting->getValue() !== null) {
                 $settingsToMigrate[$paramType] = [
                     'settingName' => $settingName,
-                    'value' => (string)$setting->getValue(),
+                    'value' => (string) $setting->getValue(),
                 ];
             }
         }
@@ -111,11 +109,12 @@ class MultipleSMSMigrationCommand extends Command
 
         $smsProvider = new SMSProvider();
         $smsProvider->setName(self::PROVIDER_NAME);
-
-        /** @var string $budgetSmsUrl */
-        $budgetSmsUrl = $this->parameterBag->get('app.budget_api_url');
-        $smsProvider->setAddress($budgetSmsUrl);
         $smsProvider->setSMSProviderType(SMSProviderType::BUDGET_SMS);
+        // Migrated accounts were previously configured against the testsms endpoint
+        // throughout this project's early testing — default to test mode so behavior
+        // doesn't silently change to live sending on migration. Flip it off manually
+        // once the account is confirmed ready for production.
+        $smsProvider->setTestMode(true);
         $smsProvider->setCreatedAt($now);
         $smsProvider->setUpdatedAt($now);
 

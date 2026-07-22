@@ -14,13 +14,10 @@ class SMSProviderDTO
     #[Assert\Length(max: 255, maxMessage: 'fieldCannotBeLongerThan')]
     public ?string $name = null;
 
-    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
-    #[Assert\Url(message: 'fieldMustBeAValidUrl')]
-    #[Assert\Length(max: 255, maxMessage: 'fieldCannotBeLongerThan')]
-    public ?string $address = null;
-
     #[Assert\NotNull(message: 'fieldCannotBeBlank')]
     public ?SMSProviderType $smsProviderType = null;
+
+    public bool $testMode = false;
 
     /**
      * @var SMSProviderParamDTO[]
@@ -34,8 +31,8 @@ class SMSProviderDTO
         $dto = new self();
         $dto->id = $provider->getId();
         $dto->name = $provider->getName();
-        $dto->address = $provider->getAddress();
         $dto->smsProviderType = $provider->getSMSProviderType();
+        $dto->testMode = $provider->isTestMode();
 
         foreach ($provider->getSmsProviderParams() as $param) {
             $dto->params[] = SMSProviderParamDTO::fromEntity($param);

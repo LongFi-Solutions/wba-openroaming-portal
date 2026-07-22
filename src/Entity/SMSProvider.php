@@ -20,15 +20,15 @@ class SMSProvider
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $address = null;
-
     /**
      * Identifies which SMSProviderInterface implementation handles this
      * provider — Doctrine maps this natively to/from the PHP enum.
      */
     #[ORM\Column(length: 50, enumType: SMSProviderType::class)]
     private ?SMSProviderType $smsProviderType = null;
+
+    #[ORM\Column(name: 'test_mode')]
+    private bool $testMode = false;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -64,18 +64,6 @@ class SMSProvider
         return $this;
     }
 
-    public function getAddress(): ?string
-    {
-        return $this->address;
-    }
-
-    public function setAddress(string $address): static
-    {
-        $this->address = $address;
-
-        return $this;
-    }
-
     public function getSMSProviderType(): ?SMSProviderType
     {
         return $this->smsProviderType;
@@ -84,6 +72,18 @@ class SMSProvider
     public function setSMSProviderType(SMSProviderType $smsProviderType): static
     {
         $this->smsProviderType = $smsProviderType;
+
+        return $this;
+    }
+
+    public function isTestMode(): bool
+    {
+        return $this->testMode;
+    }
+
+    public function setTestMode(bool $testMode): static
+    {
+        $this->testMode = $testMode;
 
         return $this;
     }

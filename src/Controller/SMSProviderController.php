@@ -119,7 +119,7 @@ class SMSProviderController extends AbstractController
             // Capture before mutating, same reasoning as delete() — the entity's
             // old state is gone once updateProviderFromDto() overwrites it
             $previousName = $provider->getName();
-            $previousAddress = $provider->getAddress();
+            $previousTestMode = $provider->isTestMode();
 
             $this->updateProviderFromDto($provider, $dto);
             $this->entityManager->flush();
@@ -133,14 +133,14 @@ class SMSProviderController extends AbstractController
                     EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
                     EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
                     EventMetadataKeysType::OLD_DATA->value => sprintf(
-                        '%s (%s)',
+                        '%s (test mode: %s)',
                         $previousName,
-                        $previousAddress
+                        $previousTestMode ? 'yes' : 'no'
                     ),
                     EventMetadataKeysType::NEW_DATA->value => sprintf(
-                        '%s (%s)',
+                        '%s (test mode: %s)',
                         $provider->getName(),
-                        $provider->getAddress()
+                        $provider->isTestMode() ? 'yes' : 'no'
                     ),
                 ]
             );
@@ -343,8 +343,8 @@ class SMSProviderController extends AbstractController
         $provider->setCreatedAt($now);
         $provider->setUpdatedAt($now);
         $provider->setName((string) $dto->name);
-        $provider->setAddress((string) $dto->address);
         $provider->setSMSProviderType($dto->smsProviderType);
+        $provider->setTestMode($dto->testMode);
         $this->entityManager->persist($provider);
 
         foreach ($dto->params as $paramDto) {
@@ -371,8 +371,8 @@ class SMSProviderController extends AbstractController
         $now = new DateTimeImmutable();
 
         $provider->setName((string) $dto->name);
-        $provider->setAddress((string) $dto->address);
         $provider->setSMSProviderType($dto->smsProviderType);
+        $provider->setTestMode($dto->testMode);
         $provider->setUpdatedAt($now);
 
         $existingParams = [];
