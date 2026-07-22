@@ -17,7 +17,7 @@ final class Version20260717161213 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $this->addSql(
-            "INSERT INTO Setting (name, value) VALUES ('SMS_ACTIVE_PROVIDER', NULL)"
+            "INSERT INTO Setting (name, value) VALUES ('SMS_ACTIVE_PROVIDER', '')"
         );
     }
 

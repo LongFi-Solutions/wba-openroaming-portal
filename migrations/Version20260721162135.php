@@ -20,12 +20,12 @@ final class Version20260721162135 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE SMSProvider ADD sms_provider_type VARCHAR(50) NOT NULL');
+        $this->addSql('ALTER TABLE SMSProvider ADD smsProviderType VARCHAR(50) NOT NULL');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE SMSProvider DROP sms_provider_type');
+        $this->addSql('ALTER TABLE SMSProvider DROP smsProviderType');
     }
 }

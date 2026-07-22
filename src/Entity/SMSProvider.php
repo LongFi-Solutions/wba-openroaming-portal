@@ -27,7 +27,7 @@ class SMSProvider
      * Identifies which SMSProviderInterface implementation handles this
      * provider — Doctrine maps this natively to/from the PHP enum.
      */
-    #[ORM\Column(name: 'sms_provider_type', length: 50, enumType: SMSProviderType::class)]
+    #[ORM\Column(length: 50, enumType: SMSProviderType::class)]
     private ?SMSProviderType $smsProviderType = null;
 
     #[ORM\Column]
