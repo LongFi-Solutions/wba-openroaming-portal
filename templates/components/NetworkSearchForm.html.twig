@@ -4,15 +4,12 @@
     <div class="sm:w-auto px-5 py-4">
         <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
 
-            {# Right: Search Bar & Action Buttons #}
-            <div class="flex flex-col lg:flex-row items-center gap-4 w-full xl:w-auto xl:justify-end grow">
-
-                {# Left Filter Tabs #}
+             {# Left Filter Tabs #}
                 <div class="flex flex-col md:flex-row sm:items-center gap-4 sm:gap-6">
                     {% set tabs = {
                         all: {
                             label: 'all',
-                            count: this.networkCounts.all,
+                            count: this.networkCounts,
                             activeClass: 'border-b-2 border-y-veryDarkButton',
                             hoverClass: 'hover:border-b-2 hover:border-y-veryDarkButton',
                             badgeActive: 'bg-veryDarkButton text-white',
