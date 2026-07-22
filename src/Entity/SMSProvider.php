@@ -27,7 +27,7 @@ class SMSProvider
     #[ORM\Column(length: 50, enumType: SMSProviderType::class)]
     private ?SMSProviderType $smsProviderType = null;
 
-    #[ORM\Column(name: 'test_mode')]
+    #[ORM\Column]
     private bool $testMode = false;
 
     #[ORM\Column]
