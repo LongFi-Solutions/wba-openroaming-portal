@@ -88,7 +88,11 @@ class SMSProviderTestConnectionController extends AbstractController
         } catch (Throwable $e) {
             return new JsonResponse([
                 'success' => false,
-                'message' => $this->translator->trans('sms_provider_test.unreachable_provider', ['%error%' => $e->getMessage()], 'controllers'),
+                'message' => $this->translator->trans(
+                    'sms_provider_test.unreachable_provider',
+                    ['%error%' => $e->getMessage()],
+                    'controllers'
+                ),
             ], Response::HTTP_BAD_GATEWAY);
         }
 
