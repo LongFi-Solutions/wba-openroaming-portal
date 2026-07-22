@@ -96,3 +96,5 @@ budgetSmsError:
   unexpectedResponse: 'Unexpected response from BudgetSMS: %response%.'
 budgetSmsSuccess:
   credentialsVerified: 'Credentials verified successfully.'
+sendTestSms: 'Send Test SMS'
+testPhoneNumberPlaceholder: 'Enter a phone number to test.'

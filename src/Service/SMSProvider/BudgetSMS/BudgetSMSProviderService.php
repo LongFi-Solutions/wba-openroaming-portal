@@ -7,6 +7,9 @@ use App\Entity\User;
 use App\Enum\BudgetSMS\BudgetSmsErrorCode;
 use App\Enum\ParamType;
 use App\Service\SMSProvider\SMSProviderInterface;
+use libphonenumber\PhoneNumber;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -51,11 +54,10 @@ final readonly class BudgetSMSProviderService implements SMSProviderInterface
     }
 
     /**
-     * Validates a set of BudgetSMS credentials by making a real request to their
-     * testsms endpoint — this simulates a send (no credit deducted, no message
-     * actually delivered), so it's safe to call before a provider is even saved.
-     * Always hits the TEST endpoint regardless of the provider's own testMode
-     * setting: this is purely a credentials check, never a real send.
+     * Sends a real test SMS to the given phone number using the given
+     * credentials. Always hits BudgetSMS's LIVE endpoint — sending to their
+     * TEST endpoint would validate the credentials but never actually
+     * deliver a message, which defeats the purpose of a real test send.
      *
      * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
@@ -66,20 +68,20 @@ final readonly class BudgetSMSProviderService implements SMSProviderInterface
         string $username,
         string $userid,
         string $handle,
-        string $from
+        string $from,
+        PhoneNumber $to,
+        string $message = 'Test message from provider configuration',
     ): BudgetSMSTestResult {
         $queryParams = [
             'username' => $username,
             'userid' => $userid,
             'handle' => $handle,
             'from' => $from,
-            // Dummy but validly-formatted destination/message — only the
-            // credentials themselves are being verified here, not delivery.
-            'to' => '351910000000',
-            'msg' => 'Test message from provider configuration',
+            'to' => PhoneNumberUtil::getInstance()->format($to, PhoneNumberFormat::E164),
+            'msg' => $message,
         ];
 
-        $apiUrl = self::TEST_API_URL . '?' . http_build_query($queryParams);
+        $apiUrl = self::LIVE_API_URL . '?' . http_build_query($queryParams);
 
         $client = HttpClient::create();
         $response = $client->request('GET', $apiUrl)->getContent();

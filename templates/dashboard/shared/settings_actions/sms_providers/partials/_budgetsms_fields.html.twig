@@ -1,22 +1,52 @@
 {# Section divider #}
-<div class="lg:col-span-2 mt-4 mb-2 flex items-center justify-between" data-provider-type="budgetsms">
+<div class="lg:col-span-2 mt-4 mb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4" data-provider-type="budgetsms">
     <h2 class="text-lg font-semibold text-gray-800">{{ 'budgetSmsConfiguration'|trans({}, '_sms') }}</h2>
 
-    {# Test Credentials #}
-    <div class="flex items-center gap-3" data-provider-type="budgetsms">
-        <span data-sms-provider-test-target="result"
-              class="hidden items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full">
-            <svg data-sms-provider-test-target="resultIcon"
-                 class="w-4 h-4 shrink-0"
-                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"></svg>
-            <span data-sms-provider-test-target="resultText"></span>
-        </span>
+    {# Test Credentials Wrapper #}
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto" data-provider-type="budgetsms">
 
+        {# Input Group (Country + Phone) - ALWAYS stays flex-row to preserve joined styling #}
+        <div class="flex flex-row items-center w-full max-w-full sm:max-w-md" {{ stimulus_target('sms-provider-test', 'phoneWrapper') }}>
+
+            {# Country Select Box #}
+            <div class="w-2/5 min-w-[110px] shrink-0">
+                {{ form_widget(form.testPhoneNumber.children.country, {
+                    attr: {
+                        class: 'block w-full px-3 py-2 bg-gray-50 border border-r-0 border-gray-300 rounded-l-md text-sm truncate focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
+                        'data-sms-provider-test-target': 'phoneCountry',
+                    },
+                }) }}
+            </div>
+
+            {# Phone Number Field #}
+            <div class="flex-1 min-w-0">
+                {{ form_widget(form.testPhoneNumber.children.number, {
+                    attr: {
+                        class: 'block w-full px-3 py-2 border border-gray-300 rounded-r-md text-sm focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
+                        placeholder: 'testPhoneNumberPlaceholder'|trans({}, '_sms'),
+                        inputmode: 'numeric',
+                        pattern: '[0-9]*',
+                        'data-sms-provider-test-target': 'phoneNumber',
+                    },
+                }) }}
+            </div>
+        </div>
+
+        {# Status Badge #}
+        <span data-sms-provider-test-target="result"
+              class="hidden items-center justify-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full">
+        <svg data-sms-provider-test-target="resultIcon"
+             class="w-4 h-4 shrink-0"
+             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"></svg>
+        <span data-sms-provider-test-target="resultText"></span>
+    </span>
+
+        {# Submit Button #}
         <button type="button"
                 data-sms-provider-test-target="button"
                 data-action="sms-provider-test#test"
-                class="btn-secondary whitespace-nowrap inline-flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed transition-opacity">
-            <span>{{ 'testCredentials'|trans({}, '_sms') }}</span>
+                class="btn-secondary whitespace-nowrap inline-flex items-center justify-center gap-2 w-full sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed transition-opacity">
+            <span>{{ 'sendTestSms'|trans({}, '_sms') }}</span>
         </button>
     </div>
 </div>
