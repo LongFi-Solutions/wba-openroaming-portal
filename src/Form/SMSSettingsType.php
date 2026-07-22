@@ -7,7 +7,6 @@ use libphonenumber\PhoneNumberUtil;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -16,10 +15,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class SMSSettingsType extends AbstractType
 {
-    private bool $disabled = true;
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $this->disabled = $options['disabled'];
+        $disabled = $options['disabled'];
 
         // Use libphonenumber to fetch all supported regions
         $phoneUtil = PhoneNumberUtil::getInstance();
@@ -33,41 +31,25 @@ class SMSSettingsType extends AbstractType
         }
 
         $builder
-            ->add('smsUsername', TextType::class, [
-                'required' => false,
-                'disabled' => $this->disabled,
-            ])
-            ->add('smsUserId', TextType::class, [
-                'required' => false,
-                'disabled' => $this->disabled,
-            ])
-            ->add('smsHandle', TextType::class, [
-                'required' => false,
-                'disabled' => $this->disabled,
-            ])
-            ->add('smsFrom', TextType::class, [
-                'required' => false,
-                'disabled' => $this->disabled,
-            ])
             ->add('defaultRegionPhoneInputs', ChoiceType::class, [
                 'choices' => $choices,
                 'multiple' => true,
                 'expanded' => false,
                 'required' => false,
                 'autocomplete' => true,
-                'disabled' => $this->disabled,
+                'disabled' => $disabled,
             ])
             ->add('timeIntervalBetweenRequests', IntegerType::class, [
                 'required' => false,
-                'disabled' => $this->disabled,
+                'disabled' => $disabled,
             ])
             ->add('timeIntervalToResetAttempts', IntegerType::class, [
                 'required' => false,
-                'disabled' => $this->disabled,
+                'disabled' => $disabled,
             ])
             ->add('attemptsNumber', IntegerType::class, [
                 'required' => false,
-                'disabled' => $this->disabled,
+                'disabled' => $disabled,
             ])
         ;
     }

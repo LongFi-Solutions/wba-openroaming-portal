@@ -1,0 +1,19 @@
+{% extends '/dashboard/base.html.twig' %}
+
+{% block container %}
+    {# Notice, matching the SMS Configuration page's provider notice style #}
+    <div class="mb-6 text-base font-semibold w-full">
+        <div class="toast-warning-dashboard" role="alert">
+            <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-current" />
+            <span class="font-medium">
+                {{ 'sms_providers_notice'|trans({}, '_sms')|raw }}
+            </span>
+        </div>
+    </div>
+
+    <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
+        <div class="w-full">
+            {{ component('SMSProviderSearchForm') }}
+        </div>
+    </div>
+{% endblock %}
