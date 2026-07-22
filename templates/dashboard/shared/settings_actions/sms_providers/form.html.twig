@@ -6,78 +6,82 @@
 
     <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-2 p-2 z-0" {{ stimulus_controller('sms-provider-type') }}>
 
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full lg:col-span-2" {{ stimulus_controller('card') }}>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+        <div class="transition-all duration-200 hover:-translate-y-1 hover:shadow-md bg-white rounded-lg p-6 w-full lg:col-span-2" {{ stimulus_controller('card') }}>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-stretch">
 
                 {# Provider Type #}
                 <div class="flex flex-col h-full">
-                    <div class="min-h-[88px]">
-                        <div class="flex flex-row justify-between">
-                            <div class="text-base font-medium text-center break-normal md:break-all">
-                                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'smsProviderType'|trans({}, '_sms') }}</h1>
-                            </div>
-                            <label class="flex items-center bg-opacity-40">
-                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
-                                        {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
+                    <div class="flex-grow flex flex-col">
+                        <div class="flex flex-row justify-between items-start mb-2">
+                            <label class="text-sm md:text-base font-semibold text-gray-800 break-words">
+                                {{ 'smsProviderType'|trans({}, '_sms') }}
                             </label>
+                            <button type="button" class="w-6 cursor-pointer opacity-60 hover:opacity-100 transition-opacity focus:outline-none"
+                                    {{ stimulus_target('card', 'button') }}
+                                    {{ stimulus_action('card', 'show_info', 'mouseenter')|stimulus_action('card', 'hide_info', 'mouseleave') }}>
+                                <img src="{{ asset('resources/logos/info_icon.svg') }}" alt="Info" />
+                            </button>
                         </div>
-                        {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: 'smsProviderTypeHelp'|trans({}, '_sms')}) }}
+                        <div class="text-sm text-gray-500 mb-4">
+                            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: 'smsProviderTypeHelp'|trans({}, '_sms')}) }}
+                        </div>
                     </div>
-                    <div class="flex items-center space-x-2 mt-5">
+
+                    <div class="mt-auto w-full">
                         {{ form_widget(form.smsProviderType, {
                             attr: {
-                                class: 'form-widget',
+                                class: 'form-widget w-full',
                                 'data-action': 'change->sms-provider-type#toggle',
                                 'data-sms-provider-type-target': 'select',
                             },
                         }) }}
-                    </div>
-                    <div class="mt-2 text-center text-red-500 text-base">
-                        {{ form_errors(form.smsProviderType) }}
+                        <div class="mt-1 text-sm text-red-500 min-h-[20px]">
+                            {{ form_errors(form.smsProviderType) }}
+                        </div>
                     </div>
                 </div>
 
                 {# Name #}
                 <div class="flex flex-col h-full">
-                    <div class="min-h-[88px]">
-                        <div class="flex flex-row justify-between">
-                            <div class="text-base font-medium text-center break-normal md:break-all">
-                                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'name'|trans({}, '_sms') }}</h1>
-                            </div>
-                            <label class="flex items-center bg-opacity-40 invisible">
-                                <img class="w-6" src="{{ asset('resources/logos/info_icon.svg') }}" alt="" />
+                    <div class="flex-grow flex flex-col">
+                        <div class="flex flex-row justify-between items-start mb-2">
+                            <label class="text-sm md:text-base font-semibold text-gray-800 break-words">
+                                {{ 'name'|trans({}, '_sms') }}
                             </label>
+                            <div class="w-6"></div>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-2 mt-5">
-                        {{ form_widget(form.name, {attr: {class: 'form-widget'}}) }}
-                    </div>
-                    <div class="mt-2 text-center text-red-500 text-base">
-                        {{ form_errors(form.name) }}
+
+                    <div class="mt-auto w-full">
+                        {{ form_widget(form.name, {attr: {class: 'form-widget w-full'}}) }}
+                        <div class="mt-1 text-sm text-red-500 min-h-[20px]">
+                            {{ form_errors(form.name) }}
+                        </div>
                     </div>
                 </div>
 
                 {# Test Mode #}
                 <div class="flex flex-col h-full">
-                    <div class="min-h-[88px]">
-                        <div class="flex flex-row justify-between">
-                            <div class="text-base font-medium text-center break-normal md:break-all">
-                                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'testMode'|trans({}, '_sms') }}</h1>
-                            </div>
-                            <label class="flex items-center bg-opacity-40 invisible">
-                                <img class="w-6" src="{{ asset('resources/logos/info_icon.svg') }}" alt="" />
+                    <div class="flex-grow flex flex-col">
+                        <div class="flex flex-row justify-between items-start mb-2">
+                            <label class="text-sm md:text-base font-semibold text-gray-800 break-words">
+                                {{ 'testMode'|trans({}, '_sms') }}
                             </label>
+                            <div class="w-6"></div>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-2 mt-5">
-                        <label class="inline-flex items-center cursor-pointer">
-                            {{ form_widget(form.testMode, {attr: {class: 'sr-only peer'}}) }}
-                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
-                        </label>
-                    </div>
-                    <div class="mt-2 text-center text-red-500 text-base">
-                        {{ form_errors(form.testMode) }}
+
+                    <div class="mt-auto w-full">
+                        {# Wrapper com h-[42px] (altura padrão de um input) para alinhar o toggle perfeitamente com os text inputs ao lado #}
+                        <div class="flex items-center h-[42px]">
+                            <label class="inline-flex items-center cursor-pointer">
+                                {{ form_widget(form.testMode, {attr: {class: 'sr-only peer'}}) }}
+                                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                            </label>
+                        </div>
+                        <div class="mt-1 text-sm text-red-500 min-h-[20px]">
+                            {{ form_errors(form.testMode) }}
+                        </div>
                     </div>
                 </div>
 
