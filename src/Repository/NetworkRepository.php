@@ -48,6 +48,7 @@ class NetworkRepository extends ServiceEntityRepository
         int $count,
     ): QueryBuilder {
         $qb = $this->createQueryBuilder('n')
+            ->select('PARTIAL n.{id, name, createdAt, updatedAt}')
             ->orderBy('n.' . $sort, $order)
             ->setFirstResult(($page - 1) * $count)
             ->setMaxResults($count);
