@@ -43,8 +43,7 @@ class NetworkSearchForm
     /** @var Paginator<Network>|null */
     private ?Paginator $cachedNetworks = null;
 
-    /** @var array<string, int>|null */
-    private ?array $cachedCounts = null;
+    private ?int $cachedCounts = null;
 
     public function __construct(
         private readonly NetworkRepository $networkRepository,
@@ -75,16 +74,11 @@ class NetworkSearchForm
         );
     }
 
-    /**
-     * @return array<string, int>
-     */
     #[ExposeInTemplate]
-    public function getNetworkCounts(): array
+    public function getNetworkCounts(): int
     {
         if ($this->cachedCounts === null) {
-            $this->cachedCounts = [
-                'all' => $this->networkRepository->countAll(),
-            ];
+            $this->cachedCounts = $this->networkRepository->countAll();
         }
 
         return $this->cachedCounts;

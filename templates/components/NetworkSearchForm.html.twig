@@ -161,7 +161,7 @@
         <hr class="w-full h-0.5 bg-gray-300/50 border-0 rounded">
         {{ include('dashboard/shared/pagination/_pagination_live.html.twig', {
             label: 'networksPerPage'|trans({}, '_network'),
-            occurrencies: this.networks|length,
+            occurrencies: this.networkCounts,
             totalPages: this.totalPages,
             page: page,
             count: count,
