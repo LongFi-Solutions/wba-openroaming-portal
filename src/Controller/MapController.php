@@ -154,6 +154,7 @@ class MapController extends AbstractController
     }
 
     #[Route('/dashboard/map/networks', name: 'admin_dashboard_map_networks', methods: ['GET'])]
+    #[isGranted(AdminPermissionsType::MAP_READ->value)]
     public function networks(): Response
     {
         $data = $this->getSettings->getSettings();
