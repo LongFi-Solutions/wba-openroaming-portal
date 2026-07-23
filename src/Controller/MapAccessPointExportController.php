@@ -207,11 +207,13 @@ class MapAccessPointExportController extends AbstractController
         }
 
         $headers = fgetcsv($handle, 0, ',', escape: '\\');
-        if (!$headers || !in_array(
+        if (
+            !$headers || !in_array(
                 'ap_name',
                 $headers,
                 true
-            )) {
+            )
+        ) {
             fclose($handle);
             $this->addFlash(
                 'error',
