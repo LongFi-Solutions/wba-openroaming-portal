@@ -4,25 +4,27 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Csv\CsvFormulaSanitizerTrait;
+use App\Entity\Network;
 use App\Enum\AdminPermissionsType;
 use App\Repository\NetworkRepository;
 use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use App\Entity\Network;
-use App\Entity\AccessPoint;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
 class MapNetworkExportController extends AbstractController
 {
+    use CsvFormulaSanitizerTrait;
+
     public function __construct(
         private readonly TranslatorInterface $translator,
     ) {
@@ -80,9 +82,9 @@ class MapNetworkExportController extends AbstractController
                     fputcsv(
                         $handle,
                         [
-                            $netName,
-                            $netDesc,
-                            $netGeo
+                            $this->sanitizeCsvField($netName),
+                            $this->sanitizeCsvField($netDesc),
+                            $netGeo,
                         ],
                         escape: '\\'
                     );
