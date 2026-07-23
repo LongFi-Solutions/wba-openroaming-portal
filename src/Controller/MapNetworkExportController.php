@@ -225,7 +225,8 @@ class MapNetworkExportController extends AbstractController
 
             $this->addFlash('success', sprintf(
                 $this->translator->trans('networkImportSuccess', [], 'controllers'),
-                count($networksCreatedOrUpdated),0
+                count($networksCreatedOrUpdated),
+                0
             ));
         } catch (Throwable $e) {
             $this->addFlash('error', sprintf(
