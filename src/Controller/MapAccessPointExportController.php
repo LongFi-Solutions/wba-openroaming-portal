@@ -313,7 +313,7 @@ class MapAccessPointExportController extends AbstractController
 
                 $validRows[] = ['dto' => $dto, 'mac' => $apMac, 'name' => $apName];
             }
-            
+
             // Atomic: any error at all → abort, write nothing.
             if ($rowErrors !== []) {
                 $groupedErrors = [];
