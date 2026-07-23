@@ -253,7 +253,7 @@ class MapAccessPointExportController extends AbstractController
                 $rowNumber++;
 
                 $apName = $this->sanitizeCsvField($row[$idxName] ?? '');
-                if ($apName === '' || $apName === '0' || $apName === "'0") {
+                if (in_array($apName, ['', '0', "'0"], true)) {
                     continue;
                 }
 
