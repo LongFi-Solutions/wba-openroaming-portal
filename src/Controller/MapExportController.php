@@ -101,7 +101,7 @@ class MapExportController extends AbstractController
                         $lat = '';
 
                         if (is_string($locationRaw) && json_validate($locationRaw)) {
-                            $parsed = json_decode($locationRaw, true);
+                            $parsed = json_decode($locationRaw, true, 512, JSON_THROW_ON_ERROR);
                             if (
                                 isset($parsed['coordinates']) &&
                                 is_array($parsed['coordinates']) &&
@@ -118,7 +118,7 @@ class MapExportController extends AbstractController
                             $lat = $locationRaw['coordinates'][1];
                         }
 
-                        if ($lng === 0 || $lng === 0.0 || $lng === '0') {
+                        if (in_array($lng, [0, 0.0, '0'], true)) {
                             $lng = '';
                             $lat = '';
                         }
@@ -274,13 +274,11 @@ class MapExportController extends AbstractController
                     if ($netGeoRaw !== '' && $netGeoRaw !== '0') {
                         if (json_validate($netGeoRaw)) {
                             $network->setGeometry($netGeoRaw);
-                        } else {
-                            if ($isNew) {
-                                $network->setGeometry(json_encode([
-                                    'type' => 'GeometryCollection',
-                                    'geometries' => []
-                                ], JSON_THROW_ON_ERROR));
-                            }
+                        } elseif ($isNew) {
+                            $network->setGeometry(json_encode([
+                                'type' => 'GeometryCollection',
+                                'geometries' => []
+                            ], JSON_THROW_ON_ERROR));
                         }
                     } elseif ($isNew) {
                         $network->setGeometry(json_encode([
