@@ -53,28 +53,22 @@ class MapAccessPointExportController extends AbstractController
 
         $sql = strtr(
             <<<'SQL'
-            SELECT
-                ap.__name__ AS name,
-                ap.__ssid__ AS ssid,
-                ap.__mac__ AS mac_address,
-                ap.__vendor__ AS vendor,
-                ap.__model__ AS model,
-                ap.__standard__ AS standard,
-                ap.__serial__ AS serial_number,
-                CASE WHEN JSON_VALID(ap.__location__)
-                    THEN ap.__location__ ->> '$.coordinates[0]'
-                    ELSE NULL
-                END AS longitude,
-                CASE WHEN JSON_VALID(ap.__location__)
-                    THEN ap.__location__ ->> '$.coordinates[1]'
-                    ELSE NULL
-                END AS latitude,
-                ap.__altMsl__ AS altitude_msl,
-                ap.__altAgl__ AS altitude_agl
-            FROM __table__ ap
-            WHERE ap.__networkFk__ = :networkId
-            ORDER BY ap.id ASC
-        SQL,
+                SELECT
+                    ap.__name__ AS name,
+                    ap.__ssid__ AS ssid,
+                    ap.__mac__ AS mac_address,
+                    ap.__vendor__ AS vendor,
+                    ap.__model__ AS model,
+                    ap.__standard__ AS standard,
+                    ap.__serial__ AS serial_number,
+                    ST_X(ap.__location__) AS longitude,
+                    ST_Y(ap.__location__) AS latitude,
+                    ap.__altMsl__ AS altitude_msl,
+                    ap.__altAgl__ AS altitude_agl
+                FROM __table__ ap
+                WHERE ap.__networkFk__ = :networkId
+                ORDER BY ap.id ASC
+            SQL,
             [
                 '__name__' => $col('name'),
                 '__ssid__' => $col('ssid'),
