@@ -303,9 +303,12 @@ class MapAccessPointExportController extends AbstractController
                     ];
                 }
 
-                usort($groupedErrors, static fn (array $a, array $b): int => count($b['rows']) <=> count($a['rows']));
+                usort(
+                    $groupedErrors,
+                    static fn(array $a, array $b): int => count($b['rows']) <=> count($a['rows'])
+                );
 
-                $this->addFlash('import_errors', array_values($groupedErrors));
+                $this->addFlash('import_errors', $groupedErrors);
                 // no separate 'import_errors_total' flash — the template derives it
                 $this->addFlash('error', $this->translator->trans('importErrorValidation', [], 'controllers'));
                 return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
