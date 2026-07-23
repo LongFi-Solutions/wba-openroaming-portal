@@ -8,10 +8,10 @@
     <div class="rounded-xl border border-red-200 bg-red-50 p-4 space-y-2">
         <div class="flex items-center gap-2 text-red-800 font-semibold">
             <twig:ux:icon name="wba:info-error" class="h-5 w-5 fill-current stroke-none" />
-            Import cancelled — {{ totalErrors }} row(s) failed validation
+            {{ 'importCancelledTitle'|trans({'%count%': totalErrors}, 'controllers') }}
         </div>
         <p class="text-sm text-red-700">
-            No access points were imported. Fix the rows below and re-upload the file.
+            {{ 'importCancelledDescription'|trans({}, 'controllers') }}
         </p>
 
         {% for group in errorGroups %}
@@ -22,16 +22,18 @@
                         {{ group.message }}
                     </span>
                     <span class="ml-2 shrink-0 rounded-full bg-red-100 text-red-700 text-xs px-2 py-0.5">
-                        {{ group.rows|length }} row{{ group.rows|length > 1 ? 's' : '' }}
+                        {{ 'importRowCountBadge'|trans({'%count%': group.rows|length}, 'controllers') }}
                     </span>
                 </summary>
                 <ul class="px-3 pb-2 pt-1 text-sm text-gray-600 divide-y divide-gray-100">
                     {% for r in group.rows|slice(0, 25) %}
-                        <li class="py-1">Row {{ r.row }} — <span class="font-mono">{{ r.name }}</span></li>
+                        <li class="py-1">
+                            {{ 'importRowLabel'|trans({'%row%': r.row, '%name%': r.name}, 'controllers') }}
+                        </li>
                     {% endfor %}
                     {% if group.rows|length > 25 %}
                         <li class="py-1 text-gray-400 italic">
-                            + {{ group.rows|length - 25 }} more row(s) with this same error
+                            {{ 'importMoreRows'|trans({'%count%': group.rows|length - 25}, 'controllers') }}
                         </li>
                     {% endif %}
                 </ul>
