@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\DTO\AccessPointDTO;
 use App\Entity\AccessPoint;
 use App\Entity\Network;
 use App\Enum\AdminPermissionsType;
@@ -17,6 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
@@ -24,6 +26,7 @@ class MapAccessPointExportController extends AbstractController
 {
     public function __construct(
         private readonly TranslatorInterface $translator,
+        private readonly ValidatorInterface $validator,
     ) {
     }
 
@@ -167,9 +170,7 @@ class MapAccessPointExportController extends AbstractController
             'application/vnd.ms-excel',
         ];
 
-        $mimeType = $file->getMimeType();
-
-        if (!in_array($mimeType, $allowedMimeTypes, true)) {
+        if (!in_array($file->getMimeType(), $allowedMimeTypes, true)) {
             $this->addFlash('error', $this->translator->trans('importErrorInvalidMimeType', [], 'controllers'));
             return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
         }
@@ -191,19 +192,37 @@ class MapAccessPointExportController extends AbstractController
         }
 
         $headers = fgetcsv($handle, 0, ',', escape: '\\');
-        if (!$headers || !in_array('ap_name', $headers, true)) {
+        if (!$headers || !in_array(
+                'ap_name',
+                $headers,
+                true
+            )) {
             fclose($handle);
-            $this->addFlash('error', $this->translator->trans('importErrorInvalidStructure', [], 'controllers'));
-            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
+            $this->addFlash(
+                'error',
+                $this->translator->trans('importErrorInvalidStructure', [], 'controllers')
+            );
+            return $this->redirectToRoute(
+                'admin_dashboard_map_network_accessPoints',
+                ['id' => $network->getId()]
+            );
         }
 
         $apsImportedCount = 0;
         $apsUpdatedCount = 0;
+        $rowErrors = [];
+        $rowNumber = 1;
         $now = new DateTimeImmutable();
 
         try {
             while (($row = fgetcsv($handle, 0, ',', escape: '\\')) !== false) {
+                $rowNumber++;
+
                 $apName = trim($row[0] ?? '');
+                if ($apName === '' || $apName === '0') {
+                    continue;
+                }
+
                 $apSsid = trim($row[1] ?? '');
                 $apMac = trim($row[2] ?? '');
                 $apVendor = trim($row[3] ?? '');
@@ -215,10 +234,33 @@ class MapAccessPointExportController extends AbstractController
                 $apAltMsl = trim($row[9] ?? '');
                 $apAltAgl = trim($row[10] ?? '');
 
-                if ($apName === '' || $apName === '0') {
-                    continue;
+                // Build the DTO exactly like the create/edit form would.
+                $dto = new AccessPointDTO();
+                $dto->network = $network;
+                $dto->name = $apName;
+                $dto->ssid = $apSsid === '' || $apSsid === '0' ? 'OpenRoaming' : $apSsid;
+                $dto->macAddress = $apMac === '' || $apMac === '0' ? null : $apMac;
+                $dto->vendor = $apVendor === '' || $apVendor === '0' ? null : $apVendor;
+                $dto->model = $apModel === '' || $apModel === '0' ? null : $apModel;
+                $dto->standard = $apStandard === '' || $apStandard === '0' ? null : $apStandard;
+                $dto->serialNumber = $apSerial === '' || $apSerial === '0' ? null : $apSerial;
+                $dto->latitude = $apLat !== '' ? $apLat : null;
+                $dto->longitude = $apLng !== '' ? $apLng : null;
+                $dto->altitudeMsl = $apAltMsl !== '' ? (float)$apAltMsl : null;
+                $dto->altitudeAgl = $apAltAgl !== '' ? (float)$apAltAgl : null;
+
+                $violations = $this->validator->validate($dto);
+
+                if (count($violations) > 0) {
+                    $messages = [];
+                    foreach ($violations as $violation) {
+                        $messages[] = ($violation->getPropertyPath() ?: 'general') . ': ' . $violation->getMessage();
+                    }
+                    $rowErrors[] = sprintf('Row %d (%s): %s', $rowNumber, $apName, implode('; ', $messages));
+                    continue; // skip this row, keep processing the rest
                 }
 
+                // Find existing AP: same rules as before (MAC match, else name match).
                 $existingAp = null;
                 foreach ($network->getAccessPoints() as $currentAp) {
                     if ($apMac !== '' && $apMac !== '0' && $currentAp->getMacAddress() === $apMac) {
@@ -241,39 +283,8 @@ class MapAccessPointExportController extends AbstractController
                     $apsImportedCount++;
                 }
 
-                $ap->setName($apName);
-                $ap->setSsid($apSsid === '' || $apSsid === '0' ? 'OpenRoaming' : $apSsid);
-                $ap->setMacAddress($apMac === '' || $apMac === '0' ? null : $apMac);
-                $ap->setVendor($apVendor === '' || $apVendor === '0' ? null : $apVendor);
-                $ap->setModel($apModel === '' || $apModel === '0' ? null : $apModel);
-                $ap->setStandard($apStandard === '' || $apStandard === '0' ? null : $apStandard);
-                $ap->setSerialNumber($apSerial === '' || $apSerial === '0' ? null : $apSerial);
-                $ap->setUpdatedAt($now);
-
-                if ($apLng !== '' && $apLat !== '') {
-                    $latFloat = (float)$apLat;
-                    $lngFloat = (float)$apLng;
-
-                    if ($latFloat >= -90 && $latFloat <= 90 && $lngFloat >= -180 && $lngFloat <= 180) {
-                        $ap->setLocation(json_encode([
-                            'type' => 'Point',
-                            'coordinates' => [$lngFloat, $latFloat]
-                        ], JSON_THROW_ON_ERROR));
-                    } else {
-                        $ap->setLocation(json_encode([
-                            'type' => 'Point',
-                            'coordinates' => [0, 0]
-                        ], JSON_THROW_ON_ERROR));
-                    }
-                } elseif (!$existingAp) {
-                    $ap->setLocation(json_encode([
-                        'type' => 'Point',
-                        'coordinates' => [0, 0]
-                    ], JSON_THROW_ON_ERROR));
-                }
-
-                $ap->setAltitudeMsl($apAltMsl !== '' ? (float)$apAltMsl : null);
-                $ap->setAltitudeAgl($apAltAgl !== '' ? (float)$apAltAgl : null);
+                // Single source of truth for entity mapping — same as the manual-entry flow.
+                $dto->updateEntity($ap);
 
                 $em->persist($ap);
             }
@@ -281,6 +292,17 @@ class MapAccessPointExportController extends AbstractController
             $em->persist($network);
             $em->flush();
             fclose($handle);
+
+            if (!empty($rowErrors)) {
+                $this->addFlash(
+                    'warning',
+                    sprintf(
+                        '%d row(s) skipped due to validation errors: %s',
+                        count($rowErrors),
+                        implode(' | ', array_slice($rowErrors, 0, 10))
+                    )
+                );
+            }
 
             $this->addFlash(
                 'success',
