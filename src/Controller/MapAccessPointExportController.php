@@ -413,7 +413,9 @@ class MapAccessPointExportController extends AbstractController
                 )
             );
         } catch (Throwable $e) {
-            fclose($handle);
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
             $this->addFlash(
                 'error',
                 sprintf(

@@ -116,7 +116,12 @@ class AccessPointDTO
                 'coordinates' => [$exactLng, $exactLat],
             ], JSON_THROW_ON_ERROR));
         } else {
-            $accessPoint->setLocation(null);
+            // location is NOT NULL in the DB — use the "no coordinates" sentinel
+            // instead of null, matching the export's (0,0) = blank convention.
+            $accessPoint->setLocation(json_encode([
+                'type' => 'Point',
+                'coordinates' => [0, 0],
+            ], JSON_THROW_ON_ERROR));
         }
 
         $accessPoint->setUpdatedAt(new DateTimeImmutable());
