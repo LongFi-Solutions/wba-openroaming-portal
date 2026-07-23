@@ -10,6 +10,7 @@ use App\Entity\AccessPoint;
 use App\Entity\Network;
 use App\Enum\AdminPermissionsType;
 use DateTimeImmutable;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -41,9 +42,9 @@ class MapAccessPointExportController extends AbstractController
         name: 'admin_dashboard_map_network_accessPoints_export'
     )]
     #[isGranted(AdminPermissionsType::MAP_READ->value)]
-    public function exportToCsv(Network $network): StreamedResponse
+    public function exportToCsv(Network $network, Connection $connection): StreamedResponse
     {
-        $response = new StreamedResponse(function () use ($network): void {
+        $response = new StreamedResponse(function () use ($network, $connection): void {
             $handle = fopen('php://output', 'wb+');
 
             if ($handle === false) {
@@ -66,30 +67,38 @@ class MapAccessPointExportController extends AbstractController
                         'ap_longitude',
                         'ap_latitude',
                         'ap_altitude_msl',
-                        'ap_altitude_agl'
+                        'ap_altitude_agl',
                     ],
                     escape: '\\'
                 );
 
-                foreach ($network->getAccessPoints() as $ap) {
-                    $locationRaw = $ap->getLocation();
+                // Coordinates extracted by MySQL (JSON_EXTRACT/->>), not decoded in PHP per-row.
+                $sql = <<<'SQL'
+                SELECT
+                    ap.name,
+                    ap.ssid,
+                    ap.mac_address,
+                    ap.vendor,
+                    ap.model,
+                    ap.standard,
+                    ap.serial_number,
+                    ap.location ->> '$.coordinates[0]' AS longitude,
+                    ap.location ->> '$.coordinates[1]' AS latitude,
+                    ap.altitude_msl,
+                    ap.altitude_agl
+                FROM access_point ap
+                WHERE ap.network_id = :networkId
+                ORDER BY ap.id ASC
+            SQL;
 
-                    $lng = '';
-                    $lat = '';
+                $result = $connection->executeQuery($sql, ['networkId' => $network->getId()]);
 
-                    if (is_string($locationRaw) && json_validate($locationRaw)) {
-                        $parsed = json_decode($locationRaw, true, 512, JSON_THROW_ON_ERROR);
-                        if (
-                            isset($parsed['coordinates']) &&
-                            is_array($parsed['coordinates']) &&
-                            count($parsed['coordinates']) >= 2
-                        ) {
-                            $lng = $parsed['coordinates'][0];
-                            $lat = $parsed['coordinates'][1];
-                        }
-                    }
+                foreach ($result->iterateAssociative() as $row) {
+                    $lng = $row['longitude'];
+                    $lat = $row['latitude'];
 
-                    if (in_array($lng, [0, 0.0, '0'], true)) {
+                    // Same "0,0 means no coordinates" convention as before.
+                    if ($lng === null || (float)$lng === 0.0) {
                         $lng = '';
                         $lat = '';
                     }
@@ -97,13 +106,13 @@ class MapAccessPointExportController extends AbstractController
                     fputcsv(
                         $handle,
                         [
-                            $this->sanitizeCsvField($ap->getName()),
-                            $this->sanitizeCsvField($ap->getSsid()),
-                            $this->sanitizeCsvField($ap->getMacAddress()),
-                            $this->sanitizeCsvField($ap->getVendor()),
-                            $this->sanitizeCsvField($ap->getModel()),
-                            $this->sanitizeCsvField($ap->getStandard()),
-                            $this->sanitizeCsvField($ap->getSerialNumber()),
+                            $this->sanitizeCsvField($row['name']),
+                            $this->sanitizeCsvField($row['ssid']),
+                            $this->sanitizeCsvField($row['mac_address']),
+                            $this->sanitizeCsvField($row['vendor']),
+                            $this->sanitizeCsvField($row['model']),
+                            $this->sanitizeCsvField($row['standard']),
+                            $this->sanitizeCsvField($row['serial_number']),
                             $lng !== '' ? number_format(
                                 (float)$lng,
                                 6,
@@ -116,8 +125,8 @@ class MapAccessPointExportController extends AbstractController
                                 '.',
                                 ''
                             ) : '',
-                            $ap->getAltitudeMsl(),
-                            $ap->getAltitudeAgl()
+                            $row['altitude_msl'],
+                            $row['altitude_agl'],
                         ],
                         escape: '\\'
                     );
@@ -129,7 +138,7 @@ class MapAccessPointExportController extends AbstractController
                         'FATAL ERROR:',
                         $e->getMessage(),
                         'LINE: ' . $e->getLine(),
-                        'FILE: ' . $e->getFile()
+                        'FILE: ' . $e->getFile(),
                     ],
                     escape: '\\'
                 );
