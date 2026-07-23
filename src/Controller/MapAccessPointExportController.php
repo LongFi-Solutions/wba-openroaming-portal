@@ -198,52 +198,24 @@ class MapAccessPointExportController extends AbstractController
 
         if (!$file) {
             $this->addFlash('error', $this->translator->trans('importErrorNoFile', [], 'controllers'));
-            return $this->redirectToRoute(
-                'admin_dashboard_map_network_accessPoints',
-                ['id' => $network->getId()]
-            );
+            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
         }
 
         if ($file->getClientOriginalExtension() !== 'csv') {
             $this->addFlash('error', $this->translator->trans('importErrorInvalidFormat', [], 'controllers'));
-            return $this->redirectToRoute(
-                'admin_dashboard_map_network_accessPoints',
-                ['id' => $network->getId()]
-            );
-        }
-
-        $allowedMimeTypes = [
-            'text/csv',
-            'text/plain',
-            'application/csv',
-            'text/x-csv',
-            'application/vnd.ms-excel',
-        ];
-
-        if (!in_array($file->getMimeType(), $allowedMimeTypes, true)) {
-            $this->addFlash('error', $this->translator->trans('importErrorInvalidMimeType', [], 'controllers'));
-            return $this->redirectToRoute(
-                'admin_dashboard_map_network_accessPoints',
-                ['id' => $network->getId()]
-            );
+            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
         }
 
         $realPath = $file->getRealPath();
         if ($realPath === false || !is_readable($realPath)) {
             $this->addFlash('error', $this->translator->trans('importErrorNotReadable', [], 'controllers'));
-            return $this->redirectToRoute(
-                'admin_dashboard_map_network_accessPoints',
-                ['id' => $network->getId()]
-            );
+            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
         }
 
         $handle = fopen($realPath, 'rb');
         if ($handle === false) {
             $this->addFlash('error', $this->translator->trans('importErrorCannotOpen', [], 'controllers'));
-            return $this->redirectToRoute(
-                'admin_dashboard_map_network_accessPoints',
-                ['id' => $network->getId()]
-            );
+            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
         }
 
         if (fread($handle, 3) !== "\xEF\xBB\xBF") {
@@ -251,73 +223,76 @@ class MapAccessPointExportController extends AbstractController
         }
 
         $headers = fgetcsv($handle, 0, ',', escape: '\\');
-        if (
-            !$headers || !in_array(
-                'ap_name',
-                $headers,
-                true
-            )
-        ) {
+        if (!$headers || !in_array('ap_name', $headers, true)) {
             fclose($handle);
-            $this->addFlash(
-                'error',
-                $this->translator->trans('importErrorInvalidStructure', [], 'controllers')
-            );
-            return $this->redirectToRoute(
-                'admin_dashboard_map_network_accessPoints',
-                ['id' => $network->getId()]
-            );
+            $this->addFlash('error', $this->translator->trans('importErrorInvalidStructure', [], 'controllers'));
+            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
         }
+
+        $cols = array_flip($headers);
+        $idxName   = $cols['ap_name'] ?? 0;
+        $idxSsid   = $cols['ap_ssid'] ?? 1;
+        $idxMac    = $cols['ap_mac_address'] ?? 2;
+        $idxVendor = $cols['ap_vendor'] ?? 3;
+        $idxModel  = $cols['ap_model'] ?? 4;
+        $idxStd    = $cols['ap_standard'] ?? 5;
+        $idxSerial = $cols['ap_serial_number'] ?? 6;
+        $idxLng    = $cols['ap_longitude'] ?? 7;
+        $idxLat    = $cols['ap_latitude'] ?? 8;
+        $idxMsl    = $cols['ap_altitude_msl'] ?? 9;
+        $idxAgl    = $cols['ap_altitude_agl'] ?? 10;
 
         $apsImportedCount = 0;
         $apsUpdatedCount = 0;
-        $rowErrors = [];   // structured, not a flat string
-        $validRows = [];   // dto + raw fields, kept if valid
+        $rowErrors = [];
+        $validRows = [];
         $rowNumber = 1;
 
         try {
             while (($row = fgetcsv($handle, 0, ',', escape: '\\')) !== false) {
                 $rowNumber++;
 
-                $apName = trim($row[0] ?? '');
-                if ($apName === '' || $apName === '0') {
-                    continue; // truly empty row, not a data error
+                $apName = $this->sanitizeCsvField($row[$idxName] ?? '');
+                if ($apName === '' || $apName === '0' || $apName === "'0") {
+                    continue;
                 }
 
-                $apSsid = trim($row[1] ?? '');
-                $apMac = trim($row[2] ?? '');
-                $apVendor = trim($row[3] ?? '');
-                $apModel = trim($row[4] ?? '');
-                $apStandard = trim($row[5] ?? '');
-                $apSerial = trim($row[6] ?? '');
-                $apLng = trim($row[7] ?? '');
-                $apLat = trim($row[8] ?? '');
-                $apAltMsl = trim($row[9] ?? '');
-                $apAltAgl = trim($row[10] ?? '');
+                $apSsid   = $this->sanitizeCsvField($row[$idxSsid] ?? '');
+                $apMac    = trim($row[$idxMac] ?? '');
+                $apVendor = $this->sanitizeCsvField($row[$idxVendor] ?? '');
+                $apModel  = $this->sanitizeCsvField($row[$idxModel] ?? '');
+                $apStd    = $this->sanitizeCsvField($row[$idxStd] ?? '');
+                $apSerial = trim($row[$idxSerial] ?? '');
 
-                // Build the DTO exactly like the create/edit form would.
+                $rawLng = str_replace(',', '.', ltrim(trim($row[$idxLng] ?? ''), "'"));
+                $rawLat = str_replace(',', '.', ltrim(trim($row[$idxLat] ?? ''), "'"));
+                $rawMsl = str_replace(',', '.', ltrim(trim($row[$idxMsl] ?? ''), "'"));
+                $rawAgl = str_replace(',', '.', ltrim(trim($row[$idxAgl] ?? ''), "'"));
+
                 $dto = new AccessPointDTO();
-                $dto->network = $network;
-                $dto->name = $apName;
-                $dto->ssid = $apSsid === '' || $apSsid === '0' ? 'OpenRoaming' : $apSsid;
-                $dto->macAddress = $apMac === '' || $apMac === '0' ? null : $apMac;
-                $dto->vendor = $apVendor === '' || $apVendor === '0' ? null : $apVendor;
-                $dto->model = $apModel === '' || $apModel === '0' ? null : $apModel;
-                $dto->standard = $apStandard === '' || $apStandard === '0' ? null : $apStandard;
-                $dto->serialNumber = $apSerial === '' || $apSerial === '0' ? null : $apSerial;
-                $dto->latitude = $apLat !== '' ? $apLat : null;
-                $dto->longitude = $apLng !== '' ? $apLng : null;
-                $dto->altitudeMsl = $apAltMsl !== '' ? (float)$apAltMsl : null;
-                $dto->altitudeAgl = $apAltAgl !== '' ? (float)$apAltAgl : null;
+                $dto->network      = $network;
+                $dto->name         = $apName;
+                $dto->ssid         = ($apSsid === '' || $apSsid === '0') ? 'OpenRoaming' : $apSsid;
+                $dto->macAddress   = ($apMac === '' || $apMac === '0') ? null : $apMac;
+                $dto->vendor       = ($apVendor === '' || $apVendor === '0') ? null : $apVendor;
+                $dto->model        = ($apModel === '' || $apModel === '0') ? null : $apModel;
+                $dto->standard     = ($apStd === '' || $apStd === '0') ? null : $apStd;
+                $dto->serialNumber = ($apSerial === '' || $apSerial === '0') ? null : $apSerial;
+
+                $dto->longitude   = $rawLat !== '' ? $rawLat : null;
+                $dto->latitude    = $rawLng !== '' ? $rawLng : null;
+
+                $dto->altitudeMsl = $rawMsl !== '' ? (float) $rawMsl : null;
+                $dto->altitudeAgl = $rawAgl !== '' ? (float) $rawAgl : null;
 
                 $violations = $this->validator->validate($dto);
 
                 if (count($violations) > 0) {
                     foreach ($violations as $violation) {
                         $rowErrors[] = [
-                            'row' => $rowNumber,
-                            'name' => $apName,
-                            'field' => $violation->getPropertyPath() ?: 'general',
+                            'row'     => $rowNumber,
+                            'name'    => $apName,
+                            'field'   => $violation->getPropertyPath() ?: 'general',
                             'message' => $violation->getMessage(),
                         ];
                     }
@@ -327,22 +302,19 @@ class MapAccessPointExportController extends AbstractController
                 $validRows[] = ['dto' => $dto, 'mac' => $apMac, 'name' => $apName];
             }
 
-            fclose($handle);
-
-            // Atomic: any error at all → abort, write nothing.
             if ($rowErrors !== []) {
                 $groupedErrors = [];
                 foreach ($rowErrors as $err) {
                     $key = $err['field'] . '|' . $err['message'];
                     if (!isset($groupedErrors[$key])) {
                         $groupedErrors[$key] = [
-                            'field' => $err['field'],
+                            'field'   => $err['field'],
                             'message' => $err['message'],
-                            'rows' => [],
+                            'rows'    => [],
                         ];
                     }
                     $groupedErrors[$key]['rows'][] = [
-                        'row' => $err['row'],
+                        'row'  => $err['row'],
                         'name' => $err['name'],
                     ];
                 }
@@ -407,9 +379,6 @@ class MapAccessPointExportController extends AbstractController
                 )
             );
         } catch (Throwable $e) {
-            if (is_resource($handle)) {
-                fclose($handle);
-            }
             $this->addFlash(
                 'error',
                 sprintf(
@@ -417,6 +386,10 @@ class MapAccessPointExportController extends AbstractController
                     $e->getMessage()
                 )
             );
+        } finally {
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
         }
 
         return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
