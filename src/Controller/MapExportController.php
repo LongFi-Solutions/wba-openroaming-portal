@@ -102,11 +102,18 @@ class MapExportController extends AbstractController
 
                         if (is_string($locationRaw) && json_validate($locationRaw)) {
                             $parsed = json_decode($locationRaw, true);
-                            if (isset($parsed['coordinates']) && is_array($parsed['coordinates']) && count($parsed['coordinates']) >= 2) {
+                            if (
+                                isset($parsed['coordinates']) &&
+                                is_array($parsed['coordinates']) &&
+                                count($parsed['coordinates']) >= 2
+                            ) {
                                 $lng = $parsed['coordinates'][0];
                                 $lat = $parsed['coordinates'][1];
                             }
-                        } elseif (is_array($locationRaw) && isset($locationRaw['coordinates'][0], $locationRaw['coordinates'][1])) {
+                        } elseif (
+                            is_array($locationRaw) &&
+                            isset($locationRaw['coordinates'][0], $locationRaw['coordinates'][1])
+                        ) {
                             $lng = $locationRaw['coordinates'][0];
                             $lat = $locationRaw['coordinates'][1];
                         }
