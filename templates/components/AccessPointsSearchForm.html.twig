@@ -60,7 +60,7 @@
                         <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                         </svg>
-                        {{ 'export'|trans({}, '_acessPoint')|default('Export') }}
+                        {{ 'exportAcessPoints'|trans({}, '_acessPoint') }}
                     </a>
 
                     <button type="button"
@@ -69,7 +69,7 @@
                         <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                         </svg>
-                        {{ 'import'|trans({}, '_acessPoint')|default('Importar') }}
+                        {{ 'importAcessPoints'|trans({}, '_acessPoint') }}
                     </button>
 
                     <a href="{{ path('admin_dashboard_map_accessPoint_create', {id: network.id}) }}" class="btn-primary px-4 min-w-[150px] text-center">
