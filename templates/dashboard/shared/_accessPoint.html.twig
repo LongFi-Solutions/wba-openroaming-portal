@@ -8,8 +8,8 @@
 
     <td class="p-4 pl-8 text-sm font-mono">
         {% if accessPoint.lat is not null %}
-            <span class="text-gray-700 block">Lat: {{ accessPoint.lat|number_format(6) }}</span>
-            <span class="text-gray-400 block text-xs">Lng: {{ accessPoint.lng|number_format(6) }}</span>
+            <span class="text-gray-700 block">Lat: {{ accessPoint.lat|number_format(7) }}</span>
+            <span class="text-gray-400 block text-xs">Lng: {{ accessPoint.lng|number_format(7) }}</span>
         {% else %}
             <span class="text-gray-400 italic text-xs">{{ 'noData'|trans({}, '_blacklist') }}</span>
         {% endif %}
