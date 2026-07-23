@@ -227,7 +227,7 @@ importErrorInvalidFormat: 'Formato de ficheiro inválido. Por favor, carregue um
 importErrorNotReadable: 'O ficheiro carregado não pode ser lido.'
 importErrorCannotOpen: 'Não foi possível abrir o ficheiro CSV carregado.'
 importErrorInvalidStructure: 'Estrutura do CSV inválida. A coluna "network_name" é obrigatória.'
-importSuccess: 'Importação concluída com sucesso! Foram processadas %d redes e importados/atualizados %d Access Points.'
+networkImportSuccess: 'Importação concluída com sucesso! Foram processadas %d redes.'
 importErrorGeneral: 'Ocorreu um erro durante a importação: %s'
 mapSettingsAppliedSuccessfully: 'Configuração do mapa aplicada com sucesso!'
 importErrorInvalidMimeType: 'O conteúdo do ficheiro não é um CSV válido (MIME type incorreto).'
