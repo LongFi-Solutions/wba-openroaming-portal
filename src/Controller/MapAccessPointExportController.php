@@ -97,15 +97,25 @@ class MapAccessPointExportController extends AbstractController
                     fputcsv(
                         $handle,
                         [
-                            $ap->getName(),
-                            $ap->getSsid(),
-                            $ap->getMacAddress(),
-                            $ap->getVendor(),
-                            $ap->getModel(),
-                            $ap->getStandard(),
-                            $ap->getSerialNumber(),
-                            $lng !== '' ? number_format((float)$lng, 6, '.', '') : '',
-                            $lat !== '' ? number_format((float)$lat, 6, '.', '') : '',
+                            $this->sanitizeCsvField($ap->getName()),
+                            $this->sanitizeCsvField($ap->getSsid()),
+                            $this->sanitizeCsvField($ap->getMacAddress()),
+                            $this->sanitizeCsvField($ap->getVendor()),
+                            $this->sanitizeCsvField($ap->getModel()),
+                            $this->sanitizeCsvField($ap->getStandard()),
+                            $this->sanitizeCsvField($ap->getSerialNumber()),
+                            $lng !== '' ? number_format(
+                                (float)$lng,
+                                6,
+                                '.',
+                                ''
+                            ) : '',
+                            $lat !== '' ? number_format(
+                                (float)$lat,
+                                6,
+                                '.',
+                                ''
+                            ) : '',
                             $ap->getAltitudeMsl(),
                             $ap->getAltitudeAgl()
                         ],
