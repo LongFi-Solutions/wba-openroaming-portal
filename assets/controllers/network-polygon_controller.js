@@ -388,14 +388,29 @@ export default class extends Controller {
         if (!this.hasGeometryJsonTarget || !this.geometryJsonTarget.value) return;
 
         const rawValue = this.geometryJsonTarget.value.trim();
-        if (['', '[]', 'null'].includes(rawValue)) return;
+        if (['', '[]', 'null', '{}'].includes(rawValue)) return;
 
         try {
             const geoJson = JSON.parse(rawValue);
-            const polygonCoordsList =
-                geoJson.type === 'MultiPolygon' ? geoJson.coordinates : [geoJson.coordinates];
+            let polygonCoordsList = [];
+
+            if (geoJson.type === 'Polygon') {
+                polygonCoordsList = [geoJson.coordinates];
+            } else if (geoJson.type === 'MultiPolygon') {
+                polygonCoordsList = geoJson.coordinates;
+            } else if (geoJson.type === 'GeometryCollection' && Array.isArray(geoJson.geometries)) {
+                geoJson.geometries.forEach((geom) => {
+                    if (geom.type === 'Polygon') {
+                        polygonCoordsList.push(geom.coordinates);
+                    } else if (geom.type === 'MultiPolygon') {
+                        polygonCoordsList.push(...geom.coordinates);
+                    }
+                });
+            }
 
             polygonCoordsList.forEach((polygonCoords) => {
+                if (!Array.isArray(polygonCoords) || polygonCoords.length === 0) return;
+
                 const coordinates = polygonCoords[0];
                 if (coordinates && coordinates.length > 0) {
                     const savedPoints = coordinates.slice(0, -1);
@@ -409,7 +424,7 @@ export default class extends Controller {
                 this.map.fitBounds(this.drawnItems.getBounds(), { padding: [40, 40], maxZoom: 16 });
             }
         } catch (error) {
-            console.error('Error loading existing polygons', error);
+            console.error('Error loading existing polygons:', error);
         }
     }
 

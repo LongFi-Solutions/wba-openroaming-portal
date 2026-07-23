@@ -236,11 +236,13 @@ class MapController extends AbstractController
 
         $form = $this->createForm(CreateNetworkType::class, $networkDTO);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $networkDTO->updateEntity($network);
             $network->setUpdatedAt(new DateTimeImmutable());
             $this->entityManager->persist($network);
             $this->entityManager->flush();
+
             $this->addFlash(
                 'success',
                 $this->translator->trans('successNetworkEdit', ['%network%' => $network->getName()], 'controllers')
@@ -255,27 +257,49 @@ class MapController extends AbstractController
             ->center(new Point($centerLat, $centerLng))
             ->zoom((int)$data[SettingName::MAP_CENTER_ZOOM->value]['value']);
 
-        $accessPoints = $this->entityManager->getRepository(AccessPoint::class)->findBy(['network' => $network]);
+        $accessPointsForMap = $this->entityManager->getRepository(AccessPoint::class)
+            ->createQueryBuilder('ap')
+            ->select('ap.id', 'ap.name', 'ap.location')
+            ->where('ap.network = :network')
+            ->andWhere('ap.location IS NOT NULL')
+            ->setParameter('network', $network)
+            ->getQuery()
+            ->getArrayResult();
 
-        foreach ($accessPoints as $ap) {
-            $locationJson = $ap->getLocation();
+        $unmappedCount = 0;
 
-            if ($locationJson !== null) {
-                $location = json_decode($locationJson, true, 512, JSON_THROW_ON_ERROR);
+        foreach ($accessPointsForMap as $apData) {
+            $locationJson = $apData['location'];
+            $location = is_string($locationJson) ? json_decode($locationJson, true) : $locationJson;
 
-                if (isset($location['coordinates']) && is_array($location['coordinates'])) {
-                    $lng = $location['coordinates'][0] ?? null;
-                    $lat = $location['coordinates'][1] ?? null;
+            if (is_array($location) && isset($location['coordinates'][0], $location['coordinates'][1])) {
+                $lng = (float)$location['coordinates'][0];
+                $lat = (float)$location['coordinates'][1];
 
-                    if ($lat !== null && $lng !== null) {
-                        $map->addMarker(new Marker(
-                            position: new Point((float)$lat, (float)$lng),
-                            title: $ap->getName() ?? 'Access Point'
-                        ));
-                    }
+                if ($lat === 0.0 && $lng === 0.0) {
+                    $unmappedCount++;
+                    continue;
                 }
+
+                $map->addMarker(new Marker(
+                    position: new Point($lat, $lng),
+                    title: $apData['name'] ?? 'Access Point'
+                ));
+            } else {
+                $unmappedCount++;
             }
         }
+
+        $nullLocationCount = (int) $this->entityManager->getRepository(AccessPoint::class)
+            ->createQueryBuilder('ap')
+            ->select('COUNT(ap.id)')
+            ->where('ap.network = :network')
+            ->andWhere('ap.location IS NULL')
+            ->setParameter('network', $network)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $totalUnmapped = $unmappedCount + $nullLocationCount;
 
         return $this->render('dashboard/shared/settings_actions/map/network/manage_network.html.twig', [
             'form' => $form->createView(),
@@ -283,6 +307,7 @@ class MapController extends AbstractController
             'map' => $map,
             'networkDTO' => $networkDTO,
             'network' => $network,
+            'unmappedCount' => $totalUnmapped,
         ]);
     }
 
