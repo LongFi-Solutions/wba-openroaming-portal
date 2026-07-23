@@ -285,7 +285,7 @@ class MapAccessPointExportController extends AbstractController
             $this->addFlash(
                 'success',
                 sprintf(
-                    $this->translator->trans('importSuccess', [], 'controllers'),
+                    $this->translator->trans('accessPointImportSuccess', [], 'controllers'),
                     $apsImportedCount,
                     $apsUpdatedCount
                 )
