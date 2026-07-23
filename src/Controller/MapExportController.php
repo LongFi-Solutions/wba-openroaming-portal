@@ -71,10 +71,14 @@ class MapExportController extends AbstractController
                     $netDesc = $network->getDescription();
 
                     $geo = $network->getGeometry();
-                    $netGeo = is_array($geo) ? json_encode(
-                        $geo,
-                        JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE
-                    ) : (string)$geo;
+                    $netGeo = '';
+                    if (is_array($geo)) {
+                        $netGeo = json_encode($geo, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+                    } elseif (is_string($geo)) {
+                        $netGeo = $geo;
+                    } elseif ($geo !== null) {
+                        $netGeo = (string)$geo;
+                    }
 
                     $aps = $network->getAccessPoints();
 
@@ -91,14 +95,25 @@ class MapExportController extends AbstractController
                     }
 
                     foreach ($aps as $ap) {
-                        $locationData = $ap->getLocationData();
+                        $locationRaw = $ap->getLocation();
 
                         $lng = '';
                         $lat = '';
 
-                        if ($locationData !== null) {
-                            $lng = $locationData['lng'];
-                            $lat = $locationData['lat'];
+                        if (is_string($locationRaw) && json_validate($locationRaw)) {
+                            $parsed = json_decode($locationRaw, true);
+                            if (isset($parsed['coordinates']) && is_array($parsed['coordinates']) && count($parsed['coordinates']) >= 2) {
+                                $lng = $parsed['coordinates'][0];
+                                $lat = $parsed['coordinates'][1];
+                            }
+                        } elseif (is_array($locationRaw) && isset($locationRaw['coordinates'][0], $locationRaw['coordinates'][1])) {
+                            $lng = $locationRaw['coordinates'][0];
+                            $lat = $locationRaw['coordinates'][1];
+                        }
+
+                        if ($lng === 0 || $lng === 0.0 || $lng === '0') {
+                            $lng = '';
+                            $lat = '';
                         }
 
                         fputcsv(
@@ -250,7 +265,16 @@ class MapExportController extends AbstractController
                     }
 
                     if ($netGeoRaw !== '' && $netGeoRaw !== '0') {
-                        $network->setGeometry($netGeoRaw);
+                        if (json_validate($netGeoRaw)) {
+                            $network->setGeometry($netGeoRaw);
+                        } else {
+                            if ($isNew) {
+                                $network->setGeometry(json_encode([
+                                    'type' => 'GeometryCollection',
+                                    'geometries' => []
+                                ], JSON_THROW_ON_ERROR));
+                            }
+                        }
                     } elseif ($isNew) {
                         $network->setGeometry(json_encode([
                             'type' => 'GeometryCollection',
@@ -298,9 +322,21 @@ class MapExportController extends AbstractController
                         $latFloat = (float)$apLat;
                         $lngFloat = (float)$apLng;
 
+                        if ($latFloat >= -90 && $latFloat <= 90 && $lngFloat >= -180 && $lngFloat <= 180) {
+                            $ap->setLocation(json_encode([
+                                'type' => 'Point',
+                                'coordinates' => [$lngFloat, $latFloat]
+                            ], JSON_THROW_ON_ERROR));
+                        } else {
+                            $ap->setLocation(json_encode([
+                                'type' => 'Point',
+                                'coordinates' => [0, 0]
+                            ], JSON_THROW_ON_ERROR));
+                        }
+                    } elseif (!$existingAp) {
                         $ap->setLocation(json_encode([
                             'type' => 'Point',
-                            'coordinates' => [$lngFloat, $latFloat]
+                            'coordinates' => [0, 0]
                         ], JSON_THROW_ON_ERROR));
                     }
 
