@@ -50,11 +50,11 @@ class AccessPointDTO
     public ?string $longitude = null;
 
     #[Assert\Type(type: 'float', message: 'decimalNumber')]
-    #[Assert\Range(notInRangeMessage: 'invalidAltitudeMsl', min: 0, max: 9000)]
+    #[Assert\Range(notInRangeMessage: 'invalidAltitudeMsl', min: -1000, max: 9000)]
     public ?float $altitudeMsl = null;
 
     #[Assert\Type(type: 'float', message: 'decimalNumber')]
-    #[Assert\PositiveOrZero(message: 'altitudeAglCannotBeNegative')]
+    #[Assert\Range(notInRangeMessage: 'invalidAltitudeAgl', min: 0, max: 1000)]
     public ?float $altitudeAgl = null;
 
     /**

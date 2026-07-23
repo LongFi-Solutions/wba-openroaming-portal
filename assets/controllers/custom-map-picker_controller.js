@@ -68,6 +68,24 @@ export default class extends Controller {
         this.marker = null;
     }
 
+    // --- Altitude Check -----------------------------------------------------
+
+    checkNegativeAltitude(event) {
+        const input = event.target;
+        const value = parseFloat(input.value);
+
+        // Se o valor for menor que zero, mostra o aviso
+        if (value < 0) {
+            const message = input.dataset.warningMessage;
+            const confirmed = window.confirm(message);
+
+            // Se o utilizador clicar em "Cancelar", limpamos o campo (ou podes definir para 0)
+            if (!confirmed) {
+                input.value = '';
+            }
+        }
+    }
+
     // --- internal helpers -------------------------------------------------
 
     _handleMapClick(e) {
