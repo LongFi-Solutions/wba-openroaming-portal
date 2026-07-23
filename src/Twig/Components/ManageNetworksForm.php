@@ -79,22 +79,58 @@ final class ManageNetworksForm extends AbstractController
         return $this->getForm()->getErrors(true);
     }
 
+    /**
+     * @return array<int, array{id: mixed, name: string, lat: float, lng: float}>
+     */
+    public function getValidAccessPoints(): array
+    {
+        if (!$this->network || !$this->network->getId()) {
+            return [];
+        }
+
+        $accessPointsForMap = $this->accessPointRepository
+            ->createQueryBuilder('ap')
+            ->select('ap.id', 'ap.name', 'ap.location')
+            ->where('ap.network = :network')
+            ->andWhere('ap.location IS NOT NULL')
+            ->setParameter('network', $this->network)
+            ->getQuery()
+            ->getArrayResult();
+
+        $validAps = [];
+
+        foreach ($accessPointsForMap as $apData) {
+            $locationJson = $apData['location'];
+            $location = is_string($locationJson) ? json_decode($locationJson, true) : $locationJson;
+
+            if (is_array($location) && isset($location['coordinates'][0], $location['coordinates'][1])) {
+                $lng = (float)$location['coordinates'][0];
+                $lat = (float)$location['coordinates'][1];
+
+                if ($lat !== 0.0 || $lng !== 0.0) {
+                    $validAps[] = [
+                        'id' => $apData['id'] ?? null,
+                        'name' => $apData['name'] ?? 'Access Point',
+                        'lat' => $lat,
+                        'lng' => $lng,
+                    ];
+                }
+            }
+        }
+
+        return $validAps;
+    }
+
     public function getMap(): Map
     {
         $map = new Map()
             ->center(new Point(37.7412, -25.6756))
             ->zoom(13);
 
-        if (!$this->network || !$this->network->getId()) {
-            return $map;
-        }
-
-        $accessPoints = $this->accessPointRepository->findByNetworkWithCoordinates($this->network);
-
-        foreach ($accessPoints as $ap) {
+        foreach ($this->getValidAccessPoints() as $ap) {
             $map->addMarker(new Marker(
-                position: new Point((float)$ap['lat'], (float)$ap['lng']),
-                title: $ap['name'] ?? 'Access Point'
+                position: new Point($ap['lat'], $ap['lng']),
+                title: $ap['name']
             ));
         }
 

@@ -11,6 +11,8 @@
 
         <div class="p-6 bg-white rounded-lg shadow-sm"
              data-controller="network-polygon map-geolocation"
+             data-network-polygon-aps-value="{{ this.validAccessPoints|json_encode }}"
+             data-network-polygon-marker-icon-value="{{ ux_icon('wba:access-point-point', {class: 'fill-none stroke-current'})|e('html_attr') }}"
              data-network-polygon-tooltip-value="{{ 'deletePolygonTooltip'|trans({}, '_map') }}"
              data-network-polygon-empty-label-value="{{ 'coverageOverviewEmpty'|trans({}, '_map') }}"
              data-network-polygon-type-labels-value="{{ {

@@ -27,6 +27,8 @@ const EARTH_RADIUS = 6378137; // WGS84 mean radius in meters
 export default class extends Controller {
     static targets = ['geometryJson', 'coverageList', 'emptyState'];
     static values = {
+        aps: { type: Array, default: [] },
+        markerIcon: { type: String, default: '' },
         emptyLabel: { type: String, default: 'No coverage areas yet.' },
         typeLabels: { type: Object, default: {} },
         areaItemLabel: { type: String, default: 'Area' },
@@ -74,8 +76,30 @@ export default class extends Controller {
 
         setTimeout(() => {
             this.loadExistingPolygons();
+            this.renderAccessPoints();
             this.renderCoverageList();
         }, 150);
+    }
+
+    // --- Access Points Rendering --------------------------------------------
+
+    renderAccessPoints() {
+        if (!this.apsValue || this.apsValue.length === 0) return;
+
+        const iconHtml = this.markerIconValue || '<div></div>';
+
+        const apIcon = this.L.divIcon({
+            className: 'custom-pin-icon coverage-network-marker',
+            html: iconHtml,
+            iconSize: [33, 40],
+            iconAnchor: [16, 40],
+        });
+
+        this.apsValue.forEach((ap) => {
+            if (!ap.lat || !ap.lng) return;
+
+            this.L.marker([ap.lat, ap.lng], { icon: apIcon }).addTo(this.map);
+        });
     }
 
     // Use arrow functions for callbacks to preserve 'this' context natively
