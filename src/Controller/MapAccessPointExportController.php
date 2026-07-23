@@ -285,11 +285,27 @@ class MapAccessPointExportController extends AbstractController
 
             // Atomic: any error at all → abort, write nothing.
             if (!empty($rowErrors)) {
-                $this->addFlash('import_errors', $rowErrors);
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('importErrorValidation', [], 'controllers')
-                );
+                $groupedErrors = [];
+                foreach ($rowErrors as $err) {
+                    $key = $err['field'] . '|' . $err['message'];
+                    if (!isset($groupedErrors[$key])) {
+                        $groupedErrors[$key] = [
+                            'field' => $err['field'],
+                            'message' => $err['message'],
+                            'rows' => [],
+                        ];
+                    }
+                    $groupedErrors[$key]['rows'][] = [
+                        'row' => $err['row'],
+                        'name' => $err['name'],
+                    ];
+                }
+
+                usort($groupedErrors, static fn (array $a, array $b): int => count($b['rows']) <=> count($a['rows']));
+
+                $this->addFlash('import_errors', array_values($groupedErrors));
+                // no separate 'import_errors_total' flash — the template derives it
+                $this->addFlash('error', $this->translator->trans('importErrorValidation', [], 'controllers'));
                 return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
             }
 
