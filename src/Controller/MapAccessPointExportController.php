@@ -154,12 +154,18 @@ class MapAccessPointExportController extends AbstractController
 
         if (!$file) {
             $this->addFlash('error', $this->translator->trans('importErrorNoFile', [], 'controllers'));
-            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
+            return $this->redirectToRoute(
+                'admin_dashboard_map_network_accessPoints',
+                ['id' => $network->getId()]
+            );
         }
 
         if ($file->getClientOriginalExtension() !== 'csv') {
             $this->addFlash('error', $this->translator->trans('importErrorInvalidFormat', [], 'controllers'));
-            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
+            return $this->redirectToRoute(
+                'admin_dashboard_map_network_accessPoints',
+                ['id' => $network->getId()]
+            );
         }
 
         $allowedMimeTypes = [
@@ -172,19 +178,28 @@ class MapAccessPointExportController extends AbstractController
 
         if (!in_array($file->getMimeType(), $allowedMimeTypes, true)) {
             $this->addFlash('error', $this->translator->trans('importErrorInvalidMimeType', [], 'controllers'));
-            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
+            return $this->redirectToRoute(
+                'admin_dashboard_map_network_accessPoints',
+                ['id' => $network->getId()]
+            );
         }
 
         $realPath = $file->getRealPath();
         if ($realPath === false || !is_readable($realPath)) {
             $this->addFlash('error', $this->translator->trans('importErrorNotReadable', [], 'controllers'));
-            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
+            return $this->redirectToRoute(
+                'admin_dashboard_map_network_accessPoints',
+                ['id' => $network->getId()]
+            );
         }
 
-        $handle = fopen($realPath, 'r');
+        $handle = fopen($realPath, 'rb');
         if ($handle === false) {
             $this->addFlash('error', $this->translator->trans('importErrorCannotOpen', [], 'controllers'));
-            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
+            return $this->redirectToRoute(
+                'admin_dashboard_map_network_accessPoints',
+                ['id' => $network->getId()]
+            );
         }
 
         if (fread($handle, 3) !== "\xEF\xBB\xBF") {
@@ -210,9 +225,9 @@ class MapAccessPointExportController extends AbstractController
 
         $apsImportedCount = 0;
         $apsUpdatedCount = 0;
-        $rowErrors = [];
+        $rowErrors = [];   // structured, not a flat string
+        $validRows = [];   // dto + raw fields, kept if valid
         $rowNumber = 1;
-        $now = new DateTimeImmutable();
 
         try {
             while (($row = fgetcsv($handle, 0, ',', escape: '\\')) !== false) {
@@ -220,7 +235,7 @@ class MapAccessPointExportController extends AbstractController
 
                 $apName = trim($row[0] ?? '');
                 if ($apName === '' || $apName === '0') {
-                    continue;
+                    continue; // truly empty row, not a data error
                 }
 
                 $apSsid = trim($row[1] ?? '');
@@ -252,57 +267,72 @@ class MapAccessPointExportController extends AbstractController
                 $violations = $this->validator->validate($dto);
 
                 if (count($violations) > 0) {
-                    $messages = [];
                     foreach ($violations as $violation) {
-                        $messages[] = ($violation->getPropertyPath() ?: 'general') . ': ' . $violation->getMessage();
+                        $rowErrors[] = [
+                            'row' => $rowNumber,
+                            'name' => $apName,
+                            'field' => $violation->getPropertyPath() ?: 'general',
+                            'message' => $violation->getMessage(),
+                        ];
                     }
-                    $rowErrors[] = sprintf('Row %d (%s): %s', $rowNumber, $apName, implode('; ', $messages));
-                    continue; // skip this row, keep processing the rest
+                    continue;
                 }
 
-                // Find existing AP: same rules as before (MAC match, else name match).
-                $existingAp = null;
-                foreach ($network->getAccessPoints() as $currentAp) {
-                    if ($apMac !== '' && $apMac !== '0' && $currentAp->getMacAddress() === $apMac) {
-                        $existingAp = $currentAp;
-                        break;
-                    }
-                    if (($apMac === '' || $apMac === '0') && $currentAp->getName() === $apName) {
-                        $existingAp = $currentAp;
-                        break;
-                    }
-                }
-
-                if ($existingAp) {
-                    $ap = $existingAp;
-                    $apsUpdatedCount++;
-                } else {
-                    $ap = new AccessPoint();
-                    $ap->setCreatedAt($now);
-                    $network->addAccessPoint($ap);
-                    $apsImportedCount++;
-                }
-
-                // Single source of truth for entity mapping — same as the manual-entry flow.
-                $dto->updateEntity($ap);
-
-                $em->persist($ap);
+                $validRows[] = ['dto' => $dto, 'mac' => $apMac, 'name' => $apName];
             }
 
-            $em->persist($network);
-            $em->flush();
             fclose($handle);
 
+            // Atomic: any error at all → abort, write nothing.
             if (!empty($rowErrors)) {
+                $this->addFlash('import_errors', $rowErrors);
                 $this->addFlash(
-                    'warning',
-                    sprintf(
-                        '%d row(s) skipped due to validation errors: %s',
-                        count($rowErrors),
-                        implode(' | ', array_slice($rowErrors, 0, 10))
-                    )
+                    'error',
+                    $this->translator->trans('importErrorValidation', [], 'controllers')
                 );
+                return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
             }
+
+            // Everything validated — now actually write it, inside one transaction.
+            $em->wrapInTransaction(
+                function () use ($em, $network, $validRows, &$apsImportedCount, &$apsUpdatedCount): void {
+                    $now = new DateTimeImmutable();
+
+                    foreach ($validRows as $entry) {
+                        /** @var AccessPointDTO $dto */
+                        $dto = $entry['dto'];
+                        $apMac = $entry['mac'];
+                        $apName = $entry['name'];
+
+                        $existingAp = null;
+                        foreach ($network->getAccessPoints() as $currentAp) {
+                            if ($apMac !== '' && $apMac !== '0' && $currentAp->getMacAddress() === $apMac) {
+                                $existingAp = $currentAp;
+                                break;
+                            }
+                            if (($apMac === '' || $apMac === '0') && $currentAp->getName() === $apName) {
+                                $existingAp = $currentAp;
+                                break;
+                            }
+                        }
+
+                        if ($existingAp) {
+                            $ap = $existingAp;
+                            $apsUpdatedCount++;
+                        } else {
+                            $ap = new AccessPoint();
+                            $ap->setCreatedAt($now);
+                            $network->addAccessPoint($ap);
+                            $apsImportedCount++;
+                        }
+
+                        $dto->updateEntity($ap);
+                        $em->persist($ap);
+                    }
+
+                    $em->persist($network);
+                }
+            );
 
             $this->addFlash(
                 'success',

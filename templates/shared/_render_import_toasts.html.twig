@@ -1,0 +1,10 @@
+{% for errorMsg in app.flashes('import_errors') %}
+    <ul class="import-error-list">
+        {% for err in errorMsg %}
+            <li>
+                <strong>Row {{ err.row }}</strong> ({{ err.name }}) —
+                <code>{{ err.field }}</code>: {{ err.message }}
+            </li>
+        {% endfor %}
+    </ul>
+{% endfor %}
