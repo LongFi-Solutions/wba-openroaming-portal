@@ -86,7 +86,7 @@ class MapAccessPointExportController extends AbstractController
                     ap.location ->> '$.coordinates[1]' AS latitude,
                     ap.altitude_msl,
                     ap.altitude_agl
-                FROM access_point ap
+                FROM AccessPoint ap
                 WHERE ap.network_id = :networkId
                 ORDER BY ap.id ASC
             SQL;
