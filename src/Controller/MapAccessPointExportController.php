@@ -81,12 +81,6 @@ class MapAccessPointExportController extends AbstractController
                             $lng = $parsed['coordinates'][0];
                             $lat = $parsed['coordinates'][1];
                         }
-                    } elseif (
-                        is_array($locationRaw) &&
-                        isset($locationRaw['coordinates'][0], $locationRaw['coordinates'][1])
-                    ) {
-                        $lng = $locationRaw['coordinates'][0];
-                        $lat = $locationRaw['coordinates'][1];
                     }
 
                     if (in_array($lng, [0, 0.0, '0'], true)) {
