@@ -286,7 +286,7 @@ class MapAccessPointExportController extends AbstractController
             fclose($handle);
 
             // Atomic: any error at all → abort, write nothing.
-            if (!empty($rowErrors)) {
+            if ($rowErrors !== []) {
                 $groupedErrors = [];
                 foreach ($rowErrors as $err) {
                     $key = $err['field'] . '|' . $err['message'];
@@ -317,7 +317,6 @@ class MapAccessPointExportController extends AbstractController
                     $now = new DateTimeImmutable();
 
                     foreach ($validRows as $entry) {
-                        /** @var AccessPointDTO $dto */
                         $dto = $entry['dto'];
                         $apMac = $entry['mac'];
                         $apName = $entry['name'];
