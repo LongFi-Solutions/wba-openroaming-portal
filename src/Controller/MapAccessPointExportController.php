@@ -137,13 +137,13 @@ class MapAccessPointExportController extends AbstractController
                             $this->sanitizeCsvField($row['serial_number']),
                             $lng !== '' ? number_format(
                                 (float)$lng,
-                                6,
+                                7,
                                 '.',
                                 ''
                             ) : '',
                             $lat !== '' ? number_format(
                                 (float)$lat,
-                                6,
+                                7,
                                 '.',
                                 ''
                             ) : '',
@@ -201,9 +201,20 @@ class MapAccessPointExportController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
         }
 
-        if ($file->getClientOriginalExtension() !== 'csv') {
-            $this->addFlash('error', $this->translator->trans('importErrorInvalidFormat', [], 'controllers'));
-            return $this->redirectToRoute('admin_dashboard_map_network_accessPoints', ['id' => $network->getId()]);
+        $allowedMimeTypes = [
+            'text/csv',
+            'text/plain',
+            'application/csv',
+            'text/x-csv',
+            'application/vnd.ms-excel',
+        ];
+
+        if (!in_array($file->getMimeType(), $allowedMimeTypes, true)) {
+            $this->addFlash('error', $this->translator->trans('importErrorInvalidMimeType', [], 'controllers'));
+            return $this->redirectToRoute(
+                'admin_dashboard_map_network_accessPoints',
+                ['id' => $network->getId()]
+            );
         }
 
         $realPath = $file->getRealPath();
@@ -269,6 +280,7 @@ class MapAccessPointExportController extends AbstractController
                 $rawMsl = str_replace(',', '.', ltrim(trim($row[$idxMsl] ?? ''), "'"));
                 $rawAgl = str_replace(',', '.', ltrim(trim($row[$idxAgl] ?? ''), "'"));
 
+                // Build the DTO exactly like the create/edit form would.
                 $dto = new AccessPointDTO();
                 $dto->network      = $network;
                 $dto->name         = $apName;
@@ -301,7 +313,8 @@ class MapAccessPointExportController extends AbstractController
 
                 $validRows[] = ['dto' => $dto, 'mac' => $apMac, 'name' => $apName];
             }
-
+            
+            // Atomic: any error at all → abort, write nothing.
             if ($rowErrors !== []) {
                 $groupedErrors = [];
                 foreach ($rowErrors as $err) {
