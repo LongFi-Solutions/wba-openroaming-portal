@@ -12,6 +12,7 @@ use App\Enum\AdminPermissionsType;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\MappingException;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -36,15 +37,61 @@ class MapAccessPointExportController extends AbstractController
 
     /**
      * Export only this network's access points.
+     * @throws MappingException
      */
     #[Route(
         'dashboard/map/network/{id:network<\d+>}/accessPoints/export',
         name: 'admin_dashboard_map_network_accessPoints_export'
     )]
     #[isGranted(AdminPermissionsType::MAP_READ->value)]
-    public function exportToCsv(Network $network, Connection $connection): StreamedResponse
+    public function exportToCsv(Network $network, Connection $connection, EntityManagerInterface $em): StreamedResponse
     {
-        $response = new StreamedResponse(function () use ($network, $connection): void {
+        $meta = $em->getClassMetadata(AccessPoint::class);
+        $table = $meta->getTableName();
+        $col = static fn(string $field): string => $meta->getColumnName($field);
+        $networkFkColumn = $meta->getSingleAssociationJoinColumnName('network');
+
+        $sql = strtr(
+            <<<'SQL'
+            SELECT
+                ap.__name__ AS name,
+                ap.__ssid__ AS ssid,
+                ap.__mac__ AS mac_address,
+                ap.__vendor__ AS vendor,
+                ap.__model__ AS model,
+                ap.__standard__ AS standard,
+                ap.__serial__ AS serial_number,
+                CASE WHEN JSON_VALID(ap.__location__)
+                    THEN ap.__location__ ->> '$.coordinates[0]'
+                    ELSE NULL
+                END AS longitude,
+                CASE WHEN JSON_VALID(ap.__location__)
+                    THEN ap.__location__ ->> '$.coordinates[1]'
+                    ELSE NULL
+                END AS latitude,
+                ap.__altMsl__ AS altitude_msl,
+                ap.__altAgl__ AS altitude_agl
+            FROM __table__ ap
+            WHERE ap.__networkFk__ = :networkId
+            ORDER BY ap.id ASC
+        SQL,
+            [
+                '__name__' => $col('name'),
+                '__ssid__' => $col('ssid'),
+                '__mac__' => $col('macAddress'),
+                '__vendor__' => $col('vendor'),
+                '__model__' => $col('model'),
+                '__standard__' => $col('standard'),
+                '__serial__' => $col('serialNumber'),
+                '__location__' => $col('location'),
+                '__altMsl__' => $col('altitudeMsl'),
+                '__altAgl__' => $col('altitudeAgl'),
+                '__table__' => $table,
+                '__networkFk__' => $networkFkColumn,
+            ]
+        );
+
+        $response = new StreamedResponse(function () use ($network, $connection, $sql): void {
             $handle = fopen('php://output', 'wb+');
 
             if ($handle === false) {
@@ -71,25 +118,6 @@ class MapAccessPointExportController extends AbstractController
                     ],
                     escape: '\\'
                 );
-
-                // Coordinates extracted by MySQL (JSON_EXTRACT/->>), not decoded in PHP per-row.
-                $sql = <<<'SQL'
-                SELECT
-                    ap.name,
-                    ap.ssid,
-                    ap.mac_address,
-                    ap.vendor,
-                    ap.model,
-                    ap.standard,
-                    ap.serial_number,
-                    ap.location ->> '$.coordinates[0]' AS longitude,
-                    ap.location ->> '$.coordinates[1]' AS latitude,
-                    ap.altitude_msl,
-                    ap.altitude_agl
-                FROM AccessPoint ap
-                WHERE ap.network_id = :networkId
-                ORDER BY ap.id ASC
-            SQL;
 
                 $result = $connection->executeQuery($sql, ['networkId' => $network->getId()]);
 
