@@ -50,11 +50,11 @@ class AccessPointDTO
     public ?string $longitude = null;
 
     #[Assert\Type(type: 'float', message: 'decimalNumber')]
-    #[Assert\Range(notInRangeMessage: 'invalidAltitudeMsl', min: 0, max: 9000)]
+    #[Assert\Range(notInRangeMessage: 'invalidAltitudeMsl', min: -1000, max: 9000)]
     public ?float $altitudeMsl = null;
 
     #[Assert\Type(type: 'float', message: 'decimalNumber')]
-    #[Assert\PositiveOrZero(message: 'altitudeAglCannotBeNegative')]
+    #[Assert\Range(notInRangeMessage: 'invalidAltitudeAgl', min: 0, max: 1000)]
     public ?float $altitudeAgl = null;
 
     /**
@@ -116,7 +116,12 @@ class AccessPointDTO
                 'coordinates' => [$exactLng, $exactLat],
             ], JSON_THROW_ON_ERROR));
         } else {
-            $accessPoint->setLocation(null);
+            // location is NOT NULL in the DB — use the "no coordinates" sentinel
+            // instead of null, matching the export's (0,0) = blank convention.
+            $accessPoint->setLocation(json_encode([
+                'type' => 'Point',
+                'coordinates' => [0, 0],
+            ], JSON_THROW_ON_ERROR));
         }
 
         $accessPoint->setUpdatedAt(new DateTimeImmutable());

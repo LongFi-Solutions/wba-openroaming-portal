@@ -1,0 +1,5 @@
+importCancelledTitle: '{0}Importação cancelada — nenhuma linha falhou a validação|{1}Importação cancelada — 1 linha falhou a validação|]1,Inf[Importação cancelada — %count% linhas falharam a validação}'
+importCancelledDescription: 'Nenhum ponto de acesso foi importado. Corrija as linhas abaixo e reenvie o ficheiro.'
+importRowCountBadge: '{1}%count% linha|]1,Inf[%count% linhas}'
+importRowLabel: 'Linha %row% — %name%'
+importMoreRows: '{1}+ %count% linha adicional com este erro|]1,Inf[+ %count% linhas adicionais com este erro}'

@@ -27,6 +27,8 @@ const EARTH_RADIUS = 6378137; // WGS84 mean radius in meters
 export default class extends Controller {
     static targets = ['geometryJson', 'coverageList', 'emptyState'];
     static values = {
+        aps: { type: Array, default: [] },
+        markerIcon: { type: String, default: '' },
         emptyLabel: { type: String, default: 'No coverage areas yet.' },
         typeLabels: { type: Object, default: {} },
         areaItemLabel: { type: String, default: 'Area' },
@@ -74,8 +76,30 @@ export default class extends Controller {
 
         setTimeout(() => {
             this.loadExistingPolygons();
+            this.renderAccessPoints();
             this.renderCoverageList();
         }, 150);
+    }
+
+    // --- Access Points Rendering --------------------------------------------
+
+    renderAccessPoints() {
+        if (!this.apsValue || this.apsValue.length === 0) return;
+
+        const iconHtml = this.markerIconValue || '<div></div>';
+
+        const apIcon = this.L.divIcon({
+            className: 'custom-pin-icon coverage-network-marker',
+            html: iconHtml,
+            iconSize: [33, 40],
+            iconAnchor: [16, 40],
+        });
+
+        this.apsValue.forEach((ap) => {
+            if (!ap.lat || !ap.lng) return;
+
+            this.L.marker([ap.lat, ap.lng], { icon: apIcon }).addTo(this.map);
+        });
     }
 
     // Use arrow functions for callbacks to preserve 'this' context natively
@@ -388,14 +412,29 @@ export default class extends Controller {
         if (!this.hasGeometryJsonTarget || !this.geometryJsonTarget.value) return;
 
         const rawValue = this.geometryJsonTarget.value.trim();
-        if (['', '[]', 'null'].includes(rawValue)) return;
+        if (['', '[]', 'null', '{}'].includes(rawValue)) return;
 
         try {
             const geoJson = JSON.parse(rawValue);
-            const polygonCoordsList =
-                geoJson.type === 'MultiPolygon' ? geoJson.coordinates : [geoJson.coordinates];
+            let polygonCoordsList = [];
+
+            if (geoJson.type === 'Polygon') {
+                polygonCoordsList = [geoJson.coordinates];
+            } else if (geoJson.type === 'MultiPolygon') {
+                polygonCoordsList = geoJson.coordinates;
+            } else if (geoJson.type === 'GeometryCollection' && Array.isArray(geoJson.geometries)) {
+                geoJson.geometries.forEach((geom) => {
+                    if (geom.type === 'Polygon') {
+                        polygonCoordsList.push(geom.coordinates);
+                    } else if (geom.type === 'MultiPolygon') {
+                        polygonCoordsList.push(...geom.coordinates);
+                    }
+                });
+            }
 
             polygonCoordsList.forEach((polygonCoords) => {
+                if (!Array.isArray(polygonCoords) || polygonCoords.length === 0) return;
+
                 const coordinates = polygonCoords[0];
                 if (coordinates && coordinates.length > 0) {
                     const savedPoints = coordinates.slice(0, -1);
@@ -409,7 +448,7 @@ export default class extends Controller {
                 this.map.fitBounds(this.drawnItems.getBounds(), { padding: [40, 40], maxZoom: 16 });
             }
         } catch (error) {
-            console.error('Error loading existing polygons', error);
+            console.error('Error loading existing polygons:', error);
         }
     }
 

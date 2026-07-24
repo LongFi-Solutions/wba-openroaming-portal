@@ -16,6 +16,10 @@ export default class extends Controller {
         if (this.map && this.moveEndHandler) {
             this.map.off('moveend', this.moveEndHandler);
         }
+
+        if (this.fetchTimeout) {
+            clearTimeout(this.fetchTimeout);
+        }
     }
 
     onMapConnect = (event) => {
@@ -23,7 +27,14 @@ export default class extends Controller {
         this.L = event.detail.L;
         this.layerGroup = this.L.layerGroup().addTo(this.map);
 
-        this.moveEndHandler = () => this.fetchAndRender();
+        this.moveEndHandler = () => {
+            clearTimeout(this.fetchTimeout);
+
+            this.fetchTimeout = setTimeout(() => {
+                this.fetchAndRender();
+            }, 300);
+        };
+
         this.map.on('moveend', this.moveEndHandler);
 
         this.fetchAndRender();

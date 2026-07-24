@@ -232,7 +232,12 @@
                     {# ALTITUDE MSL #}
                     <div class="relative pb-2">
                         {{ form_label(form.altitudeMsl, 'altitudeMsl'|trans({}, '_acessPoint'), {label_attr: {class: 'form-label'}}) }}
-                        {{ form_widget(form.altitudeMsl, {attr: {class: 'form-widget', placeholder: 'altitudeMslPh'|trans({}, '_acessPoint')}}) }}
+                        {{ form_widget(form.altitudeMsl, {attr: {
+                            class: 'form-widget',
+                            placeholder: 'altitudeMslPh'|trans({}, '_acessPoint'),
+                            'data-action': 'change->custom-map-picker#checkNegativeAltitude',
+                            'data-warning-message': 'negativeAltitudeWarning'|trans({}, '_acessPoint'),
+                        }}) }}
 
                         {# Description #}
                         <p class="text-gray-400 text-sm mt-1 ml-1">
