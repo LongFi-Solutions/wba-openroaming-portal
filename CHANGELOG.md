@@ -12,13 +12,8 @@
   replacing the previous single hardcoded provider configuration.
 - New `SMSProviderInterface` - based gateway pattern (one implementation class per provider) with live "Test
   Credentials" validation against the provider's API before saving.
-- **FreeRADIUS Statistics page optimization**: switched to aggregated `GROUP BY` queries with array hydration, resolving
-  PHP memory limit errors on large datasets.
 - New user data export option, available both on the landing page (self-service) and on the admin dashboard, with the
   choice between censored or uncensored personal data.
-- **TOTP/2FA**: reviewed time-window verification against RFC 6238, replacing a per-second brute-force check with direct
-  period-based verification for the same accepted tolerance window (performance and CPU-exhaustion fix).
-- New Portal Statistics data export (alongside the existing FreeRADIUS statistics export).
 
 Please make sure to execute the new migration to update and use the new required configuration tables for
 SMSProvider management, Coverage Map (`AccessPoint`, `Network`) and other settings introduced in this release.
