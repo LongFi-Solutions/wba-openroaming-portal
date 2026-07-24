@@ -14,7 +14,6 @@ class PemKeyMatchesCertificate extends Constraint
     /**
      * @param array<string, mixed> $options
      * @param array<string>|null $groups
-     * @param mixed $payload
      */
     public function __construct(
         public string $certificateField = 'client',
