@@ -2,22 +2,42 @@
 
 # Release V1.13.0
 
+- **Coverage Map / Access Points implementation**: new `AccessPoint` and `Network` management, CSV import & export for
+  access point data, and relation between FreeRADIUS `radacct` accounting data via MAC address matching.
+- New public `/map` route, rendering network coverage areas as polygons, and a new authenticated `/dashboard/map` page
+  rendering both network polygons and individual Access Point markers.
+- Map rendering implemented, a network management page with polygon/rectangle/circle drawing tools, and a "Coverage
+  Overview" list of drawn shapes.
+- **SMS Provider management rework**: new multi-provider management page (list, create, edit, activate, delete),
+  replacing the previous single hardcoded provider configuration.
+- New `SMSProviderInterface` - based gateway pattern (one implementation class per provider) with live "Test
+  Credentials" validation against the provider's API before saving.
+- **FreeRADIUS Statistics page optimization**: switched to aggregated `GROUP BY` queries with array hydration, resolving
+  PHP memory limit errors on large datasets.
+- New user data export option, available both on the landing page (self-service) and on the admin dashboard, with the
+  choice between censored or uncensored personal data.
+- **TOTP/2FA**: reviewed time-window verification against RFC 6238, replacing a per-second brute-force check with direct
+  period-based verification for the same accepted tolerance window (performance and CPU-exhaustion fix).
+- New Portal Statistics data export (alongside the existing FreeRADIUS statistics export).
+
+Please make sure to execute the new migration to update and use the new required configuration tables for
+SMSProvider management, Coverage Map (`AccessPoint`, `Network`) and other settings introduced in this release.
+
+- Run the migrations with:
+
+```bash
+  php bin/console doctrine:migrations:migrate
+```
+
 - **Required one-time action:** After upgrading, run
   the [MultipleSMSMigrationCommand.php](src/Command/MultipleSMSMigrationCommand.php) to migrate
   existing BudgetSMS API credentials from the Settings table to the new dedicated SMSProvider management system.
   This command should be executed **only once** and while the portal is **offline or restricted**.
   - Run the command with:
-    ```bash
+
+```bash
     php bin/console prepare:multiSMSMigration
-    ```
-
-Also, please make sure to execute the new migration to update and use the new required configuration tables for
-SMSProvider management page
-
-- Run the migrations with:
-  ```bash
-  php bin/console doctrine:migrations:migrate
-  ```
+```
 
 # Release V1.12.1
 
