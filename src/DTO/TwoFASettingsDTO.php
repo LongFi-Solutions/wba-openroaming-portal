@@ -27,31 +27,31 @@ class TwoFASettingsDTO
     public ?string $twoFaAppIssuer = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
-    #[Assert\Range([
-        'min' => 60,
-        'notInRangeMessage' => 'ValueCannotBeLessThan'
-    ])]
+    #[Assert\Range(
+        notInRangeMessage: 'ValueCannotBeLessThan',
+        min: 60
+    )]
     public ?int $twoFaCodeExpirationTime = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
-    #[Assert\Range([
-        'min' => 1,
-        'notInRangeMessage' => 'valueCannotBeLessThanAttempt'
-    ])]
+    #[Assert\Range(
+        notInRangeMessage: 'valueCannotBeLessThanAttempt',
+        min: 1
+    )]
     public ?int $twoFaAttemptsNumberResendCode = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
-    #[Assert\Range([
-        'min' => 5,
-        'notInRangeMessage' => 'valueCannotBeLessThanMinutes'
-    ])]
+    #[Assert\Range(
+        notInRangeMessage: 'valueCannotBeLessThanMinutes',
+        min: 5
+    )]
     public ?int $twoFaTimeResetAttempts = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
-    #[Assert\Range([
-        'min' => 30,
-        'notInRangeMessage' => 'ValueCannotBeLessThan'
-    ])]
+    #[Assert\Range(
+        notInRangeMessage: 'ValueCannotBeLessThan',
+        min: 30
+    )]
     public ?int $twoFaResendInterval = null;
 
     /**

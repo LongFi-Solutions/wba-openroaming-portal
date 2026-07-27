@@ -4,7 +4,7 @@
     and app.user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value %}
 
 {% if isDefaultAdminEmail2FA %}
-    <div class="toast-error-dashboard sticky top-0 z-[9999]">
+    <div class="toast-error-dashboard relative mb-6">
         <twig:ux:icon name="wba:warning" class="w-5 h-5 mr-3 shrink-0 fill-current stroke-none" />
         <span>{{ 'defaultAdminEmailNotAvailable'|trans({'%command%': 'php bin/console reset:super-admin'}, 'base_configuration') }}</span>
     </div>

@@ -23,14 +23,29 @@
     admin_dashboard_return_apps: {icon: 'wba:mobile-arrows', title: 'returnAppsManagement'},
     admin_dashboard_add_admin: {icon: 'wba:add-user', title: 'addAdmin'},
     admin_dashboard_activity_logs: {icon: 'wba:clock-counter-clockwise', title: 'activityLogs', class: 'fill-current stroke-none'},
+    admin_dashboard_map: {icon: 'wba:map-outline', title: 'map', class: 'fill-current stroke-none'},
+    admin_dashboard_map_networks: {icon: 'wba:table', title: 'networkManagement', class: 'fill-current stroke-none'},
+    admin_dashboard_map_network_create: {icon: 'wba:network', title: 'createNetwork', class: 'fill-current stroke-none'},
+    admin_dashboard_map_network_edit: {icon: 'wba:network', title: 'editNetwork', class: 'fill-current stroke-none'},
+    admin_dashboard_map_network_accessPoints: {icon: 'wba:wifi', title: 'network'},
+    admin_dashboard_map_accessPoint_create: {icon: 'wba:wifi', title: 'createAccessPoint'},
+    admin_dashboard_map_accessPoint_edit: {icon: 'wba:wifi', title: 'editAccessPoint'},
+    admin_dashboard_map_settings: {icon: 'wba:cog', title: 'mapSettings'},
 } %}
 
 {% set currentRoute = app.request.attributes.get('_route') %}
 {% set header = routeHeaders[currentRoute] ?? {icon: 'wba:wifi', title: 'Dashboard'} %}
 
 <div class="flex flex-row items-center pl-4">
-    <twig:ux:icon name="{{ header.icon }}" class="w-10 mt-0.5 {{ header.class ?? 'fill-none stroke-current' }}" />
-    <h1 class="text-2xl font-semibold p-5">{{ header.title|trans({}, '_header_admin') }}</h1>
+    <twig:ux:icon name="{{ header.icon }}"
+                  class="w-10 h-10 mt-0.5 block {{ header.class ?? 'fill-none stroke-current' }}" />
+    <h1 class="text-2xl font-semibold p-5">
+        {% if currentRoute == 'admin_dashboard_map_network_accessPoints' and network is defined %}
+            {{ network.name }}
+        {% else %}
+            {{ header.title|trans({}, '_header_admin') }}
+        {% endif %}
+    </h1>
 </div>
 
 {# Main Button #}

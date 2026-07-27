@@ -216,3 +216,20 @@ sms_provider_test:
   empty_phone_number: "Por favor, introduza um número de telefone para enviar o teste."
   invalid_phone_number: "Esse número de telefone não parece ser válido."
   unreachable_provider: "Não foi possível contactar o BudgetSMS: %error%"
+successNetworkCreate: 'A rede "%network%" foi criada com sucesso.'
+successNetworkEdit: 'A rede "%network%" foi atualizada com sucesso.'
+successNetworkDelete: 'A rede "%network%" foi eliminada com sucesso.'
+successAccessPointCreate: 'O Ponto de acesso "%accessPoint%" foi criado com sucesso.'
+successAccessPointEdit: 'O Ponto de acesso "%accessPoint%" foi atualizado com sucesso.'
+successAccessPointDelete: 'O Ponto de acesso "%accessPoint%" foi eliminado com sucesso.'
+importErrorNoFile: 'Nenhum ficheiro foi carregado.'
+importErrorInvalidFormat: 'Formato de ficheiro inválido. Por favor, carregue um ficheiro CSV válido.'
+importErrorNotReadable: 'O ficheiro carregado não pode ser lido.'
+importErrorCannotOpen: 'Não foi possível abrir o ficheiro CSV carregado.'
+importErrorInvalidStructure: 'Estrutura do CSV inválida. A coluna "network_name" é obrigatória.'
+networkImportSuccess: 'Importação concluída com sucesso! Foram processadas %d redes.'
+accessPointsImportSuccess: 'Importação concluída com sucesso! Foram processados %d pontos de acesso.'
+importErrorGeneral: 'Ocorreu um erro durante a importação: %s'
+importErrorValidation: 'Importação cancelada. Reveja os erros abaixo e reenvie o ficheiro.'
+mapSettingsAppliedSuccessfully: 'Configuração do mapa aplicada com sucesso!'
+importErrorInvalidMimeType: 'O conteúdo do ficheiro não é um CSV válido (MIME type incorreto).'

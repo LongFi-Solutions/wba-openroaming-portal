@@ -103,7 +103,7 @@ Upgrading your system requires caution and preparation. Follow these general gui
 | 1.11.1          | 1.11.2         | No migrations required. Font files for Inter are now self-hosted under `public/fonts/inter/`. No additional steps required.                                                                                                                                                                                                                                                                                                                                                             |
 | 1.11.2          | 1.12.0         | Run `php bin/console doctrine:migrations:migrate` to apply new configuration settings.                                                                                                                                                                                                                                                                                                                                                                                                  |
 | 1.12.0          | 1.12.1         | Updated configuration variables default value to follow better practices (bool instead of ON & OFF, please consult the `env.sample` for more details)                                                                                                                                                                                                                                                                                                                                   |
-| 1.12.1          | 1.13.0         | Run `php bin/console prepare:multiSMSMigration` **once** to migrate existing BudgetSMS API credentials from the `Settings` table to the new dedicated `SMSProvider` management system. Perform this action while the portal is **offline or restricted**.                                                                                                                                                                                                                               |
+| 1.12.1          | 1.13.0         | Run `php bin/console doctrine:migrations:migrate` to set up the new `AccessPoint`, `Network`, and `SMSProvider`/`SMSProviderParam` tables. Then run `php bin/console prepare:multiSMSMigration` **once** to migrate existing BudgetSMS API credentials from the `Settings` table to the new dedicated `SMSProvider` management system. Perform both actions while the portal is **offline or restricted**.                                                                              |
 
 Use this table to determine the exact upgrade steps based on your current version.
 
@@ -175,6 +175,35 @@ docker compose exec web php bin/console cache:clear
 ```bash
 docker compose logs -f web
 ```
+
+---
+
+## Release-Specific Notes: Version 1.13.0
+
+**Scenario**: Your current version is **1.12.1**, and you want to upgrade to **1.13.0**.
+
+- **New Entities & Required Migrations:**
+  This release introduces the Coverage Map feature (`AccessPoint`, `Network` entities) and the new multi-provider
+  `SMSProvider`/`SMSProviderParam` management system. You must run:
+```bash
+  php bin/console doctrine:migrations:migrate
+```
+
+- **Required One-Time Action — SMS Credentials Migration:**
+  After the schema migration above, run the following command **once** to migrate your existing BudgetSMS API
+  credentials from the `Settings` table into the new `SMSProvider` system:
+```bash
+  php bin/console prepare:multiSMSMigration
+```
+> **Important:** This command must be executed only once, and while the portal is **offline or restricted**.
+> Once the migration is complete, SMS provider credentials are managed exclusively through the new
+> SMS Provider management page in the dashboard.
+
+- **No further manual steps** are required for the Coverage Map, FreeRADIUS Statistics optimization, user data
+  export, or TOTP/2FA changes in this release — these are available immediately after the migration completes.
+
+- **Breaking Changes:**
+  Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
 
 ---
 
