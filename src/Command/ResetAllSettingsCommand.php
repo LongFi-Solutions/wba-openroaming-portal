@@ -194,6 +194,7 @@ class ResetAllSettingsCommand extends Command
             ['name' => SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS->value, 'value' => '60'],
             ['name' => SettingName::SMS_TIME_INTERVAL_BETWEEN_REQUESTS->value, 'value' => '30'],
             ['name' => SettingName::SMS_ATTEMPTS_NUMBER->value, 'value' => '5'],
+            ['name' => SettingName::SMS_ACTIVE_PROVIDER->value, 'value' => ''],
             ['name' => SettingName::BREAKING_GLASS_ADMIN_EMAIL->value, 'value' => ''],
             ['name' => SettingName::DELETE_UNCONFIRMED_USERS_CRON_ENABLED->value, 'value' => 'ON'],
             ['name' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED->value, 'value' => 'ON'],

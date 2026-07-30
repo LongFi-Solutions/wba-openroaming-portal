@@ -162,6 +162,7 @@ class SettingFixture extends Fixture
             ['name' => SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS->value, 'value' => '60'],
             ['name' => SettingName::SMS_TIME_INTERVAL_BETWEEN_REQUESTS->value, 'value' => '30'],
             ['name' => SettingName::SMS_ATTEMPTS_NUMBER->value, 'value' => '5'],
+            ['name' => SettingName::SMS_ACTIVE_PROVIDER->value, 'value' => ''],
             ['name' => SettingName::BREAKING_GLASS_ADMIN_EMAIL->value, 'value' => ''],
 
             ['name' => SettingName::MAP_CENTER_LONGITUDE->value, 'value' => '0'],

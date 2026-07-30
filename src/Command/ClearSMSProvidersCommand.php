@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Entity\Setting;
 use App\Entity\SMSProvider;
 use App\Entity\SMSProviderParam;
+use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -64,6 +66,17 @@ class ClearSMSProvidersCommand extends Command
             $providersDeleted = $this->entityManager
                 ->createQuery('DELETE FROM ' . SMSProvider::class)
                 ->execute();
+
+            // Reset the active-provider pointer so it doesn't reference a deleted row
+            $activeProviderSetting = $this->entityManager
+                ->getRepository(Setting::class)
+                ->findOneBy(['name' => SettingName::SMS_ACTIVE_PROVIDER->value]);
+
+            if ($activeProviderSetting !== null) {
+                $activeProviderSetting->setValue('');
+                $this->entityManager->persist($activeProviderSetting);
+                $this->entityManager->flush();
+            }
 
             $this->entityManager->commit();
 
