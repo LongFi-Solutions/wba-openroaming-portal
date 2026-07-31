@@ -57,7 +57,7 @@ class NetworkSearchForm
     public function getNetworks(): Paginator
     {
         if (!$this->cachedNetworks instanceof Paginator) {
-            $this->cachedNetworks = new Paginator($this->getQueryBuilder());
+            $this->cachedNetworks = new Paginator($this->getQueryBuilder(), false);
         }
 
         return $this->cachedNetworks;

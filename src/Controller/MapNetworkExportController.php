@@ -126,12 +126,12 @@ class MapNetworkExportController extends AbstractController
 
         if (!$file) {
             $this->addFlash('error', $this->translator->trans('importErrorNoFile', [], 'controllers'));
-            return $this->redirectToRoute('admin_dashboard_map_network_list');
+            return $this->redirectToRoute('admin_dashboard_map_networks');
         }
 
         if ($file->getClientOriginalExtension() !== 'csv') {
             $this->addFlash('error', $this->translator->trans('importErrorInvalidFormat', [], 'controllers'));
-            return $this->redirectToRoute('admin_dashboard_map_network_list');
+            return $this->redirectToRoute('admin_dashboard_map_networks');
         }
 
         $allowedMimeTypes = [
@@ -146,19 +146,19 @@ class MapNetworkExportController extends AbstractController
 
         if (!in_array($mimeType, $allowedMimeTypes, true)) {
             $this->addFlash('error', $this->translator->trans('importErrorInvalidMimeType', [], 'controllers'));
-            return $this->redirectToRoute('admin_dashboard_map_network_list');
+            return $this->redirectToRoute('admin_dashboard_map_networks');
         }
 
         $realPath = $file->getRealPath();
         if ($realPath === false || !is_readable($realPath)) {
             $this->addFlash('error', $this->translator->trans('importErrorNotReadable', [], 'controllers'));
-            return $this->redirectToRoute('admin_dashboard_map_network_list');
+            return $this->redirectToRoute('admin_dashboard_map_networks');
         }
 
         $handle = fopen($realPath, 'r');
         if ($handle === false) {
             $this->addFlash('error', $this->translator->trans('importErrorCannotOpen', [], 'controllers'));
-            return $this->redirectToRoute('admin_dashboard_map_network_list');
+            return $this->redirectToRoute('admin_dashboard_map_networks');
         }
 
         if (fread($handle, 3) !== "\xEF\xBB\xBF") {
@@ -169,7 +169,7 @@ class MapNetworkExportController extends AbstractController
         if (!$headers || !in_array('network_name', $headers, true)) {
             fclose($handle);
             $this->addFlash('error', $this->translator->trans('importErrorInvalidStructure', [], 'controllers'));
-            return $this->redirectToRoute('admin_dashboard_map_network_list');
+            return $this->redirectToRoute('admin_dashboard_map_networks');
         }
 
         $networksCreatedOrUpdated = [];
@@ -241,6 +241,6 @@ class MapNetworkExportController extends AbstractController
             }
         }
 
-        return $this->redirectToRoute('admin_dashboard_map');
+        return $this->redirectToRoute('admin_dashboard_map_networks');
     }
 }
