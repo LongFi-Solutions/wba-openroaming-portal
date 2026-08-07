@@ -57,6 +57,10 @@ enum AdminPermissionsType: string
     case CONNECTIVITY_STATISTICS_READ = 'CONNECTIVITY_STATISTICS_READ';
     // Activity Logs page
     case ACTIVITY_LOGS_READ = 'ACTIVITY_LOGS_READ';
+    case ACTIVITY_LOGS_WRITE = 'ACTIVITY_LOGS_WRITE';
+    case MAP_READ = 'MAP_READ';
+    case MAP_WRITE = 'MAP_WRITE';
+
 
     public function getLabel(): string
     {
@@ -75,10 +79,11 @@ enum AdminPermissionsType: string
             self::LDAP_SYNCHRONIZATION_WRITE, self::LDAP_SYNCHRONIZATION_READ => 'LDAPSynchronization',
             self::RADIUS_PROFILE_CONFIG_WRITE, self::RADIUS_PROFILE_CONFIG_READ => 'radiusProfileConfiguration',
             self::SMS_CONFIG_WRITE, self::SMS_CONFIG_READ => 'SMSConfiguration',
+            self::MAP_WRITE, self::MAP_READ => 'map',
             self::DOMAINS_BLACKLIST_READ, self::DOMAINS_BLACKLIST_WRITE => 'domainsBlacklist',
             self::PORTAL_STATISTICS_READ => 'portalStatistics',
             self::CONNECTIVITY_STATISTICS_READ => 'connectivityStatistics',
-            self::ACTIVITY_LOGS_READ => 'activityLogs',
+            self::ACTIVITY_LOGS_READ, self::ACTIVITY_LOGS_WRITE => 'activityLogs',
         };
     }
 

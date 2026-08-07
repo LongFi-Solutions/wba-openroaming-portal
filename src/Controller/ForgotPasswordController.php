@@ -38,7 +38,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -63,7 +63,7 @@ class ForgotPasswordController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly MagicLinkService $magicLinkService,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
-        private readonly RateLimiterFactory $verifyAccountLimiter,
+        private readonly RateLimiterFactoryInterface $verifyAccountLimiter,
         private readonly ForgotPasswordService $forgotPasswordService,
     ) {
     }

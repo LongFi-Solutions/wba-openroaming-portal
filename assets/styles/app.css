@@ -60,7 +60,7 @@
 }
 
 .form-widget-upload {
-  @apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none pr-10 cursor-pointer hover:border-primary;
+    @apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none pr-10 cursor-pointer hover:border-primary;
 }
 
 .form-widget-text-area {
@@ -416,6 +416,93 @@
     .stepper-progress-bar {
         @apply transition-all duration-500 ease-in-out;
     }
+}
+
+/* Leaflet Coverage Map Overrides */
+@layer components {
+    /* Only hide real AP markers (icon URL-based), not our custom divIcon pins */
+    .coverage-map-public .leaflet-marker-icon:not(.coverage-network-marker),
+    .coverage-map-public .leaflet-marker-shadow {
+        @apply !hidden;
+    }
+
+    /* Zoom control — rounded card matching the map wrapper */
+    .coverage-map-public .leaflet-control-zoom {
+        @apply !border-none !rounded-xl !shadow-lg overflow-hidden;
+    }
+
+    .coverage-map-public .leaflet-control-zoom a {
+        @apply !w-8 !h-8 !leading-8 !bg-white !border-none !text-gray-700 font-semibold transition-colors duration-150;
+    }
+
+    .coverage-map-public .leaflet-control-zoom a:hover {
+        @apply !bg-gray-100 !text-gray-900;
+    }
+
+    .coverage-map-public .leaflet-control-zoom-in {
+        @apply !border-b !border-gray-200;
+    }
+
+    .coverage-map-public .leaflet-container {
+        @apply !rounded-2xl;
+    }
+
+    .leaflet-popup-content-wrapper {
+        @apply rounded-xl shadow-xl p-1;
+    }
+
+    .leaflet-popup-content {
+        @apply my-[14px] mx-[18px] min-w-[200px];
+    }
+
+    .leaflet-popup-tip {
+        @apply shadow-md;
+    }
+
+    .leaflet-popup-close-button {
+        @apply !top-[10px] !right-[10px] !text-[#9ca3af] !text-[20px];
+    }
+
+    .leaflet-popup-close-button:hover {
+        @apply hover:!text-[#374151];
+    }
+
+    .coverage-map-popup-title {
+        @apply block text-base font-bold text-[#212529] mb-1.5;
+    }
+
+    .coverage-map-popup-description {
+        @apply text-sm text-[#6b7280] leading-snug m-0;
+    }
+
+    .coverage-network-marker {
+        @apply !bg-transparent !border-none;
+    }
+
+    .coverage-network-pin {
+        @apply relative w-7 h-7 rounded-full bg-primary/25 border-2 border-primary flex items-center justify-center;
+    }
+
+    .coverage-network-pin-dot {
+        @apply w-2.5 h-2.5 rounded-full bg-primary;
+    }
+}
+
+/* Shape Number Labels */
+.network-polygon-shape-label {
+    @apply pointer-events-none;
+}
+
+.network-polygon-shape-label span {
+    @apply flex items-center justify-center
+    w-7 h-7
+    rounded-full
+    bg-white
+    border-2 border-primary
+    text-primary
+    text-xs font-bold
+    shadow-md
+    select-none;
 }
 
 /* Smooth Animations */

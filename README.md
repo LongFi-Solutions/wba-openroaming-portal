@@ -497,9 +497,7 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 48. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
 49. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
 50. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
-51. `SMS_USERNAME`: Budget SMS Username.
-52. `SMS_USER_ID`: Budget SMS User ID.
-53. `SMS_HANDLE`: Budget SMS Handle hash.
+51. `SMS_ACTIVE_PROVIDER`: Current activated SMS provider.
 54. `SMS_FROM`: Entity sending the SMS for the users.
 55. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
 

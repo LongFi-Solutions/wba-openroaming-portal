@@ -4,6 +4,8 @@ namespace App\Command;
 
 use App\Entity\Setting;
 use App\Entity\SettingTranslation;
+use App\Entity\SMSProvider;
+use App\Entity\SMSProviderParam;
 use App\Enum\LanguageType;
 use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
@@ -82,7 +84,7 @@ class ResetAllSettingsCommand extends Command
             ['name' => SettingName::CUSTOMER_LOGO_ENABLED->value, 'value' => 'ON'],
             ['name' => SettingName::CUSTOMER_LOGO->value, 'value' => '/resources/logos/WBA_Logo.png'],
             ['name' => SettingName::OPENROAMING_LOGO->value, 'value' => '/resources/logos/openroaming.svg'],
-            ['name' => SettingName::WALLPAPER_IMAGE->value, 'value' => '/resources/images/wallpaper.png'],
+            ['name' => SettingName::WALLPAPER_IMAGE->value, 'value' => '/resources/images/background.png'],
             ['name' => SettingName::WELCOME_TEXT->value, 'value' => 'Welcome to OpenRoaming Provisioning Service'],
             [
                 'name' => SettingName::WELCOME_DESCRIPTION->value,
@@ -163,10 +165,6 @@ class ResetAllSettingsCommand extends Command
             ['name' => SettingName::CAPPORT_PORTAL_URL->value, 'value' => 'https://example.com/'],
             ['name' => SettingName::CAPPORT_VENUE_INFO_URL->value, 'value' => 'https://openroaming.org/'],
 
-            ['name' => SettingName::SMS_USERNAME->value, 'value' => ''],
-            ['name' => SettingName::SMS_USER_ID->value, 'value' => ''],
-            ['name' => SettingName::SMS_HANDLE->value, 'value' => ''],
-            ['name' => SettingName::SMS_FROM->value, 'value' => 'OpenRoaming'],
             ['name' => SettingName::SMS_TIMER_RESEND->value, 'value' => '5'],
             ['name' => SettingName::USER_DELETE_TIME->value, 'value' => '5'],
             ['name' => SettingName::TIME_INTERVAL_NOTIFICATION->value, 'value' => '7'],
@@ -196,11 +194,15 @@ class ResetAllSettingsCommand extends Command
             ['name' => SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS->value, 'value' => '60'],
             ['name' => SettingName::SMS_TIME_INTERVAL_BETWEEN_REQUESTS->value, 'value' => '30'],
             ['name' => SettingName::SMS_ATTEMPTS_NUMBER->value, 'value' => '5'],
+            ['name' => SettingName::SMS_ACTIVE_PROVIDER->value, 'value' => ''],
             ['name' => SettingName::BREAKING_GLASS_ADMIN_EMAIL->value, 'value' => ''],
             ['name' => SettingName::DELETE_UNCONFIRMED_USERS_CRON_ENABLED->value, 'value' => 'ON'],
             ['name' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED->value, 'value' => 'ON'],
             ['name' => SettingName::LDAP_SYNC_CRON_ENABLED->value, 'value' => 'ON'],
             ['name' => SettingName::DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED->value, 'value' => 'ON'],
+            ['name' => SettingName::MAP_CENTER_LONGITUDE->value, 'value' => '0'],
+            ['name' => SettingName::MAP_CENTER_LATITUDE->value, 'value' => '0'],
+            ['name' => SettingName::MAP_CENTER_ZOOM->value, 'value' => '12'],
         ];
 
         // phpcs:disable Generic.Files.LineLength.TooLong
@@ -332,6 +334,9 @@ class ResetAllSettingsCommand extends Command
         $this->entityManager->beginTransaction();
 
         try {
+            $this->entityManager->createQuery('DELETE FROM ' . SMSProviderParam::class)->execute();
+            $this->entityManager->createQuery('DELETE FROM ' . SMSProvider::class)->execute();
+
             $settingsRepository = $this->entityManager->getRepository(Setting::class);
             $translationsRepository = $this->entityManager->getRepository(SettingTranslation::class);
 

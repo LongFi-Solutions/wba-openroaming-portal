@@ -1,5 +1,45 @@
 # Changelog
 
+# Release V1.13.0
+
+- **Coverage Map / Access Points implementation**: new `AccessPoint` and `Network` management, CSV import & export for
+  access point data, and relation between FreeRADIUS `radacct` accounting data via MAC address matching.
+- New public `/map` route, rendering network coverage areas as polygons, and a new authenticated `/dashboard/map` page
+  rendering both network polygons and individual Access Point markers.
+- Map rendering implemented, a network management page with polygon/rectangle/circle drawing tools, and a "Coverage
+  Overview" list of drawn shapes.
+- **SMS Provider management rework**: new multi-provider management page (list, create, edit, activate, delete),
+  replacing the previous single hardcoded provider configuration.
+- New `SMSProviderInterface` - based gateway pattern (one implementation class per provider) with live "Test
+  Credentials" validation against the provider's API before saving.
+- New user data export option, available both on the landing page (self-service) and on the admin dashboard, with the
+  choice between censored or uncensored personal data.
+
+Please make sure to execute the new migration to update and use the new required configuration tables for
+SMSProvider management, Coverage Map (`AccessPoint`, `Network`) and other settings introduced in this release.
+
+- Run the migrations with:
+
+```bash
+  php bin/console doctrine:migrations:migrate
+```
+
+- **Required one-time action:** After upgrading, run
+  the [MultipleSMSMigrationCommand.php](src/Command/MultipleSMSMigrationCommand.php) to migrate
+  existing BudgetSMS API credentials from the Settings table to the new dedicated SMSProvider management system.
+  This command should be executed **only once** and while the portal is **offline or restricted**.
+  - Run the command with:
+
+```bash
+    php bin/console prepare:multiSMSMigration
+```
+
+# Release V1.12.1
+
+- Removed the preparation command that was introduced for v1.11.
+- Updated configuration variables default value to follow better practices (bool instead of ON & OFF, please consult the `env.sample` for more details)
+- Add fallback message error in case the default super admin account has 2fa forced with email
+
 # Release V1.12.0
 
 - New settings to configure the number of retry attempts for email & SMS at a specific timeframe, with customization available on the dashboard.

@@ -1,0 +1,5 @@
+importCancelledTitle: '{0}Import cancelled — no rows failed validation|{1}Import cancelled — 1 row failed validation|]1,Inf[Import cancelled — %count% rows failed validation}'
+importCancelledDescription: 'No access points were imported. Fix the rows below and re-upload the file.'
+importRowCountBadge: '{1}%count% row|]1,Inf[%count% rows}'
+importRowLabel: 'Row %row% — %name%'
+importMoreRows: '{1}+ %count% more row with this same error|]1,Inf[+ %count% more rows with this same error}'

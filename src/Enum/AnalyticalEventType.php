@@ -38,6 +38,8 @@ enum AnalyticalEventType: string
     case SETTING_PLATFORM_2FA_REQUEST = 'SETTING_PLATFORM_2FA_REQUEST';
     case SETTING_PLATFORM_2FA_RESET_REQUEST = 'SETTING_PLATFORM_2FA_RESET_REQUEST';
     case SETTING_TERMS_REQUEST = 'SETTING_TERMS_REQUEST';
+
+    case SETTING_MAP_REQUEST = 'SETTINGS_MAP_REQUEST';
     case SETTING_TERMS_RESET_REQUEST = 'SETTING_TERMS_RESET_REQUEST';
     case SETTING_RADIUS_CONF_REQUEST = 'SETTING_RADIUS_CONF_REQUEST';
     case SETTING_RADIUS_CONF_RESET_REQUEST = 'SETTING_RADIUS_CONF_RESET_REQUEST';
@@ -142,6 +144,11 @@ enum AnalyticalEventType: string
     case RETURN_APPS_RESET_REQUEST = 'RETURN_APPS_RESET_REQUEST';
     case BREAKING_GLASS_ACCOUNT_GENERATION = 'BREAKING_GLASS_ACCOUNT_GENERATION';
     case BREAKING_GLASS_ACCOUNT_RESET = 'BREAKING_GLASS_ACCOUNT_RESET';
+    case SMS_PROVIDER_CREATED = 'SMS_PROVIDER_CREATED';
+    case SMS_PROVIDER_UPDATED = 'SMS_PROVIDER_UPDATED';
+    case SMS_PROVIDER_DELETED = 'SMS_PROVIDER_DELETED';
+    case SMS_PROVIDER_ACTIVATED = 'SMS_PROVIDER_ACTIVATED';
+    case SMS_PROVIDER_DEACTIVATED = 'SMS_PROVIDER_DEACTIVATED';
 
     public function getLabel(): string
     {
@@ -295,6 +302,13 @@ enum AnalyticalEventType: string
             self::NOTIFY_ADMIN_EXPIRING_CERT_TWO_MONTHS => 'Admin Notified: Certificate Expires in 2 Months',
             self::NOTIFY_ADMIN_EXPIRING_CERT_THREE_MONTHS => 'Admin Notified: Certificate Expires in 3 Months',
 
+            // SMS
+            self::SMS_PROVIDER_CREATED => 'SMS Provider Created',
+            self::SMS_PROVIDER_UPDATED => 'SMS Provider Updated',
+            self::SMS_PROVIDER_DELETED => 'SMS Provider Deleted',
+            self::SMS_PROVIDER_ACTIVATED => 'SMS Provider Activated',
+            self::SMS_PROVIDER_DEACTIVATED => 'SMS Provider Deactivated',
+
             // Other
             self::RADIUS_TLS_UPDATED => 'RADIUS TLS Updated',
             self::RETURN_APPS_UPDATED => 'Return Apps Updated',
@@ -302,6 +316,7 @@ enum AnalyticalEventType: string
             self::BREAKING_GLASS_ACCOUNT_GENERATION => 'Breaking Glass Account Generation',
             self::BREAKING_GLASS_ACCOUNT_RESET => 'Breaking Glass Account Reset',
             self::EXPORT_ACTIVITY_LOGS_REQUEST => 'Export Activity Logs Request',
+            self::SETTING_MAP_REQUEST => 'Settings Map Request',
         };
     }
 }

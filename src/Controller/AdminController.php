@@ -119,8 +119,6 @@ class AdminController extends AbstractController
         $verifiedUsersCount = $this->userRepository->countVerifiedUsers($searchTerm, true);
         $bannedUsersCount = $this->userRepository->countBannedUsers($searchTerm, true);
 
-        // Check if the export users operation is enabled
-        $exportUsers = $this->parameterBag->get('app.export_users');
         // Check if the delete action has a public PGP key defined
         $deleteUsers = $this->parameterBag->get('app.pgp_public_key');
         // Create form views
@@ -142,7 +140,6 @@ class AdminController extends AbstractController
             'activeSort' => $sort,
             'activeOrder' => $order,
             'count' => $count,
-            'export_users' => $exportUsers,
             'delete_users' => $deleteUsers,
             'ApUsage' => null,
             'formRevokeProfiles' => $formRevokeProfiles

@@ -1,9 +1,15 @@
 doctrine:
     dbal:
+        types:
+            revisor_geometry: App\Doctrine\Type\MySQLGeometryType
+            point: App\Doctrine\Type\PointType
         connections:
             default:
                 url: '%env(resolve:DATABASE_URL)%'
                 server_version: '8.0.44'
+                mapping_types:
+                    geometry: revisor_geometry
+                    point: point
             freeradius:
                 url: '%env(resolve:DATABASE_FREERADIUS_URL)%'
                 server_version: '8.0.44'

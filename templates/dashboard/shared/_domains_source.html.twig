@@ -13,7 +13,7 @@
     {# Domain Source Activation #}
     <td class="p-4">
         <p class="font-semibold p-1">
-            {% if domainsSource.isActive is defined and domainsSource.isActive == 0 %}
+            {% if domainsSource.isActive is defined and not domainsSource.isActive %}
                 <span class="pill-error">
                     {{ 'inactive'|trans({}, '_blacklist') }}
                 </span>
@@ -45,49 +45,41 @@
                 <ul class="p-2 text-gray-700 gap-y-2">
 
                     {# Refresh Source #}
-                    <li>
-                        {% if domainsSource.isActive is defined and domainsSource.isActive == 1 %}
+                    {% if domainsSource.isActive %}
+                        <li>
                             <form method="post"
-                                  action="{{ path('admin_domain_source_refresh', {id: domainsSource.id}) }}">
+                                  action="{{ path('admin_dashboard_domain_source_refresh', {id: domainsSource.id}) }}">
                                 <button type="submit"
                                         class="flex items-center px-2 py-2 w-full hover:text-blue-500">
                                     <twig:ux:icon name="wba:refresh-outline" class="w-5 mr-3 fill-none stroke-current"/>
                                     {{ 'refresh'|trans({}, '_blacklist') }}
                                 </button>
                             </form>
-                        {% endif %}
-                    </li>
+                        </li>
+                    {% endif %}
 
                     {# Toggle Source #}
                     <li>
                         <form method="post"
-                              action="{{ path('admin_dashboard_domain_source_refresh', {id: domainsSource.id}) }}">
+                              action="{{ path('admin_dashboard_domain_source_toggle', {id: domainsSource.id}) }}">
                             <button type="submit"
-                                    class="flex items-center px-2 py-2 w-full
-                       {{ domainsSource.isActive()
-                                    ? 'hover:text-red-500'
-                                    : 'hover:text-green-500' }}">
+                                    class="flex items-center px-2 py-2 w-full {{ domainsSource.isActive ? 'hover:text-red-500' : 'hover:text-green-500' }}">
                                 <twig:ux:icon name="wba:toggle-outline"
                                               class="w-5 mr-3 fill-none stroke-current"/>
 
-                                {{ domainsSource.isActive()
+                                {{ domainsSource.isActive
                                 ? 'deactivate'|trans({}, '_blacklist')
                                 : 'activate'|trans({}, '_blacklist') }}
                             </button>
                         </form>
                     </li>
 
-                {# Toggle Source #}
-                <li>
-                    <form method="post"
-                          action="{{ path('admin_dashboard_domain_source_toggle', {id: domainsSource.id}) }}">
-                        <button type="submit"
-                                class="flex items-center px-2 py-2 w-full
-                       {{ domainsSource.isActive()
-                                ? 'hover:text-red-500'
-                                : 'hover:text-green-500' }}">
-                            <twig:ux:icon name="wba:toggle-outline"
-                                          class="w-5 mr-3 fill-none stroke-current"/>
+                    {# Delete Source #}
+                    <li {{ stimulus_controller('alert') }}>
+                        <form method="post"
+                              action="{{ path('admin_dashboard_domain_source_delete', {id: domainsSource.id}) }}"
+                                {{ stimulus_target('alert', 'form') }}>
+                            <input type="hidden" name="_method" value="DELETE">
 
                             <a href="javascript:void(0)"
                                class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-red-400"
@@ -100,30 +92,9 @@
                             </a>
                         </form>
                     </li>
+
                 </ul>
             </div>
         </td>
     {% endif %}
-
-                {# Delete #}
-                <li {{ stimulus_controller('alert') }}>
-                    <form method="post"
-                          action="{{ path('admin_dashboard_domain_source_delete', {id: domainsSource.id}) }}"
-                            {{ stimulus_target('alert', 'form') }}>
-                        <input type="hidden" name="_method" value="DELETE">
-
-                        <a href="javascript:void(0)"
-                           class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-red-400"
-                           data-domain-id="{{ domainsSource.id }}"
-                           data-domain-confirm-delete="{{ 'confirm_delete_domain_source'|trans({'%domain%': domainsSource.url}, '_blacklist') }}"
-                                {{ stimulus_action('alert', 'deleteDomainSource') }}
-                                {{ stimulus_target('alert', 'button') }}>
-                            <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-none stroke-current"/>
-                            {{ 'delete'|trans({}, '_blacklist') }}
-                        </a>
-                    </form>
-                </li>
-            </ul>
-        </div>
-    </td>
 </tr>
