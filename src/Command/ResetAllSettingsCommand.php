@@ -200,7 +200,7 @@ class ResetAllSettingsCommand extends Command
             ['name' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED->value, 'value' => 'ON'],
             ['name' => SettingName::LDAP_SYNC_CRON_ENABLED->value, 'value' => 'ON'],
             ['name' => SettingName::DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED->value, 'value' => 'ON'],
-            ['name' => SettingName::MAP_ENABLED->value, 'value' => 'ON'],
+            ['name' => SettingName::MAP_ENABLED->value, 'value' => 'OFF'],
             ['name' => SettingName::MAP_CENTER_LONGITUDE->value, 'value' => '0'],
             ['name' => SettingName::MAP_CENTER_LATITUDE->value, 'value' => '0'],
             ['name' => SettingName::MAP_CENTER_ZOOM->value, 'value' => '12'],
