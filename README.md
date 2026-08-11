@@ -414,133 +414,141 @@ individual needs. Here's a rundown of several important variables and their func
 8. `RADIUS_TRUSTED_ROOT_CA_SHA1_HASH`: The SHA1 hash of your RADIUS server's trusted root CA (Defaults to LetsEncrypt
    CA).
 
-**IMPORTANT**: The LetsEncrypt CA's SHA1 hash is set as the default value.
-This hash is important since it is necessary
+**IMPORTANT**: The LetsEncrypt CA's SHA1 hash is set as the default value. This hash is important since it is necessary
 to validate the RADIUS server's certificate.
 
 **Missing Values:** Please check that all crucial fields are fully filled if any values are missing.
-Pay attention to the UUID field (domain of your portal).
-It's critical to provide a unique UUID that differs from the default.
-The Same uuid may result in conflicts between different portals, resulting in profile overrides.
+Pay attention to the UUID field (domain of your portal). It's critical to provide a unique UUID that differs from the
+default. The same UUID may result in conflicts between different portals, resulting in profile overrides.
 
 If you use a different CA for your RADIUS server, you must replace this value with the SHA1 hash of your CA's root
 certificate. **Connection errors** can happen if the right SHA1 hash is not provided.
 
-1. `PLATFORM_MODE`: Live || Demo.
-   When in Demo, only "demo login" is displayed, and SAML and other login
-   methods are disabled regardless of other settings. A demo warning will also be displayed.
-2. `USER_VERIFICATION`: ON || OFF.
-   When it\'s ON it activates the email verification system.
-   This system requires all
-   the users to verify its own account before they download any profile.
-3. `TURNSTILE_CHECKER`: ON || OFF.
-   When it\'s ON, it activates the turnstile verification system.
-   This system requires all
-   the users to check and verify is session before creating an account.
-   To prevent bots.
+1. `PLATFORM_MODE`: Live || Demo. When demo, only "demo login" is displayed, and SAML and other login methods are
+   disabled regardless of other settings. A demo warning will also be displayed.
+2. `USER_VERIFICATION`: ON || OFF. When it's ON it activates the verification system. This system requires all
+   the users to verify their own account before they download any profile.
+3. `TURNSTILE_CHECKER`: The Turnstile checker is a validation step to distinguish between genuine users and bots.
+   This can be used in Live or Demo modes.
 4. `API_STATUS`: Defines whether the API is enabled or disabled.
+5. `LOGIN_WITH_UUID_ONLY`: Defines whether authentication is performed using a confirmation code sent to the user
+   or a traditional UUID & password. When this feature is set to "OFF", it will send a reset password email for all
+   the users' portal accounts.
 
-5. `PAGE_TITLE`: The title displayed on the webpage.
-6. `CUSTOMER_LOGO_ENABLED`: Shows the customer logo on the landing page.
-7. `CUSTOMER_LOGO`: The resource path or URL to the customer logo image.
-8. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
-9. `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
-10. `WELCOME_TEXT`: The welcome text displayed on the user interface.
-11. `WELCOME_DESCRIPTION`: The description text displayed under the welcome text.
-12. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
-    with a Google account login.
-13. `VALID_DOMAINS_MICROSOFT_LOGIN`: Defines the valid domains to authenticate with Microsoft Azure, when it's empty, he
-    lets anyone
-    with a Microsoft account login.
-14. `CONTACT_EMAIL`: The email address for contact inquiries.
+6. `PAGE_TITLE`: The title displayed on the webpage.
+7. `CUSTOMER_LOGO_ENABLED`: Shows the customer logo on the landing page.
+8. `CUSTOMER_LOGO`: The resource path or URL to the customer's logo image.
+9. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
+10. `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
+11. `WELCOME_TEXT`: The welcome text displayed on the user interface.
+12. `WELCOME_DESCRIPTION`: The description text displayed under the welcome text.
+13. `ADDITIONAL_LABEL`: Additional label displayed on the landing page, for extra information if necessary.
+14. `VALID_DOMAINS_GOOGLE_LOGIN`: When this is empty, it allows all domains to authenticate. Domains must be separated
+    by ",".
+15. `VALID_DOMAINS_MICROSOFT_LOGIN`: When this is empty, it allows all domains to authenticate. Domains must be
+    separated by ",".
+16. `CONTACT_EMAIL`: The email address for contact inquiries.
 
-15. `AUTH_METHOD_SAML_ENABLED`: Enable or disable SAML authentication method.
-16. `AUTH_METHOD_SAML_LABEL`: The label for SAML authentication button on the login page.
-17. `AUTH_METHOD_SAML_DESCRIPTION`: The description for SAML authentication on the login page.
-18. `AUTH_METHOD_GOOGLE_LOGIN_ENABLED`: Enable or disable Google authentication method.
-19. `AUTH_METHOD_GOOGLE_LOGIN_LABEL`: The label for Google authentication button on the login page.
-20. `AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
-21. `AUTH_METHOD_MICROSOFT_LOGIN_ENABLED`: Enable or disable Google authentication method.
-22. `AUTH_METHOD_MICROSOFT_LOGIN_LABEL`: The label for Google authentication button on the login page.
-23. `AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
-24. `AUTH_METHOD_REGISTER_METHOD_ENABLED`: Enable or disable Register authentication method.
-25. `AUTH_METHOD_REGISTER_METHOD_LABEL`: The label for Register authentication button on the login page.
-26. `AUTH_METHOD_REGISTER_METHOD_DESCRIPTION`: The description for Register authentication on the login page.
-27. `AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED`: Enable or disable Login (email) authentication method.
-28. `AUTH_METHOD_LOGIN_TRADITIONAL_LABEL`: The label for Login (email) authentication button on the login page.
-29. `AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION`: The description for Login (email) authentication on the login page.
-30. `LOGIN_WITH_UUID_ONLY`: Enabled or disabled only UUID authentication, this method sends a confirmation code instead
-    of the tradicional uuid & password.
-31. `AUTH_METHOD_SMS_REGISTER_ENABLED`: Enable or disable Login (SMS) authentication method.
-32. `AUTH_METHOD_SMS_REGISTER_LABEL`: The label for Login (SMS) authentication button on the login page.
-33. `AUTH_METHOD_SMS_REGISTER_DESCRIPTION`: The description for Login (SMS) authentication on the login page.
+17. `AUTH_METHOD_SAML_ENABLED`: Enable or disable SAML authentication method.
+18. `AUTH_METHOD_SAML_LABEL`: The label for SAML authentication button on the login page.
+19. `AUTH_METHOD_SAML_DESCRIPTION`: The description for SAML authentication on the login page.
+20. `AUTH_METHOD_GOOGLE_LOGIN_ENABLED`: Enable or disable Google authentication method.
+21. `AUTH_METHOD_GOOGLE_LOGIN_LABEL`: The label for Google authentication button on the login page.
+22. `AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
+23. `AUTH_METHOD_MICROSOFT_LOGIN_ENABLED`: Enable or disable Microsoft authentication method.
+24. `AUTH_METHOD_MICROSOFT_LOGIN_LABEL`: The label for Microsoft authentication button on the login page.
+25. `AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION`: The description for Microsoft authentication on the login page.
+26. `AUTH_METHOD_REGISTER_ENABLED`: Enable or disable Register authentication method.
+27. `AUTH_METHOD_REGISTER_LABEL`: The label for Register authentication button on the login page.
+28. `AUTH_METHOD_REGISTER_DESCRIPTION`: The description for Register authentication on the login page.
+29. `AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED`: Enable or disable Login with phone number or email.
+30. `AUTH_METHOD_LOGIN_TRADITIONAL_LABEL`: The label for Login authentication button on the login page.
+31. `AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION`: The description for Login authentication on the login page.
+32. `AUTH_METHOD_SMS_REGISTER_ENABLED`: Enable or disable authentication register with the phone number.
+33. `AUTH_METHOD_SMS_REGISTER_LABEL`: The label for authentication with the phone number, on the login page button.
+34. `AUTH_METHOD_SMS_REGISTER_DESCRIPTION`: The description for authentication with the phone number on the
+    login page.
 
-34. `TWO_FACTOR_AUTH_STATUS`: The status of two-factor authentication when users log in to the platform.
-35. `TWO_FACTOR_AUTH_APP_LABEL`: Platform identifier in two-factor application
-36. `TWO_FACTOR_AUTH_APP_ISSUER`: Issuer identifier in two-factor application
-37. `TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME`: Local two-factor authentication code expiration time
-38. `TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE`: Number of attempts to request resending of the two-factor
-    authentication code
-39. `TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS`: Time in minutes to reset attempts to send two-factor
-    authentication code
-40. `TWO_FACTOR_AUTH_RESEND_INTERVAL`: Time interval in seconds to request a new two-factor authentication code
+35. `TWO_FACTOR_AUTH_STATUS`: The status of two-factor authentication when users log in to the platform.
+36. `TWO_FACTOR_AUTH_APP_LABEL`: Platform identifier in two-factor application.
+37. `TWO_FACTOR_AUTH_APP_ISSUER`: Issuer identifier in two-factor application.
+38. `TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME`: Local two-factor authentication code expiration time.
+39. `TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE`: Number of attempts to request resending of the two-factor
+    authentication code.
+40. `TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS`: Time in minutes to reset attempts to send two-factor authentication code.
+41. `TWO_FACTOR_AUTH_RESEND_INTERVAL`: Time interval in seconds to request a new authentication code.
 
-41. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
-42. `SYNC_LDAP_SERVER`: The LDAP server's URL.
-43. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
-44. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
-45. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
-46. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
-    The placeholder `@ID` is replaced with the user's ID.
+42. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
+43. `SYNC_LDAP_SERVER`: The LDAP server's URL.
+44. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
+45. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
+46. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
+47. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory. The placeholder `@ID` is replaced
+    with the user's ID.
 
-47. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
-48. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
-49. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
-50. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
-51. `SMS_ACTIVE_PROVIDER`: Current activated SMS provider.
-54. `SMS_FROM`: Entity sending the SMS for the users.
-55. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
+48. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles.
+49. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
+50. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
+51. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
 
-56. `EMAIL_TIMER_RESEND`: Time in minutes to make the user wait to resend a new EMAIL for reset password request.
-57. `LINK_VALIDITY`: Time in minutes a link stays active before it expires.
+52. `SMS_ACTIVE_PROVIDER`: Current activated SMS provider.
+53. `SMS_TIMER_RESEND`: Time in minutes to make the user wait to resend a new SMS.
+54. `EMAIL_TIMER_RESEND`: Time in minutes to make the user wait to resend a new email for reset password requests.
+55. `LINK_VALIDITY`: Time in minutes a link stays active before it expires.
 
-58. `TOS_LINK`: Term's and Conditions URL.
-59. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
-60. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
-61. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
-62. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
-63. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
-64. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
-65. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
-66. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
-67. `DELETE_UNCONFIRMED_USERS_CRON`: Defines the schedule to delete unconfirmed users from the portal.
-68. `USERS_WHEN_PROFILE_EXPIRES_CRON`: Defines the schedule to notify the users when their profile to expire.
-69. `LDAP_SYNC_CRON`: Defines the schedule for LDAP synchronization automation command.
-70. `CRON_ADVANCED_STATUS`:  Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)
-71. `DOMAIN_BLACKLIST_IMPORT_CRON`: Defines the schedule to import/refresh Blacklist of domains.
-72. `CLOUDFLARE_TOKEN` : Token for automatic Cloudflare certificate renewal.
-73. `ENABLE_RADIUS_TLS_RESET`: Saves the current state of the **RADIUS_TLS_NAME**, if this is set to false the reset
-    certs widget will ask for a new radius_tls_name to be configured. **Careful when setting up this stage to be the
-    actual RADIUS_TLS_NAME on the free-radius resolver. For more details consul this **
-74. `RETURN_APPS_ENABLED`: Enables or disables the return-to-apps configuration for mobile devices. If set to false, the
-    asset association endpoints will not be exposed, preventing Android and iOS applications from linking to the portal.
-75. `RETURN_APPS_PACKAGE_NAME_ANDROID`: Defines the application identifier used for mobile app association for Android,
-    this corresponds to the package name (e.g., com.example.app).
-76. `RETURN_APPS_ID_IOS`: Defines the application identifier used for mobile app association for iOS, this follows
-    the TEAMID.bundleId format required for Apple App Site Association.
-77. `EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS`: Time window (in minutes) after which the email request attempts counter is reset
-78. `EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS`: Minimum cooldown (in seconds) between consecutive email requests
-79. `EMAIL_ATTEMPTS_NUMBER`: Maximum number of allowed requests within the defined time window
-80. `SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS`: Time window (in minutes) after which the SMS request attempts counter is reset
-81. `SMS_TIME_INTERVAL_BETWEEN_REQUESTS`: Minimum cooldown (in seconds) between consecutive SMS requests
-82. `SMS_ATTEMPTS_NUMBER`: Maximum number of allowed requests within the defined time window
-83. `BREAKING_GLASS_ADMIN_EMAIL`: Defines the email for the one time usage admin account.
-84. `DELETE_UNCONFIRMED_USERS_CRON_ENABLED`: Enables or disables the automatic deletion of unconfirmed users cron job.
-85. `USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED`: Enables or disables the automatic notification cron job for users whose
-    profile is about to expire.
-86. `LDAP_SYNC_CRON_ENABLED`: Enables or disables the automatic LDAP synchronization cron job.
-87. `DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED`: Enables or disables the automatic domain blacklist import and
+56. `TOS`: Terms and Conditions format.
+57. `PRIVACY_POLICY`: Privacy policy format.
+58. `TOS_LINK`: Terms and Conditions URL.
+59. `PRIVACY_POLICY_LINK`: Privacy policy URL.
+60. `TOS_EDITOR`: Terms and Conditions text editor.
+61. `PRIVACY_POLICY_EDITOR`: Privacy policy text editor.
+
+62. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
+63. `TIME_INTERVAL_NOTIFICATION`: The notification interval (in days) to alert a user before their profile expires.
+64. `DEFAULT_REGION_PHONE_INPUTS`: Set the default regions for the phone number inputs.
+65. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
+66. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with Google login.
+67. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with Microsoft login.
+68. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
+69. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
+
+70. `DELETE_UNCONFIRMED_USERS_CRON`: Defines the schedule to delete unconfirmed users from the portal.
+71. `USERS_WHEN_PROFILE_EXPIRES_CRON`: Defines the schedule to notify the users when their profile is about to expire.
+72. `LDAP_SYNC_CRON`: Defines the schedule for LDAP synchronization automation command.
+73. `DOMAIN_BLACKLIST_IMPORT_CRON`: Defines the cron schedule for importing and synchronizing blocked domains.
+74. `CRON_ADVANCED_STATUS`: Saves the previous status mode on the schedule cron configuration page (Simple/Advanced).
+75. `DELETE_UNCONFIRMED_USERS_CRON_ENABLED`: Enables or disables the automatic deletion of unconfirmed users cron job.
+76. `USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED`: Enables or disables the automatic notification cron job for users
+    whose profile is about to expire.
+77. `LDAP_SYNC_CRON_ENABLED`: Enables or disables the automatic LDAP synchronization cron job.
+78. `DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED`: Enables or disables the automatic domain blacklist import and
     synchronization cron job.
+
+79. `CLOUDFLARE_TOKEN`: Token for automatic Cloudflare certificate renewal.
+80. `ENABLE_RADIUS_TLS_RESET`: Saves the current state of the **RADIUS_TLS_NAME**; if this is set to false, the
+    reset certs widget will ask for a new RADIUS_TLS_NAME to be configured. **Careful when setting up this stage —
+    it must match the actual RADIUS_TLS_NAME on the FreeRADIUS resolver.**
+
+81. `RETURN_APPS_ENABLED`: Enables or disables the Return to Apps configuration for mobile devices. If set to false,
+    the asset association endpoints will not be exposed, preventing Android and iOS applications from linking to
+    the portal.
+82. `RETURN_APPS_PACKAGE_NAME_ANDROID`: Name of the package or application associated for Android devices.
+83. `RETURN_APPS_ID_IOS`: Name of the package or application associated for iOS devices.
+
+84. `EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS`: Time window (in minutes) after which the email request attempts
+    counter is reset.
+85. `EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS`: Minimum cooldown (in seconds) between consecutive email requests.
+86. `EMAIL_ATTEMPTS_NUMBER`: Maximum number of allowed requests within the defined time window.
+87. `SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS`: Time window (in minutes) after which the SMS request attempts counter
+    is reset.
+88. `SMS_TIME_INTERVAL_BETWEEN_REQUESTS`: Minimum cooldown (in seconds) between consecutive SMS requests.
+89. `SMS_ATTEMPTS_NUMBER`: Maximum number of allowed requests within the defined time window.
+90. `BREAKING_GLASS_ADMIN_EMAIL`: Defines the email for the one-time-usage admin account.
+
+91. `MAP_ENABLED`: Enables or disables the coverage map feature.
+92. `MAP_CENTER_LATITUDE`: Default latitude used to center the coverage map.
+93. `MAP_CENTER_LONGITUDE`: Default longitude used to center the coverage map.
+94. `MAP_CENTER_ZOOM`: Default zoom level used for the coverage map.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
