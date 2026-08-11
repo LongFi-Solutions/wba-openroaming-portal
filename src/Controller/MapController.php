@@ -13,6 +13,7 @@ use App\Entity\User;
 use App\Enum\AdminPermissionsType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
+use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Form\CreateAccessPointType;
 use App\Form\CreateNetworkType;
@@ -56,6 +57,16 @@ class MapController extends AbstractController
     {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
+
+        $mapEnabled = $data[SettingName::MAP_ENABLED->value]['value'] ?? OperationMode::OFF->value;
+
+        if ($mapEnabled === OperationMode::OFF->value) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('coverageMapDisabled', [], 'controllers')
+            );
+            return $this->redirectToRoute('app_landing');
+        }
 
         // Default fallback center
         $defaultLat = (float)$data[SettingName::MAP_CENTER_LATITUDE->value]['value'];

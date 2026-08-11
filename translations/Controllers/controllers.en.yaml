@@ -235,3 +235,4 @@ sms_provider_test:
   empty_phone_number: "Please enter a phone number to send the test to."
   invalid_phone_number: "That phone number doesn't look valid."
   unreachable_provider: "Could not reach BudgetSMS: %error%"
+coverageMapDisabled: 'The coverage map is currently disabled.'
