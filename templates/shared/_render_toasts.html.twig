@@ -22,6 +22,17 @@
         }) }}
     {% endfor %}
 
+    {# Warning: Map Disabled (Toast with Link) #}
+    {% for message in app.session.flashbag.get('warning_map_disabled') %}
+        {{ include('shared/_toast_with_link.html.twig', {
+            message: 'mapDisabledLandingNotice'|trans({}, '_render_toasts'),
+            toast_type: toastTypeMap.warning,
+            action_route: 'admin_dashboard_map_settings',
+            action_icon: 'wba:warning',
+            action_label: 'goToSettings'|trans({}, '_render_toasts')
+        }) }}
+    {% endfor %}
+
     {# Error #}
     {% for message in app.session.flashbag.get('error') %}
         {{ include('shared/_toast.html.twig', {

@@ -199,6 +199,9 @@ class MapController extends AbstractController
                 'success',
                 $this->translator->trans('successNetworkCreate', ['%network%' => $network->getName()], 'controllers')
             );
+            if ($data[SettingName::MAP_ENABLED->value]['value'] === OperationMode::OFF->value) {
+                $this->addFlash('warning_map_disabled', true);
+            }
             return $this->redirectToRoute('admin_dashboard_map_networks');
         }
 
