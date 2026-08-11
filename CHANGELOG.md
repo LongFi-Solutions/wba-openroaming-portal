@@ -1,5 +1,11 @@
 # Changelog
 
+# Release V1.13.1
+
+- Added a toggle to enable/disable the Coverage Map feature from the admin dashboard (Map Settings)
+- Changed the default map center from `0, 0` (Gulf of Guinea) to `51.4779, 0.0000` (Greenwich, London) to avoid
+  defaulting to the middle of the ocean when no location is configured
+
 # Release V1.13.0
 
 - **Coverage Map / Access Points implementation**: new `AccessPoint` and `Network` management, CSV import & export for
