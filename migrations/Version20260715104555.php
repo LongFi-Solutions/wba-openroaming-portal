@@ -23,8 +23,8 @@ final class Version20260715104555 extends AbstractMigration
         $this->addSql(
             "
             INSERT INTO Setting (name, value) VALUES
-            ('MAP_CENTER_LATITUDE', '0'),
-            ('MAP_CENTER_LONGITUDE', '0'),
+            ('MAP_CENTER_LATITUDE', '51.4779'),
+            ('MAP_CENTER_LONGITUDE', '0.0000'),
             ('MAP_CENTER_ZOOM', '12')
         "
         );
