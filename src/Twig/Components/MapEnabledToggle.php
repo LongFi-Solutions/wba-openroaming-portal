@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Twig\Components;
 
+use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
+use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SettingsService;
 use DateTime;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -19,8 +22,8 @@ use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
-#[AsLiveComponent('MapEnabledToggle')]
-class MapEnabledToggle
+#[AsLiveComponent]
+class MapEnabledToggle extends AbstractController
 {
     use DefaultActionTrait;
 
@@ -51,14 +54,19 @@ class MapEnabledToggle
             return;
         }
 
-        $this->enabled = !$this->enabled;
+        $currentUser = $this->security->getUser();
 
-        $this->settingsService->updateSettingsFromArray([
-            SettingName::MAP_ENABLED->value => $this->enabled ? 'ON' : 'OFF',
-        ]);
+        if (!$currentUser instanceof User) {
+            return;
+        }
+
+        $oldValue = $this->enabled ? OperationMode::ON->value : OperationMode::OFF->value;
+        $this->enabled = !$this->enabled;
+        $newValue = $this->enabled ? OperationMode::ON->value : OperationMode::OFF->value;
+
+        $this->settingsService->update(SettingName::MAP_ENABLED->value, $newValue);
         $this->settingsService->flush();
 
-        $currentUser = $this->security->getUser();
         $request = $this->requestStack->getCurrentRequest();
 
         $this->eventActions->saveEvent(
@@ -69,7 +77,10 @@ class MapEnabledToggle
                 EventMetadataKeysType::IP->value => $request?->getClientIp(),
                 EventMetadataKeysType::USER_AGENT->value => $request?->headers->get('User-Agent'),
                 EventMetadataKeysType::CHANGESET->value => [
-                    SettingName::MAP_ENABLED->value => $this->enabled ? 'ON' : 'OFF',
+                    SettingName::MAP_ENABLED->value => [
+                        EventMetadataKeysType::OLD_DATA->value => $oldValue,
+                        EventMetadataKeysType::NEW_DATA->value => $newValue,
+                    ],
                 ],
             ]
         );
