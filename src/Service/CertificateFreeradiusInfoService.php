@@ -189,7 +189,7 @@ readonly class CertificateFreeradiusInfoService
 
         return array_any(
             (array)$policies,
-            fn($policy) => array_any($evOids, fn($oid) => str_contains((string)$policy, (string)$oid))
+            fn($policy) => array_any($evOids, fn($oid) => str_contains((string)$policy, $oid))
         );
     }
 }

@@ -1023,20 +1023,19 @@ class TwoFAController extends AbstractController
                 return $this->redirectToRoute('app_2FA_first_verification_local', [
                     'context' => $context
                 ]);
-            } else {
-                $interval_seconds = $this->twoFAService->timeLeftToResendCodeTimeInterval(
-                    $user,
-                    AnalyticalEventType::TWO_FA_CODE_ENABLE->value
-                );
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        'errorAdminWait',
-                        ['%time%' => $interval_seconds],
-                        'controllers'
-                    )
-                );
             }
+            $interval_seconds = $this->twoFAService->timeLeftToResendCodeTimeInterval(
+                $user,
+                AnalyticalEventType::TWO_FA_CODE_ENABLE->value
+            );
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'errorAdminWait',
+                    ['%time%' => $interval_seconds],
+                    'controllers'
+                )
+            );
         } else {
             $interval_minutes = $this->twoFAService->timeLeftToResendCode(
                 $user,

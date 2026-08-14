@@ -183,7 +183,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         $value = $attributes[$attribute];
 
         if (!$isArrayValue) {
-            $value = reset($value);
+            return reset($value);
         }
 
         return $value;

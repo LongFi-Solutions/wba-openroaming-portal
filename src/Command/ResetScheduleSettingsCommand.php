@@ -30,8 +30,6 @@ class ResetScheduleSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:scheduleSettings')
-            ->setDescription('Reset Schedule Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 

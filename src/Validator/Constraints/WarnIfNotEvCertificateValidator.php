@@ -54,6 +54,6 @@ class WarnIfNotEvCertificateValidator extends ConstraintValidator
 
         preg_match_all('/Policy:\s*([\d.]+)/', $policiesRaw, $matches);
 
-        return array_any($matches[1], fn($oid) => in_array(trim((string)$oid), self::EV_OIDS, true));
+        return array_any($matches[1], fn($oid) => in_array(trim($oid), self::EV_OIDS, true));
     }
 }

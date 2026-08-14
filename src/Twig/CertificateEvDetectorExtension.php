@@ -10,25 +10,17 @@ use App\Service\CertificateProcessCheckerService;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
-class CertificateEvDetectorExtension extends AbstractExtension
+class CertificateEvDetectorExtension
 {
     public function __construct(
         private readonly CertificateProcessCheckerService $certificateProcessCheckerService
     ) {
     }
 
-    #[\Override]
-    public function getFunctions(): array
-    {
-        return [
-            new TwigFunction('isFreeradiusCertEV', $this->isFreeradiusCertEV(...)),
-            new TwigFunction('isCertificateProcessInvalid', $this->isCertificateProcessInvalid(...)),
-        ];
-    }
-
     /**
      * Check if the current FreeRADIUS certificate is EV
      */
+    #[\Twig\Attribute\AsTwigFunction(name: 'isFreeradiusCertEV')]
     public function isFreeradiusCertEV(): bool
     {
         $process = $this->certificateProcessCheckerService->getCurrentProcess();
@@ -43,6 +35,7 @@ class CertificateEvDetectorExtension extends AbstractExtension
     /**
      * Check if the latest certificate process has been marked as invalid
      */
+    #[\Twig\Attribute\AsTwigFunction(name: 'isCertificateProcessInvalid')]
     public function isCertificateProcessInvalid(): bool
     {
         $process = $this->certificateProcessCheckerService->getCurrentProcess();

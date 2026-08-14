@@ -8,24 +8,17 @@ use App\Service\EEAUserDetector;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
-class EEAUserExtension extends AbstractExtension
+class EEAUserExtension
 {
     public function __construct(
         private readonly EEAUserDetector $eeaUserDetector
     ) {
     }
 
-    #[\Override]
-    public function getFunctions(): array
-    {
-        return [
-            new TwigFunction('isEEAUser', $this->isEEAUser(...))
-        ];
-    }
-
     /**
      * Check if the current user is from the EEA
      */
+    #[\Twig\Attribute\AsTwigFunction(name: 'isEEAUser')]
     public function isEEAUser(): int
     {
         return $this->eeaUserDetector->isEEAUser();

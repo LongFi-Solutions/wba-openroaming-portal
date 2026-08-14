@@ -29,8 +29,6 @@ class ResetRadiusSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:radiusSettings')
-            ->setDescription('Reset Radius Configuration Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 

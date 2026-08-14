@@ -35,8 +35,6 @@ class ResetAllSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:allSettings')
-            ->setDescription('Reset All Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 

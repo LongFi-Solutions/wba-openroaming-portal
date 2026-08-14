@@ -29,8 +29,6 @@ class ClearEventCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('clear:eventEntity')
-            ->setDescription('Clear events with null values from the Event entity')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the action');
     }
 

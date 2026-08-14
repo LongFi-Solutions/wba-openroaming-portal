@@ -41,8 +41,6 @@ class ResetAdminCommand extends Command
     protected function configure(): void
     {
         $this
-        ->setName('reset:super-admin')
-        ->setDescription('Reset Super Admin Credentials')
         ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 

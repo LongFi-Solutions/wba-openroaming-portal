@@ -40,11 +40,6 @@ class MultipleSMSMigrationCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('prepare:multiSMSMigration')
-            ->setDescription(
-                'Migrate current credentials about BudgetSMS Api from 
-                the Settings table for the new dedicated SMSProvider management'
-            )
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the migration');
     }
 

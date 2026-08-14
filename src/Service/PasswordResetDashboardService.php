@@ -73,7 +73,7 @@ readonly class PasswordResetDashboardService
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
         if ($user->getPhoneNumber() && $userExternalAuth?->getProviderId() === UserProvider::PHONE_NUMBER->value) {
-            $flashes = array_merge($flashes, $this->handleSmsReset($user, $newPassword, $clientIp, $byUser));
+            return array_merge($flashes, $this->handleSmsReset($user, $newPassword, $clientIp, $byUser));
         }
 
         return $flashes;

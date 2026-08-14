@@ -31,8 +31,6 @@ class ResetLDAPSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:ldapSettings')
-            ->setDescription('Reset LDAP Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 
