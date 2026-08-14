@@ -90,7 +90,7 @@ class CustomType extends AbstractType
 
         $uploadMaxFilesize = ini_get('upload_max_filesize') ?: '2M';
         $postMaxSize = ini_get('post_max_size') ?: '8M';
-        $maxSize = (string)min($uploadMaxFilesize, $postMaxSize);
+        $maxSize = min($uploadMaxFilesize, $postMaxSize);
 
         foreach ($allowedSettings as $settingName => $config) {
             $formFieldOptions = [
