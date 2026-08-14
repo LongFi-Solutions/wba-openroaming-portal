@@ -30,7 +30,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Uid\Uuid;
 
 #[AsCommand(
     name: 'backup:createBreakingGlassAdmin',
@@ -144,10 +143,11 @@ class CreateBreakingGlassAdminAccountCommand extends Command
     /**
      * @param string[] $allPermissions
      * @return array{0: User, 1: string}
+     * @throws RandomException
      */
     private function createAccount(mixed $setting, string $plainPassword, array $allPermissions): array
     {
-        $username = sprintf('breakglass_%s', substr(Uuid::v4()->toRfc4122(), 0, 8));
+        $username = sprintf('breakglass_%s', bin2hex(random_bytes(4)));
         $email = $username . '@openroaming.com';
 
         $setting->setValue($email);
