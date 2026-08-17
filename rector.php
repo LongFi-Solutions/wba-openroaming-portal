@@ -15,7 +15,6 @@ try {
             __DIR__ . '/src',
             __DIR__ . '/tests',
         ])
-        ->withSkipPath(__DIR__ . '/src/Entity')
         // uncomment to reach your current PHP version
         ->withPhpSets(php84: true)
         ->withComposerBased(twig: true, doctrine: true, phpunit: true, symfony: true)
