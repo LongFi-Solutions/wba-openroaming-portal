@@ -80,6 +80,9 @@ final class ManageAccessPointsForm extends AbstractController
         return $form;
     }
 
+    /**
+     * @return FormErrorIterator<FormError>
+     */
     public function getFormErrors(): FormErrorIterator
     {
         return $this->getForm()->getErrors(true);

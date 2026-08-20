@@ -31,8 +31,6 @@ class ResetAuthSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:authSettings')
-            ->setDescription('Reset Authentication Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 

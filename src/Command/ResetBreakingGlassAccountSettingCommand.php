@@ -39,8 +39,6 @@ class ResetBreakingGlassAccountSettingCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:breakingGlassAccountSetting')
-            ->setDescription('Reset Breaking last saved account')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
     protected function execute(InputInterface $input, OutputInterface $output): int

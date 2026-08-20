@@ -24,7 +24,7 @@ readonly class MetricsService
         private UserExternalAuthRepository $userExternalAuthRepository,
         PrometheusStorageService $storageService,
         private LoggerInterface $logger,
-        #[Autowire('%kernel.project_dir%')] private string $projectDir
+        #[Autowire(param: 'kernel.project_dir')] private string $projectDir
     ) {
         $this->registry = new CollectorRegistry($storageService->getAdapter());
     }

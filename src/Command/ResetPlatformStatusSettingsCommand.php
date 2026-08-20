@@ -29,8 +29,6 @@ class ResetPlatformStatusSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:statusSettings')
-            ->setDescription('Reset Platform Status Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 

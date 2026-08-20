@@ -165,8 +165,9 @@ class SettingFixture extends Fixture
             ['name' => SettingName::SMS_ACTIVE_PROVIDER->value, 'value' => ''],
             ['name' => SettingName::BREAKING_GLASS_ADMIN_EMAIL->value, 'value' => ''],
 
-            ['name' => SettingName::MAP_CENTER_LONGITUDE->value, 'value' => '0'],
-            ['name' => SettingName::MAP_CENTER_LATITUDE->value, 'value' => '0'],
+            ['name' => SettingName::MAP_ENABLED->value, 'value' => 'OFF'],
+            ['name' => SettingName::MAP_CENTER_LONGITUDE->value, 'value' => '0.0000'],
+            ['name' => SettingName::MAP_CENTER_LATITUDE->value, 'value' => '51.4779'],
             ['name' => SettingName::MAP_CENTER_ZOOM->value, 'value' => '12'],
         ];
 

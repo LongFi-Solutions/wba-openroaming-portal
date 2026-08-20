@@ -33,8 +33,6 @@ class ClearSMSProvidersCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('clear:smsProviders')
-            ->setDescription('Clear all SMS providers and their parameters from the database')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the deletion');
     }
     protected function execute(InputInterface $input, OutputInterface $output): int

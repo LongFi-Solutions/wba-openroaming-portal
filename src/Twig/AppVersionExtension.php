@@ -7,7 +7,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
-class AppVersionExtension extends AbstractExtension
+class AppVersionExtension
 {
     private readonly string $projectDir;
     private readonly string $environment;
@@ -18,15 +18,7 @@ class AppVersionExtension extends AbstractExtension
         $this->environment = $kernel->getEnvironment();
     }
 
-    #[\Override]
-    public function getFunctions(): array
-    {
-        return [
-            new TwigFunction('app_version', $this->getAppVersion(...)),
-            new TwigFunction('app_branch', $this->getAppBranch(...)),
-        ];
-    }
-
+    #[\Twig\Attribute\AsTwigFunction(name: 'app_version')]
     public function getAppVersion(): ?string
     {
         $composerJsonPath = $this->projectDir . '/composer.json';
@@ -50,6 +42,7 @@ class AppVersionExtension extends AbstractExtension
         return $composerJsonDecoded['version'] ?? null;
     }
 
+    #[\Twig\Attribute\AsTwigFunction(name: 'app_branch')]
     public function getAppBranch(): ?string
     {
         if ($this->environment === 'prod') {

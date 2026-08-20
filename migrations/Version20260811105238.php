@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20260715104555 extends AbstractMigration
+final class Version20260811105238 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -23,12 +23,9 @@ final class Version20260715104555 extends AbstractMigration
         $this->addSql(
             "
             INSERT INTO Setting (name, value) VALUES
-            ('MAP_CENTER_LATITUDE', '51.4779'),
-            ('MAP_CENTER_LONGITUDE', '0.0000'),
-            ('MAP_CENTER_ZOOM', '12')
+            ('MAP_ENABLED', 'OFF')
         "
         );
-
     }
 
     public function down(Schema $schema): void
@@ -38,9 +35,7 @@ final class Version20260715104555 extends AbstractMigration
             "
             DELETE FROM Setting
             WHERE name IN (
-                'MAP_CENTER_LATITUDE',
-                'MAP_CENTER_LONGITUDE',
-                'MAP_CENTER_ZOOM'
+                'MAP_ENABLED'
             )
         "
         );

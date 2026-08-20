@@ -10,19 +10,11 @@ use Exception;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
-class CertificateExpirationDetectorExtension extends AbstractExtension
+class CertificateExpirationDetectorExtension
 {
     public function __construct(
         private readonly CertificateCheckerService $certificateService
     ) {
-    }
-
-    #[\Override]
-    public function getFunctions(): array
-    {
-        return [
-            new TwigFunction('certStatusTag', $this->getCertStatusTag(...)),
-        ];
     }
 
     /**
@@ -31,6 +23,7 @@ class CertificateExpirationDetectorExtension extends AbstractExtension
      *  - 'warning' if <= 30 days left
      *  - null if more than 30 days left or file missing
      */
+    #[\Twig\Attribute\AsTwigFunction(name: 'certStatusTag')]
     public function getCertStatusTag(): ?int
     {
         try {

@@ -27,10 +27,6 @@ class ResetReturnAppsSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:returnApps')
-            ->setDescription(
-                'Reset Return to Apps Settings'
-            )
             ->addOption(
                 'yes',
                 'y',
