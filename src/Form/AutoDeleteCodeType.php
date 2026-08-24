@@ -28,9 +28,7 @@ class AutoDeleteCodeType extends AbstractType
         $builder
             ->add('code', TextType::class, [
                 'constraints' => [
-                    new NotBlank([
-                        'message' => $this->translator->trans('enterCode', [], 'AutoDeleteType'),
-                    ]),
+                    new NotBlank(message: $this->translator->trans('enterCode', [], 'AutoDeleteType')),
                 ],
                 'attr' => [
                     'autocomplete' => 'off',

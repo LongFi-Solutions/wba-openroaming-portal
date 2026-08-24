@@ -8,26 +8,24 @@ readonly class OSDetectionService
 {
     public function detectDevice(string $userAgent): string
     {
-        $os = OSType::NONE->value;
-
         // Windows
         if (preg_match('/windows|win32/i', $userAgent)) {
-            $os = OSType::WINDOWS->value;
+            return OSType::WINDOWS->value;
         }
 
         // macOS
         if (preg_match('/macintosh|mac os x/i', $userAgent)) {
-            $os = OSType::MACOS->value;
+            return OSType::MACOS->value;
         }
 
         // iOS
         if (preg_match('/iphone|ipod|ipad/i', $userAgent)) {
-            $os = OSType::IOS->value;
+            return OSType::IOS->value;
         }
 
         // Android
         if (preg_match('/android/i', $userAgent)) {
-            $os = OSType::ANDROID->value;
+            return OSType::ANDROID->value;
         }
 
         // Linux
@@ -35,6 +33,6 @@ readonly class OSDetectionService
 //            $os = OSType::LINUX;
 //        }
 
-        return $os;
+        return OSType::NONE->value;
     }
 }

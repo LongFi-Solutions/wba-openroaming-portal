@@ -301,10 +301,10 @@ class UserAccountDeletionController extends AbstractController
                 new DateTime()->modify('+1 minutes'),
                 '/',
                 null,
-                false,
+                null,
                 true,
                 false,
-                Cookie::SAMESITE_LAX
+                \Symfony\Component\HttpFoundation\Cookie::SAMESITE_LAX
             );
             $response = $this->redirectToRoute('saml_login');
             $response->headers->setCookie($cookie);

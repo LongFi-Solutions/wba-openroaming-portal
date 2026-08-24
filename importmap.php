@@ -4,10 +4,10 @@
  * Returns the importmap for this application.
  *
  * - "path" is a path inside the asset mapper system. Use the
- * "debug:asset-map" command to see the full list of paths.
+ *     "debug:asset-map" command to see the full list of paths.
  *
  * - "entrypoint" (JavaScript only) set to true for any module that will
- * be used as an "entrypoint" (and passed to the importmap() Twig function).
+ *     be used as an "entrypoint" (and passed to the importmap() Twig function).
  *
  * The "importmap:require" command can be used to add new entries to this file.
  */
@@ -22,15 +22,25 @@ return [
     '@symfony/ux-live-component' => [
         'path' => './vendor/symfony/ux-live-component/assets/dist/live_controller.js',
     ],
+    'tw-elements' => [
+        'path' => './assets/lib/tw-elements.umd.min.js',
+    ],
+    'tw-elements/css/tw-elements.min.css' => [
+        'path' => './assets/lib/tw-elements.min.css',
+        'type' => 'css',
+    ],
+    '@symfony/ux-leaflet-map' => [
+        'path' => './vendor/symfony/ux-leaflet-map/assets/dist/map_controller.js',
+    ],
     '@hotwired/stimulus' => [
         'version' => '3.2.2',
     ],
     'tom-select/dist/css/tom-select.default.css' => [
-        'version' => '2.6.1',
+        'version' => '2.6.2',
         'type' => 'css',
     ],
     'tom-select' => [
-        'version' => '2.6.1',
+        'version' => '2.6.2',
     ],
     '@orchidjs/sifter' => [
         'version' => '1.1.0',
@@ -39,15 +49,15 @@ return [
         'version' => '1.1.2',
     ],
     'tom-select/dist/css/tom-select.default.min.css' => [
-        'version' => '2.6.1',
+        'version' => '2.6.2',
         'type' => 'css',
     ],
     'tom-select/dist/css/tom-select.bootstrap4.css' => [
-        'version' => '2.6.1',
+        'version' => '2.6.2',
         'type' => 'css',
     ],
     'tom-select/dist/css/tom-select.bootstrap5.css' => [
-        'version' => '2.6.1',
+        'version' => '2.6.2',
         'type' => 'css',
     ],
     'chart.js' => [
@@ -71,13 +81,6 @@ return [
     'lodash.isequal' => [
         'version' => '4.5.0',
     ],
-    'tw-elements' => [
-        'path' => './assets/lib/tw-elements.umd.min.js',
-    ],
-    'tw-elements/css/tw-elements.min.css' => [
-        'path' => './assets/lib/tw-elements.min.css',
-        'type' => 'css',
-    ],
     'quill/dist/quill.snow.css' => [
         'version' => '2.0.3',
         'type' => 'css',
@@ -100,7 +103,7 @@ return [
         'type' => 'css',
     ],
     'axios' => [
-        'version' => '1.18.1',
+        'version' => '1.19.0',
     ],
     'quill2-emoji' => [
         'version' => '0.1.2',
@@ -113,13 +116,13 @@ return [
         'version' => '1.0.11',
     ],
     'quill-toggle-fullscreen-button' => [
-        'version' => '0.1.4',
+        'version' => '0.2.0',
     ],
     'quill-html-edit-button' => [
         'version' => '3.0.0',
     ],
     '@kurkle/color' => [
-        'version' => '0.3.4',
+        'version' => '0.4.0',
     ],
     'leaflet' => [
         'version' => '1.9.4',
@@ -127,8 +130,5 @@ return [
     'leaflet/dist/leaflet.min.css' => [
         'version' => '1.9.4',
         'type' => 'css',
-    ],
-    '@symfony/ux-leaflet-map' => [
-        'path' => './vendor/symfony/ux-leaflet-map/assets/dist/map_controller.js',
     ],
 ];

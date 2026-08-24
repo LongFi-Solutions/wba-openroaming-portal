@@ -31,8 +31,6 @@ class ResetCustomSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:customSettings')
-            ->setDescription('Reset Customization Settings')
             ->addOption(
                 'yes',
                 'y',
