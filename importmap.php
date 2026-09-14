@@ -80,7 +80,7 @@ return [
         'type' => 'css',
     ],
     'quill' => [
-        'version' => '2.0.0-dev.4',
+        'version' => '2.0.3',
     ],
     'quill-delta' => [
         'version' => '5.1.0',
