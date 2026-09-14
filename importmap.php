@@ -71,13 +71,6 @@ return [
     'lodash.isequal' => [
         'version' => '4.5.0',
     ],
-    'tw-elements' => [
-        'version' => '2.0.0',
-    ],
-    'tw-elements/css/tw-elements.min.css' => [
-        'version' => '2.0.0',
-        'type' => 'css',
-    ],
     'quill/dist/quill.snow.css' => [
         'version' => '2.0.3',
         'type' => 'css',
