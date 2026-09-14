@@ -32,12 +32,6 @@ class ResetRadiusTLSCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:radiusTLS')
-            ->setDescription(
-                'DANGEROUS: Resetting the RADIUS TLS Name changes the OpenRoaming realm.' .
-                ' This WILL invalidate all previously downloaded OpenRoaming profiles and' .
-                ' users will be BLOCKED from authentication by the resolver.'
-            )
             ->addOption(
                 'yes',
                 'y',

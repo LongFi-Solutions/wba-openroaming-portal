@@ -6,9 +6,11 @@ use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\UserProvider;
 use App\Enum\UserVerificationStatus;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -62,30 +64,41 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         }
     }
 
-//    /**
-//     * @return User[] Returns an array of User objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('u.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * @return array<int, array{type: string|null, cnt: int}>
+     */
+    public function count2FAStatsByDateRange(DateTime $start, DateTime $end): array
+    {
+        return $this->createQueryBuilder('u')
+            ->select('u.twoFAtype AS type, COUNT(u.id) AS cnt')
+            ->where('u.createdAt BETWEEN :start AND :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->groupBy('u.twoFAtype')
+            ->getQuery()
+            ->getArrayResult();
+    }
 
-//    public function findOneBySomeField($value): ?User
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * @return array{verified: int, not_verified: int, banned: int}
+     */
+    public function countUserVerificationStats(DateTime $start, DateTime $end): array
+    {
+        $qb = $this->createQueryBuilder('u');
+
+        return $qb
+            ->select(
+                'SUM(CASE WHEN u.isVerified = true THEN 1 ELSE 0 END) AS verified',
+                'SUM(CASE WHEN u.isVerified = false THEN 1 ELSE 0 END) AS not_verified',
+                'SUM(CASE WHEN u.bannedAt IS NOT NULL THEN 1 ELSE 0 END) AS banned'
+            )
+            ->andWhere('u.createdAt BETWEEN :start AND :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getSingleResult();
+    }
+
     /**
      * @return User[]
      */
@@ -106,54 +119,44 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      * Filters out admin/super admin roles.
      * Applies verification / banned filters.
      * Excludes soft-deleted users.
-     *
-     *
-     * @return User[]
      */
     public function searchWithFilter(
         string $filter,
-        ?string $sort,
-        ?string $order,
-        ?string $searchTerm = null
-    ): array {
-        $qb = $this->createQueryBuilder('u');
-
-        $qb->where('u.roles NOT LIKE :admin')
+        string $sort,
+        string $order,
+        ?string $query,
+        int $page,
+        int $count,
+    ): QueryBuilder {
+        $qb = $this->createQueryBuilder('u')
+            ->where('u.deletedAt IS NULL')
+            ->andWhere('u.roles NOT LIKE :admin')
             ->andWhere('u.roles NOT LIKE :superAdmin')
             ->setParameter('admin', '%ROLE_ADMIN%')
-            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
+            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%')
+            ->orderBy('u.' . $sort, $order)
+            ->setFirstResult(($page - 1) * $count)
+            ->setMaxResults($count);
 
-
-        // Add filters based on verification status
         if ($filter === UserVerificationStatus::VERIFIED->value) {
-            $qb->andWhere('u.isVerified = :Verified')
-                ->setParameter(UserVerificationStatus::VERIFIED->value, true);
+            $qb->andWhere('u.isVerified = true');
         } elseif ($filter === UserVerificationStatus::BANNED->value) {
             $qb->andWhere('u.bannedAt IS NOT NULL');
         }
 
-        // Exclude deleted users
-        $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
-
-        $qb->leftJoin('u.userExternalAuths', 'ua');
-
-        // Apply the search term, if provided
-        if ($searchTerm) {
+        if ($query !== null) {
             $qb->andWhere(
                 $qb->expr()->orX(
-                    'u.uuid LIKE :searchTerm',
-                    'u.email LIKE :searchTerm',
-                    'u.first_name LIKE :searchTerm',
-                    'u.last_name LIKE :searchTerm',
+                    $qb->expr()->like('u.email', ':query'),
+                    $qb->expr()->like('u.uuid', ':query'),
+                    $qb->expr()->like('u.first_name', ':query'),
+                    $qb->expr()->like('u.last_name', ':query'),
+                    $qb->expr()->like('u.phoneNumber', ':query'),
                 )
-            )->setParameter('searchTerm', '%' . $searchTerm . '%');
+            )->setParameter('query', '%' . $query . '%');
         }
 
-        $field = $sort === 'uuid' ? 'u.uuid' : 'u.createdAt';
-        // Order by creation date (newest first)
-        return $qb->orderBy($field, $order)
-            ->getQuery()
-            ->getResult();
+        return $qb;
     }
 
     /**
@@ -388,5 +391,40 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    /**
+     * @return User[]
+     */
+    public function findUnverifiedUsersCreatedBefore(DateTime $before): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.isVerified = false')
+            ->andWhere('u.deletedAt IS NULL')
+            ->andWhere('u.isDisabled = false')
+            ->andWhere('u.createdAt < :before')
+            ->setParameter('before', $before)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return User[]
+     */
+    public function findAllAdmins(): array
+    {
+        $qb = $this->createQueryBuilder('u');
+
+        $qb->andWhere(
+            $qb->expr()->orX(
+                'u.roles LIKE :admin',
+                'u.roles LIKE :superAdmin'
+            )
+        )
+            ->setParameter('admin', '%ROLE_ADMIN%')
+            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%')
+            ->andWhere($qb->expr()->isNull('u.deletedAt'));
+
+        return $qb->getQuery()->getResult();
     }
 }

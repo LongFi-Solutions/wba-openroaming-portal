@@ -59,9 +59,9 @@
             {# Compute stepRoute dynamically #}
             {% set stepRoute = step.routes[0] %}
             {% if step.id == 'freeradius_upload' %}
-                {% if setupProcessType == constant('App\\Enum\\AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_AUTO_DOMAIN').value %}
+                {% if setupProcessType == constant('App\\Enum\\AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERADIUS_UPLOAD_AUTO_DOMAIN').value %}
                     {% set stepRoute = 'admin_dashboard_settings_certs_freeradius_auto_renew_domain' %}
-                {% elseif setupProcessType == constant('App\\Enum\\AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_CLOUDFLARE_DNS_CHALLENGE').value %}
+                {% elseif setupProcessType == constant('App\\Enum\\AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERADIUS_UPLOAD_CLOUDFLARE_DNS_CHALLENGE').value %}
                     {% set stepRoute = 'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge' %}
                 {% else %}
                     {% set stepRoute = 'admin_dashboard_settings_certs_freeradius_upload' %}

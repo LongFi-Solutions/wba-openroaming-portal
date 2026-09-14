@@ -1,5 +1,100 @@
 # Changelog
 
+# Release V1.13.1
+
+- Added a toggle to enable/disable the Coverage Map feature from the admin dashboard (Map Settings)
+- Changed the default map center from `0, 0` (Gulf of Guinea) to `51.4779, 0.0000` (Greenwich, London) to avoid
+  defaulting to the middle of the ocean when no location is configured
+
+# Release V1.13.0
+
+- **Coverage Map / Access Points implementation**: new `AccessPoint` and `Network` management, CSV import & export for
+  access point data, and relation between FreeRADIUS `radacct` accounting data via MAC address matching.
+- New public `/map` route, rendering network coverage areas as polygons, and a new authenticated `/dashboard/map` page
+  rendering both network polygons and individual Access Point markers.
+- Map rendering implemented, a network management page with polygon/rectangle/circle drawing tools, and a "Coverage
+  Overview" list of drawn shapes.
+- **SMS Provider management rework**: new multi-provider management page (list, create, edit, activate, delete),
+  replacing the previous single hardcoded provider configuration.
+- New `SMSProviderInterface` - based gateway pattern (one implementation class per provider) with live "Test
+  Credentials" validation against the provider's API before saving.
+- New user data export option, available both on the landing page (self-service) and on the admin dashboard, with the
+  choice between censored or uncensored personal data.
+
+Please make sure to execute the new migration to update and use the new required configuration tables for
+SMSProvider management, Coverage Map (`AccessPoint`, `Network`) and other settings introduced in this release.
+
+- Run the migrations with:
+
+```bash
+  php bin/console doctrine:migrations:migrate
+```
+
+- **Required one-time action:** After upgrading, run
+  the [MultipleSMSMigrationCommand.php](src/Command/MultipleSMSMigrationCommand.php) to migrate
+  existing BudgetSMS API credentials from the Settings table to the new dedicated SMSProvider management system.
+  This command should be executed **only once** and while the portal is **offline or restricted**.
+  - Run the command with:
+
+```bash
+    php bin/console prepare:multiSMSMigration
+```
+
+# Release V1.12.1
+
+- Removed the preparation command that was introduced for v1.11.
+- Updated configuration variables default value to follow better practices (bool instead of ON & OFF, please consult the `env.sample` for more details)
+- Add fallback message error in case the default super admin account has 2fa forced with email
+
+# Release V1.12.0
+
+- New settings to configure the number of retry attempts for email & SMS at a specific timeframe, with customization available on the dashboard.
+- New settings for number of tries for email & sms on a specific time stamp also customizable on the platform
+- New command for breaking glass cases that generate a new pair of credentials for the dashboard access (one time use
+  per generation). It also has white-flag to skip 2FA validation and when it logs in this account is immediately
+  disabled.
+- New Activity logs only of the portal (Users interaction and settings management)
+- New setting to track the cron job enablement and execution for each one
+- New UserProfile details page with information about the profiles downloaded per user, connectivity status, event logs and other important information
+- Minor rework on some pages (Reset password per user on the dashboard is now a dedicated page and the edit has also been modified to comply with these changes)
+- User deletion now encrypts all existing event metadata (uuid, performed_on_uuid, user_old_data, user_new_data) before updating the user entity; the deletion event itself is encrypted inline at save time
+- Users are notified before their data is wiped — by email or by SMS
+- Activity logs: new encrypted data badge (amber, lock icon) displayed on the action column of the activity log table and inside the event detail modal, indicating that the event metadata has been encrypted following a user deletion
+- Fix SAML authenticator to manually extract standard attributes from the SAMLResponse when complex URI schemas fail to map automatically. This also lets the SAML factory able to generated account from Google Workspace (old G Suite)
+
+Please make sure to execute the new migration to update and use the new required configuration settings
+- Run the migrations with:
+  ```bash
+  php bin/console doctrine:migrations:migrate
+  ```
+  
+# Release V1.11.2
+
+- Eliminate external CDN dependency on `rsms.me``assets/fonts/inter/`
+- Remove unversioned external font CDN links without Subresource Integrity (SRI) from base twig template
+- Fix CI/CD pipeline crash by downloading and serving `tw-elements` JS and CSS assets locally, bypassing jsDelivr's broken automated ESM bundler (`+esm`).
+- Fix application crash on the "add new admins" page by adding the missing `domainsBlacklisted` property/validation constraint to the DTO.
+
+# Release V1.11.1
+
+- Fix certificate chain validation to support multi-certificate PEM bundles
+- Fixed dashboard access permission inconsistencies affecting some operations.
+- It's required to run the new migrations this will remove the unused settings of freeradius connectivity.
+  - Run the migrations with:
+    ```bash
+    php bin/console doctrine:migrations:migrate
+    ```
+
+# Release V1.11.0
+
+- Updated both statistics pages on the dashboard interface
+- Minor improvements with other UI elements
+- Improved date-filtering on both statistics pages
+- Code Optimizations
+- Updated `DATABASE_URL` and `DATABASE_FREERADIUS_URL` in `.env` to use full MySQL version string (e.g. `serverVersion=8.0.44`) to fix deprecations — please update your `.env` accordingly and follow the `.env.sample`
+
+No migrations are needed for this release
+
 # Release V1.10.5
 
 - Updated `openingApp` label for return apps landing page
@@ -47,7 +142,7 @@
 - Added a new validator for each authentication method or registration to block blacklisted domains
 - New loading screen for long time requests (example, refresh domains)
 - Add new `SAML_IDENTIFIER_ATTRIBUTE` environment variable to support configurable SAML user identifier mapping (
-  sAMAccountName, email, uid, or username).
+  sAMAccountName, email, uuid, or username).
 - Added `SAML_ATTRIBUTE_MAPPING` configuration to allow fully customizable SAML attribute mappings (uuid, email,
   first_name, last_name) per Identity Provider.
 - It's required to run the new migrations this will set up the new entities for the new domains, sources page (

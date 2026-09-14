@@ -125,34 +125,28 @@ readonly class InstallationService
 
     public function getStep(InstallationProgress $installationProgress): string
     {
+
         if (
             $installationProgress->getDbOpenRoaming() &&
             $installationProgress->getDbFreeradius()
         ) {
             if (
-                $installationProgress->getTurnstileKey() &&
-                $installationProgress->getTurnstileSecret() &&
-                $installationProgress->getTrustedProxies()
+                $installationProgress->getEmailAdmin() &&
+                $installationProgress->getPasswordAdmin() &&
+                $installationProgress->getAdminConfirmation()
             ) {
                 if (
-                    $installationProgress->getEmailAdmin() &&
-                    $installationProgress->getPasswordAdmin() &&
-                    $installationProgress->getAdminConfirmation()
+                    $this->checkDatabaseSettings($installationProgress) &&
+                    $this->checkSettingsValues($installationProgress)
                 ) {
-                    if (
-                        $this->checkDatabaseSettings($installationProgress) &&
-                        $this->checkSettingsValues($installationProgress)
-                    ) {
-                        $installationProgress->setInstallationState(ProcessStatusType::COMPLETED);
-                        $this->entityManager->persist($installationProgress);
-                        $this->entityManager->flush();
-                        return InstallationStep::COMPLETED->value;
-                    }
-                    return InstallationStep::COMMAND->value;
+                    $installationProgress->setInstallationState(ProcessStatusType::COMPLETED);
+                    $this->entityManager->persist($installationProgress);
+                    $this->entityManager->flush();
+                    return InstallationStep::COMPLETED->value;
                 }
-                return InstallationStep::ADMIN->value;
+                return InstallationStep::COMMAND->value;
             }
-            return InstallationStep::SETTINGS->value;
+            return InstallationStep::ADMIN->value;
         }
         return InstallationStep::DATABASE->value;
     }
@@ -363,11 +357,13 @@ readonly class InstallationService
         ) {
             return false;
         }
+
+        $jwtPassphrase = $installationProgress->getJwtPassphrase();
         if (
-            $installationProgress->getJwtPassphrase() !== null &&
+            $jwtPassphrase !== null &&
             !$this->envValueMatches(
                 SettingsConfigType::JWT_PASSPHRASE->value,
-                $installationProgress->getJwtPassphrase()
+                $jwtPassphrase
             )
         ) {
             return false;
@@ -375,15 +371,22 @@ readonly class InstallationService
         return true;
     }
 
-    public function envValueMatches(string $key, string $expectedValue): bool
+    public function envValueMatches(string $key, ?string $expectedValue): bool
     {
         $envPath = $this->parameterBag->get('kernel.project_dir') . '/.env';
+
+        if (!file_exists($envPath)) {
+            return false;
+        }
+
         $envContent = file_get_contents($envPath);
 
-        $pattern = sprintf('/^%s="?(.*?)"?$/m', preg_quote($key, '/'));
+        $expectedValue ??= '';
+
+        $pattern = sprintf('/^%s=("?)(.*?)\1$/m', preg_quote($key, '/'));
 
         if (preg_match($pattern, (string)$envContent, $matches)) {
-            return trim($matches[1], "\"' \r\n") === $expectedValue;
+            return trim($matches[2]) === trim($expectedValue);
         }
 
         return false;

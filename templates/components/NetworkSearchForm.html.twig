@@ -1,0 +1,149 @@
+{% import 'dashboard/shared/_sort_arrow.html.twig' as sharedSort %}
+<div {{ attributes }}>
+
+    <div class="sm:w-auto px-5 py-4">
+        <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
+
+            {# Left Filter Tabs #}
+            <div class="flex flex-col md:flex-row sm:items-center gap-4 sm:gap-6">
+                <div class="flex items-center pb-2 gap-2 border-b-2 border-y-veryDarkButton">
+                    <span>{{ 'all'|trans({}, 'dashboard') }}</span>
+                    <span class="text-xs px-2 py-0.5 rounded-md min-w-[24px] text-center bg-veryDarkButton text-white">
+                        {{ this.networkCounts }}
+                    </span>
+                </div>
+            </div>
+
+            {# Search Bar #}
+            <div class="w-full lg:w-3/6">
+                <div class="flex flex-row items-center border rounded-md bg-white">
+                    <button type="button">
+                        <svg class="w-5 mx-3 text-gray-400" fill="none" stroke="currentColor"
+                             stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                    </button>
+                    <label class="w-full">
+                        <input type="text"
+                               class="form-widget w-full p-2 bg-transparent border-none outline-none focus:ring-0"
+                               placeholder="{{ 'searchNetworks'|trans({}, '_network') }}"
+                               data-model="debounce(300)|query"
+                               autocomplete="off" />
+                    </label>
+                </div>
+            </div>
+
+            {# Action Buttons #}
+            <div class="flex flex-wrap items-center justify-start lg:justify-end gap-3 w-full lg:w-auto shrink-0">
+
+                {# Export CSV #}
+                <a href="{{ path('admin_dashboard_map_export') }}"
+                   data-download="true"
+                   class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none transition-colors shadow-sm">
+                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                    </svg>
+                    {{ 'export'|trans({}, '_network') }}
+                </a>
+
+                {# Import CSV #}
+                <button type="button"
+                        id="btn-open-import"
+                        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none transition-colors shadow-sm cursor-pointer">
+                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    {{ 'import'|trans({}, '_network')|default('Importar') }}
+                </button>
+
+                {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP_WRITE')) %}
+                    {# Create Network #}
+                    <a href="{{ path('admin_dashboard_map_network_create') }}"
+                       class="btn-primary px-4 min-w-[150px] flex items-center justify-center gap-2 shadow-sm">
+                        {{ 'createNetwork'|trans({}, '_network') }}
+                    </a>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+    {# Table #}
+    <div class="overflow-x-auto max-w-full mt-3">
+        <table class="w-full items-start">
+            <thead class="text-sm text-gray-700 bg-veryLightGreen border-b border-gray-200">
+            <tr>
+                <th scope="col" class="px-6 py-4 font-semibold text-left">
+                    {{ 'name'|trans({}, '_network') }}
+                </th>
+                <th scope="col" class="px-6 py-4 font-semibold text-left">
+                    {{ 'accessPoints'|trans({}, '_network') }}
+                </th>
+                <th scope="col" class="px-6 py-4 font-semibold text-left">
+                    <div class="flex items-center gap-2">
+                        <span>{{ 'createdAt'|trans({}, '_network') }}</span>
+                        <button type="button"
+                                data-action="live#action"
+                                data-live-action-param="changeSort"
+                                data-live-field-param="createdAt"
+                                class="p-1 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors cursor-pointer focus:outline-none">
+                            {{ sharedSort.sortArrow('createdAt', sort, order) }}
+                        </button>
+                    </div>
+                </th>
+                <th scope="col" class="px-6 py-4 font-semibold text-left">
+                    <div class="flex items-center gap-2">
+                        <span>{{ 'updatedAt'|trans({}, '_network') }}</span>
+                        <button type="button"
+                                data-action="live#action"
+                                data-live-action-param="changeSort"
+                                data-live-field-param="updatedAt"
+                                class="p-1 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors cursor-pointer focus:outline-none">
+                            {{ sharedSort.sortArrow('updatedAt', sort, order) }}
+                        </button>
+                    </div>
+                </th>
+                <th scope="col" class="relative px-6 py-4">
+                    <span class="sr-only">Actions</span>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for network in this.networks %}
+                {{ include('dashboard/shared/_network.html.twig', {
+                    network: network,
+                }) }}
+            {% else %}
+                <tr>
+                    <td colspan="8">
+                        <div class="flex flex-row justify-center items-start mt-2 p-4">
+                            <div class="pill-error">
+                                {% if query %}
+                                    {{ 'noNetworksFoundWith'|trans({}, '_network') }} "{{ query }}"
+                                {% else %}
+                                    {{ 'noNetworks'|trans({}, '_network') }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# Pagination #}
+    <div class="m-8">
+        <hr class="w-full h-0.5 bg-gray-300/50 border-0 rounded">
+        {{ include('dashboard/shared/pagination/_pagination_live.html.twig', {
+            label: 'networksPerPage'|trans({}, '_network'),
+            occurrencies: this.networkCounts,
+            totalPages: this.totalPages,
+            page: page,
+            count: count,
+        }) }}
+    </div>
+
+    {{ include('dashboard/shared/settings_actions/map/network/_import_modal.html.twig') }}
+</div>

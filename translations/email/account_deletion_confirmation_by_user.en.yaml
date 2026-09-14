@@ -1,0 +1,8 @@
+subject_account_deletion_confirmation: "Your account has been deleted"
+warning: "This action is permanent and cannot be reversed."
+deletion_message: "We are writing to confirm that the account associated with <strong>%uuid%</strong> has been permanently deleted from our portal."
+deletion_info: "In accordance with the General Data Protection Regulation (GDPR), all personal data associated with your account has been erased or anonymised where technically required. No further action is needed on your part."
+footer:
+  support_team: "If you have any questions regarding this deletion, you may reach us at"
+  thank_you: "Thank you for having used our service."
+  team: "The %supportTeam% Team"

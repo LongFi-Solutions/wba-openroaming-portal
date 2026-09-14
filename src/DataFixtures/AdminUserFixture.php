@@ -7,7 +7,6 @@ use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DefaultUser;
-use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Service\EventActions;
@@ -53,9 +52,18 @@ class AdminUserFixture extends Fixture
         $manager->persist($userExternalAuth);
 
         // Save the event Action using the service
-        $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_CREATION->value, new DateTime(), []);
-        $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_VERIFICATION->value, new DateTime(), []);
-
+        $this->eventActions->saveEvent(
+            $admin,
+            AnalyticalEventType::SUPER_ADMIN_CREATION->value,
+            new DateTime(),
+            []
+        );
+        $this->eventActions->saveEvent(
+            $admin,
+            AnalyticalEventType::SUPER_ADMIN_VERIFICATION->value,
+            new DateTime(),
+            []
+        );
 
         $manager->flush();
     }

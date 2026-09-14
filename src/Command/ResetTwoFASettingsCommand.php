@@ -29,8 +29,6 @@ class ResetTwoFASettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:twoFASettings')
-            ->setDescription('Reset Two Factor Authentication Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 

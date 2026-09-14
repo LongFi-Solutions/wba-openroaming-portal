@@ -61,11 +61,6 @@ final class SMSSettingsForm extends AbstractController
 
         // Submit current DTO data (manual mapping)
         $form->submit([
-            SettingName::SMS_USERNAME->value => $this->SMSSettingsDTO?->smsUsername,
-            SettingName::SMS_USER_ID->value => $this->SMSSettingsDTO?->smsUserId,
-            SettingName::SMS_HANDLE->value => $this->SMSSettingsDTO?->smsHandle,
-            SettingName::SMS_FROM->value => $this->SMSSettingsDTO?->smsFrom,
-            SettingName::SMS_TIMER_RESEND->value => $this->SMSSettingsDTO?->smsTimerResend,
             SettingName::DEFAULT_REGION_PHONE_INPUTS->value => $regions,
         ], false);
 

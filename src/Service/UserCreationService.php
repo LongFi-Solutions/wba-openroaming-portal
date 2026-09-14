@@ -8,7 +8,7 @@ use App\Entity\UserExternalAuth;
 use App\Enum\AdminPermissionsType;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
-use App\Enum\PlatformMode;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\UserProvider;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -47,12 +47,12 @@ readonly class UserCreationService
 
         // Defines the Event to the table
         $eventMetaData = [
-            'ip' => $request->getClientIp(),
-            'user_agent' => $request->headers->get('User-Agent'),
-            'platform' => PlatformMode::LIVE->value,
-            'uuid' => $user->getUuid(),
-            'registrationType' => $provider,
+            EventMetadataKeysType::IP->value => $request->getClientIp(),
+            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
+            EventMetadataKeysType::REGISTRATION_TYPE->value => $provider,
         ];
+
         $this->eventActions->saveEvent(
             $user,
             AnalyticalEventType::USER_CREATION->value,

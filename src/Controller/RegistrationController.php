@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
@@ -30,10 +31,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -43,7 +44,6 @@ use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
 
 class RegistrationController extends AbstractController
 {
@@ -71,7 +71,7 @@ class RegistrationController extends AbstractController
         private readonly RequestStack $requestStack,
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly PhoneNumberUtil $phoneNumberUtil,
-        private readonly RateLimiterFactory $verifyAccountLimiter,
+        private readonly RateLimiterFactoryInterface $verifyAccountLimiter,
     ) {
     }
 
@@ -404,17 +404,17 @@ class RegistrationController extends AbstractController
                 $session->set('session_verified', true);
 
                 // Defines the Event to the table
-                $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
+                $eventMetaData = [
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
+                    EventMetadataKeysType::PLATFORM->value => PlatformMode::LIVE->value,
                 ];
                 $this->eventActions->saveEvent(
                     $user,
                     AnalyticalEventType::USER_VERIFICATION->value,
                     new DateTime(),
-                    $eventMetadata
+                    $eventMetaData
                 );
 
                 $this->addFlash(

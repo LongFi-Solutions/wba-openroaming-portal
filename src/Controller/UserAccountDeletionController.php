@@ -3,20 +3,25 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
+use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Form\AutoDeleteCodeType;
 use App\Form\AutoDeletePasswordType;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
+use App\Service\EmailGenerator;
 use App\Service\GetSettings;
+use App\Service\SendSMS;
 use App\Service\TwoFAService;
-use App\Service\UserDeletionService;
+use App\Service\UserDeletion\UserDeletionService;
 use DateTime;
 use Doctrine\ORM\Exception\ORMException;
+use libphonenumber\PhoneNumber;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -25,6 +30,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
 class UserAccountDeletionController extends AbstractController
 {
@@ -35,6 +41,8 @@ class UserAccountDeletionController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly UserRepository $userRepository,
         private readonly TwoFAService $twoFAService,
+        private readonly EmailGenerator $emailGenerator,
+        private readonly SendSMS $sendSMS,
     ) {
     }
 
@@ -57,8 +65,8 @@ class UserAccountDeletionController extends AbstractController
         }
 
         if (
-            in_array('ROLE_ADMIN', $currentUser->getRoles(), true) ||
-            in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles(), true)
+            in_array(AdminRoleType::ROLE_ADMIN->value, $currentUser->getRoles(), true) ||
+            in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $currentUser->getRoles(), true)
         ) {
             $this->addFlash(
                 'error',
@@ -90,7 +98,11 @@ class UserAccountDeletionController extends AbstractController
             $loginWithUuidOnly = $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value;
         }
 
-        if ($loginWithUuidOnly) {
+        if (
+            $loginWithUuidOnly
+            && is_array($data)
+            && ($data[SettingName::PLATFORM_MODE->value]['value'] ?? null) === PlatformMode::LIVE->value
+        ) {
             if (
                 $this->twoFAService->canValidationCode($currentUser, AnalyticalEventType::USER_AUTO_DELETE_CODE->value)
             ) {
@@ -130,10 +142,23 @@ class UserAccountDeletionController extends AbstractController
 
             // Compare the typed password with the hashed password from the database
             if (password_verify((string)$typedPassword, $currentPasswordDB)) {
+                // Notify the user before their data is wiped
+                try {
+                    if ($currentUser->getEmail() !== null) {
+                        $this->emailGenerator->sendUserAccountDeletionConfirmationEmail($currentUser);
+                    } elseif ($currentUser->getPhoneNumber() instanceof PhoneNumber) {
+                        $message = $this->translator->trans('sms_account_deletion', [], 'UserDeletionService');
+                        $this->sendSMS->sendSmsNoValidation($currentUser, $message);
+                    }
+                } catch (Throwable) {
+                    // non-fatal — deletion continues regardless
+                }
+
                 $this->userDeletionService->deleteUser($currentUser, $userExternalAuths, $request, $currentUser);
 
                 return $this->redirectToRoute('app_landing');
             }
+
             $this->addFlash(
                 'error',
                 $this->translator->trans('invalidPassword', [], 'controllers')
@@ -156,6 +181,7 @@ class UserAccountDeletionController extends AbstractController
 
     /**
      * @throws \JsonException
+     * @throws ORMException
      */
     #[Route('/landing/userAccount/deletion/local/code', name: 'app_user_account_deletion_local_code')]
     #[IsGranted('ROLE_USER')]
@@ -192,6 +218,17 @@ class UserAccountDeletionController extends AbstractController
 
             // Compare the typed code with the 2fa code from the database
             if ($this->twoFAService->validate2FACode($currentUser, $typedCode)) {
+                // Notify the user before their data is wiped
+                try {
+                    if ($currentUser->getEmail() !== null) {
+                        $this->emailGenerator->sendUserAccountDeletionConfirmationEmail($currentUser);
+                    } elseif ($currentUser->getPhoneNumber() instanceof PhoneNumber) {
+                        $message = $this->translator->trans('sms_account_deletion', [], 'UserDeletionService');
+                        $this->sendSMS->sendSmsNoValidation($currentUser, $message);
+                    }
+                } catch (Throwable) {
+                    // non-fatal — deletion continues regardless
+                }
                 $this->userDeletionService->deleteUser($currentUser, $userExternalAuths, $request, $currentUser);
                 return $this->redirectToRoute('app_landing');
             }
@@ -264,10 +301,10 @@ class UserAccountDeletionController extends AbstractController
                 new DateTime()->modify('+1 minutes'),
                 '/',
                 null,
-                false,
+                null,
                 true,
                 false,
-                Cookie::SAMESITE_LAX
+                \Symfony\Component\HttpFoundation\Cookie::SAMESITE_LAX
             );
             $response = $this->redirectToRoute('saml_login');
             $response->headers->setCookie($cookie);
@@ -307,10 +344,22 @@ class UserAccountDeletionController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        /** @var User $user */
-        $user = $this->userRepository->findOneBy(['id' => $currentLoggedUserID]);
-        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
-        $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $user);
+        /** @var User $currentUser */
+        $currentUser = $this->userRepository->findOneBy(['id' => $currentLoggedUserID]);
+        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
+        // Notify the user before their data is wiped
+        try {
+            if ($currentUser->getEmail() !== null) {
+                $this->emailGenerator->sendUserAccountDeletionConfirmationEmail($currentUser);
+            } elseif ($currentUser->getPhoneNumber() instanceof PhoneNumber) {
+                $message = $this->translator->trans('sms_account_deletion', [], 'UserDeletionService');
+                $this->sendSMS->sendSmsNoValidation($currentUser, $message);
+            }
+        } catch (Throwable) {
+            // non-fatal — deletion continues regardless
+        }
+
+        $this->userDeletionService->deleteUser($currentUser, $userExternalAuths, $request, $currentUser);
 
         return $this->redirectToRoute('app_landing');
     }

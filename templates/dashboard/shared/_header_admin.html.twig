@@ -1,13 +1,9 @@
-{# Dashboard Header #}
-{# templates/dashboard/shared/_header.html.twig #}
-
 {# Define route-to-header mapping #}
 {% set routeHeaders = {
     admin_page: {icon: 'wba:user', title: 'usersManagement'},
-    admin_user_edit: {icon: 'wba:user', title: 'usersManagement'},
+    admin_dashboard_admins: {icon: 'wba:admin-management', title: 'adminManagement'},
     admin_dashboard_customize: {icon: 'wba:pencil-edit', title: 'landingPageConfiguration'},
     admin_reset_password: {icon: 'wba:cog', title: 'resetPassword'},
-    admin_user_update: {icon: 'wba:user-circle', title: 'accountSettings'},
     admin_dashboard_settings_terms: {icon: 'wba:file-check', title: 'termsAndPolicies'},
     admin_dashboard_settings_radius: {icon: 'wba:file-space', title: 'radiusProfileConfiguration'},
     admin_dashboard_settings_status: {icon: 'wba:barchart', title: 'platformStatus'},
@@ -18,98 +14,117 @@
     admin_dashboard_settings_schedule: {icon: 'wba:schedule', title: 'scheduleAutomation'},
     admin_dashboard_statistics: {icon: 'wba:piechart', title: 'portalStatistics'},
     admin_dashboard_statistics_freeradius: {icon: 'wba:hdd', title: 'connectivityStatistics'},
-    admin_dashboard_settings_sms: {icon: 'wba:sms', title: 'SMSConfiguration'},
+    admin_dashboard_settings_sms: {icon: 'wba:config', title: 'SMSConfiguration'},
+    admin_dashboard_settings_sms_providers: {icon: 'wba:sms-buble', title: 'SMSProviders', class: 'fill-current stroke-none'},
+    admin_dashboard_settings_sms_providers_new: {icon: 'wba:sms-buble', title: 'newSMSProvider', class: 'fill-current stroke-none'},
+    admin_dashboard_settings_sms_providers_edit: {icon: 'wba:sms-buble', title: 'editSMSProvider', class: 'fill-current stroke-none'},
     admin_dashboard_settings_domains: {icon: 'wba:file-cross', title: 'domainBlacklist'},
     admin_dashboard_settings_certs_management: {icon: 'wba:certificate', title: 'certsManagement'},
     admin_dashboard_return_apps: {icon: 'wba:mobile-arrows', title: 'returnAppsManagement'},
-    dashboard_add_admin: {icon: 'wba:add-user', title: 'addAdmin'},
+    admin_dashboard_add_admin: {icon: 'wba:add-user', title: 'addAdmin'},
+    admin_dashboard_activity_logs: {icon: 'wba:clock-counter-clockwise', title: 'activityLogs', class: 'fill-current stroke-none'},
+    admin_dashboard_map: {icon: 'wba:map-outline', title: 'map', class: 'fill-current stroke-none'},
+    admin_dashboard_map_networks: {icon: 'wba:table', title: 'networkManagement', class: 'fill-current stroke-none'},
+    admin_dashboard_map_network_create: {icon: 'wba:network', title: 'createNetwork', class: 'fill-current stroke-none'},
+    admin_dashboard_map_network_edit: {icon: 'wba:network', title: 'editNetwork', class: 'fill-current stroke-none'},
+    admin_dashboard_map_network_accessPoints: {icon: 'wba:wifi', title: 'network'},
+    admin_dashboard_map_accessPoint_create: {icon: 'wba:wifi', title: 'createAccessPoint'},
+    admin_dashboard_map_accessPoint_edit: {icon: 'wba:wifi', title: 'editAccessPoint'},
+    admin_dashboard_map_settings: {icon: 'wba:cog', title: 'mapSettings'},
 } %}
 
 {% set currentRoute = app.request.attributes.get('_route') %}
 {% set header = routeHeaders[currentRoute] ?? {icon: 'wba:wifi', title: 'Dashboard'} %}
 
 <div class="flex flex-row items-center pl-4">
-    <twig:ux:icon name="{{ header.icon }}" class="w-10 mt-0.5 fill-none stroke-current" />
-    <h1 class="text-2xl font-semibold p-5">{{ header.title|trans({}, '_header_admin') }}</h1>
+    <twig:ux:icon name="{{ header.icon }}"
+                  class="w-10 h-10 mt-0.5 block {{ header.class ?? 'fill-none stroke-current' }}" />
+    <h1 class="text-2xl font-semibold p-5">
+        {% if currentRoute == 'admin_dashboard_map_network_accessPoints' and network is defined %}
+            {{ network.name }}
+        {% else %}
+            {{ header.title|trans({}, '_header_admin') }}
+        {% endif %}
+    </h1>
 </div>
 
 {# Main Button #}
 <div class="relative" {{ stimulus_controller('nav-dropdown') }} >
-  <button type="button" {{ stimulus_target('nav-dropdown', 'button') }} {{ stimulus_action('nav-dropdown', 'toggle')|stimulus_action('nav-dropdown', 'lost_focus', 'focusout') }}
-          class="cursor-pointer shadow-md w-12 h-12 p-2 rounded-full duration-300 hidden xl:relative xl:block hover:bg-white hover:text-lightGreen">
-    <twig:ux:icon name="wba:menu" class="stroke-current"/>
-  </button>
+    <button type="button" {{ stimulus_target('nav-dropdown', 'button') }} {{ stimulus_action('nav-dropdown', 'toggle')|stimulus_action('nav-dropdown', 'lost_focus', 'focusout') }}
+            class="cursor-pointer shadow-md w-12 h-12 p-2 rounded-full duration-300 hidden xl:relative xl:block hover:bg-white hover:text-lightGreen">
+        <twig:ux:icon name="wba:menu" class="stroke-current"/>
+    </button>
 
-  <div class="hidden xl:block">
-    <div {{ stimulus_target('nav-dropdown', 'container') }}
-            class="w-full max-w-[250px] z-40 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-md min-w-max absolute right-0 mt-2">
-      <ul class="py-2 text-sm space-y-1" aria-labelledby="adminActionsDropdownButton">
-        <li class="px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
-          {# Account Option #}
-          <a href="{{ path('admin_user_edit', {id: app.user.id}) }}"
-             class="flex items-center space-x-2">
-            <twig:ux:icon name="wba:user-circle" class="w-7 pr-2 mr-2 fill-none stroke-current"/>
-            {{ 'account'|trans({}, '_header_admin') }}
-          </a>
-        </li>
-        {# Language Dropdown #}
-        <div {{ stimulus_controller('nav-dropdown') }}>
-            <div class="px-2 mx-2">
-                <button
-                        type="button"
-                        {{ stimulus_target('nav-dropdown', 'button') }}
-                        {{ stimulus_action('nav-dropdown', 'toggleHeader')|stimulus_action('nav-dropdown', 'lost_focusHeader', 'focusout') }}
-                        class="w-full flex items-center space-x-2 px-2 py-2 rounded cursor-pointer hover:shadow hover:bg-gray-100 hover:text-lightGreen duration-100">
+    <div class="hidden xl:block">
+        <div {{ stimulus_target('nav-dropdown', 'container') }}
+                class="w-full max-w-[250px] z-40 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-md min-w-max absolute right-0 mt-2">
+            <ul class="py-2 text-sm space-y-1" aria-labelledby="adminActionsDropdownButton">
+                <li class="px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
+                    {# Account Option #}
+                    <a href="{{ path('admin_dashboard_user_show', {id: app.user.id}) }}"
+                       class="flex items-center space-x-2">
+                        <twig:ux:icon name="wba:user-circle" class="w-7 pr-2 mr-2 fill-none stroke-current"/>
+                        {{ 'account'|trans({}, '_header_admin') }}
+                    </a>
+                </li>
+                {# Language Dropdown #}
+                <div {{ stimulus_controller('nav-dropdown') }}>
+                    <div class="px-2 mx-2">
+                        <button
+                                type="button"
+                                {{ stimulus_target('nav-dropdown', 'button') }}
+                                {{ stimulus_action('nav-dropdown', 'toggleHeader')|stimulus_action('nav-dropdown', 'lost_focusHeader', 'focusout') }}
+                                class="w-full flex items-center space-x-2 px-2 py-2 rounded cursor-pointer hover:shadow hover:bg-gray-100 hover:text-lightGreen duration-100">
 
-                    <twig:ux:icon name="wba:globe" class="w-6 pr-1 mr-2 fill-none stroke-current"/>
-                    <span class="truncate">{{ 'language'|trans({}, 'landing') }}</span>
-                </button>
-            </div>
-          {# Country Dropdown Options #}
-          <ul {{ stimulus_target('nav-dropdown', 'container') }}
-                  class="px-6 hidden mt-2 divide-y divide-gray-100 text-sm rounded-lg bg-white">
-            <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == constant('App\\Enum\\LanguageType::EN').value ? 'selected' : '' }}">
-              <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag"/>
-              <a href="{{ path('app_change_language', {locale: constant('App\\Enum\\LanguageType::EN').value}) }}">
-                English
-              </a>
-            </li>
-            <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == constant('App\\Enum\\LanguageType::PT').value ? 'selected' : '' }}">
-              <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:portugal-flag"/>
-              <a href="{{ path('app_change_language', {locale: constant('App\\Enum\\LanguageType::PT').value}) }}">
-                Portuguese
-              </a>
-            </li>
-          </ul>
+                            <twig:ux:icon name="wba:globe" class="w-6 pr-1 mr-2 fill-none stroke-current"/>
+                            <span class="truncate">{{ 'language'|trans({}, 'landing') }}</span>
+                        </button>
+                    </div>
+                    {# Country Dropdown Options #}
+                    <ul {{ stimulus_target('nav-dropdown', 'container') }}
+                            class="px-6 hidden mt-2 divide-y divide-gray-100 text-sm rounded-lg bg-white">
+                        <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == constant('App\\Enum\\LanguageType::EN').value ? 'selected' : '' }}">
+                            <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag"/>
+                            <a href="{{ path('app_change_language', {locale: constant('App\\Enum\\LanguageType::EN').value}) }}">
+                                English
+                            </a>
+                        </li>
+                        <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == constant('App\\Enum\\LanguageType::PT').value ? 'selected' : '' }}">
+                            <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:portugal-flag"/>
+                            <a href="{{ path('app_change_language', {locale: constant('App\\Enum\\LanguageType::PT').value}) }}">
+                                Portuguese
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <li class="px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
+                    {# Logout Option #}
+                    <a href="{{ path('app_dashboard_logout') }}"
+                       class="flex items-center space-x-2">
+                        <twig:ux:icon name="wba:logout" class="w-7 pr-2 mr-2 fill-none stroke-current"/>
+                        {{ 'logout'|trans({}, '_header_admin') }}
+                    </a>
+                </li>
+            </ul>
         </div>
-        <li class="px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
-          {# Logout Option #}
-          <a href="{{ path('app_dashboard_logout') }}"
-             class="flex items-center space-x-2">
-            <twig:ux:icon name="wba:logout" class="w-7 pr-2 mr-2 fill-none stroke-current"/>
-            {{ 'logout'|trans({}, '_header_admin') }}
-          </a>
-        </li>
-      </ul>
     </div>
-  </div>
-  {# User Info #}
-  <div class="top-0 right-16 mt-2 ml-2 text-gray-700 text-base font-bold whitespace-nowrap hidden xl:block xl:absolute ">
-    {% if app.user.firstName == null and app.user.lastName == null %}
-      Admin OR Portal
-    {% else %}
-      {{ app.user.firstName }} {{ app.user.lastName }}
-    {% endif %}
-  </div>
-  <div class="top-6 right-16 mt-2 ml-2 text-gray-500 text-sm font-normal whitespace-nowrap hidden xl:block xl:absolute">
-    {{ 'admin'|trans({}, '_header_admin') }}
-  </div>
+    {# User Info #}
+    <div class="top-0 right-16 mt-2 ml-2 text-gray-700 text-base font-bold whitespace-nowrap hidden xl:block xl:absolute ">
+        {% if app.user.firstName == null and app.user.lastName == null %}
+            Admin OR Portal
+        {% else %}
+            {{ app.user.firstName }} {{ app.user.lastName }}
+        {% endif %}
+    </div>
+    <div class="top-6 right-16 mt-2 ml-2 text-gray-500 text-sm font-normal whitespace-nowrap hidden xl:block xl:absolute">
+        {{ 'admin'|trans({}, '_header_admin') }}
+    </div>
 </div>
 
 {# Header - Button - Hamburger (only used in lower resolutions - Opens sidebar) #}
 <button {{ stimulus_target('nav', 'button') }} {{ stimulus_action('nav', 'toggle') }}
         class="block hamburger xl:hidden focus:outline-none mt-3">
-  <span class="hamburger-top"></span>
-  <span class="hamburger-middle"></span>
-  <span class="hamburger-bottom"></span>
+    <span class="hamburger-top"></span>
+    <span class="hamburger-middle"></span>
+    <span class="hamburger-bottom"></span>
 </button>

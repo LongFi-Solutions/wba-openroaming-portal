@@ -203,3 +203,36 @@ tooManyAttempts: "Too many requests. Please try again in %seconds% seconds."
 redirectingToApp: 'Redirected to the app.'
 certificateProcessBlocked: "A configuration error has occurred. Please contact our support team."
 emailAliasesNotAllowed: 'Email aliases are not allowed for registration.'
+canSkipThisPage: 'Turnstile setup is optional. To skip this step, submit the page without filling in any fields.'
+chmodDbScript: 'Grant execution permissions to the database update script.'
+chmodSettingsScript: 'Grant execution permissions to the settings update script.'
+successNetworkCreate: 'Network "%network%" was successfully created.'
+successNetworkEdit: 'Network "%network%" was successfully updated.'
+successNetworkDelete: 'Network "%network%" was successfully deleted.'
+successAccessPointCreate: 'Access Point "%accessPoint%" was successfully created.'
+successAccessPointEdit: 'Access Point "%accessPoint%" was successfully updated.'
+successAccessPointDelete: 'Access Point "%accessPoint%" was successfully deleted.'
+importErrorNoFile: 'No file was uploaded.'
+importErrorInvalidFormat: 'Invalid file format. Please upload a valid CSV file.'
+importErrorNotReadable: 'The uploaded file is not readable.'
+importErrorCannotOpen: 'Could not open the uploaded CSV file.'
+importErrorInvalidStructure: 'Invalid CSV structure. The column "network_name" is mandatory.'
+networkImportSuccess: 'Import successful! Processed %d networks.'
+accessPointImportSuccess: 'Import successful! Processed %d access points.'
+importErrorGeneral: 'An error occurred during import: %s'
+importErrorValidation: 'Import cancelled. Review the errors below and re-upload the file.'
+mapSettingsAppliedSuccessfully: 'Map settings applied successfully!'
+importErrorInvalidMimeType: 'The file content is not a valid CSV (invalid MIME type).'
+SMSProviderSavedSuccessfully: 'SMS provider saved successfully.'
+SMSProviderActivatedSuccessfully: 'SMS provider activated successfully.'
+SMSProviderDeletedSuccessfully: 'SMS provider deleted successfully.'
+cannotDeleteActiveSMSProvider: 'The active SMS provider cannot be deleted.'
+ProviderIsNotActive: 'This provider is not currently active.'
+SMSProviderDeactivatedSuccessfully: 'SMS provider deactivated successfully.'
+sms_provider_test:
+  invalid_csrf: "Invalid CSRF token."
+  unsupported_provider: "Testing is not yet supported for this provider type."
+  empty_phone_number: "Please enter a phone number to send the test to."
+  invalid_phone_number: "That phone number doesn't look valid."
+  unreachable_provider: "Could not reach BudgetSMS: %error%"
+coverageMapDisabled: 'The coverage map is currently disabled.'

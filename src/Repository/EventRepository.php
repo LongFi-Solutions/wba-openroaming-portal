@@ -8,7 +8,9 @@ use App\Enum\AnalyticalEventType;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 
 /**
  * @extends ServiceEntityRepository<Event>
@@ -42,6 +44,149 @@ class EventRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    public function searchWithFilter(
+        string $filter = 'all',
+        string $sort = 'event_datetime',
+        string $order = 'desc',
+        ?string $searchTerm = null,
+        ?string $startDate = null,
+        ?string $endDate = null,
+        ?User $user = null,
+        int $page = 1,
+        int $count = 10
+    ): QueryBuilder {
+        return $this->buildFilterQuery($filter, $sort, $order, $searchTerm, $startDate, $endDate, $user)
+            ->setFirstResult(($page - 1) * $count)
+            ->setMaxResults($count);
+    }
+
+    public function searchWithFilterUnpaginated(
+        string $filter = 'all',
+        string $sort = 'event_datetime',
+        string $order = 'desc',
+        ?string $searchTerm = null,
+        ?string $startDate = null,
+        ?string $endDate = null,
+        ?User $user = null,
+    ): QueryBuilder {
+        return $this->buildFilterQuery($filter, $sort, $order, $searchTerm, $startDate, $endDate, $user);
+    }
+
+    private function buildFilterQuery(
+        string $filter,
+        string $sort,
+        string $order,
+        ?string $searchTerm,
+        ?string $startDate,
+        ?string $endDate,
+        ?User $user
+    ): QueryBuilder {
+        $qb = $this->createQueryBuilder('e')
+            ->join('e.user', 'u')
+            ->addSelect('u')
+            ->where(
+                'u.email LIKE :search OR
+                 u.uuid LIKE :search OR
+                  e.event_name LIKE :search OR
+                   e.event_metadata LIKE :search'
+            )
+            ->setParameter('search', '%' . $searchTerm . '%');
+
+        if (!is_null($startDate)) {
+            try {
+                $qb->andWhere('e.event_datetime >= :startDate')
+                    ->setParameter('startDate', new DateTime($startDate));
+            } catch (Exception) {
+            }
+        }
+
+        if (!is_null($endDate)) {
+            try {
+                $qb->andWhere('e.event_datetime <= :endDate')
+                    ->setParameter('endDate', new DateTime($endDate));
+            } catch (Exception) {
+            }
+        }
+
+        $this->applyUserFilter($qb, $user);
+        $this->applyEventGroupFilter($qb, $filter);
+
+        $allowedSorts = ['event_datetime', 'event_name'];
+        $allowedOrders = ['asc', 'desc'];
+        $sort = in_array($sort, $allowedSorts, true) ? $sort : 'event_datetime';
+        $order = in_array(strtolower($order), $allowedOrders, true) ? $order : 'desc';
+        $qb->orderBy('e.' . $sort, $order);
+
+        return $qb;
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    public function countByEventGroup(?User $user = null): array
+    {
+        $qb = $this->createQueryBuilder('e')
+            ->select('COUNT(e.id) as all_events')
+            ->addSelect(
+                'SUM(CASE WHEN e.event_name IN (:user_events) THEN 1 ELSE 0 END) as user_actions'
+            )
+            ->addSelect(
+                'SUM(CASE WHEN e.event_name IN (:admin_events) THEN 1 ELSE 0 END) as admin_actions'
+            )
+            ->addSelect(
+                'SUM(CASE WHEN e.event_name IN (:auth_events) THEN 1 ELSE 0 END) as auth_events'
+            )
+            ->addSelect(
+                'SUM(CASE WHEN e.event_name LIKE :setting_prefix THEN 1 ELSE 0 END) as settings_changes'
+            )
+            ->addSelect(
+                'SUM(CASE WHEN e.event_name LIKE :cert_prefix THEN 1 ELSE 0 END) as certificate_events'
+            );
+
+        $qb->setParameter('user_events', [
+            AnalyticalEventType::USER_CREATION->value,
+            AnalyticalEventType::USER_VERIFICATION->value,
+            AnalyticalEventType::USER_ACCOUNT_DELETION->value,
+            AnalyticalEventType::USER_ACCOUNT_UPDATE->value,
+        ]);
+
+        $qb->setParameter('admin_events', [
+            AnalyticalEventType::ADMIN_CREATION->value,
+            AnalyticalEventType::ADMIN_ADDED_PERMISSIONS->value,
+            AnalyticalEventType::ADMIN_REMOVED_PERMISSIONS->value,
+            AnalyticalEventType::ADMIN_ADDED_NEW_USER->value,
+        ]);
+
+        $qb->setParameter('auth_events', [
+            AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value,
+            AnalyticalEventType::GOOGLE_LOGIN_REQUEST->value,
+            AnalyticalEventType::MICROSOFT_LOGIN_REQUEST->value,
+            AnalyticalEventType::LOGOUT_REQUEST->value,
+        ]);
+
+
+        $qb->setParameter('setting_prefix', 'SETTING_%');
+        $qb->setParameter('cert_prefix', 'CERTIFICATE_%');
+
+
+        if ($user instanceof User) {
+            $qb->andWhere('e.user = :user')
+                ->setParameter('user', $user);
+        }
+
+
+        $result = $qb->getQuery()->getSingleResult();
+
+        return [
+            'all' => (int)($result['all_events'] ?? 0),
+            'user_actions' => (int)($result['user_actions'] ?? 0),
+            'admin_actions' => (int)($result['admin_actions'] ?? 0),
+            'auth_events' => (int)($result['auth_events'] ?? 0),
+            'settings_changes' => (int)($result['settings_changes'] ?? 0),
+            'certificate_events' => (int)($result['certificate_events'] ?? 0),
+        ];
     }
 
     /**
@@ -138,7 +283,7 @@ class EventRepository extends ServiceEntityRepository
     /**
      * Find events where any field is null or empty.
      *
-     * @return Event[] Returns an array of Event objects
+     * @return Event[]
      */
     public function findEventsWithNullOrEmptyFields(): array
     {
@@ -154,6 +299,102 @@ class EventRepository extends ServiceEntityRepository
                     )
             )
             ->setParameter('emptyString', '')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Find DOWNLOAD_PROFILE related events.
+     *
+     * @return Event[] Returns an array of Event objects
+     * @throws \JsonException
+     */
+    public function findDownloadProfileEvents(DateTime $start, DateTime $end): array
+    {
+        return $this->createQueryBuilder('e')
+            ->select('e.event_metadata')
+            ->andWhere('e.event_name = :event')
+            ->andWhere('e.event_datetime BETWEEN :start AND :end')
+            ->setParameter('event', AnalyticalEventType::DOWNLOAD_PROFILE->value)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getArrayResult();
+    }
+
+    /**
+     * Counts USER_CREATION events by platform mode.
+     *
+     * @return array<int, array{event_metadata: string|null}>
+     */
+    public function findUserCreationEvents(DateTime $start, DateTime $end): array
+    {
+        return $this->createQueryBuilder('e')
+            ->select('e.event_metadata')
+            ->andWhere('e.event_name = :event')
+            ->andWhere('e.event_datetime BETWEEN :start AND :end')
+            ->setParameter('event', AnalyticalEventType::USER_CREATION->value)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getArrayResult();
+    }
+
+    private function applyEventGroupFilter(QueryBuilder $qb, string $group): void
+    {
+        match ($group) {
+            'user_actions' => $qb->andWhere('e.event_name IN (:events)')
+                ->setParameter('events', [
+                    AnalyticalEventType::USER_CREATION->value,
+                    AnalyticalEventType::USER_VERIFICATION->value,
+                    AnalyticalEventType::USER_ACCOUNT_DELETION->value,
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE->value,
+                ]),
+            'admin_actions' => $qb->andWhere('e.event_name IN (:events)')
+                ->setParameter('events', [
+                    AnalyticalEventType::SUPER_ADMIN_CREATION->value,
+                    AnalyticalEventType::SUPER_ADMIN_VERIFICATION->value,
+                    AnalyticalEventType::ADMIN_CREATION->value,
+                    AnalyticalEventType::ADMIN_VERIFICATION->value,
+                    AnalyticalEventType::ADMIN_ADDED_PERMISSIONS->value,
+                    AnalyticalEventType::ADMIN_REMOVED_PERMISSIONS->value,
+                    AnalyticalEventType::ADMIN_ADDED_NEW_USER->value,
+                ]),
+            'auth_events' => $qb->andWhere('e.event_name IN (:events)')
+                ->setParameter('events', [
+                    AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value,
+                    AnalyticalEventType::GOOGLE_LOGIN_REQUEST->value,
+                    AnalyticalEventType::MICROSOFT_LOGIN_REQUEST->value,
+                    AnalyticalEventType::LOGOUT_REQUEST->value,
+                ]),
+            'settings_changes' => $qb->andWhere('e.event_name LIKE :prefix')
+                ->setParameter('prefix', 'SETTING_%'),
+            'certificate_events' => $qb->andWhere('e.event_name LIKE :prefix')
+                ->setParameter('prefix', 'CERTIFICATE_%'),
+            default => null,
+        };
+    }
+
+    private function applyUserFilter(QueryBuilder $qb, ?User $user): void
+    {
+        if ($user instanceof User) {
+            $qb->andWhere('e.user = :user')
+                ->setParameter('user', $user);
+        }
+    }
+
+    /**
+     * @return Event[]
+     */
+    public function findLastEvents(User $user, string $eventLog, DateTime $limitTime): array
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.user = :user')
+            ->andWhere('e.event_name = :event')
+            ->andWhere('e.event_datetime >= :limitTime')
+            ->setParameter('user', $user)
+            ->setParameter('event', $eventLog)
+            ->setParameter('limitTime', $limitTime)
             ->getQuery()
             ->getResult();
     }

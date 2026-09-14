@@ -29,8 +29,6 @@ class ResetCapportSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:capportSettings')
-            ->setDescription('Reset Capport configuration Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 

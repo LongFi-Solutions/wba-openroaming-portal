@@ -87,18 +87,23 @@ Upgrading your system requires caution and preparation. Follow these general gui
 
 ## Upgrade Path Matrix
 
-| Current Version | Target Version | Required Actions                                                                                                                                                                                                                                                                |
-|-----------------|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `< 1.4.0`       | 1.7.0          | Upgrade to at least 1.4.0 and run `php bin/console clear:eventEntity` to remove invalid legacy records before continuing.                                                                                                                                                       |
-| 1.4.0           | 1.7.0          | Run `php bin/console lexik:jwt:generate-keypair` **before upgrading**.                                                                                                                                                                                                          |
-| 1.5.0           | 1.7.0          | Run `php bin/console reset:allocate-providers` before proceeding.                                                                                                                                                                                                               |
-| 1.6.0           | 1.7.0          | No additional steps required; proceed directly after reviewing the changelog.                                                                                                                                                                                                   |
-| 1.7.x           | 1.7.0          | Run `php bin/console doctrine:schema:update --force` to apply required schema changes.                                                                                                                                                                                          |
-| ≤ 1.8.0         | 1.8.1          | Run `php bin/console doctrine:migrations:migrate` to apply optimizations and remove the deprecated `verificationCode` field.                                                                                                                                                    |
-| 1.8.1           | 1.9.0          | Run `php bin/console doctrine:migrations:migrate`.                                                                                                                                                                                                                              |
-| 1.9.0           | 1.9.1          | Minor patch release — no commands required.                                                                                                                                                                                                                                     |
-| 1.9.1           | 1.10.0         | Run `php bin/console doctrine:migrations:migrate`.                                                                                                                                                                                                                              |
-| 1.10.0          | 1.11.0         | Run `php bin/console doctrine:migrations:migrate`. After upgrading, run `php bin/console prepare-release:v1110` **once** to promote the admin user to **Super Admin** for the new role hierarchy system. Note this command it's only present on this release for the migration. |
+| Current Version | Target Version | Required Actions                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+|-----------------|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `< 1.4.0`       | 1.4.0          | Run `php bin/console clear:eventEntity` to remove invalid legacy records before continuing.                                                                                                                                                                                                                                                                                                                                                                                             |
+| 1.4.0           | 1.7.0          | Run `php bin/console lexik:jwt:generate-keypair` **before upgrading**.                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 1.5.0           | 1.7.0          | Run `php bin/console reset:allocate-providers` before proceeding.                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 1.6.0           | 1.7.0          | No additional steps required; proceed directly after reviewing the changelog.                                                                                                                                                                                                                                                                                                                                                                                                           |
+| 1.7.x           | 1.8.0          | Run `php bin/console doctrine:schema:update --force` to apply required schema changes.                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ≤ 1.8.0         | 1.8.1          | Run `php bin/console doctrine:migrations:migrate` to apply optimizations and remove the deprecated `verificationCode` field.                                                                                                                                                                                                                                                                                                                                                            |
+| 1.8.1           | 1.9.0          | Run `php bin/console doctrine:migrations:migrate`.                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 1.9.0           | 1.9.1          | Minor patch release — no commands required.                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 1.9.1           | 1.10.0         | Run `php bin/console doctrine:migrations:migrate`. After upgrading, run `php bin/console prepare-release:v1100` **once** to migrate existing administrator permissions to the new Super Admin role hierarchy. Then fix VichUploader cache permissions: `chown -R www-data:www-data /var/www/openroaming/var/cache/prod/vich_uploader && chmod -R 777 /var/www/openroaming/var/cache/prod/vich_uploader`. All actions should be performed while the portal is **offline or restricted**. |
+| 1.10.x          | 1.11.0         | No migrations required. Update `.env` file: change `serverVersion=8` to `serverVersion=8.0.44` (or your actual MySQL version) in both `DATABASE_URL` and `DATABASE_FREERADIUS_URL`. Refer to `.env.sample` for reference.                                                                                                                                                                                                                                                               |
+| 1.11.0          | 1.11.1         | Run `php bin/console doctrine:migrations:migrate`. To remove outdated settings from the database.                                                                                                                                                                                                                                                                                                                                                                                       |
+| 1.11.1          | 1.11.2         | No migrations required. Font files for Inter are now self-hosted under `public/fonts/inter/`. No additional steps required.                                                                                                                                                                                                                                                                                                                                                             |
+| 1.11.2          | 1.12.0         | Run `php bin/console doctrine:migrations:migrate` to apply new configuration settings.                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 1.12.0          | 1.12.1         | Updated configuration variables default value to follow better practices (bool instead of ON & OFF, please consult the `env.sample` for more details)                                                                                                                                                                                                                                                                                                                                   |
+| 1.12.1          | 1.13.0         | Run `php bin/console doctrine:migrations:migrate` to set up the new `AccessPoint`, `Network`, and `SMSProvider`/`SMSProviderParam` tables. Then run `php bin/console prepare:multiSMSMigration` **once** to migrate existing BudgetSMS API credentials from the `Settings` table to the new dedicated `SMSProvider` management system. Perform both actions while the portal is **offline or restricted**.                                                                              |
 
 Use this table to determine the exact upgrade steps based on your current version.
 
@@ -124,6 +129,81 @@ Use the following checklist before starting the upgrade process:
 ---
 
 ## Step-by-Step Procedure
+
+Follow these steps generic steps updating the portal:
+
+1. **Navigate to the project folder and pull the latest version**
+
+   Navigate to the directory where the portal is installed on your server, then pull the latest version:
+
+```bash
+   cd /path/to/your/portal
+   git pull
+```
+
+> **Note:** Replace `/path/to/your/portal` with the actual path where the portal is installed on your server
+
+2. **Pull the latest Docker images**
+
+```bash
+docker compose pull
+```
+
+3. **Restart the containers**
+
+```bash
+docker compose up -d
+```
+
+4. **Run any version-specific commands**  
+   Check the [Upgrade Path Matrix](#upgrade-path-matrix) for your current version and run any required commands inside
+   the container. Example:
+
+```bash
+docker compose exec web php bin/console doctrine:migrations:migrate
+```
+
+5. **Clear the cache**
+
+```bash
+docker compose exec web php bin/console cache:clear
+```
+
+6. **Verify the portal is running correctly**  
+   Check logs for errors:
+
+```bash
+docker compose logs -f web
+```
+
+---
+
+## Release-Specific Notes: Version 1.13.0
+
+**Scenario**: Your current version is **1.12.1**, and you want to upgrade to **1.13.0**.
+
+- **New Entities & Required Migrations:**
+  This release introduces the Coverage Map feature (`AccessPoint`, `Network` entities) and the new multi-provider
+  `SMSProvider`/`SMSProviderParam` management system. You must run:
+```bash
+  php bin/console doctrine:migrations:migrate
+```
+
+- **Required One-Time Action — SMS Credentials Migration:**
+  After the schema migration above, run the following command **once** to migrate your existing BudgetSMS API
+  credentials from the `Settings` table into the new `SMSProvider` system:
+```bash
+  php bin/console prepare:multiSMSMigration
+```
+> **Important:** This command must be executed only once, and while the portal is **offline or restricted**.
+> Once the migration is complete, SMS provider credentials are managed exclusively through the new
+> SMS Provider management page in the dashboard.
+
+- **No further manual steps** are required for the Coverage Map, FreeRADIUS Statistics optimization, user data
+  export, or TOTP/2FA changes in this release — these are available immediately after the migration completes.
+
+- **Breaking Changes:**
+  Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
 
 ---
 

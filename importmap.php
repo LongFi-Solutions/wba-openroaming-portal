@@ -16,18 +16,31 @@ return [
         'path' => './assets/app.js',
         'entrypoint' => true,
     ],
+    '@symfony/stimulus-bundle' => [
+        'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
+    ],
+    '@symfony/ux-live-component' => [
+        'path' => './vendor/symfony/ux-live-component/assets/dist/live_controller.js',
+    ],
+    'tw-elements' => [
+        'path' => './assets/lib/tw-elements.umd.min.js',
+    ],
+    'tw-elements/css/tw-elements.min.css' => [
+        'path' => './assets/lib/tw-elements.min.css',
+        'type' => 'css',
+    ],
+    '@symfony/ux-leaflet-map' => [
+        'path' => './vendor/symfony/ux-leaflet-map/assets/dist/map_controller.js',
+    ],
     '@hotwired/stimulus' => [
         'version' => '3.2.2',
     ],
     'tom-select/dist/css/tom-select.default.css' => [
-        'version' => '2.4.3',
+        'version' => '2.6.2',
         'type' => 'css',
     ],
-    '@symfony/stimulus-bundle' => [
-        'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
-    ],
     'tom-select' => [
-        'version' => '2.4.3',
+        'version' => '2.6.2',
     ],
     '@orchidjs/sifter' => [
         'version' => '1.1.0',
@@ -36,31 +49,28 @@ return [
         'version' => '1.1.2',
     ],
     'tom-select/dist/css/tom-select.default.min.css' => [
-        'version' => '2.4.3',
+        'version' => '2.6.2',
         'type' => 'css',
     ],
     'tom-select/dist/css/tom-select.bootstrap4.css' => [
-        'version' => '2.4.3',
+        'version' => '2.6.2',
         'type' => 'css',
     ],
     'tom-select/dist/css/tom-select.bootstrap5.css' => [
-        'version' => '2.4.3',
+        'version' => '2.6.2',
         'type' => 'css',
     ],
     'chart.js' => [
-        'version' => '3.9.1',
-    ],
-    '@symfony/ux-live-component' => [
-        'path' => './vendor/symfony/ux-live-component/assets/dist/live_controller.js',
+        'version' => '4.5.1',
     ],
     'lodash-es' => [
-        'version' => '4.17.21',
+        'version' => '4.18.1',
     ],
     'parchment' => [
         'version' => '3.0.0',
     ],
     'eventemitter3' => [
-        'version' => '5.0.1',
+        'version' => '5.0.4',
     ],
     'fast-diff' => [
         'version' => '1.3.0',
@@ -93,7 +103,7 @@ return [
         'type' => 'css',
     ],
     'axios' => [
-        'version' => '1.13.2',
+        'version' => '1.19.0',
     ],
     'quill2-emoji' => [
         'version' => '0.1.2',
@@ -106,9 +116,19 @@ return [
         'version' => '1.0.11',
     ],
     'quill-toggle-fullscreen-button' => [
-        'version' => '0.1.4',
+        'version' => '0.2.0',
     ],
     'quill-html-edit-button' => [
         'version' => '3.0.0',
+    ],
+    '@kurkle/color' => [
+        'version' => '0.4.0',
+    ],
+    'leaflet' => [
+        'version' => '1.9.4',
+    ],
+    'leaflet/dist/leaflet.min.css' => [
+        'version' => '1.9.4',
+        'type' => 'css',
     ],
 ];

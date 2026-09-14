@@ -29,8 +29,6 @@ class ResetTermsSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:termsSettings')
-            ->setDescription('Reset Terms and Conditions Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 

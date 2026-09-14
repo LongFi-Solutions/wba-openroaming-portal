@@ -31,8 +31,6 @@ class ResetCustomSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:customSettings')
-            ->setDescription('Reset Customization Settings')
             ->addOption(
                 'yes',
                 'y',
@@ -61,7 +59,7 @@ class ResetCustomSettingsCommand extends Command
             ['name' => SettingName::CUSTOMER_LOGO_ENABLED->value, 'value' => 'ON'],
             ['name' => SettingName::CUSTOMER_LOGO->value, 'value' => '/resources/logos/WBA_Logo.png'],
             ['name' => SettingName::OPENROAMING_LOGO->value, 'value' => '/resources/logos/openroaming.svg'],
-            ['name' => SettingName::WALLPAPER_IMAGE->value, 'value' => '/resources/images/wallpaper.png'],
+            ['name' => SettingName::WALLPAPER_IMAGE->value, 'value' => '/resources/images/background.png'],
             ['name' => SettingName::WELCOME_TEXT->value, 'value' => 'Welcome to OpenRoaming Provisioning Service'],
             [
                 'name' => SettingName::WELCOME_DESCRIPTION->value,

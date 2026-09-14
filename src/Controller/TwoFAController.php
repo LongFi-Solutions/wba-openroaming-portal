@@ -869,7 +869,7 @@ class TwoFAController extends AbstractController
         }
 
         // Handle access restrictions based on the context
-        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted(AdminRoleType::ROLE_ADMIN->value)) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAdminCanAccessThisPage', [], 'controllers')
@@ -1023,20 +1023,19 @@ class TwoFAController extends AbstractController
                 return $this->redirectToRoute('app_2FA_first_verification_local', [
                     'context' => $context
                 ]);
-            } else {
-                $interval_seconds = $this->twoFAService->timeLeftToResendCodeTimeInterval(
-                    $user,
-                    AnalyticalEventType::TWO_FA_CODE_ENABLE->value
-                );
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        'errorAdminWait',
-                        ['%time%' => $interval_seconds],
-                        'controllers'
-                    )
-                );
             }
+            $interval_seconds = $this->twoFAService->timeLeftToResendCodeTimeInterval(
+                $user,
+                AnalyticalEventType::TWO_FA_CODE_ENABLE->value
+            );
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'errorAdminWait',
+                    ['%time%' => $interval_seconds],
+                    'controllers'
+                )
+            );
         } else {
             $interval_minutes = $this->twoFAService->timeLeftToResendCode(
                 $user,
@@ -1118,7 +1117,10 @@ class TwoFAController extends AbstractController
         $session = $request->getSession();
         $data = $this->getSettings->getSettings();
         $form = $this->createForm(TwoFACode::class);
-        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
             // Check if the code used is the one generated in the BD.

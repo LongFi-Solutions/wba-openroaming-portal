@@ -61,6 +61,7 @@ export default class extends Controller {
 
         this.setCookiePreferences();
         this.setCookiesAccepted();
+
         this.hideBanner();
     }
 
@@ -82,8 +83,7 @@ export default class extends Controller {
         if (allEnabled) {
             this.setCookiesAccepted();
         } else {
-            // If even one is false, remove cookies_accepted
-            document.cookie = 'cookies_accepted=; path=/; max-age=0';
+            document.cookie = 'cookies_accepted=; path=/; max-age=0; Secure; SameSite=Lax';
         }
 
         this.closeModal();
@@ -106,11 +106,15 @@ export default class extends Controller {
             'cookie_preferences=' +
             JSON.stringify(this.cookieScopes) +
             '; path=/; max-age=' +
-            365 * 24 * 60 * 60;
+            365 * 24 * 60 * 60 +
+            '; Secure; SameSite=Lax';
     }
 
     setCookiesAccepted() {
-        document.cookie = 'cookies_accepted=true; path=/; max-age=' + 365 * 24 * 60 * 60;
+        document.cookie =
+            'cookies_accepted=true; path=/; max-age=' +
+            365 * 24 * 60 * 60 +
+            '; Secure; SameSite=Lax';
     }
 
     getCookiePreferences() {
@@ -130,8 +134,7 @@ export default class extends Controller {
         cookies.forEach((cookie) => {
             const eqPos = cookie.indexOf('=');
             const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-            // Clear each cookie by setting max-age=0
-            document.cookie = name + '=; path=/; max-age=0';
+            document.cookie = name.trim() + '=; path=/; max-age=0; Secure; SameSite=Lax';
         });
 
         localStorage.clear();

@@ -1,0 +1,11 @@
+{% extends '/dashboard/base.html.twig' %}
+
+{% block container %}
+    {{ include('dashboard/shared/_dashboard_toasts.html.twig') }}
+
+    <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
+        <div class="w-full">
+            {{ component('ActivityLogSearchForm') }}
+        </div>
+    </div>
+{% endblock %}

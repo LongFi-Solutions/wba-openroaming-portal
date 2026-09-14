@@ -38,6 +38,9 @@ readonly class AdminPermissionsFormBuilder
             'smsConfig' => 'SMSConfiguration',
             'portalStatistics' => 'portalStatistics',
             'connectivityStatistics' => 'connectivityStatistics',
+            'domainsBlacklist' => 'domainsBlacklist',
+            'activityLogs' => 'activityLogs',
+            'map' => 'map'
         ];
 
         foreach ($permissions as $field => $translationKey) {
@@ -57,11 +60,24 @@ readonly class AdminPermissionsFormBuilder
             'label' => $this->translator->trans($translationKey, [], 'UserAddType'),
             'expanded' => true,
             'multiple' => false,
-            'choices' => [
-                $this->translator->trans('none', [], 'UserAddType') => PermissionLevel::NONE,
-                $this->translator->trans('read', [], 'UserAddType') => PermissionLevel::READ,
-                $this->translator->trans('write', [], 'UserAddType') => PermissionLevel::WRITE,
-            ],
+            'choices' => $this->getPermissionChoices($field),
         ]);
+    }
+
+    /**
+     * @return array<string, PermissionLevel>
+     */
+    private function getPermissionChoices(string $field): array
+    {
+        $choices = [
+            $this->translator->trans('none', [], 'UserAddType') => PermissionLevel::NONE,
+            $this->translator->trans('read', [], 'UserAddType') => PermissionLevel::READ,
+        ];
+
+        if (!in_array($field, ['connectivityStatistics', 'portalStatistics'], true)) {
+            $choices[$this->translator->trans('write', [], 'UserAddType')] = PermissionLevel::WRITE;
+        }
+
+        return $choices;
     }
 }

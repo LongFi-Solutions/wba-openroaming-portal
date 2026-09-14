@@ -17,7 +17,6 @@ readonly class EEAUserDetector
     ) {
     }
 
-
     /**
      * Determines if the current user is located within the European Economic Area (EEA).
      *

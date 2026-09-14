@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Setting;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\LanguageType;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
@@ -30,39 +31,57 @@ readonly class SettingsService
 
     /**
      * Update or create multiple settings from a generic array.
+     * Returns a changeset of [name => ['old_data' => ..., 'new_data' => ...]] for changed fields.
      *
-     * @param array<string, array{value: int|string|null|bool}> $settingsData
+     * @param array<string, array{value: bool|float|int|string|null}> $settingsData
+     * @return array<string, array{old_data: string|null, new_data: string|null}>
      */
-    public function updateSettingsFromArray(array $settingsData): void
+    public function updateSettingsFromArray(array $settingsData): array
     {
+        $changeset = [];
+
         foreach ($settingsData as $name => $item) {
             $value = $item['value'] ?? null;
-
-            // Try to fetch existing setting
             $setting = $this->settingRepository->findOneBy(['name' => $name]);
-
-            $valueToSet = $value !== null ? (string)$value : null;
+            $valueToSet = $value !== null ? (string) $value : null;
 
             if ($setting) {
+                $oldValue = $setting->getValue();
+
+                if ($oldValue !== $valueToSet) {
+                    $changeset[$name] = [
+                        EventMetadataKeysType::OLD_DATA->value => $oldValue,
+                        EventMetadataKeysType::NEW_DATA->value => $valueToSet
+                    ];
+                }
+
                 $setting->setValue($valueToSet);
             } else {
+                $changeset[$name] = [
+                    EventMetadataKeysType::OLD_DATA->value => null,
+                    EventMetadataKeysType::NEW_DATA->value => $valueToSet
+                ];
+
                 $setting = new Setting();
                 $setting->setName($name);
                 $setting->setValue($valueToSet);
                 $this->entityManager->persist($setting);
             }
         }
+
+        return $changeset;
     }
 
     /**
      * Update or create multiple settings from a generic array.
      *
      * @param array<string, array{value: int|string|null}> $settingsData
+     * @return array<string, array{old_data: string|null, new_data: int|string|null}>
      */
     public function updateAuthSettingsToTranslateFromArray(
         array $settingsData,
         ?string $locale = LanguageType::EN->value
-    ): void {
+    ): array {
         $authSettingsToTranslate = [
             SettingName::AUTH_METHOD_SAML_LABEL->value,
             SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value,
@@ -77,34 +96,56 @@ readonly class SettingsService
             SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value,
             SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value,
         ];
+
+        $changeset = [];
+
         foreach ($settingsData as $name => $item) {
-            $value = $item['value'] ?? null;
+            $newValue = $item['value'] ?? null;
 
             // Try to fetch existing setting
             $setting = $this->settingRepository->findOneBy(['name' => $name]);
 
             if ($setting) {
+                $oldValue = $setting->getValue();
                 if (in_array($name, $authSettingsToTranslate, true)) {
                     // Get the translated setting
                     $settingTranslation = $this->settingTranslationRepository->findOneBy(
                         ['setting' => $setting, 'locale' => $locale]
                     );
-                    if ($value === null) {
+                    if ($newValue === null) {
+                        $changeset[$name] = [
+                            EventMetadataKeysType::OLD_DATA->value => $oldValue,
+                            EventMetadataKeysType::NEW_DATA->value => null
+                        ];
                         $settingTranslation?->setTranslation('');
                     } else {
-                        $settingTranslation?->setTranslation((string)$value);
+                        $changeset[$name] = [
+                            EventMetadataKeysType::OLD_DATA->value => $oldValue,
+                            EventMetadataKeysType::NEW_DATA->value => $newValue
+                        ];
+                        $settingTranslation?->setTranslation((string)$newValue);
                     }
                 } else {
-                    $setting->setValue((string)$value);
+                    $setting->setValue((string)$newValue);
+                    $changeset[$name] = [
+                        EventMetadataKeysType::OLD_DATA->value => $oldValue,
+                        EventMetadataKeysType::NEW_DATA->value => $newValue
+                    ];
                 }
             } else {
                 // Create new setting if it doesn't exist
                 $setting = new Setting();
                 $setting->setName($name);
-                $setting->setValue((string)$value);
+                $setting->setValue((string)$newValue);
                 $this->entityManager->persist($setting);
+                $changeset[$name] = [
+                    EventMetadataKeysType::OLD_DATA->value => null,
+                    EventMetadataKeysType::NEW_DATA->value => $newValue
+                ];
             }
         }
+
+        return $changeset;
     }
 
     public function flush(): void

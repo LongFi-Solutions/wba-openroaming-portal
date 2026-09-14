@@ -44,52 +44,52 @@ class CustomType extends AbstractType
             SettingName::WELCOME_TEXT->value => [
                 'type' => QuillType::class,
                 'constraints' => [
-                    new Assert\NotBlank([
-                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')
-                    ]),
+                    new Assert\NotBlank(
+                        message: $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')
+                    ),
                 ]
             ],
             SettingName::WELCOME_DESCRIPTION->value => QuillType::class,
             SettingName::PAGE_TITLE->value => [
                 'type' => TextType::class,
                 'constraints' => [
-                    new Assert\NotBlank([
-                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')
-                    ]),
-                    new Length([
-                        'max' => 255,
-                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
-                    ])
+                    new Assert\NotBlank(
+                        message: $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')
+                    ),
+                    new Length(
+                        max: 255,
+                        maxMessage: $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType')
+                    )
                 ],
             ],
             SettingName::ADDITIONAL_LABEL->value => [
                 'type' => QuillType::class,
                 'constraints' => [
-                    new Length([
-                        'max' => 255,
-                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
-                    ])
+                    new Length(
+                        max: 255,
+                        maxMessage: $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType')
+                    )
                 ],
             ],
             SettingName::CONTACT_EMAIL->value => [
                 'type' => EmailType::class,
                 'constraints' => [
-                    new EmailConstraint([
-                        'message' => $this->translator->trans('invalidValueEmailAddress', [], 'CustomType')
-                    ]),
-                    new Assert\NotBlank([
-                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')
-                    ]),
-                    new Length([
-                        'max' => 320,
-                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
-                    ])
+                    new EmailConstraint(
+                        message: $this->translator->trans('invalidValueEmailAddress', [], 'CustomType')
+                    ),
+                    new Assert\NotBlank(
+                        message: $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')
+                    ),
+                    new Length(
+                        max: 320,
+                        maxMessage: $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType')
+                    )
                 ]
             ],
         ];
 
-        $uploadMaxFilesize = ini_get('upload_max_filesize');
-        $postMaxSize = ini_get('post_max_size');
+        $uploadMaxFilesize = ini_get('upload_max_filesize') ?: '2M';
+        $postMaxSize = ini_get('post_max_size') ?: '8M';
         $maxSize = min($uploadMaxFilesize, $postMaxSize);
 
         foreach ($allowedSettings as $settingName => $config) {
@@ -103,13 +103,10 @@ class CustomType extends AbstractType
                 $formFieldOptions['mapped'] = true;
                 $formFieldOptions['required'] = false;
                 $formFieldOptions['constraints'] = [
-                    new File([
-                        'maxSize' => $maxSize,
-                        'mimeTypes' => [
-                            'image/jpeg',
-                            'image/png',
-                            'image/webp',
-                        ],
+                    new File(maxSize: $maxSize, mimeTypes: [
+                        'image/jpeg',
+                        'image/png',
+                        'image/webp',
                     ]),
                 ];
                 $formFieldType = $config;

@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EventMetadataKeysType;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\SettingType;
@@ -62,10 +63,10 @@ readonly class VerificationCodeEmailGenerator
         $translatedCategory = $this->translator->trans($enum->getTranslationKey(), [], 'setting_type');
 
         $eventMetaData = [
-            'platform' => PlatformMode::LIVE->value,
-            'user_agent' => $userAgent,
-            'uuid' => $user->getUuid(),
-            'ip' => $ip,
+            EventMetadataKeysType::PLATFORM->value => PlatformMode::LIVE->value,
+            EventMetadataKeysType::USER_AGENT->value => $userAgent,
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
+            EventMetadataKeysType::IP->value => $ip,
         ];
         $this->eventActions->saveEvent(
             $user,

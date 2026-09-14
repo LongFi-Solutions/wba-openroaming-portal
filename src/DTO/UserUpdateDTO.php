@@ -65,8 +65,11 @@ class UserUpdateDTO
     public PermissionLevel $ldapSynchronization = PermissionLevel::NONE;
     public PermissionLevel $radiusProfileConfig = PermissionLevel::NONE;
     public PermissionLevel $smsConfig = PermissionLevel::NONE;
+    public PermissionLevel $domainsBlacklist = PermissionLevel::NONE;
     public PermissionLevel $portalStatistics = PermissionLevel::NONE;
     public PermissionLevel $connectivityStatistics = PermissionLevel::NONE;
+    public PermissionLevel $activityLogs = PermissionLevel::NONE;
+    public PermissionLevel $map = PermissionLevel::NONE;
 
     public function __construct(?User $user = null)
     {
@@ -173,5 +176,8 @@ class UserUpdateDTO
         'smsConfig' => 'SMS_CONFIG',
         'portalStatistics' => 'PORTAL_STATISTICS',
         'connectivityStatistics' => 'CONNECTIVITY_STATISTICS',
+        'domainsBlacklist' => 'DOMAINS_BLACKLIST',
+        'activityLogs' => 'ACTIVITY_LOGS',
+        'map' => 'MAP'
     ];
 }

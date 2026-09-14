@@ -2,7 +2,7 @@
         id="loading-overlay"
         data-controller="loading"
         class="
-        fixed inset-0 z-50
+        fixed inset-0 z-[9999]
         flex items-center justify-center
         bg-white/80
         opacity-0 pointer-events-none
@@ -141,12 +141,13 @@
         const link = e.target.closest('a[href]');
         if (!link) return;
 
+        const href = link.getAttribute('href') || '';
+
         if (
-                link.dataset.noLoader === 'true' ||
-                link.target === '_blank' ||
-                link.hasAttribute('download') ||
-                link.getAttribute('href') === '#' ||
-                link.getAttribute('href').startsWith('javascript:')
+            link.dataset.noLoader === 'true' ||
+            link.target === '_blank' ||
+            href === '#' ||
+            href.startsWith('javascript:')
         ) {
             return;
         }
@@ -166,6 +167,37 @@
         const target = link.href.split('#')[0];
         if (current === target) return;
 
+        const isDownload =
+            link.dataset.download === 'true' ||
+            link.hasAttribute('download') ||
+            /\.(pdf|zip|csv|xlsx|docx|png|jpg|jpeg)$/i.test(href);
+
+        if (isDownload) {
+            showLoading();
+
+            const start = Date.now();
+
+            const stopLoader = () => {
+                hideLoading();
+                document.removeEventListener('visibilitychange', onVisibilityChange);
+            };
+
+            const onVisibilityChange = () => {
+                if (document.visibilityState === 'hidden') {
+                    stopLoader();
+                }
+            };
+
+            document.addEventListener('visibilitychange', onVisibilityChange);
+
+            setTimeout(() => {
+                if (Date.now() - start > 800) {
+                    stopLoader();
+                }
+            }, 2000);
+
+            return;
+        }
         showLoading();
     });
 

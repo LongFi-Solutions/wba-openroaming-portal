@@ -10,7 +10,7 @@
     </div>
 
     {# Add Domain Blacklist Card #}
-    <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6 transition hover:-translate-y-1 hover:shadow rounded-md p-6">
+    <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6 transition rounded-md p-6">
 
         {# Header #}
         <div class="mb-4">
@@ -35,8 +35,7 @@
                 }) }}
 
                 <button type="submit"
-                        class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md
-                               hover:bg-blue-700 transition whitespace-nowrap">
+                        class="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-md transition whitespace-nowrap">
                     {{ 'addSource'|trans({}, '_blacklist') }}
                 </button>
             </div>

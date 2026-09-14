@@ -25,9 +25,7 @@ class ResetPasswordSMSConfirmationType extends AbstractType
         $builder
             ->add('verificationCode', TextType::class, [
                 'constraints' => [
-                    new NotBlank([
-                        'message' => $this->translator->trans('enterCode', [], 'TwoFA'),
-                    ]),
+                    new NotBlank(message: $this->translator->trans('enterCode', [], 'TwoFA')),
                 ],
                 'attr' => [
                     'autocomplete' => 'off',
