@@ -19,18 +19,17 @@ RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/local/bin --filename=composer \
  && composer self-update --2
 
-# Compile PHP extensions once — copied into the runtime stage to avoid recompiling
+# PHP extensions, needed here for composer install and the Symfony cache warmup.
+# install-php-extensions resolves the right system libraries and extension versions
+# for the base image's Debian release. The previous hand-pinned pecl builds were
+# tied to bullseye: memcached-3.2.0 cannot detect bookworm's libmemcached-awesome.
+COPY --from=mlocati/php-extension-installer:2.11.12 /usr/bin/install-php-extensions /usr/local/bin/
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    xmlsec1 libxmlsec1-openssl \
-    libpng-dev libjpeg-dev libfreetype6-dev libsqlite3-dev libicu-dev libzip-dev \
-    libonig-dev libxml2-dev libgpgme-dev libgpg-error-dev libmemcached-dev \
-    libldap2-dev build-essential pkg-config autoconf bash \
- && docker-php-ext-configure gd --with-jpeg --with-freetype \
- && docker-php-ext-install intl zip bcmath mbstring pdo pdo_mysql pdo_sqlite soap gd dom exif opcache ldap \
- && pecl channel-update pecl.php.net \
- && pecl install gnupg-1.5.0 memcached-3.2.0 \
- && docker-php-ext-enable gnupg memcached \
- && rm -rf /var/lib/apt/lists/*
+    xmlsec1 libxmlsec1-openssl bash \
+ && rm -rf /var/lib/apt/lists/* \
+ && install-php-extensions \
+      intl zip bcmath mbstring pdo pdo_mysql pdo_sqlite soap gd dom exif opcache ldap \
+      gnupg memcached
 
 # Copy Symfony app
 COPY . .
@@ -53,19 +52,28 @@ WORKDIR /var/www/openroaming
 # Set CA bundle for Python / requests (Certbot)
 ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
-# Install runtime OS libraries — no PHP extension compilation (extensions copied from vendor stage below)
+# Install runtime OS packages, then the PHP extensions.
+#
+# The extensions are installed here rather than copied as .so files from the
+# vendor stage: install-php-extensions pulls each extension's own runtime
+# libraries, so the two cannot drift apart. Copying the .so files left gd
+# unloadable, because it is built against libavif, which was not installed here.
+COPY --from=mlocati/php-extension-installer:2.11.12 /usr/bin/install-php-extensions /usr/local/bin/
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx supervisor tzdata xmlsec1 libxmlsec1-openssl ca-certificates \
-    libpng-dev libjpeg-dev libfreetype6-dev libsqlite3-dev libicu-dev libzip-dev \
-    libonig-dev libxml2-dev libgpgme-dev libgpg-error-dev libmemcached-dev \
-    libldap2-dev curl gnupg bash \
+    curl gnupg bash \
     certbot python3-certbot-nginx python3-certbot-dns-cloudflare python3-certbot-dns-google \
  && update-ca-certificates \
- && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/* \
+ && install-php-extensions \
+      intl zip bcmath mbstring pdo pdo_mysql pdo_sqlite soap gd dom exif opcache ldap \
+      gnupg memcached
 
-# Reuse compiled extensions from vendor stage — avoids recompiling lexbor/dom and all other extensions
-COPY --from=vendor /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
-COPY --from=vendor /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
+# Fail the build here rather than at runtime if an extension is not loadable:
+# the container would still start, so CI's smoke test would not catch it
+RUN for ext in intl zip bcmath mbstring pdo_mysql pdo_sqlite soap gd exif ldap gnupg memcached; do \
+      php -m | grep -qx "$ext" || { echo "missing PHP extension: $ext"; php -m; exit 1; }; \
+    done
 
 # Set PHP memory limit for runtime (overrides the 512M set in vendor stage)
 RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini
