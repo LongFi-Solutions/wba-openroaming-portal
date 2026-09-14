@@ -1,7 +1,7 @@
 # =========================
 # PHP / Composer build stage
 # =========================
-FROM php:8.4-fpm-bullseye AS vendor
+FROM php:8.4-fpm-bookworm AS vendor
 ENV COMPOSER_ALLOW_SUPERUSER=1
 WORKDIR /app
 
@@ -46,7 +46,7 @@ RUN php bin/console cache:warmup --env=prod
 # =========================
 # Final runtime image
 # =========================
-FROM php:8.4-fpm-bullseye AS runtime
+FROM php:8.4-fpm-bookworm AS runtime
 ENV TZ=UTC
 WORKDIR /var/www/openroaming
 
