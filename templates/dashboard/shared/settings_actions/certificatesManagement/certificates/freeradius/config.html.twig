@@ -41,7 +41,8 @@
                     bg-primary text-white hover:bg-primary-dark focus:ring-2 focus:ring-offset-2 focus:ring-primary
                 {% endif %}"
                     {% if configApplied %} disabled title="{{ 'configAlreadyApplied'|trans({}, 'config_freeradius') }}" {% else %}
-                        onclick="return confirm('{{ 'confirmFollowSteps'|trans({}, 'config_freeradius') }}');"
+                        {{ stimulus_controller('confirm', {message: 'confirmFollowSteps'|trans({}, 'config_freeradius')}) }}
+                        {{ stimulus_action('confirm', 'ask', 'click') }}
                     {% endif %}
             >
                 {{ 'submit'|trans({}, 'config_radsec') }}

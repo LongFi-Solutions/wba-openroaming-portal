@@ -378,7 +378,7 @@
             <div class="mt-8 divider-solid"></div>
 
             <div class="mt-6 flex w-full justify-end items-center gap-2">
-                <button type="submit" class="w-[160px] btn-primary" onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'data_base') }}')">
+                <button type="submit" class="w-[160px] btn-primary" {{ stimulus_controller('confirm', {message: 'saveChangesMessage'|trans({}, 'data_base')}) }} {{ stimulus_action('confirm', 'ask', 'click') }}>
                     {{ 'databaseApplyBtn'|trans({}, 'data_base') }}
                 </button>
             </div>

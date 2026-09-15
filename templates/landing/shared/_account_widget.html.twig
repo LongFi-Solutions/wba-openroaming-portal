@@ -175,12 +175,14 @@
                     {% for auth in user.userExternalAuths %}
                         {% if auth.provider != constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
                             <a href="{{ path('app_user_account_deletion_external') }}" class="btn-logout"
-                               onclick="return confirm('{{ 'dangerZone.deleteAccountWarningMessage'|trans({}, '_account_widget') }}')">
+                               {{ stimulus_controller('confirm', {message: 'dangerZone.deleteAccountWarningMessage'|trans({}, '_account_widget')}) }}
+                               {{ stimulus_action('confirm', 'ask', 'click') }}>
                                 {{ 'dangerZone.deleteAccount'|trans({}, '_account_widget') }}
                             </a>
                         {% else %}
                             <a href="{{ path('app_user_account_deletion_local') }}" class="btn-logout"
-                               onclick="return confirm('{{ 'dangerZone.deleteAccountWarningMessageLocal'|trans({}, '_account_widget') }}')">
+                               {{ stimulus_controller('confirm', {message: 'dangerZone.deleteAccountWarningMessageLocal'|trans({}, '_account_widget')}) }}
+                               {{ stimulus_action('confirm', 'ask', 'click') }}>
                                 {{ 'dangerZone.deleteAccount'|trans({}, '_account_widget') }}
                             </a>
                         {% endif %}

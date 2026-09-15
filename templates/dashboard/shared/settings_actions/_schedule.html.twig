@@ -86,7 +86,8 @@
                 </a>
 
                 <button type="submit" class="btn-primary"
-                        onclick="return confirm('{{ 'applyChanges'|trans({}, 'schedule') }}')">
+                        {{ stimulus_controller('confirm', {message: 'applyChanges'|trans({}, 'schedule')}) }}
+                        {{ stimulus_action('confirm', 'ask', 'click') }}>
                     {{ 'saveChanges'|trans({}, 'schedule') }}
                 </button>
             </div>

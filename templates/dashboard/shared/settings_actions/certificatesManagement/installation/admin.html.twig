@@ -112,7 +112,8 @@
   <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
 
     <button type="submit" class="btn-primary"
-            onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'admin_config') }}')">
+            {{ stimulus_controller('confirm', {message: 'saveChangesMessage'|trans({}, 'admin_config')}) }}
+            {{ stimulus_action('confirm', 'ask', 'click') }}>
       {{ 'databaseApplyBtn'|trans({}, 'admin_config') }}
     </button>
   </div>

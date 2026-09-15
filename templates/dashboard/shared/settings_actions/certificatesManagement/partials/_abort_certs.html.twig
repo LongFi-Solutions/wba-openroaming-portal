@@ -4,7 +4,8 @@
   {% if not app.session.has(SYSTEM_RESET_REQUEST) %}
     <form action="{{ path('admin_dashboard_settings_certs_management_certificates_abort') }}"
           method="POST"
-          onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">
+          {{ stimulus_controller('confirm', {message: 'confirm_abort'|trans({}, '_certificate_stepper')}) }}
+          {{ stimulus_action('confirm', 'ask', 'submit') }}>
       <button type="submit"
               class="w-full sm:w-auto flex items-center gap-2
           px-3 py-1.5 sm:px-4 sm:py-2
