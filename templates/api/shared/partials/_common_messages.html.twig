@@ -4,7 +4,8 @@
             <button
                     type="button"
                     class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                    onclick="document.getElementById('common-{{ loop.index }}').classList.toggle('hidden')"
+                    {{ stimulus_controller('toggle-hidden', {id: 'common-' ~ loop.index}) }}
+                    {{ stimulus_action('toggle-hidden', 'toggle', 'click') }}
             >
                 <div class="flex items-center space-x-4">
                     <span class="text-sm font-medium text-indigo-700">HTTP {{ status }}</span>

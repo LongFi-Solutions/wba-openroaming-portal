@@ -131,7 +131,8 @@
             {{ 'cancel'|trans({}, '_sms') }}
         </a>
         <button type="submit" class="btn-primary"
-                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general')|e('js') }}')">
+                {{ stimulus_controller('confirm', {message: 'saveChangesMessage'|trans({}, 'settings_actions_general')}) }}
+                {{ stimulus_action('confirm', 'ask', 'click') }}>
             {% if provider %}
                 {{ 'saveProvider'|trans({}, '_sms') }}
             {% else %}

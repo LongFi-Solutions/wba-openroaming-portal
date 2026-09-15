@@ -7,7 +7,7 @@
             >
                 <label for="count">{{ label }}</label>
 
-                <select class="form-select" name="count" id="count" data-update-url-target="select" onchange="this.form.submit()">
+                <select class="form-select" name="count" id="count" data-update-url-target="select" {{ stimulus_controller('auto-submit') }} {{ stimulus_action('auto-submit', 'submit', 'change') }}>
                     <option value="5" {% if count == 5 %} selected {% endif %}>5</option>
                     <option value="10" {% if count == 10 %} selected {% endif %}>10</option>
                 </select>

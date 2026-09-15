@@ -1,5 +1,6 @@
 <a href="{{ path('admin_dashboard_settings_certs_radsecproxy_upload') }}"
-   onclick="return confirm('{{ 'confirmReinstall'|trans({}, '_certificates') }}')"
+   {{ stimulus_controller('confirm', {message: 'confirmReinstall'|trans({}, '_certificates')}) }}
+   {{ stimulus_action('confirm', 'ask', 'click') }}
    class="group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-8 border border-gray-200
                   transition-all hover:shadow-lg hover:-translate-y-1">
 
@@ -16,7 +17,8 @@
 </a>
 
 <a href="{{ path('admin_dashboard_settings_certs_radsecproxy_upload') }}"
-   onclick="return confirm('{{ 'confirmReinstall'|trans({}, '_certificates') }}')"
+   {{ stimulus_controller('confirm', {message: 'confirmReinstall'|trans({}, '_certificates')}) }}
+   {{ stimulus_action('confirm', 'ask', 'click') }}
    class="group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-8 border border-gray-200
                   transition-all hover:shadow-lg hover:-translate-y-1">
 

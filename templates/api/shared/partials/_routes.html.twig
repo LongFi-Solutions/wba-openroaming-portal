@@ -22,7 +22,8 @@
                         <button
                                 type="button"
                                 class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                                onclick="document.getElementById('resp-{{ loop.parent.loop.index }}-{{ loop.index }}').classList.toggle('hidden')"
+                                {{ stimulus_controller('toggle-hidden', {id: 'resp-' ~ loop.parent.loop.index ~ '-' ~ loop.index}) }}
+                                {{ stimulus_action('toggle-hidden', 'toggle', 'click') }}
                         >
                             <div class="flex items-center gap-4">
                                 {% if route.isProtected %}

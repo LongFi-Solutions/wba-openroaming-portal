@@ -10,9 +10,9 @@
         : '/resources/images/background.png' %}
 
     <div class="relative min-h-screen bg-center bg-cover flex items-center justify-center px-4 sm:px-6 lg:px-8"
-         style="background-image: url('{{ bgUrl }}');">
+         {{ stimulus_controller('background-image', {url: bgUrl}) }}>
 
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-10 text-center" style="color: #3F474D;">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-10 text-center text-[#3F474D]">
 
             {# Language selector — always on top #}
             <div class="text-left mb-6">
@@ -28,8 +28,8 @@
             {% if app.request.pathInfo == '/return-to-app' %}
 
                 {# Spinner #}
-                <div style="position:relative; display:flex; align-items:center; justify-content:center; width:120px; height:120px; margin: 0 auto 1.75rem;">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:120px;height:120px;">
+                <div class="relative flex items-center justify-center w-[120px] h-[120px] mx-auto mb-7">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="w-[120px] h-[120px]">
                         <circle cx="50" cy="50" r="45" fill="none" stroke="#F3F4F6" stroke-width="2" />
                         <circle
                                 cx="50" cy="50" r="45"
@@ -63,20 +63,20 @@
                     <img
                             src="{{ asset('resources/logos/openroaming-loading-logo.svg') }}"
                             alt="Loading"
-                            style="position:absolute; width:60px; height:60px; object-fit:contain;"
+                            class="absolute w-[60px] h-[60px] object-contain"
                     />
                 </div>
 
-                <p style="font-size:1.25rem; font-weight:700; margin-bottom:0.75rem;">
+                <p class="text-xl font-bold mb-3">
                     {{ 'openingApp'|trans({}, 'error') }}
-                    <span style="display:inline-flex; margin-left:2px;">
-                        <span style="animation: dotPulse 1.2s ease-in-out infinite; animation-delay:0s; opacity:0.3;">.</span>
-                        <span style="animation: dotPulse 1.2s ease-in-out infinite; animation-delay:0.3s; opacity:0.3;">.</span>
-                        <span style="animation: dotPulse 1.2s ease-in-out infinite; animation-delay:0.6s; opacity:0.3;">.</span>
+                    <span class="inline-flex ml-[2px]">
+                        <span class="opacity-30">.</span>
+                        <span class="opacity-30">.</span>
+                        <span class="opacity-30">.</span>
                     </span>
                 </p>
 
-                <p style="font-size:0.9rem; color:#6b7280; line-height:1.6; margin-bottom:2rem;">
+                <p class="text-[0.9rem] text-[#6b7280] leading-[1.6] mb-8">
                     {{ 'finishSetupExplanation'|trans({}, 'error') }}
                 </p>
 
@@ -89,7 +89,7 @@
                     </div>
                 </div>
 
-                <h1 class="text-3xl font-bold mb-4" style="color: #3F474D;">
+                <h1 class="text-3xl font-bold mb-4 text-[#3F474D]">
                     {{ status_title }} {{ status_code }}
                 </h1>
 

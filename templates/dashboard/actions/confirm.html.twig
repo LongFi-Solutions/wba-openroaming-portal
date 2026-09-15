@@ -29,7 +29,8 @@
                         <label for="code" class="form-label">{{ 'code'|trans({}, 'confirm') }}</label>
 
                         <input type="number" id="code" name="code" class="form-widget"
-                               oninput="if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                               {{ stimulus_controller('input-filter') }}
+                               {{ stimulus_action('input-filter', 'enforce', 'input') }}
                                maxlength="6">
                     </div>
 

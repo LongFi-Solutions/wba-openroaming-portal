@@ -194,7 +194,8 @@
     {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::LDAP_SYNCHRONIZATION_WRITE')) %}
         <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
             <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingLDAP'}) }}"
-               onclick="return confirm('{{ 'resetMessage'|trans({}, 'settings_actions_general') }}')"
+               {{ stimulus_controller('confirm', {message: 'resetMessage'|trans({}, 'settings_actions_general')}) }}
+               {{ stimulus_action('confirm', 'ask', 'click') }}
                class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
                 {{ 'reset'|trans({}, 'settings_actions_general') }}
             </a>

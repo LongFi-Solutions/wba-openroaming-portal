@@ -256,7 +256,8 @@
             </a>
 
             <button type="submit" class="btn-primary"
-                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
+                    {{ stimulus_controller('confirm', {message: 'saveChangesMessage'|trans({}, 'settings_actions_general')}) }}
+                    {{ stimulus_action('confirm', 'ask', 'click') }}>
                 {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
             </button>
         </div>

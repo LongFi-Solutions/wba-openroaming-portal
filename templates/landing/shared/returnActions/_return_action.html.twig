@@ -16,7 +16,7 @@
             {{ 'twoFactorAuth.goBack'|trans({}, '_account_widget') }}
         </a>
     {% else %}
-        <button class="w-[160px] btn-secondary" onclick="window.history.back();">
+        <button class="w-[160px] btn-secondary" {{ stimulus_controller('history-back') }} {{ stimulus_action('history-back', 'back', 'click') }}>
             {{ 'twoFactorAuth.goBack'|trans({}, '_account_widget') }}
         </button>
     {% endif %}

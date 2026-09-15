@@ -24,7 +24,8 @@
     {% if exportFreeradiusStatistics === true %}
         <div class="flex justify-start">
             <a href="{{ path('admin_dashboard_statistics_freeradius_export', {startDate: selectedStartDate, endDate: selectedEndDate}) }}"
-               onclick="return confirm('...')"
+               {{ stimulus_controller('confirm', {message: '...'}) }}
+               {{ stimulus_action('confirm', 'ask', 'click') }}
                class="btn-primary">
                 {{ 'exportStatistics'|trans({}, 'freeradius_statistics') }}
             </a>

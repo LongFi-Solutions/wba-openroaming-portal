@@ -73,7 +73,8 @@
                                 <input type="hidden" name="_token"
                                        value="{{ csrf_token('sms-provider-deactivate-' ~ provider.id) }}">
                                 <button type="submit"
-                                        onclick="return confirm('{{ 'confirmDeactivateProvider'|trans({}, '_sms')|e('js') }}')"
+                                        {{ stimulus_controller('confirm', {message: 'confirmDeactivateProvider'|trans({}, '_sms')}) }}
+                                        {{ stimulus_action('confirm', 'ask', 'click') }}
                                         class="w-full text-left flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400">
                                     <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 mr-3 fill-none stroke-current" />
                                     {{ 'deactivate'|trans({}, '_sms') }}
@@ -87,7 +88,8 @@
                                 <input type="hidden" name="_token"
                                        value="{{ csrf_token('sms-provider-activate-' ~ provider.id) }}">
                                 <button type="submit"
-                                        onclick="return confirm('{{ 'confirmActivateProvider'|trans({}, '_sms')|e('js') }}')"
+                                        {{ stimulus_controller('confirm', {message: 'confirmActivateProvider'|trans({}, '_sms')}) }}
+                                        {{ stimulus_action('confirm', 'ask', 'click') }}
                                         class="w-full text-left flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
                                     <twig:ux:icon name="wba:check-circle-rounded" class="w-5 mr-3 fill-none stroke-current" />
                                     {{ 'activate'|trans({}, '_sms') }}
@@ -102,7 +104,8 @@
                             <input type="hidden" name="_token"
                                    value="{{ csrf_token('sms-provider-delete-' ~ provider.id) }}">
                             <button type="submit"
-                                    onclick="return confirm('{{ 'confirmDeleteProvider'|trans({}, '_sms')|e('js') }}')"
+                                    {{ stimulus_controller('confirm', {message: 'confirmDeleteProvider'|trans({}, '_sms')}) }}
+                                    {{ stimulus_action('confirm', 'ask', 'click') }}
                                     class="w-full text-left flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400 {{ isActive ? 'opacity-40 cursor-not-allowed' : '' }}"
                                     {% if isActive %}disabled
                                     title="{{ 'cannotDeleteActiveProvider'|trans({}, '_sms') }}"{% endif %}>
