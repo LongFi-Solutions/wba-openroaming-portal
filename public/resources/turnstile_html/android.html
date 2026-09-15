@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Turnstile</title>
-    <style>
+    <style nonce="%%CSP_NONCE%%">
         body, html {
             margin: 0;
             padding: 0;
@@ -28,7 +28,7 @@
 </head>
 <body>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
-    <script>
+    <script nonce="%%CSP_NONCE%%">
 		function addTurnstileWidget() {
 			const turnstileDiv = document.createElement("div")
             turnstileDiv.className = "cf-turnstile"
