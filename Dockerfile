@@ -1,4 +1,14 @@
 # =========================
+# gnupg extension source
+# =========================
+# Checked out from git rather than downloaded from pecl.php.net, which times out
+# under load (it returned 502/504s during the PHP 8.4.27 security release). A git
+# checkout is needed because gnupg builds against its phpc submodule, which
+# GitHub's source tarballs leave out.
+FROM scratch AS gnupg-src
+ADD https://github.com/php-gnupg/php-gnupg.git#gnupg-1.5.4 /
+
+# =========================
 # PHP / Composer build stage
 # =========================
 FROM php:8.4-fpm-bookworm AS vendor
@@ -23,15 +33,16 @@ RUN curl -sS https://getcomposer.org/installer | php -- \
 # install-php-extensions resolves the right system libraries and extension versions
 # for the base image's Debian release. The previous hand-pinned pecl builds were
 # tied to bullseye: memcached-3.2.0 cannot detect bookworm's libmemcached-awesome.
-# memcached is built from its GitHub release tag rather than pecl.php.net, which
-# times out under load (it returned 504s during the PHP 8.4.27 security release).
+# memcached and gnupg are built from their GitHub release tags rather than
+# pecl.php.net (see the gnupg-src stage above).
 COPY --from=mlocati/php-extension-installer:2.11.12 /usr/bin/install-php-extensions /usr/local/bin/
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=bind,from=gnupg-src,target=/tmp/php-gnupg,rw \
+    apt-get update && apt-get install -y --no-install-recommends \
     xmlsec1 libxmlsec1-openssl bash \
  && rm -rf /var/lib/apt/lists/* \
  && install-php-extensions \
       intl zip bcmath mbstring pdo pdo_mysql pdo_sqlite soap gd dom exif opcache ldap \
-      gnupg php-memcached-dev/php-memcached@v3.4.0
+      /tmp/php-gnupg php-memcached-dev/php-memcached@v3.4.0
 
 # Copy Symfony app
 COPY . .
@@ -61,7 +72,8 @@ ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 # libraries, so the two cannot drift apart. Copying the .so files left gd
 # unloadable, because it is built against libavif, which was not installed here.
 COPY --from=mlocati/php-extension-installer:2.11.12 /usr/bin/install-php-extensions /usr/local/bin/
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=bind,from=gnupg-src,target=/tmp/php-gnupg,rw \
+    apt-get update && apt-get install -y --no-install-recommends \
     nginx supervisor tzdata xmlsec1 libxmlsec1-openssl ca-certificates \
     curl gnupg bash \
     certbot python3-certbot-nginx python3-certbot-dns-cloudflare python3-certbot-dns-google \
@@ -69,7 +81,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && rm -rf /var/lib/apt/lists/* \
  && install-php-extensions \
       intl zip bcmath mbstring pdo pdo_mysql pdo_sqlite soap gd dom exif opcache ldap \
-      gnupg php-memcached-dev/php-memcached@v3.4.0
+      /tmp/php-gnupg php-memcached-dev/php-memcached@v3.4.0
 
 # Fail the build here rather than at runtime if an extension is not loadable:
 # the container would still start, so CI's smoke test would not catch it
