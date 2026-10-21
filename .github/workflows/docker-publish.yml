@@ -6,6 +6,9 @@ on:
     tags: ["v*.*.*"]
   pull_request:
     branches: ["production", "develop"]
+  # Manual rebuild from the Actions tab, e.g. to pick up a PHP security release
+  # without a code change. Pick the branch to rebuild in the "Run workflow" menu.
+  workflow_dispatch:
 
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
@@ -44,6 +47,9 @@ jobs:
           context: .
           push: false
           load: true
+          # Always re-pull the floating php:8.4-fpm-bookworm base so each build
+          # ships the newest PHP 8.4 patch release
+          pull: true
           tags: portal:ci-test
           cache-from: type=gha,scope=portal
           cache-to: type=gha,mode=max,scope=portal
@@ -62,6 +68,7 @@ jobs:
           fi
 
           echo "portal container is running"
+          docker exec portal-test php -v
           docker stop portal-test
           docker rm portal-test
 
@@ -71,6 +78,7 @@ jobs:
         with:
           context: .
           push: true
+          pull: true
           tags: ghcr.io/${{ env.REPO_LC }}:${{ github.ref_name }}
           cache-from: type=gha,scope=portal
 
@@ -79,7 +87,7 @@ jobs:
   # Authenticates to GCP via Workload Identity Federation, then SSHes into the
   # VM through the IAP tunnel (no open port 22 needed). Pulls the tested image
   # from ghcr.io, restarts the stack, and runs any pending DB migrations.
-  # Only runs on push to production — not on PRs, tag pushes, or develop.
+  # Only runs on push or manual run on production — not on PRs, tag pushes, or develop.
   #
   # Required secrets:
   #   GCP_WORKLOAD_IDENTITY_PROVIDER — WIF provider resource name
@@ -96,7 +104,7 @@ jobs:
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/production'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/production'
     permissions:
       contents: read
       id-token: write
