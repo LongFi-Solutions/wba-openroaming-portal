@@ -34,12 +34,21 @@ class UserAddDTO
     #[Assert\NotBlank(message: 'fieldCannotBeBlank', groups: [UserProvider::PHONE_NUMBER->value])]
     public ?PhoneNumber $phoneNumber = null;
 
-    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\NotBlank(
+        message: 'fieldCannotBeBlank'
+    )]
     #[Assert\Length(
-        min: 8,
+        min: 16,
         max: 255,
-        minMessage: 'fieldCannotBeShorterThan',
-        maxMessage: 'fieldCannotBeLongerThan'
+        minMessage: 'passwordCannotBeShorterThan',
+        maxMessage: 'passwordCannotBeLongerThan'
+    )]
+    #[Assert\PasswordStrength(
+        minScore: Assert\PasswordStrength::STRENGTH_MEDIUM,
+        message: 'passwordIsTooWeak'
+    )]
+    #[Assert\NotCompromisedPassword(
+        message: 'passwordIsCompromised'
     )]
     public ?string $password = null;
 
@@ -71,6 +80,8 @@ class UserAddDTO
     public PermissionLevel $connectivityStatistics = PermissionLevel::NONE;
     public PermissionLevel $activityLogs = PermissionLevel::NONE;
     public PermissionLevel $map = PermissionLevel::NONE;
+    public PermissionLevel $installation = PermissionLevel::NONE;
+    public PermissionLevel $securityTxt = PermissionLevel::NONE;
 
     /**
      * Returns AdminPermissionsType strings based on selected levels
@@ -97,7 +108,9 @@ class UserAddDTO
             'domainsBlacklist' => 'DOMAINS_BLACKLIST',
             'connectivityStatistics' => 'CONNECTIVITY_STATISTICS',
             'activityLogs' => 'ACTIVITY_LOGS',
-            'map' => 'MAP'
+            'map' => 'MAP',
+            'installation' => 'INSTALLATION',
+            'securityTxt' => 'SECURITY_TXT',
         ];
 
         $permissions = [];

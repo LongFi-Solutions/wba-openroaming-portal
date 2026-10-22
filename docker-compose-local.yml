@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: DockerfileDev
+    security_opt:
+      - no-new-privileges:true
     env_file:
       - .env
     volumes:
@@ -19,6 +21,8 @@ services:
       - "80:80"
   mysql:
     image: mysql:8.0
+    security_opt:
+      - no-new-privileges:true
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -26,10 +30,15 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mysql:/var/lib/mysql
+      - ./service-config/mysql/ssl.cnf:/etc/mysql/conf.d/ssl.cnf:ro
   memcached:
     image: memcached:1.6
+    security_opt:
+      - no-new-privileges:true
   mailcatcher:
     image: schickling/mailcatcher
+    security_opt:
+      - no-new-privileges:true
     ports:
       - '1080:1080'
       - '1025:1025'

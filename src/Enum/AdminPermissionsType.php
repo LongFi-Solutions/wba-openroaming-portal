@@ -57,9 +57,11 @@ enum AdminPermissionsType: string
     case CONNECTIVITY_STATISTICS_READ = 'CONNECTIVITY_STATISTICS_READ';
     // Activity Logs page
     case ACTIVITY_LOGS_READ = 'ACTIVITY_LOGS_READ';
-    case ACTIVITY_LOGS_WRITE = 'ACTIVITY_LOGS_WRITE';
     case MAP_READ = 'MAP_READ';
     case MAP_WRITE = 'MAP_WRITE';
+    case INSTALLATION_WRITE = 'INSTALLATION_WRITE';
+    case SECURITY_TXT_READ = 'SECURITY_TXT_READ';
+    case SECURITY_TXT_WRITE = 'SECURITY_TXT_WRITE';
 
 
     public function getLabel(): string
@@ -83,7 +85,9 @@ enum AdminPermissionsType: string
             self::DOMAINS_BLACKLIST_READ, self::DOMAINS_BLACKLIST_WRITE => 'domainsBlacklist',
             self::PORTAL_STATISTICS_READ => 'portalStatistics',
             self::CONNECTIVITY_STATISTICS_READ => 'connectivityStatistics',
-            self::ACTIVITY_LOGS_READ, self::ACTIVITY_LOGS_WRITE => 'activityLogs',
+            self::ACTIVITY_LOGS_READ => 'activityLogs',
+            self::INSTALLATION_WRITE => 'installation',
+            self::SECURITY_TXT_READ, self::SECURITY_TXT_WRITE => 'securityTxt',
         };
     }
 
