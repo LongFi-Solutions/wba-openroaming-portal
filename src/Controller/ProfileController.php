@@ -10,12 +10,14 @@ use App\Enum\OperationMode;
 use App\Enum\OSType;
 use App\Enum\SettingName;
 use App\Enum\UserRadiusProfileStatus;
+use App\Exception\EncryptionException;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Service\CertificateProcessCheckerService;
+use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\ExpirationProfileService;
 use App\Service\TwoFAService;
@@ -56,6 +58,7 @@ class ProfileController extends AbstractController
         private readonly UserRadiusProfileRepository $radiusProfileRepository,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly UserAgentOsDetector $userAgentOsDetector,
+        private readonly EncryptionService $encryptionService,
     ) {
     }
 
@@ -432,18 +435,31 @@ class ProfileController extends AbstractController
             $this->settingRepository->findOneBy(['name' => SettingName::DISPLAY_NAME->value])->getValue(),
         ], $profile);
 
-        // Detect key type and set correct SignatureMethod in the XML template.
-        // template_win11.xml hardcodes ecdsa-sha256, but the server may have an RSA key
-        // (e.g. Let's Encrypt R12 issuer) which requires rsa-sha256 instead.
-        $privkeyContents = file_get_contents('/var/www/openroaming/signing-keys/privkey.pem');
+        // Explicitly define key paths
+        $privkeyPath = '/var/www/openroaming/signing-keys/privkey.pem';
+        $certPath = '/var/www/openroaming/signing-keys/cert.pem';
+        $caPath = '/var/www/openroaming/signing-keys/ca/ca.pem';
+
+        // Detect key type and override algorithm URIs in XML template
+        $privkeyContents = file_get_contents($privkeyPath);
         if ($privkeyContents !== false) {
             $keyInfo = openssl_pkey_get_private($privkeyContents);
             if ($keyInfo !== false) {
                 $details = openssl_pkey_get_details($keyInfo);
-                if ($details && $details['type'] === OPENSSL_KEYTYPE_RSA) {
+                if ($details && isset($details['type']) && $details['type'] === OPENSSL_KEYTYPE_RSA) {
                     $profile = str_replace(
                         'http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256',
                         'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
+                        $profile
+                    );
+                    $profile = str_replace(
+                        'http://www.w3.org/2000/09/xmldsig#rsa-sha1',
+                        'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
+                        $profile
+                    );
+                    $profile = str_replace(
+                        'http://www.w3.org/2000/09/xmldsig#sha1',
+                        'http://www.w3.org/2001/04/xmlenc#sha256',
                         $profile
                     );
                 }
@@ -451,39 +467,57 @@ class ProfileController extends AbstractController
         }
 
         $randomFactorIdentifier = bin2hex(random_bytes(16));
-
-        // Both Win10 and Win11 require signing — Win10 uses EV/RSA, Win11 uses LE/ECDSA
         $unSignedFilePath = '/tmp/windows_unsigned_' . $randomFactorIdentifier . '.xml';
         $signedFilePath = '/tmp/windows_signed_' . $randomFactorIdentifier . '.xml';
 
         file_put_contents($unSignedFilePath, $profile);
 
+        // Construct xmlsec1 command with full path and input/output parameters
         $command = [
             'xmlsec1',
             '--sign',
-            '--pkcs12',
-            '/var/www/openroaming/signing-keys/windowsKey.pfx',
-            '--pwd',
-            '',
-            '--output',
-            $signedFilePath,
-            $unSignedFilePath,
+            '--crypto',
+            'openssl',
+            '--lax-key-search',
+            '--privkey-pem',
+            $privkeyPath . ',' . $certPath,
         ];
 
+        if (file_exists($caPath) && filesize($caPath) > 0) {
+            $command[] = '--trusted-pem';
+            $command[] = $caPath;
+        }
+
+        $command[] = '--output';
+        $command[] = $signedFilePath;
+        $command[] = $unSignedFilePath;
+
+        // Run process
         $process = new Process($command);
         try {
             $process->mustRun();
-            unlink($unSignedFilePath);
+            if (file_exists($unSignedFilePath)) {
+                unlink($unSignedFilePath);
+            }
         } catch (ProcessFailedException $exception) {
+            if (file_exists($unSignedFilePath)) {
+                unlink($unSignedFilePath);
+            }
             throw new RuntimeException(
-                $this->translator->trans('signingFailed', [], 'controllers') . $exception->getMessage(),
+                $this->translator->trans('signingFailed', [], 'controllers') . ' ' . $exception->getMessage(),
                 $exception->getCode(),
                 $exception
             );
         }
 
         $signedProfileContents = file_get_contents($signedFilePath);
-        unlink($signedFilePath);
+        if (file_exists($signedFilePath)) {
+            unlink($signedFilePath);
+        }
+
+        if ($signedProfileContents === false) {
+            throw new RuntimeException('Failed to read signed Windows profile.');
+        }
 
         $uuid = uniqid('', true);
         $cache = new CacheUtils();
@@ -595,11 +629,12 @@ class ProfileController extends AbstractController
         if (!$radiusProfile) {
             // No active profile exists — create a fresh one (handles new users AND expired/revoked users)
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $realmName;
-            $token = $this->generateToken($androidLimit - $realmSize);
+            $plainToken = $this->generateToken($androidLimit - $realmSize);
+            $encryptedToken = $this->encryptionService->encrypt($plainToken);
 
             $radiusProfile = new UserRadiusProfile();
             $radiusProfile->setUser($user);
-            $radiusProfile->setRadiusToken($token);
+            $radiusProfile->setRadiusToken($encryptedToken);
             $radiusProfile->setRadiusUser($username);
             $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
             $radiusProfile->setIssuedAt(new DateTime());
@@ -619,7 +654,7 @@ class ProfileController extends AbstractController
             $radiusUser->setUsername($username);
             $radiusUser->setAttribute('Cleartext-Password');
             $radiusUser->setOp(':=');
-            $radiusUser->setValue($token);
+            $radiusUser->setValue($plainToken);
 
             $radiusUserRepository->save($radiusUser, true);
             $radiusProfileRepository->save($radiusProfile, true);
@@ -631,16 +666,30 @@ class ProfileController extends AbstractController
 
             if (!$radiusUser) {
                 // radcheck row was manually removed — restore it from the active profile
+                $plainToken = $this->decryptToken((string)$radiusProfile->getRadiusToken());
+
                 $radiusUser = new RadiusUser();
                 $radiusUser->setUsername($radiusProfile->getRadiusUser());
                 $radiusUser->setAttribute('Cleartext-Password');
                 $radiusUser->setOp(':=');
-                $radiusUser->setValue($radiusProfile->getRadiusToken());
+                $radiusUser->setValue($plainToken);
                 $radiusUserRepository->save($radiusUser, true);
             }
         }
 
         return $radiusUser;
+    }
+
+    /**
+     * Safely decrypt radius token while remaining backwards-compatible with legacy unencrypted tokens.
+     */
+    private function decryptToken(string $token): string
+    {
+        try {
+            return $this->encryptionService->decrypt($token);
+        } catch (EncryptionException) {
+            return $token;
+        }
     }
 
     private function checkUserStatus(User $user): bool

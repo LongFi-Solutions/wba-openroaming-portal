@@ -50,6 +50,7 @@ COPY . .
 # Install PHP dependencies
 COPY ./.env.sample /app/.env
 RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini \
+ && echo "error_reporting=E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" > /usr/local/etc/php/conf.d/error_reporting.ini \
  && composer install --optimize-autoloader --no-interaction
 
 # Warm Symfony cache
@@ -89,8 +90,9 @@ RUN for ext in intl zip bcmath mbstring pdo_mysql pdo_sqlite soap gd exif ldap g
       php -m | grep -qx "$ext" || { echo "missing PHP extension: $ext"; php -m; exit 1; }; \
     done
 
-# Set PHP memory limit for runtime (overrides the 512M set in vendor stage)
-RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini
+# Set PHP memory limit for runtime (overrides the 512M set in vendor stage) and error reporting
+RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini \
+ && echo "error_reporting=E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" > /usr/local/etc/php/conf.d/error_reporting.ini
 
 # Copy Symfony app from vendor stage
 COPY . /var/www/openroaming
